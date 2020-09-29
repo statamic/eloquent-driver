@@ -1,0 +1,23 @@
+{
+    "name": "statamic/eloquent-driver",
+    "description": "Allows you to store Statamic data in a database.",
+    "autoload": {
+        "psr-4": {
+            "Statamic\\Eloquent\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Eloquent Driver",
+            "description": "Allows you to store Statamic data in a database."
+        },
+        "laravel": {
+            "providers": [
+                "Statamic\\Eloquent\\ServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "statamic/cms": "^3.0"
+    }
+}
