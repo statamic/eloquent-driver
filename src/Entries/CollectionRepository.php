@@ -2,32 +2,20 @@
 
 namespace Statamic\Eloquent\Entries;
 
-use Illuminate\Support\Facades\Cache;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository
 {
-    public function updateEntryUris($collection)
+    public function updateEntryUris($collection, $ids = null)
     {
-        foreach ($collection->sites() as $site) {
-            $this->updateEntryUrisForSite($collection, $site);
-        }
-    }
+        $query = $collection->queryEntries();
 
-    private function updateEntryUrisForSite($collection, $site)
-    {
-        $key = 'previous-collection-route-'.$collection->id().'-'.$site;
-        $route = $collection->route($site);
-
-        if (Cache::get($key) !== $route) {
-            $collection
-                ->queryEntries()
-                ->where('site', $site)
-                ->get()->each(function ($entry) {
-                    EntryModel::where('id', $entry->id())->update(['uri' => $entry->uri()]);
-                });
+        if ($ids) {
+            $query->whereIn('id', $ids);
         }
 
-        Cache::forever($key, $route);
+        $query->get()->each(function ($entry) {
+            EntryModel::where('id', $entry->id())->update(['uri' => $entry->uri()]);
+        });
     }
 }

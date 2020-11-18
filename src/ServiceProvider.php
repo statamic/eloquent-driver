@@ -4,6 +4,7 @@ namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -13,27 +14,39 @@ use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
 {
+    protected $config = false;
+
     public function boot()
     {
         parent::boot();
 
-        $this->registerMigrations();
+        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
+
+            $this->commands([ImportEntries::class]);
+        }
     }
 
     public function register()
     {
+        $this->registerEntries();
+    }
+
+    protected function registerEntries()
+    {
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
-        $this->app->bind(EntryQueryBuilder::class, function () {
-            return new EntryQueryBuilder(EntryModel::query());
+        $this->app->bind(EntryQueryBuilder::class, function ($app) {
+            return new EntryQueryBuilder(
+                $app['statamic.eloquent.entries.model']::query()
+            );
         });
-    }
 
-    protected function registerMigrations()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        }
+        $this->app->bind('statamic.eloquent.entries.model', function () {
+            return config('statamic-eloquent-driver.entries.model');
+        });
     }
 }
