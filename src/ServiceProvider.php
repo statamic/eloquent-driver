@@ -19,7 +19,11 @@ class ServiceProvider extends AddonServiceProvider
     {
         parent::boot();
 
-        $this->mergeConfigFrom(__DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
+        }
     }
 
     public function register()
