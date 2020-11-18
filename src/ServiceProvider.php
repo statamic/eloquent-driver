@@ -4,6 +4,7 @@ namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -23,6 +24,8 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
+
+            $this->commands([ImportEntries::class]);
         }
     }
 
@@ -36,8 +39,10 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
-        $this->app->bind(EntryQueryBuilder::class, function () {
-            return new EntryQueryBuilder(EntryModel::query());
+        $this->app->bind(EntryQueryBuilder::class, function ($app) {
+            return new EntryQueryBuilder(
+                $app['statamic.eloquent.entries.model']::query()
+            );
         });
 
         $this->app->bind('statamic.eloquent.entries.model', function () {

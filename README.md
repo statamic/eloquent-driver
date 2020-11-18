@@ -30,7 +30,7 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 - In the config file, change `model` to `UuidEntryModel`.
 - Copy the `create_entries_table_with_strings` migration.
 - Run `php artisan migrate`.
-- Import entries into database (command coming).
+- Import entries into database with `php please eloquent:import-entries`.
 
 
 ## Known issues
