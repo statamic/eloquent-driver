@@ -13,14 +13,21 @@ use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
 {
+    protected $config = false;
+
     public function boot()
     {
         parent::boot();
 
-        $this->registerMigrations();
+        $this->mergeConfigFrom(__DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
     }
 
     public function register()
+    {
+        $this->registerEntries();
+    }
+
+    protected function registerEntries()
     {
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
@@ -28,12 +35,9 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind(EntryQueryBuilder::class, function () {
             return new EntryQueryBuilder(EntryModel::query());
         });
-    }
 
-    protected function registerMigrations()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        }
+        $this->app->bind('statamic.eloquent.entries.model', function () {
+            return config('statamic-eloquent-driver.entries.model');
+        });
     }
 }

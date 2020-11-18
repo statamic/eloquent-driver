@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEntriesTable extends Migration
+class CreateEntriesTableWithStrings extends Migration
 {
     /**
      * Run the migrations.
@@ -14,9 +14,9 @@ class CreateEntriesTable extends Migration
     public function up()
     {
         Schema::create('entries', function (Blueprint $table) {
-            $table->increments('id');
+            $table->string('id');
             $table->string('site');
-            $table->unsignedInteger('origin_id')->nullable();
+            $table->string('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug');

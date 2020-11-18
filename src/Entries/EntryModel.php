@@ -10,10 +10,6 @@ class EntryModel extends Eloquent
 
     protected $table = 'entries';
 
-    public $incrementing = false;
-
-    protected $keyType = 'string';
-
     protected $casts = [
         'date' => 'datetime',
         'data' => 'json',
@@ -23,5 +19,10 @@ class EntryModel extends Eloquent
     public function origin()
     {
         return $this->belongsTo(self::class);
+    }
+
+    public static function generateId()
+    {
+        return null;
     }
 }
