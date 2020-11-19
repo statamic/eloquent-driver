@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Support\Arr;
 
 class EntryModel extends Eloquent
 {
@@ -21,6 +22,11 @@ class EntryModel extends Eloquent
         return $this->belongsTo(self::class);
     }
 
+    public function getAttribute($key)
+    {
+        return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
+    }
+  
     public static function generateId()
     {
         return null;
