@@ -1,8 +1,8 @@
 # Statamic Eloquent Driver
 
-This package provides support for storing your Statamic data in a database, rather than in the filesystem.
+This package provides support for storing your Statamic data in a database rather than the filesystem.
 
-Currently only supports entries, with more to come.
+This driver currently supports entries but not taxonomies, navigations, globals, or form submissions. We'll be working on those in the future.
 
 ## Installation
 
@@ -20,7 +20,7 @@ php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider"
 Since Statamic uses UUIDs within content files by default, we provide two solutions depending on whether you need to use existing content.
 
 
-### Fresh install of [statamic/statamic](https://github.com/statamic/statamic)
+### Fresh install of [statamic/statamic](https://github.com/statamic/statamic) (using incrementing ids)
 
 If you're starting from scratch, we can use traditional incrementing integers for IDs.
 
@@ -29,7 +29,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 - Copy the `create_entries_table` migration into `database/migrations`.
 - Run `php artisan migrate`.
 
-### Starting from an existing site
+### Starting from an existing site (using UUIDs)
 
 If you're planning to use existing content, we can use the existing UUIDs. This will prevent you from needing to update any data or relationships.
 
@@ -41,4 +41,4 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 
 ## Known issues
 
-When saving a collection or reordering entries, the URIs of all entries in the collection will be updated, even if they haven't changed. This is an intensive operation and will be addressed in a [future version](https://github.com/statamic/cms/pull/2768) of Statamic.
+When saving a collection or reordering entries, the URIs of all entries in the collection will be updated, even if they haven't changed. This is an intensive operation and is being addressed in a [future version](https://github.com/statamic/cms/pull/2768) of Statamic core.
