@@ -6,6 +6,11 @@
             "Statamic\\Eloquent\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    },
     "extra": {
         "statamic": {
             "name": "Eloquent Driver",
@@ -19,5 +24,8 @@
     },
     "require": {
         "statamic/cms": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.4"
     }
 }
