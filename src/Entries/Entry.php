@@ -26,7 +26,6 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         return $class::findOrNew($this->id())->fill([
-            'id' => $this->id() ?? $class::generateId(),
             'origin_id' => $this->originId(),
             'site' => $this->locale(),
             'slug' => $this->slug(),
@@ -70,7 +69,7 @@ class Entry extends FileEntry
         }
 
         if (! $this->model->origin) {
-            return null;
+            return;
         }
 
         return self::fromModel($this->model->origin);
