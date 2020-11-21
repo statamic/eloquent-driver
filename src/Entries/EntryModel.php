@@ -26,9 +26,4 @@ class EntryModel extends Eloquent
     {
         return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
     }
-  
-    public static function generateId()
-    {
-        return null;
-    }
 }
