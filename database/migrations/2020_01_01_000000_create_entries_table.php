@@ -23,6 +23,7 @@ class CreateEntriesTable extends Migration
             $table->string('uri')->nullable();
             $table->string('date')->nullable();
             $table->string('collection');
+            $table->string('blueprint');
             $table->json('data');
             $table->timestamps();
         });
