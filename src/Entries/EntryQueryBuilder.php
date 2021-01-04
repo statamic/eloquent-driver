@@ -29,7 +29,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        if (! in_array($column, $this->columns)) {
+        if (! in_array($column, $this->columns) && is_string($column)) {
             $column = 'data->'.$column;
         }
 
