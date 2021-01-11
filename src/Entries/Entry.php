@@ -69,7 +69,7 @@ class Entry extends FileEntry
         }
 
         if (! $this->model->origin) {
-            return;
+            return null;
         }
 
         return self::fromModel($this->model->origin);
