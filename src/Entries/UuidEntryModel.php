@@ -9,8 +9,12 @@ class UuidEntryModel extends EntryModel
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public static function generateId()
+    protected static function boot()
     {
-        return (string) Str::uuid();
+        parent::boot();
+
+        static::creating(function ($entry) {
+            $entry->{$entry->getKeyName()} = (string) Str::uuid();
+        });
     }
 }
