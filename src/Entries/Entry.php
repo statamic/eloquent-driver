@@ -17,6 +17,7 @@ class Entry extends FileEntry
             ->date($model->date)
             ->collection($model->collection)
             ->data($model->data)
+            ->blueprint($model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
     }
@@ -24,6 +25,12 @@ class Entry extends FileEntry
     public function toModel()
     {
         $class = app('statamic.eloquent.entries.model');
+
+        $data = $this->data();
+
+        if ($this->blueprint && $this->collection()->entryBlueprints()->count() > 1) {
+            $data['blueprint'] = $this->blueprint;
+        }
 
         return $class::findOrNew($this->id())->fill([
             'id' => $this->id() ?? $class::generateId(),
@@ -33,7 +40,7 @@ class Entry extends FileEntry
             'uri' => $this->uri(),
             'date' => $this->hasDate() ? $this->date() : null,
             'collection' => $this->collectionHandle(),
-            'data' => $this->data(),
+            'data' => $data,
             'published' => $this->published(),
             'status' => $this->status(),
         ]);
