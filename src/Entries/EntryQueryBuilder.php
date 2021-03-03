@@ -18,8 +18,8 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     protected function transform($items, $columns = [])
     {
-        return EntryCollection::make($items)->map(function ($model) {
-            return Entry::fromModel($model);
+        return EntryCollection::make($items)->map(function ($model) use ($columns) {
+            return Entry::fromModel($model)->selectedQueryColumns($columns);
         });
     }
 
@@ -39,6 +39,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function get($columns = ['*'])
     {
         $this->addTaxonomyWheres();
+        $this->addSelect('*');
 
         return parent::get($columns);
     }
@@ -46,6 +47,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function paginate($perPage = null, $columns = ['*'])
     {
         $this->addTaxonomyWheres();
+        $this->addSelect('*');
 
         return parent::paginate($perPage, $columns);
     }
