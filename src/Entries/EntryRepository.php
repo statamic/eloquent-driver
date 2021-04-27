@@ -11,7 +11,7 @@ class EntryRepository extends StacheRepository
     public static function bindings(): array
     {
         return [
-            EntryContract::class => Entry::class,
+            EntryContract::class => config('statamic-eloquent-driver.entries.base', Entry::class),
             QueryBuilder::class => EntryQueryBuilder::class,
         ];
     }
