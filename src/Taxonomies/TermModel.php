@@ -9,7 +9,7 @@ class TermModel extends Eloquent
 {
     protected $guarded = [];
 
-    protected $table = 'terms';
+    protected $table = 'taxonomy_terms';
 
     protected $casts = [
         'data' => 'json',
