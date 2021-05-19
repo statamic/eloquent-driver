@@ -2,7 +2,11 @@
 
 This package provides support for storing your Statamic data in a database rather than the filesystem.
 
-This driver currently supports entries but not taxonomies, navigations, globals, or form submissions. We'll be working on those in the future.
+Todo:
+- [x] taxonomies
+- [ ] navigations
+- [ ] globals 
+- [ ] form submissions
 
 ## Installation
 

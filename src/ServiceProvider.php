@@ -4,11 +4,16 @@ namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
+use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
+use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
+use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
+use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -32,6 +37,7 @@ class ServiceProvider extends AddonServiceProvider
     public function register()
     {
         $this->registerEntries();
+        $this->registerTaxonomies();
     }
 
     protected function registerEntries()
@@ -48,5 +54,27 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.entries.model', function () {
             return config('statamic-eloquent-driver.entries.model');
         });
+    }
+
+    public function registerTaxonomies()
+    {
+        Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+        Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+
+        $this->app->bind(TermQueryBuilder::class, function ($app) {
+            return new TermQueryBuilder(
+                $app['statamic.eloquent.terms.model']::query()
+            );
+        });
+
+        $this->app->bind('statamic.eloquent.terms.model', function () {
+            return config('statamic-eloquent-driver.terms.model');
+        });
+
+        $this->app->bind('statamic.eloquent.taxonomies.model', function () {
+            return config('statamic-eloquent-driver.taxonomies.model');
+        });
+
+
     }
 }
