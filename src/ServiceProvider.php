@@ -6,11 +6,13 @@ use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContr
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
+use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
@@ -38,6 +40,7 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->registerEntries();
         $this->registerTaxonomies();
+        $this->registerGlobals();
     }
 
     protected function registerEntries()
@@ -76,5 +79,18 @@ class ServiceProvider extends AddonServiceProvider
         });
 
 
+    }
+
+    private function registerGlobals()
+    {
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+
+        $this->app->bind('statamic.eloquent.global-sets.model', function () {
+            return config('statamic-eloquent-driver.global-sets.model');
+        });
+
+        $this->app->bind('statamic.eloquent.variables.model', function () {
+            return config('statamic-eloquent-driver.variables.model');
+        });
     }
 }

@@ -14,4 +14,12 @@ return [
         'model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
 
+    'global-sets' => [
+        'model' =>  \Statamic\Eloquent\Globals\GlobalSetModel::class,
+    ],
+
+    'variables' => [
+        'model' =>  \Statamic\Eloquent\Globals\VariablesModel::class,
+    ],
+
 ];
