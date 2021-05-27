@@ -6,6 +6,10 @@ return [
         'model' => \Statamic\Eloquent\Entries\EntryModel::class,
     ],
 
+    'collections' => [
+        'model' => \Statamic\Eloquent\Entries\CollectionModel::class,
+    ],
+
     'taxonomies' => [
         'model' =>  \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
     ],

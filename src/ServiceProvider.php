@@ -61,6 +61,10 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.entries.model', function () {
             return config('statamic-eloquent-driver.entries.model');
         });
+
+        $this->app->bind('statamic.eloquent.collections.model', function () {
+            return config('statamic-eloquent-driver.collections.model');
+        });
     }
 
     public function registerTaxonomies()

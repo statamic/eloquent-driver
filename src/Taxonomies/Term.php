@@ -32,6 +32,7 @@ class Term extends FileEntry
         if ($this->blueprint && $this->taxonomy()->termBlueprints()->count() > 1) {
             $data['blueprint'] = $this->blueprint;
         }
+
         return $class::findOrNew($this->model?->id)->fill([
             'site' => $this->locale(),
             'slug' => $this->slug(),
