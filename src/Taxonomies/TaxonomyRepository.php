@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use \Statamic\Stache\Repositories\TaxonomyRepository as StacheRepository;
+
 class TaxonomyRepository extends StacheRepository
 {
     protected function transform($items, $columns = [])
@@ -27,10 +28,12 @@ class TaxonomyRepository extends StacheRepository
         return $this->transform(TaxonomyModel::all());
     }
 
-
     public function findByHandle($handle): ?TaxonomyContract
     {
-        return app(TaxonomyContract::class)->fromModel(TaxonomyModel::whereHandle($handle)->firstOrFail());
+        $taxonomyModel = TaxonomyModel::whereHandle($handle)->first();
+        return $taxonomyModel
+            ? app(TaxonomyContract::class)->fromModel($taxonomyModel)
+            : null;
     }
 
     public function save($entry)
