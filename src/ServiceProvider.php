@@ -7,12 +7,15 @@ use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
+use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
+use Statamic\Eloquent\Structures\NavigationRepository;
+use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
@@ -41,6 +44,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerEntries();
         $this->registerTaxonomies();
         $this->registerGlobals();
+        $this->registerStructures();
     }
 
     protected function registerEntries()
@@ -77,8 +81,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.taxonomies.model', function () {
             return config('statamic-eloquent-driver.taxonomies.model');
         });
-
-
     }
 
     private function registerGlobals()
@@ -91,6 +93,20 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.variables.model', function () {
             return config('statamic-eloquent-driver.variables.model');
+        });
+    }
+
+    private function registerStructures()
+    {
+        Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
+        Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
+
+        $this->app->bind('statamic.eloquent.navigations.model', function () {
+            return config('statamic-eloquent-driver.navigations.model');
+        });
+
+        $this->app->bind('statamic.eloquent.nav-trees.model', function () {
+            return config('statamic-eloquent-driver.nav-trees.model');
         });
     }
 }

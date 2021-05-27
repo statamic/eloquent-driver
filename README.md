@@ -4,7 +4,7 @@ This package provides support for storing your Statamic data in a database rathe
 
 Todo:
 - [x] taxonomies
-- [ ] navigations
+- [x] navigations
 - [x] globals 
 - [ ] form submissions
 - [ ] collections 

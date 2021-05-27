@@ -22,4 +22,12 @@ return [
         'model' =>  \Statamic\Eloquent\Globals\VariablesModel::class,
     ],
 
+    'navigations' => [
+        'model' =>  \Statamic\Eloquent\Structures\NavModel::class,
+    ],
+
+    'nav-trees' => [
+        'model' =>  \Statamic\Eloquent\Structures\NavTreeModel::class,
+    ],
+
 ];
