@@ -13,7 +13,6 @@ use \Statamic\Stache\Repositories\GlobalRepository as StacheRepository;
 
 class GlobalRepository extends StacheRepository
 {
-
     protected function transform($items, $columns = [])
     {
         return GlobalCollection::make($items)->map(function ($model) {
@@ -21,13 +20,6 @@ class GlobalRepository extends StacheRepository
         });
     }
 
-
-    public static function bindings(): array
-    {
-        return [
-            GlobalSetContract::class => GlobalSet::class,
-        ];
-    }
 
     public function find($handle): ?GlobalSetContract
     {
@@ -57,5 +49,12 @@ class GlobalRepository extends StacheRepository
     public function delete($entry)
     {
         $entry->model()->delete();
+    }
+
+    public static function bindings(): array
+    {
+        return [
+            GlobalSetContract::class => GlobalSet::class,
+        ];
     }
 }
