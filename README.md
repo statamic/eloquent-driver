@@ -2,12 +2,14 @@
 
 This package provides support for storing your Statamic data in a database rather than the filesystem.
 
+**Multisite is not tested yet!**
+
 Todo:
 - [x] taxonomies
 - [x] navigations
 - [x] globals 
 - [ ] form submissions
-- [ ] collections 
+- [x] collections 
 
 ## Installation
 
