@@ -24,7 +24,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 
 - Delete `content/collections/pages/home.md`
 - Change the structure `tree` in `content/collections/pages.yaml` to `{}`.
-- Copy the `create_entries_table` migration into `database/migrations`.
+- Copy all migrations into `database/migrations`.
 - Run `php artisan migrate`.
 
 ### Starting from an existing site (using UUIDs)
