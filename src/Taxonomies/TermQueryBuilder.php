@@ -1,13 +1,9 @@
 <?php
 
-
 namespace Statamic\Eloquent\Taxonomies;
 
-use Statamic\Eloquent\Entries\Entry;
-use Statamic\Entries\EntryCollection;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
-
 
 class TermQueryBuilder extends EloquentQueryBuilder
 {
@@ -24,10 +20,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function column($column)
     {
-        if ($column == 'origin') {
-            $column = 'origin_id';
-        }
-
         if (! in_array($column, $this->columns)) {
             $column = 'data->'.$column;
         }

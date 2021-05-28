@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Statamic\Eloquent\Entries;
 
 use Statamic\Eloquent\Entries\CollectionModel as Model;
 use Statamic\Entries\Collection as FileEntry;
-
 
 class Collection extends FileEntry
 {
@@ -14,7 +12,7 @@ class Collection extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static)
-            ->structure($model->structure)
+            ->structureContents($model->structure)
             ->sortDirection($model->sort_dir)
             ->sortField($model->sort_field)
             ->layout($model->layout)
