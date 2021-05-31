@@ -1,9 +1,10 @@
 <?php
 
-namespace Statamic\Eloquent\Entries;
+namespace Statamic\Eloquent\Collections;
 
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
+use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository

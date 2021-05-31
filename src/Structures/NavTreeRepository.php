@@ -9,7 +9,9 @@ class NavTreeRepository extends StacheRepository
 {
     public function find(string $handle, string $site): ?TreeContract
     {
-        $model = NavTreeModel::whereHandle($handle)->first();
+        $model = TreeModel::whereHandle($handle)
+            ->whereType('navigation')
+            ->first();
 
         return $model
             ? app(TreeContract::class)->fromModel($model)

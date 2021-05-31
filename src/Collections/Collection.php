@@ -1,8 +1,9 @@
 <?php
 
-namespace Statamic\Eloquent\Entries;
+namespace Statamic\Eloquent\Collections;
 
-use Statamic\Eloquent\Entries\CollectionModel as Model;
+use Statamic\Eloquent\Collections\CollectionModel as Model;
+use Statamic\Eloquent\Structures\CollectionStructure;
 use Statamic\Entries\Collection as FileEntry;
 
 class Collection extends FileEntry
@@ -67,5 +68,13 @@ class Collection extends FileEntry
         $this->id($model->id);
 
         return $this;
+    }
+
+    protected function makeStructureFromContents()
+    {
+        return (new CollectionStructure)
+            ->handle($this->handle())
+            ->expectsRoot($this->structureContents['root'] ?? false)
+            ->maxDepth($this->structureContents['max_depth'] ?? null);
     }
 }

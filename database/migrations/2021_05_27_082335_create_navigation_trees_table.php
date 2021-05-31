@@ -13,9 +13,10 @@ class CreateNavigationTreesTable extends Migration
      */
     public function up()
     {
-        Schema::create('navigation_trees', function (Blueprint $table) {
+        Schema::create('trees', function (Blueprint $table) {
             $table->id();
             $table->string('handle');
+            $table->string('type');
             $table->string('initialPath')->nullable();
             $table->string('locale')->nullable();
             $table->json('tree')->nullable();
@@ -30,6 +31,6 @@ class CreateNavigationTreesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('navigation_trees');
+        Schema::dropIfExists('trees');
     }
 }

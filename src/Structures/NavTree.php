@@ -2,7 +2,7 @@
 
 namespace Statamic\Eloquent\Structures;
 
-use Statamic\Eloquent\Structures\NavTreeModel as Model;
+use Statamic\Eloquent\Structures\NavTree as Model;
 use Statamic\Structures\NavTree as FileEntry;
 
 class NavTree extends FileEntry
@@ -21,13 +21,14 @@ class NavTree extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.nav-trees.model');
+        $class = app('statamic.eloquent.trees.model');
 
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),
             'initialPath' => $this->initialPath(),
             'locale' => $this->locale(),
             'tree' => $this->tree,
+            'type' => 'navigation',
         ]);
     }
 

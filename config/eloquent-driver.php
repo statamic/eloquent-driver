@@ -8,6 +8,8 @@ return [
 
     'collections' => [
         'model' => \Statamic\Eloquent\Entries\CollectionModel::class,
+    'trees' => [
+        'model' => \Statamic\Eloquent\Structures\TreeModel::class,
     ],
 
     'taxonomies' => [
