@@ -1,15 +1,10 @@
 <?php
 
-
 namespace Statamic\Eloquent\Globals;
 
-use Illuminate\Support\Collection;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
-use Statamic\Eloquent\Taxonomies\Taxonomy;
-use Statamic\Eloquent\Taxonomies\TaxonomyModel;
 use Statamic\Globals\GlobalCollection;
-use \Statamic\Stache\Repositories\GlobalRepository as StacheRepository;
-
+use Statamic\Stache\Repositories\GlobalRepository as StacheRepository;
 
 class GlobalRepository extends StacheRepository
 {
@@ -19,7 +14,6 @@ class GlobalRepository extends StacheRepository
             return GlobalSet::fromModel($model);
         });
     }
-
 
     public function find($handle): ?GlobalSetContract
     {
@@ -35,7 +29,6 @@ class GlobalRepository extends StacheRepository
     {
         return $this->transform(GlobalSetModel::all());
     }
-
 
     public function save($entry)
     {

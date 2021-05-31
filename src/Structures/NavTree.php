@@ -1,10 +1,9 @@
 <?php
 
-
 namespace Statamic\Eloquent\Structures;
 
-use Statamic\Structures\NavTree as FileEntry;
 use Statamic\Eloquent\Structures\NavTreeModel as Model;
+use Statamic\Structures\NavTree as FileEntry;
 
 class NavTree extends FileEntry
 {
@@ -42,5 +41,4 @@ class NavTree extends FileEntry
 
         return $this;
     }
-
 }

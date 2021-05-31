@@ -4,11 +4,11 @@ namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
-use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
+use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
+use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;

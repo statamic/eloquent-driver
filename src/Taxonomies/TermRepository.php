@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Database\Eloquent\Builder;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Stache\Repositories\TermRepository as StacheRepository;
 

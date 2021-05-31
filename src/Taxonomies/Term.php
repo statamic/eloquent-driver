@@ -19,7 +19,6 @@ class Term extends FileEntry
         $term = $term->model($model);
         $term = $term->blueprint($model->data['blueprint'] ?? null);
 
-
         return $term;
     }
 

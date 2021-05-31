@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
-use Illuminate\Support\Collection as IlluminateCollection;
 
 class CollectionRepository extends StacheRepository
 {

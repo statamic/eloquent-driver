@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Statamic\Eloquent\Globals;
 
-
-use Statamic\Eloquent\Taxonomies\Term;
 use Statamic\Eloquent\Globals\GlobalSetModel as Model;
 use Statamic\Globals\GlobalSet as FileEntry;
 
@@ -19,7 +16,7 @@ class GlobalSet extends FileEntry
             ->title($model->title)
             ->model($model);
 
-        foreach($model->localizations as $localization) {
+        foreach ($model->localizations as $localization) {
             $global->addLocalization(Variables::fromModel(VariablesModel::make($localization)));
         }
 
@@ -30,7 +27,7 @@ class GlobalSet extends FileEntry
     {
         $class = app('statamic.eloquent.global-sets.model');
 
-        $localizations = $this->localizations()->map(function($value, $key) {
+        $localizations = $this->localizations()->map(function ($value, $key) {
             return $value->toModel()->toArray();
         });
 

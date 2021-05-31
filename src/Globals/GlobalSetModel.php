@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Statamic\Eloquent\Globals;
-
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
@@ -14,7 +12,7 @@ class GlobalSetModel extends Eloquent
     protected $table = 'global_sets';
 
     protected $casts = [
-        'localizations' => 'json'
+        'localizations' => 'json',
     ];
 
     public function getAttribute($key)

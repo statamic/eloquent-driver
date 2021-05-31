@@ -2,10 +2,9 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
-use \Statamic\Stache\Repositories\TaxonomyRepository as StacheRepository;
+use Statamic\Stache\Repositories\TaxonomyRepository as StacheRepository;
 
 class TaxonomyRepository extends StacheRepository
 {
@@ -31,6 +30,7 @@ class TaxonomyRepository extends StacheRepository
     public function findByHandle($handle): ?TaxonomyContract
     {
         $taxonomyModel = TaxonomyModel::whereHandle($handle)->first();
+
         return $taxonomyModel
             ? app(TaxonomyContract::class)->fromModel($taxonomyModel)
             : null;

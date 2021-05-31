@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Statamic\Eloquent\Globals;
-
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;

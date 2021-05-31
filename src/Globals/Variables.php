@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Statamic\Eloquent\Globals;
 
 use Statamic\Eloquent\Globals\VariablesModel as Model;
@@ -23,8 +22,7 @@ class Variables extends FileEntry
 
         return $class::make([
             'locale' => $this->locale,
-            'data' => $data ,
+            'data' => $data,
         ]);
     }
-
 }

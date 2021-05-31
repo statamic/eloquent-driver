@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Support\Arr;
 
 class CollectionModel extends Eloquent
 {
@@ -21,5 +20,4 @@ class CollectionModel extends Eloquent
         'default_publish_state' => 'bool',
         'ampable' => 'bool',
     ];
-
 }

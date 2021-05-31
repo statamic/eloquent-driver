@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Statamic\Eloquent\Structures;
-
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 

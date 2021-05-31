@@ -1,10 +1,9 @@
 <?php
 
-
 namespace Statamic\Eloquent\Structures;
 
-use Statamic\Structures\Nav as FileEntry;
 use Statamic\Eloquent\Structures\NavModel as Model;
+use Statamic\Structures\Nav as FileEntry;
 
 class Nav extends FileEntry
 {
@@ -12,7 +11,7 @@ class Nav extends FileEntry
 
     public static function fromModel(Model $model)
     {
-       return (new static)
+        return (new static)
             ->handle($model->handle)
             ->title($model->title)
             ->collections($model->collections)

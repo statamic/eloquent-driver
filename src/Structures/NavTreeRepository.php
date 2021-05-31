@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Statamic\Eloquent\Structures;
 
 use Statamic\Contracts\Structures\Tree as TreeContract;
@@ -11,6 +10,7 @@ class NavTreeRepository extends StacheRepository
     public function find(string $handle, string $site): ?TreeContract
     {
         $model = NavTreeModel::whereHandle($handle)->first();
+
         return $model
             ? app(TreeContract::class)->fromModel($model)
             : null;
