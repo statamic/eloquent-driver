@@ -5,15 +5,17 @@ namespace Statamic\Eloquent;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands\ImportEntries;
-use Statamic\Eloquent\Entries\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
+use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
@@ -42,6 +44,7 @@ class ServiceProvider extends AddonServiceProvider
     public function register()
     {
         $this->registerEntries();
+        $this->registerCollections();
         $this->registerTaxonomies();
         $this->registerGlobals();
         $this->registerStructures();
@@ -50,7 +53,6 @@ class ServiceProvider extends AddonServiceProvider
     protected function registerEntries()
     {
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
-        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
         $this->app->bind(EntryQueryBuilder::class, function ($app) {
             return new EntryQueryBuilder(
@@ -61,9 +63,19 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.entries.model', function () {
             return config('statamic-eloquent-driver.entries.model');
         });
+    }
+
+    protected function registerCollections()
+    {
+        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
 
         $this->app->bind('statamic.eloquent.collections.model', function () {
             return config('statamic-eloquent-driver.collections.model');
+        });
+
+        $this->app->bind('statamic.eloquent.trees.model', function () {
+            return config('statamic-eloquent-driver.trees.model');
         });
     }
 
@@ -109,8 +121,8 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic-eloquent-driver.navigations.model');
         });
 
-        $this->app->bind('statamic.eloquent.nav-trees.model', function () {
-            return config('statamic-eloquent-driver.nav-trees.model');
+        $this->app->bind('statamic.eloquent.trees.model', function () {
+            return config('statamic-eloquent-driver.trees.model');
         });
     }
 }

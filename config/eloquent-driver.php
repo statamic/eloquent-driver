@@ -7,7 +7,9 @@ return [
     ],
 
     'collections' => [
-        'model' => \Statamic\Eloquent\Entries\CollectionModel::class,
+        'model' => \Statamic\Eloquent\Collections\CollectionModel::class,
+    ],
+
     'trees' => [
         'model' => \Statamic\Eloquent\Structures\TreeModel::class,
     ],
