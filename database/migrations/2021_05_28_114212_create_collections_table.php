@@ -23,7 +23,7 @@ class CreateCollectionsTable extends Migration
             $table->string('future_date_behavior')->nullable();
             $table->boolean('default_publish_state')->default(true);
             $table->boolean('ampable')->default(false);
-            $table->string('sites')->nullable();
+            $table->json('sites')->nullable();
             $table->string('template')->nullable();
             $table->string('layout')->nullable();
             $table->string('sort_dir')->nullable();

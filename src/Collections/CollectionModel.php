@@ -15,6 +15,7 @@ class CollectionModel extends Eloquent
         'inject' => 'json',
         'taxonomies' => 'json',
         'structure' => 'json',
+        'sites' => 'json',
         'revisions' => 'bool',
         'dated' => 'bool',
         'default_publish_state' => 'bool',
