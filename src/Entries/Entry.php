@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Entries;
 
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
+use Illuminate\Support\Carbon;
 
 class Entry extends FileEntry
 {
@@ -60,7 +61,9 @@ class Entry extends FileEntry
 
     public function lastModified()
     {
-        return $this->model->updated_at;
+        return $this->has('updated_at')
+        ? Carbon::createFromTimestamp($this->get('updated_at'))
+        : $this->model->created_at;
     }
 
     public function origin($origin = null)
