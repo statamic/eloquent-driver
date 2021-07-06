@@ -19,6 +19,10 @@ class Term extends FileEntry
         $term = $term->model($model);
         $term = $term->blueprint($model->data['blueprint'] ?? null);
 
+        collect($model->data['localizations'] ?? [])->each(function ($data, $locale) use ($term) {
+            $term->dataForLocale($locale, $data);
+        });
+
         return $term;
     }
 
@@ -31,6 +35,12 @@ class Term extends FileEntry
         if ($this->blueprint && $this->taxonomy()->termBlueprints()->count() > 1) {
             $data['blueprint'] = $this->blueprint;
         }
+
+        $data['localizations'] = $this->localizations()->keys()->reduce(function ($localizations, $locale) {
+            $localizations[$locale] = $this->dataForLocale($locale)->toArray();
+
+            return $localizations;
+        }, []);
 
         return $class::findOrNew($this->model?->id)->fill([
             'site' => $this->locale(),
