@@ -17,6 +17,7 @@ class CreateTaxonomiesTable extends Migration
             $table->increments('id');
             $table->string('handle');
             $table->string('title');
+            $table->json('sites')->nullable();
             $table->timestamps();
         });
     }

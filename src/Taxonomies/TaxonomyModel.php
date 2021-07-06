@@ -12,7 +12,7 @@ class TaxonomyModel extends Eloquent
     protected $table = 'taxonomies';
 
     protected $casts = [
-
+        'sites' => 'json',
     ];
 
     public function getAttribute($key)

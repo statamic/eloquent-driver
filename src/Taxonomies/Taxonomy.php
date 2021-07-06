@@ -14,6 +14,7 @@ class Taxonomy extends FileEntry
         return (new static)
             ->handle($model->handle)
             ->title($model->title)
+            ->sites($model->sites)
             ->model($model);
     }
 
@@ -24,6 +25,7 @@ class Taxonomy extends FileEntry
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),
             'title' => $this->title(),
+            'sites' => $this->sites,
         ]);
     }
 
