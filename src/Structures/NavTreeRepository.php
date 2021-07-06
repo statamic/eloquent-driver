@@ -11,6 +11,7 @@ class NavTreeRepository extends StacheRepository
     {
         $model = TreeModel::whereHandle($handle)
             ->whereType('navigation')
+            ->where('locale', $site)
             ->first();
 
         return $model
