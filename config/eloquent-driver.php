@@ -4,6 +4,7 @@ return [
 
     'entries' => [
         'model' => \Statamic\Eloquent\Entries\EntryModel::class,
+        'entry' => \Statamic\Eloquent\Entries\Entry::class,
     ],
 
     'collections' => [

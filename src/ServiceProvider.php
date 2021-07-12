@@ -52,16 +52,20 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function registerEntries()
     {
+        $this->app->bind('statamic.eloquent.entries.entry', function () {
+            return config('statamic-eloquent-driver.entries.entry');
+        });
+
+        $this->app->bind('statamic.eloquent.entries.model', function () {
+            return config('statamic-eloquent-driver.entries.model');
+        });
+
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
 
         $this->app->bind(EntryQueryBuilder::class, function ($app) {
             return new EntryQueryBuilder(
                 $app['statamic.eloquent.entries.model']::query()
             );
-        });
-
-        $this->app->bind('statamic.eloquent.entries.model', function () {
-            return config('statamic-eloquent-driver.entries.model');
         });
     }
 
