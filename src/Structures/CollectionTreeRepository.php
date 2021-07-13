@@ -10,6 +10,7 @@ class CollectionTreeRepository extends StacheRepository
     public function find(string $handle, string $site): ?TreeContract
     {
         $model = TreeModel::whereHandle($handle)
+            ->where('locale', $site)
             ->whereType('collection')
             ->first();
 
