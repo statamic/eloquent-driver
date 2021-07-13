@@ -2,8 +2,6 @@
 
 This package provides support for storing your Statamic data in a database rather than the filesystem.
 
-This driver currently supports entries but not taxonomies, navigations, globals, or form submissions. We'll be working on those in the future.
-
 ## Installation
 
 Install using Composer:
@@ -26,7 +24,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 
 - Delete `content/collections/pages/home.md`
 - Change the structure `tree` in `content/collections/pages.yaml` to `{}`.
-- Copy the `create_entries_table` migration into `database/migrations`.
+- Copy all migrations into `database/migrations`.
 - Run `php artisan migrate`.
 
 ### Starting from an existing site (using UUIDs)
