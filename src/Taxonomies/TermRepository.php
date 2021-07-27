@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Stache\Repositories\TermRepository as StacheRepository;
+use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
 {
@@ -14,7 +15,7 @@ class TermRepository extends StacheRepository
         return app(TermQueryBuilder::class);
     }
 
-    public function find($id): ?Term
+    public function find($id): LocalizedTerm
     {
         [$handle, $slug] = explode('::', $id);
 

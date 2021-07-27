@@ -7,6 +7,8 @@ use Statamic\Taxonomies\TermCollection;
 
 class TermQueryBuilder extends EloquentQueryBuilder
 {
+    protected $site = null;
+
     protected $columns = [
         'id', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
     ];
@@ -14,7 +16,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected function transform($items, $columns = [])
     {
         return TermCollection::make($items)->map(function ($model) {
-            return Term::fromModel($model);
+            return Term::fromModel($model)->in($this->site);
         });
     }
 
@@ -25,5 +27,16 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         return $column;
+    }
+
+    public function where($column, $operator = null, $value = null)
+    {
+        if ($column === 'site') {
+            $this->site = $operator;
+
+            return $this;
+        }
+
+        return parent::where($column, $operator, $value);
     }
 }
