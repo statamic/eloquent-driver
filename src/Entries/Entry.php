@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
 
@@ -58,6 +59,28 @@ class Entry extends FileEntry
         return $this;
     }
 
+    /**
+     * This overwrite is needed to prevent Statamic to save updated_at also into the data. We track updated_at already in the database.
+     *
+     * @param null $user
+     * @return $this|Entry|FileEntry|\Statamic\Taxonomies\LocalizedTerm
+     */
+    public function updateLastModified($user = null)
+    {
+        if (! config('statamic.system.track_last_update')) {
+            return $this;
+        }
+
+        $user
+            ? $this->set('updated_by', $user->id())
+            : $this->remove('updated_by');
+
+        // ensure 'updated_at' does not exists in the data of the entry.
+        $this->remove('updated_at');
+
+        return $this;
+    }
+
     public function lastModified()
     {
         return $this->model->updated_at;
@@ -76,7 +99,7 @@ class Entry extends FileEntry
         }
 
         if (! $this->model->origin) {
-            return null;
+            return;
         }
 
         return self::fromModel($this->model->origin);
