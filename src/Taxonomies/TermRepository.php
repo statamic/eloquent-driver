@@ -15,7 +15,7 @@ class TermRepository extends StacheRepository
         return app(TermQueryBuilder::class);
     }
 
-    public function find($id): LocalizedTerm
+    public function find($id): ?LocalizedTerm
     {
         [$handle, $slug] = explode('::', $id);
 
