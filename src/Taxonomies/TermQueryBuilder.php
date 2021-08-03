@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Statamic\Facades\Site;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
 
@@ -15,8 +16,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function transform($items, $columns = [])
     {
-        return TermCollection::make($items)->map(function ($model) {
-            return Term::fromModel($model)->in($this->site);
+        $site = $this->site;
+        if(!$site) {
+            $site = Site::default()->handle();
+        }
+
+        return TermCollection::make($items)->map(function ($model) use($site) {
+            return Term::fromModel($model)->in($site);
         });
     }
 
