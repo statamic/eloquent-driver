@@ -71,9 +71,6 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function registerCollections()
     {
-        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
-
         $this->app->bind('statamic.eloquent.collections.model', function () {
             return config('statamic-eloquent-driver.collections.model');
         });
@@ -85,6 +82,9 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.trees.model', function () {
             return config('statamic-eloquent-driver.trees.model');
         });
+
+        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
     }
 
     public function registerTaxonomies()
