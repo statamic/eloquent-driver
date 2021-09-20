@@ -69,7 +69,7 @@ class CollectionRepository extends StacheRepository
     public static function bindings(): array
     {
         return [
-            CollectionContract::class => Collection::class,
+            CollectionContract::class => app('statamic.eloquent.collections.entry'),
         ];
     }
 }
