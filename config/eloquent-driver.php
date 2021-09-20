@@ -9,6 +9,7 @@ return [
 
     'collections' => [
         'model' => \Statamic\Eloquent\Collections\CollectionModel::class,
+        'entry' => \Statamic\Eloquent\Collections\Collection::class,
     ],
 
     'trees' => [

@@ -32,7 +32,7 @@ class ServiceProvider extends AddonServiceProvider
     {
         parent::boot();
 
-        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+        $this->mergeConfigFrom($config = __DIR__ . '/../config/eloquent-driver.php', 'statamic-eloquent-driver');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
@@ -76,6 +76,10 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.collections.model', function () {
             return config('statamic-eloquent-driver.collections.model');
+        });
+
+        $this->app->bind('statamic.eloquent.collections.entry', function () {
+            return config('statamic-eloquent-driver.collections.entry');
         });
 
         $this->app->bind('statamic.eloquent.trees.model', function () {
