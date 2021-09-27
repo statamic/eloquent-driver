@@ -38,10 +38,10 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
 
             $this->publishes([
-                __DIR__ . '/database/seeders/DefaultBlueprintSeeder.php' => database_path('seeders/DefaultBlueprintSeeder.php'),
+                __DIR__ . '/../database/seeders/DefaultBlueprintSeeder.php' => database_path('seeders/DefaultBlueprintSeeder.php'),
             ], 'statamic-database-seeders');
 
-            $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
             $this->commands([ImportEntries::class]);
         }
