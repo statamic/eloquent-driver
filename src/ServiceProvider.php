@@ -49,6 +49,7 @@ class ServiceProvider extends AddonServiceProvider
     public function register()
     {
         $this->registerBlueprints();
+        $this->registerFieldsets();
         $this->registerEntries();
         $this->registerCollections();
         $this->registerTaxonomies();
@@ -61,6 +62,14 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->singleton(
             'Statamic\Fields\BlueprintRepository',
             'Statamic\Eloquent\Blueprints\BlueprintRepository'
+        );
+    }
+
+    protected function registerFieldsets()
+    {
+        $this->app->singleton(
+            'Statamic\Fields\FieldsetRepository',
+            'Statamic\Eloquent\Fieldsets\FieldsetRepository'
         );
     }
 
