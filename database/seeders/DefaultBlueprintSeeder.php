@@ -1,6 +1,6 @@
 <?php
 
-namespace Statamic\Eloquent\Database\Seeders;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
