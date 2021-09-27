@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Database\Seeders\DefaultBlueprintSeeder;
 
 class CreateBlueprintsTable extends Migration
 {
@@ -21,8 +20,6 @@ class CreateBlueprintsTable extends Migration
             $table->json('data');
             $table->timestamps();
         });
-
-        (new DefaultBlueprintSeeder())->run();
     }
 
     /**
