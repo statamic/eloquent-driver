@@ -48,11 +48,10 @@ class DefaultBlueprintSeeder extends Seeder
     {
         DB::table('blueprints')->updateOrInsert(
             [
-                'id' => 1
+                'handle' => 'default'
             ],
             [
                 'namespace'  => null,
-                'handle'     => 'default',
                 'data'       => $this->configJson(),
                 'created_at' => Carbon::now()
             ]
