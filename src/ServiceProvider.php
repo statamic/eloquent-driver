@@ -41,8 +41,6 @@ class ServiceProvider extends AddonServiceProvider
                 __DIR__ . '/../database/seeders/DefaultBlueprintSeeder.php' => database_path('seeders/DefaultBlueprintSeeder.php'),
             ], 'statamic-database-seeders');
 
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-
             $this->commands([ImportEntries::class]);
         }
     }
