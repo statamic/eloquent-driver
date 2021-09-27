@@ -37,17 +37,31 @@ class ServiceProvider extends AddonServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
 
+            $this->publishes([
+                __DIR__ . '/database/seeders/DefaultBlueprintSeeder.php' => database_path('seeders/DefaultBlueprintSeeder.php'),
+            ], 'statamic-database-seeders');
+
+
             $this->commands([ImportEntries::class]);
         }
     }
 
     public function register()
     {
+        $this->registerBlueprints();
         $this->registerEntries();
         $this->registerCollections();
         $this->registerTaxonomies();
         $this->registerGlobals();
         $this->registerStructures();
+    }
+
+    protected function registerBlueprints()
+    {
+        $this->app->singleton(
+            'Statamic\Fields\BlueprintRepository',
+            'Statamic\Eloquent\Blueprints\BlueprintRepository'
+        );
     }
 
     protected function registerEntries()
