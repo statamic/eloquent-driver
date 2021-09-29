@@ -10,6 +10,8 @@ use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryCo
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
+use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -21,6 +23,8 @@ use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
+use Statamic\Eloquent\Assets\AssetRepository;
+use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -47,6 +51,7 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
+        $this->registerAssets();
         $this->registerBlueprints();
         $this->registerFieldsets();
         $this->registerEntries();
@@ -154,5 +159,11 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.trees.model', function () {
             return config('statamic-eloquent-driver.trees.model');
         });
+    }
+
+    private function registerAssets()
+    {
+        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
+        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
     }
 }
