@@ -40,7 +40,7 @@ class Entry extends FileEntry
             'uri' => $this->uri(),
             'date' => $this->hasDate() ? $this->date() : null,
             'collection' => $this->collectionHandle(),
-            'data' => $data,
+            'data' => $data->except(EntryQueryBuilder::COLUMNS),
             'published' => $this->published(),
             'status' => $this->status(),
         ]);
