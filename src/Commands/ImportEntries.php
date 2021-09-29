@@ -79,6 +79,8 @@ class ImportEntries extends Command
             'data' => $entry->data()->except(EntryQueryBuilder::COLUMNS),
             'published' => $entry->published(),
             'status' => $entry->status(),
+            'created_at' => $entry->lastModified(),
+            'updated_at' => $entry->lastModified(),
         ]);
     }
 }
