@@ -19,7 +19,7 @@ class EntryModel extends Eloquent
 
     public function origin()
     {
-        return $this->belongsTo(self::class);
+        return $this->belongsTo(static::class);
     }
 
     public function getAttribute($key)
