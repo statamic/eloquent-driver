@@ -15,7 +15,7 @@ class CollectionRepository extends StacheRepository
         }
 
         $query->get()->each(function ($entry) {
-            EntryModel::where('id', $entry->id())->update(['uri' => $entry->uri()]);
+            EntryModel::find($entry->id())->update(['uri' => $entry->uri()]);
         });
     }
 }
