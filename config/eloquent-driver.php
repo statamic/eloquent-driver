@@ -40,4 +40,9 @@ return [
         'model' =>  \Statamic\Eloquent\Structures\NavTreeModel::class,
     ],
 
+    'roles' => [
+        'model' => \Statamic\Eloquent\Auth\RoleModel::class,
+        'entry' => \Statamic\Eloquent\Auth\Role::class,
+    ],
+
 ];
