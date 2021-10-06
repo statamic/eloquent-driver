@@ -45,4 +45,9 @@ return [
         'entry' => \Statamic\Eloquent\Auth\Role::class,
     ],
 
+    'groups' => [
+        'model' => \Statamic\Eloquent\Auth\UserGroupModel::class,
+        'entry' => \Statamic\Eloquent\Auth\UserGroup::class,
+    ],
+
 ];

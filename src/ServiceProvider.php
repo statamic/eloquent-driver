@@ -13,6 +13,7 @@ use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Auth\RoleRepository as RoleRepositoryContract;
+use Statamic\Contracts\Auth\UserGroupRepository as UserGroupRepositoryContract;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -27,6 +28,7 @@ use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Assets\AssetRepository;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Auth\RoleRepository;
+use Statamic\Eloquent\Auth\UserGroupRepository;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -62,6 +64,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerGlobals();
         $this->registerStructures();
         $this->registerRoles();
+        $this->registerUserGroups();
     }
 
     protected function registerBlueprints()
@@ -181,5 +184,18 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(RoleRepositoryContract::class, RoleRepository::class);
+    }
+
+    private function registerUserGroups()
+    {
+        $this->app->bind('statamic.eloquent.groups.entry', function () {
+            return config('statamic-eloquent-driver.groups.entry');
+        });
+
+        $this->app->bind('statamic.eloquent.groups.model', function () {
+            return config('statamic-eloquent-driver.groups.model');
+        });
+
+        Statamic::repository(UserGroupRepositoryContract::class, UserGroupRepository::class);
     }
 }
