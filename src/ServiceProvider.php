@@ -47,11 +47,6 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
-        $this->registerEntries();
-    }
-
-    protected function registerEntries()
-    {
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
