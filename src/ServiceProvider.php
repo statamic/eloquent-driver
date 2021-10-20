@@ -16,25 +16,36 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $config = false;
 
+    protected $updateScripts = [
+        \Statamic\Eloquent\Updates\MoveConfig::class,
+    ];
+
     public function boot()
     {
         parent::boot();
 
-        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic.eloquent-driver');
 
-        if ($this->app->runningInConsole()) {
-            $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
-
-            $this->commands([ImportEntries::class]);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $this->publishes([
+            $config => config_path('statamic/eloquent-driver.php'),
+        ], 'statamic-eloquent-config');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/create_entries_table.php' => $this->migrationsPath('create_entries_table'),
+        ], 'statamic-eloquent-entries-table');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php' => $this->migrationsPath('create_entries_table_with_string_ids'),
+        ], 'statamic-eloquent-entries-table-with-string-ids');
+
+        $this->commands([ImportEntries::class]);
     }
 
     public function register()
-    {
-        $this->registerEntries();
-    }
-
-    protected function registerEntries()
     {
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
@@ -46,7 +57,14 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind('statamic.eloquent.entries.model', function () {
-            return config('statamic-eloquent-driver.entries.model');
+            return config('statamic.eloquent-driver.entries.model');
         });
+    }
+
+    protected function migrationsPath($filename)
+    {
+        $date = date('Y_m_d_His');
+
+        return database_path("migrations/{$date}_{$filename}.php");
     }
 }
