@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\UuidEntryModel;
 use Statamic\Facades\Entry;
 use Statamic\Stache\Repositories\CollectionRepository;
@@ -75,9 +76,11 @@ class ImportEntries extends Command
             'uri' => $entry->uri(),
             'date' => $entry->hasDate() ? $entry->date() : null,
             'collection' => $entry->collectionHandle(),
-            'data' => $entry->data(),
+            'data' => $entry->data()->except(EntryQueryBuilder::COLUMNS),
             'published' => $entry->published(),
             'status' => $entry->status(),
+            'created_at' => $entry->lastModified(),
+            'updated_at' => $entry->lastModified(),
         ]);
     }
 }

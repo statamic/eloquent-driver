@@ -19,11 +19,18 @@ class EntryModel extends Eloquent
 
     public function origin()
     {
-        return $this->belongsTo(self::class);
+        return $this->belongsTo(static::class);
     }
 
     public function getAttribute($key)
     {
+        // Because the import script was importing `updated_at` into the
+        // json data column, we will explicitly reference other SQL
+        // columns first to prevent errors with that bad data.
+        if (in_array($key, EntryQueryBuilder::COLUMNS)) {
+            return parent::getAttribute($key);
+        }
+
         return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
     }
 }

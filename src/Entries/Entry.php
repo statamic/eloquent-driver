@@ -34,13 +34,14 @@ class Entry extends FileEntry
         }
 
         return $class::findOrNew($this->id())->fill([
+            'id' => $this->id(),
             'origin_id' => $this->originId(),
             'site' => $this->locale(),
             'slug' => $this->slug(),
             'uri' => $this->uri(),
             'date' => $this->hasDate() ? $this->date() : null,
             'collection' => $this->collectionHandle(),
-            'data' => $data,
+            'data' => $data->except(EntryQueryBuilder::COLUMNS),
             'published' => $this->published(),
             'status' => $this->status(),
         ]);
