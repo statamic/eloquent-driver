@@ -16,18 +16,22 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $config = false;
 
+    protected $updateScripts = [
+        \Statamic\Eloquent\Updates\MoveConfig::class,
+    ];
+
     public function boot()
     {
         parent::boot();
 
-        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic.eloquent-driver');
 
         if (! $this->app->runningInConsole()) {
             return;
         }
 
         $this->publishes([
-            $config => config_path('statamic-eloquent-driver.php'),
+            $config => config_path('statamic/eloquent-driver.php'),
         ], 'statamic-eloquent-config');
 
         $this->publishes([
@@ -58,7 +62,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind('statamic.eloquent.entries.model', function () {
-            return config('statamic-eloquent-driver.entries.model');
+            return config('statamic.eloquent-driver.entries.model');
         });
     }
 

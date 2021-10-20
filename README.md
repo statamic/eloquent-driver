@@ -33,7 +33,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 
 If you're planning to use existing content, we can use the existing UUIDs. This will prevent you from needing to update any data or relationships.
 
-- In the `config/statamic-eloquent-driver.php` file, change `model` to `UuidEntryModel`.
+- In the `config/statamic/eloquent-driver.php` file, change `model` to `UuidEntryModel`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"`.
 - Run `php artisan migrate`.
 - Import entries into database with `php please eloquent:import-entries`.
