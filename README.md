@@ -41,8 +41,3 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 ## Storing Users in a Database
 
 Statamic has a[ built-in users eloquent driver](https://statamic.dev/knowledge-base/storing-users-in-a-database) if you'd like to cross that bridge too.
-
-
-## Known issues
-
-When saving a collection or reordering entries, the URIs of all entries in the collection will be updated, even if they haven't changed. This is an intensive operation and is being addressed in a [future version](https://github.com/statamic/cms/pull/2768) of Statamic core.
