@@ -40,4 +40,4 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 
 ## Storing Users in a Database
 
-Statamic has a[ built-in users eloquent driver](https://statamic.dev/knowledge-base/storing-users-in-a-database) if you'd like to cross that bridge too.
+Statamic has a[ built-in users eloquent driver](https://statamic.dev/tips/storing-users-in-a-database) if you'd like to cross that bridge too.
