@@ -15,6 +15,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
         'date', 'collection', 'created_at', 'updated_at',
     ];
+    
+    public function select($columns = [])
+    {
+        return $this;
+    }
 
     protected function transform($items, $columns = [])
     {
