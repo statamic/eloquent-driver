@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
+use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
@@ -12,6 +13,7 @@ use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContra
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands\ImportEntries;
+use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
@@ -61,6 +63,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
+            
+        $this->app->bind(EntryContract::class, Entry::class);
 
         $this->app->bind(EntryQueryBuilder::class, function ($app) {
             return new EntryQueryBuilder(
