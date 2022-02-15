@@ -1,6 +1,8 @@
 <?php
 
 return [
+    
+    'table_prefix' => env('STATAMIC_TABLE_PREFIX', ''),
 
     'collections' => [
         'driver' => 'eloquent',
