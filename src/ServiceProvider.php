@@ -2,24 +2,22 @@
 
 namespace Statamic\Eloquent;
 
+use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
-use Statamic\Contracts\Forms\FormSubmission as FormSubmissionContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
-use Statamic\Eloquent\Forms\Form;
 use Statamic\Eloquent\Forms\FormRepository;
-use Statamic\Eloquent\Forms\FormSubmission;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\Variables;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
@@ -52,12 +50,26 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
+        $this->registerAssets();
         $this->registerCollections();
         $this->registerEntries();
         $this->registerForms();
         $this->registerGlobals();
         $this->registerStructures();
         $this->registerTaxonomies();
+    }
+
+    protected function registerAssets()
+    {
+        if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+
+        $this->app->bind('statamic.eloquent.assets.container-model', function () {
+            return config('statamic.eloquent-driver.assets.container-model');
+        });
     }
 
     protected function registerCollections()
