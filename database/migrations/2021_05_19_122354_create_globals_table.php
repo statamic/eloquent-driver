@@ -13,7 +13,7 @@ class CreateGlobalsTable extends Migration
      */
     public function up()
     {
-        Schema::create('global_sets', function (Blueprint $table) {
+        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'global_sets', function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->string('title');
@@ -29,6 +29,6 @@ class CreateGlobalsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('global_sets');
+        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'global_sets');
     }
 }

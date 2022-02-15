@@ -11,14 +11,22 @@ class CollectionModel extends Eloquent
     protected $table = 'collections';
 
     protected $casts = [
-        'routes' => 'json',
-        'inject' => 'json',
-        'taxonomies' => 'json',
-        'structure' => 'json',
-        'sites' => 'json',
-        'revisions' => 'bool',
-        'dated' => 'bool',
-        'default_publish_state' => 'bool',
-        'ampable' => 'bool',
+        'settings' => 'json',
+        'settings.routes' => 'array',
+        'settings.inject' => 'array',
+        'settings.taxonomies' => 'array',
+        'settings.structure' => 'array',
+        'settings.sites' => 'array',
+        'settings.revisions' => 'boolean',
+        'settings.dated' => 'boolean',
+        'settings.default_publish_state' => 'boolean',
+        'settings.ampable' => 'boolean',
     ];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
+    }
 }

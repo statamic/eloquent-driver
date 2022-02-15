@@ -13,7 +13,7 @@ class CreateCollectionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('collections', function (Blueprint $table) {
+        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'collections', function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->string('title');
@@ -44,6 +44,6 @@ class CreateCollectionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('collections');
+        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'collections');
     }
 }

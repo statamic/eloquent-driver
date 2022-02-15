@@ -15,4 +15,11 @@ class NavModel extends Eloquent
         'expectsRoot' => 'boolean',
         'maxDepth' => 'integer',
     ];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
+    }
 }

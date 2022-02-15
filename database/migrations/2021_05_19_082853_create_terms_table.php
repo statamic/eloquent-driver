@@ -13,7 +13,7 @@ class CreateTermsTable extends Migration
      */
     public function up()
     {
-        Schema::create('taxonomy_terms', function (Blueprint $table) {
+        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'taxonomy_terms', function (Blueprint $table) {
             $table->id();
             $table->string('site');
             $table->string('slug');
@@ -31,6 +31,6 @@ class CreateTermsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('taxonomy_terms');
+        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'taxonomy_terms');
     }
 }

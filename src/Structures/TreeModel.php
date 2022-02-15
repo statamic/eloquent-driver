@@ -13,4 +13,11 @@ class TreeModel extends Eloquent
     protected $casts = [
         'tree' => 'json',
     ];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
+    }
 }
