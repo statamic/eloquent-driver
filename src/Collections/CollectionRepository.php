@@ -18,7 +18,7 @@ class CollectionRepository extends StacheRepository
         }
 
         $query->get()->each(function ($entry) {
-            EntryModel::find($entry->id())->update(['uri' => $entry->uri()]);
+            app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
         });
     }
 
