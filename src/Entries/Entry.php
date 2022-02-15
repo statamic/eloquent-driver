@@ -34,7 +34,6 @@ class Entry extends FileEntry
         }
 
         return $class::findOrNew($this->id())->fill([
-            'id' => $this->id(),
             'origin_id' => $this->originId(),
             'site' => $this->locale(),
             'slug' => $this->slug(),
@@ -105,17 +104,6 @@ class Entry extends FileEntry
 
         return self::fromModel($this->model->origin_id);
     }
-
-//     public function id($id = null)
-//     {
-//         if (func_num_args() > 0) {
-//             $this->id = $id;
-//
-//             return $this;
-//         }
-//
-//         return $this->model?->id;
-//     }
 
     public function originId()
     {
