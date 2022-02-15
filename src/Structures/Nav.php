@@ -23,7 +23,7 @@ class Nav extends FileEntry
 
     public function newTreeInstance()
     {
-        return new NavTree;
+        return app(app('statamic.eloquent.navigations.tree'));
     }
 
     public function toModel()

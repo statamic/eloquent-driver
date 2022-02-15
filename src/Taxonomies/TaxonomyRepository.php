@@ -11,7 +11,7 @@ class TaxonomyRepository extends StacheRepository
     protected function transform($items, $columns = [])
     {
         return Collection::make($items)->map(function ($model) {
-            return Taxonomy::fromModel($model);
+            return app(TaxonomyContract::class)::fromModel($model);
         });
     }
 
@@ -24,12 +24,12 @@ class TaxonomyRepository extends StacheRepository
 
     public function all(): Collection
     {
-        return $this->transform(TaxonomyModel::all());
+        return $this->transform(app('statamic.eloquent.taxonomies.model')::all());
     }
 
     public function findByHandle($handle): ?TaxonomyContract
     {
-        $taxonomyModel = TaxonomyModel::whereHandle($handle)->first();
+        $taxonomyModel = app('statamic.eloquent.taxonomies.model')::whereHandle($handle)->first();
 
         return $taxonomyModel
             ? app(TaxonomyContract::class)->fromModel($taxonomyModel)

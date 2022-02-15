@@ -84,7 +84,7 @@ class Entry extends FileEntry
 
     public function lastModified()
     {
-        return $this->model->updated_at;
+        return $this->model?->updated_at;
     }
 
     public function origin($origin = null)
@@ -99,12 +99,23 @@ class Entry extends FileEntry
             return $this->origin;
         }
 
-        if (! $this->model->origin) {
+        if (! $this->model?->origin_id) {
             return;
         }
 
-        return self::fromModel($this->model->origin);
+        return self::fromModel($this->model->origin_id);
     }
+
+//     public function id($id = null)
+//     {
+//         if (func_num_args() > 0) {
+//             $this->id = $id;
+//
+//             return $this;
+//         }
+//
+//         return $this->model?->id;
+//     }
 
     public function originId()
     {

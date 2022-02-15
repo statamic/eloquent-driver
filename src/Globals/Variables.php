@@ -16,7 +16,7 @@ class Variables extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.variables.model');
+        $class = app('statamic.eloquent.global-sets.variables-model');
 
         $data = $this->data();
 

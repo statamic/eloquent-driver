@@ -9,13 +9,13 @@ class NavTreeRepository extends StacheRepository
 {
     public function find(string $handle, string $site): ?TreeContract
     {
-        $model = TreeModel::whereHandle($handle)
+        $model = app('statamic.eloquent.navigations.tree-model')::whereHandle($handle)
             ->whereType('navigation')
             ->where('locale', $site)
             ->first();
 
         return $model
-            ? app(TreeContract::class)->fromModel($model)
+            ? app(app('statamic.eloquent.navigations.tree'))->fromModel($model)
             : null;
     }
 
@@ -31,12 +31,5 @@ class NavTreeRepository extends StacheRepository
     public function delete($entry)
     {
         $entry->model()->delete();
-    }
-
-    public static function bindings()
-    {
-        return [
-            TreeContract::class => NavTree::class,
-        ];
     }
 }

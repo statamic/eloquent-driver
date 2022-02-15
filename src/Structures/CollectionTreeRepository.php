@@ -9,13 +9,13 @@ class CollectionTreeRepository extends StacheRepository
 {
     public function find(string $handle, string $site): ?TreeContract
     {
-        $model = TreeModel::whereHandle($handle)
+        $model = app('statamic.eloquent.collections.tree-model')::whereHandle($handle)
             ->where('locale', $site)
             ->whereType('collection')
             ->first();
 
         return $model
-            ? app(CollectionTree::class)->fromModel($model)
+            ? app(app('statamic.eloquent.collections.tree'))->fromModel($model)
             : null;
     }
 

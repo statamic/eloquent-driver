@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Site;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
@@ -11,7 +12,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected $site = null;
 
     protected $columns = [
-        'id', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
+        'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
     ];
 
     protected function transform($items, $columns = [])
@@ -22,7 +23,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         return TermCollection::make($items)->map(function ($model) use($site) {
-            return Term::fromModel($model)->in($site);
+            return app(TermContract::class)::fromModel($model)->in($site);
         });
     }
 
