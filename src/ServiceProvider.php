@@ -14,7 +14,7 @@ use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContra
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
-use Statamic\Eloquent\Commands\ImportEntries;
+use Statamic\Eloquent\Commands;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
@@ -55,7 +55,16 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/publish/create_entries_table_with_string_ids.php' => $this->migrationsPath('create_entries_table_with_string_ids'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
-        $this->commands([ImportEntries::class]);
+        $this->commands([
+            Commands\ImportAssets::class,
+            Commands\ImportBlueprints::class,
+            Commands\ImportCollections::class,
+            Commands\ImportEntries::class,
+            //Commands\ImportForms::class,
+            //Commands\ImportGlobals::class,
+            //Commands\ImportStructures::class,
+            //Commands\ImportTaxonomies::class,
+        ]);
     }
 
     public function register()
