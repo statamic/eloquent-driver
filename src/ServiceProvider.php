@@ -60,10 +60,10 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
             Commands\ImportEntries::class,
-            //Commands\ImportForms::class,
-            //Commands\ImportGlobals::class,
-            //Commands\ImportStructures::class,
-            //Commands\ImportTaxonomies::class,
+            Commands\ImportForms::class,
+            Commands\ImportGlobals::class,
+            Commands\ImportNavs::class,
+            Commands\ImportTaxonomies::class,
         ]);
     }
 

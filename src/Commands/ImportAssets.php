@@ -7,7 +7,6 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Eloquent\Assets\AssetContainer;
-use Statamic\Facades\Entry;
 use Statamic\Stache\Repositories\AssetContainerRepository;
 use Statamic\Statamic;
 
