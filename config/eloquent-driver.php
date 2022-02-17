@@ -1,8 +1,19 @@
 <?php
 
 return [
-    
+
     'table_prefix' => env('STATAMIC_TABLE_PREFIX', ''),
+
+    'assets' => [
+        'driver' => 'eloquent',
+        'container-model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
+    ],
+
+    'blueprints' => [
+        'driver' => 'eloquent',
+        'blueprint-model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+        'fieldsets-model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+    ],
 
     'collections' => [
         'driver' => 'eloquent',

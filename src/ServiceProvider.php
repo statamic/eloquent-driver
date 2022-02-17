@@ -38,22 +38,22 @@ class ServiceProvider extends AddonServiceProvider
         parent::boot();
 
         $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
-        
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        
+
         if (! $this->app->runningInConsole()) {
             return;
         }
-                    
-        $this->publishes([$config => config_path('statamic-eloquent-driver.php')]);
-            
+
+        $this->publishes([$config => config_path('statamic.eloquent-driver.php')]);
+
         $this->publishes([
             __DIR__.'/../database/publish/create_entries_table.php' => $this->migrationsPath('create_entries_table'),
         ], 'statamic-eloquent-entries-table');
 
         $this->publishes([
             __DIR__.'/../database/publish/create_entries_table_with_string_ids.php' => $this->migrationsPath('create_entries_table_with_string_ids'),
-        ], 'statamic-eloquent-entries-table-with-string-ids');            
+        ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([ImportEntries::class]);
     }
@@ -61,6 +61,7 @@ class ServiceProvider extends AddonServiceProvider
     public function register()
     {
         $this->registerAssets();
+        $this->registerBlueprints();
         $this->registerCollections();
         $this->registerEntries();
         $this->registerForms();
@@ -79,6 +80,31 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.assets.container-model', function () {
             return config('statamic.eloquent-driver.assets.container-model');
+        });
+    }
+
+    protected function registerBlueprints()
+    {
+        if (config('statamic.eloquent-driver.blueprints.driver', 'file') != 'eloquent') {
+           return;
+        }
+
+        $this->app->singleton(
+            'Statamic\Fields\BlueprintRepository',
+            'Statamic\Eloquent\Fields\BlueprintRepository'
+        );
+
+        $this->app->singleton(
+            'Statamic\Fields\FieldsetRepository',
+            'Statamic\Eloquent\Fields\FieldsetRepository'
+        );
+
+        $this->app->bind('statamic.eloquent.blueprints.blueprint-model', function () {
+            return config('statamic.eloquent-driver.blueprints.blueprint-model');
+        });
+
+        $this->app->bind('statamic.eloquent.blueprints.fieldsets-model', function () {
+            return config('statamic.eloquent-driver.blueprints.fieldsets-model');
         });
     }
 
@@ -207,5 +233,12 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.taxonomies.model', function () {
             return config('statamic.eloquent-driver.taxonomies.model');
         });
+    }
+
+    protected function migrationsPath($filename)
+    {
+        $date = date('Y_m_d_His');
+
+        return database_path("migrations/{$date}_{$filename}.php");
     }
 }
