@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
+use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
@@ -13,6 +14,7 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
+use Statamic\Eloquent\Assets\AssetRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Commands;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -86,9 +88,14 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
-
+        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
+            
         $this->app->bind('statamic.eloquent.assets.container-model', function () {
             return config('statamic.eloquent-driver.assets.container-model');
+        });
+        
+        $this->app->bind('statamic.eloquent.assets.model', function () {
+            return config('statamic.eloquent-driver.assets.model');
         });
     }
 

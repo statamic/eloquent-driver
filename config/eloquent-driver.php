@@ -7,6 +7,7 @@ return [
     'assets' => [
         'driver' => 'eloquent',
         'container-model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
+        'model' => \Statamic\Eloquent\Assets\AssetModel::class,
     ],
 
     'blueprints' => [
