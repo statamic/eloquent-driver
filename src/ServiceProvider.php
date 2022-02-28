@@ -8,6 +8,7 @@ use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContr
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
@@ -22,6 +23,7 @@ use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\Variables;
+use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
@@ -77,11 +79,12 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerEntries();
         $this->registerForms();
         $this->registerGlobals();
+        $this->registerRevisions();
         $this->registerStructures();
         $this->registerTaxonomies();
     }
 
-    protected function registerAssets()
+    private function registerAssets()
     {
         if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
             return;
@@ -99,7 +102,7 @@ class ServiceProvider extends AddonServiceProvider
         });
     }
 
-    protected function registerBlueprints()
+    private function registerBlueprints()
     {
         if (config('statamic.eloquent-driver.blueprints.driver', 'file') != 'eloquent') {
            return;
@@ -124,7 +127,7 @@ class ServiceProvider extends AddonServiceProvider
         });
     }
 
-    protected function registerCollections()
+    private function registerCollections()
     {
         if (config('statamic.eloquent-driver.collections.driver', 'file') != 'eloquent') {
             return;
@@ -147,7 +150,7 @@ class ServiceProvider extends AddonServiceProvider
         });
     }
 
-    protected function registerEntries()
+    private function registerEntries()
     {
         if (config('statamic.eloquent-driver.entries.driver', 'file') != 'eloquent') {
             return;
@@ -201,6 +204,19 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.global-sets.variables-model', function () {
             return config('statamic.eloquent-driver.global-sets.variables-model');
+        });
+    }
+    
+    private function registerRevisions()
+    {
+        // if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
+        //     return;
+        // }
+
+        Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);
+            
+        $this->app->bind('statamic.eloquent.revisions.model', function () {
+            return config('statamic.eloquent-driver.revisions.model');
         });
     }
 

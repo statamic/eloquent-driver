@@ -24,12 +24,12 @@ class CollectionRepository extends StacheRepository
 
     public function all(): IlluminateCollection
     {
-        return $this->transform(CollectionModel::all());
+        return $this->transform(app('statamic.eloquent.collections.model')::all());
     }
 
     public function find($handle): ?CollectionContract
     {
-        $model = CollectionModel::whereHandle($handle)->first();
+        $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
 
         return $model
             ? app(CollectionContract::class)->fromModel($model)
@@ -38,7 +38,7 @@ class CollectionRepository extends StacheRepository
 
     public function findByHandle($handle): ?CollectionContract
     {
-        $model = CollectionModel::whereHandle($handle)->first();
+        $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
 
         return $model
             ? app(CollectionContract::class)->fromModel($model)

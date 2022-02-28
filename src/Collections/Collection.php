@@ -19,6 +19,7 @@ class Collection extends FileEntry
             ->layout($model->settings['layout'] ?? null)
             ->template($model->settings['template'] ?? null)
             ->sites($model->settings['sites'] ?? null)
+            ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->futureDateBehavior($model->settings['future_date_behavior'] ?? null)
             ->pastDateBehavior($model->settings['past_date_behavior'] ?? null)
             ->ampable($model->settings['ampable'] ?? null)
@@ -53,7 +54,7 @@ class Collection extends FileEntry
                 'sort_field' => $this->sortField(),
                 'mount' => $this->mount,
                 'taxonomies' => $this->taxonomies,
-                'revisions' => $this->revisions,
+                'revisions' => $this->revisionsEnabled(),
                 'inject' => $this->cascade,
                 'structure' => $this->hasStructure() ? $this->structureContents() : null,
                 'title_formats' => collect($this->titleFormats())->filter()->values(),

@@ -1,19 +1,18 @@
 <?php
 
-namespace Statamic\Eloquent\Taxonomies;
+namespace Statamic\Eloquent\Revisions;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
 
-class TaxonomyModel extends Eloquent
+class RevisionModel extends Eloquent
 {
     protected $guarded = [];
 
-    protected $table = 'taxonomies';
+    protected $table = 'revisions';
 
     protected $casts = [
-        'settings' => 'json',
-        'sites' => 'json',
+        'attributes' => 'json',
     ];
 
     public function __construct(array $attributes = [])
@@ -21,10 +20,5 @@ class TaxonomyModel extends Eloquent
         parent::__construct($attributes);
 
         $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
-
-    public function getAttribute($key)
-    {
-        return Arr::get($this->getAttributeValue('settings'), $key, parent::getAttribute($key));
     }
 }
