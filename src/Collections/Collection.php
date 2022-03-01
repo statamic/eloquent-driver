@@ -13,24 +13,29 @@ class Collection extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static)
+            ->title($model->title)
+            ->routes($model->settings['routes'] ?? null)
+            ->requiresSlugs($model->settings['slugs'] ?? true)
+            ->titleFormats($model->settings['title_formats'] ?? null)
+            ->mount($model->settings['mount'] ?? null)
+            ->dated($model->settings['dated'] ?? null)
+            ->ampable($model->settings['ampable'] ?? null)
+            ->sites($model->settings['sites'] ?? null)
+            ->template($model->settings['template'] ?? null)
+            ->layout($model->settings['layout'] ?? null)
+            ->cascade($model->settings['inject'] ?? [])
+            ->searchIndex($model->settings['search_index'] ?? null)
+            ->revisionsEnabled($model->settings['revisions'] ?? false)
+            ->defaultPublishState($model->settings['default_status'] ?? true)
             ->structureContents($model->settings['structure'] ?? [])
             ->sortDirection($model->settings['sort_dir'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
-            ->layout($model->settings['layout'] ?? null)
-            ->template($model->settings['template'] ?? null)
-            ->sites($model->settings['sites'] ?? null)
-            ->revisionsEnabled($model->settings['revisions'] ?? false)
+            ->taxonomies($model->settings['taxonomies'] ?? null)
+            ->propagate($model->settings['propagate'] ?? null)
             ->futureDateBehavior($model->settings['future_date_behavior'] ?? null)
             ->pastDateBehavior($model->settings['past_date_behavior'] ?? null)
-            ->ampable($model->settings['ampable'] ?? null)
-            ->dated($model->settings['dated'] ?? null)
-            ->title($model->title)
             ->handle($model->handle)
-            ->routes($model->settings['routes'] ?? null)
-            ->taxonomies($model->settings['taxonomies'] ?? null)
-            ->mount($model->settings['mount'] ?? null)
-            ->titleFormats($model->settings['title_formats'] ?? null)
-            ->model($model);
+            ->model($model);            
     }
 
     public function toModel()
@@ -42,22 +47,25 @@ class Collection extends FileEntry
             'handle' => $this->handle,
             'settings' => [
                 'routes' => $this->routes,
+                'slugs' => $this->requiresSlugs(),
+                'title_formats' => collect($this->titleFormats())->filter()->values(),
+                'mount' => $this->mount,
                 'dated' => $this->dated,
-                'past_date_behavior' => $this->pastDateBehavior(),
-                'future_date_behavior' => $this->futureDateBehavior(),
-                'default_publish_state' => $this->defaultPublishState,
                 'ampable' => $this->ampable,
                 'sites' => $this->sites,
                 'template' => $this->template,
                 'layout' => $this->layout,
+                'inject' => $this->cascade,
+                'search_index' => $this->searchIndex,
+                'revisions' => $this->revisionsEnabled(),
+                'default_status' => $this->defaultPublishState,
+                'structure' => $this->hasStructure() ? $this->structureContents() : null,
                 'sort_dir' => $this->sortDirection(),
                 'sort_field' => $this->sortField(),
-                'mount' => $this->mount,
                 'taxonomies' => $this->taxonomies,
-                'revisions' => $this->revisionsEnabled(),
-                'inject' => $this->cascade,
-                'structure' => $this->hasStructure() ? $this->structureContents() : null,
-                'title_formats' => collect($this->titleFormats())->filter()->values(),
+                'propagate' => $this->propagate(),
+                'past_date_behavior' => $this->pastDateBehavior(),
+                'future_date_behavior' => $this->futureDateBehavior(),
             ]
         ]);
     }
