@@ -3,10 +3,11 @@
 namespace Statamic\Eloquent\Revisions;
 
 use Statamic\Contracts\Revisions\Revision as Contract;
-use Statamic\Revisions\Revision as FileEntry;
 use Statamic\Eloquent\Revisions\RevisionModel as Model;
 use Statamic\Events\RevisionDeleted;
 use Statamic\Events\RevisionSaved;
+use Statamic\Revisions\Revision as FileEntry;
+use Statamic\Revisions\WorkingCopy;
 
 class Revision extends FileEntry
 {
@@ -47,15 +48,15 @@ class Revision extends FileEntry
         ]);
     }
     
-    public function fromWorkingCopy($workingCopy)
+    public function fromRevisionOrWorkingCopy($item)
     {
         return (new static)
-            ->key($workingCopy->key())
-            ->action($workingCopy->action() ?? false)
-            ->date($workingCopy->date())
-            ->user($workingCopy->user()->id() ?? false)
-            ->message($workingCopy->message() ?? '')
-            ->attributes($workingCopy->attributes() ?? []);      
+            ->key($item->key())
+            ->action($item instanceof WorkingCopy ? 'working' : 'revision')
+            ->date($item->date())
+            ->user($item->user()?->id() ?? false)
+            ->message($item->message() ?? '')
+            ->attributes($item->attributes() ?? []);      
     }
 
     public function model($model = null)

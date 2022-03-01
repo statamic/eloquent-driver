@@ -26,11 +26,9 @@ class RevisionRepository extends StacheRepository
 
     public function findWorkingCopyByKey($key)
     {
-        if (! $revision = app('statamic.eloquent.revisions.model')::whereKey($key)->first()) {
+        if (! $revision = app('statamic.eloquent.revisions.model')::where(['key' => $key, 'action' => 'working'])->first()) {
             return null;
         }
-        
-        $revision->action = 'working';
 
         return $this->makeRevisionFromFile($key, $revision);
     }
@@ -38,7 +36,7 @@ class RevisionRepository extends StacheRepository
     public function save(RevisionContract $copy)
     {
         $revision = (new Revision())
-            ->fromWorkingCopy($copy)
+            ->fromRevisionOrWorkingCopy($copy)
             ->toModel()
             ->save();
     }
