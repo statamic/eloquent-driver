@@ -23,7 +23,7 @@ class ChangeCollectionsTable extends Migration
             ->orderBy('created_at')
             ->each(function ($collection) {
                
-                DB::table('collections')
+                DB::table(config('statamic.eloquent-driver.table_prefix', '').'collections')
                     ->where('id', $collection->id)
                     ->update([
                         'settings' => json_encode([
