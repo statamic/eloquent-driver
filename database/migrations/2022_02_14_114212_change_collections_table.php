@@ -20,6 +20,7 @@ class ChangeCollectionsTable extends Migration
         });
         
         DB::table(config('statamic.eloquent-driver.table_prefix', '').'collections')
+            ->orderBy('created_at')
             ->each(function ($collection) {
                
                 DB::table('collections')
