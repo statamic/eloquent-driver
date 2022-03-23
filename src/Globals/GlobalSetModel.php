@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Globals;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class GlobalSetModel extends Eloquent
+class GlobalSetModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -14,13 +14,6 @@ class GlobalSetModel extends Eloquent
     protected $casts = [
         'localizations' => 'json',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function getAttribute($key)
     {

@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Forms;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Statamic\Eloquent\Database\BaseModel;
 
-class SubmissionModel extends Eloquent
+class SubmissionModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -13,13 +13,6 @@ class SubmissionModel extends Eloquent
     protected $casts = [
         'data' => 'json',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function form()
     {

@@ -1,8 +1,9 @@
 <?php
 
 return [
-
-    'table_prefix' => env('STATAMIC_TABLE_PREFIX', ''),
+    
+    'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
+    'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
 
     'assets' => [
         'driver' => 'eloquent',

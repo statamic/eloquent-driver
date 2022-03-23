@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Fields;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class FieldsetModel extends Model
+class FieldsetModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -16,13 +16,6 @@ class FieldsetModel extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function getAttribute($key)
     {

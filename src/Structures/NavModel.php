@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Structures;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Statamic\Eloquent\Database\BaseModel;
 
-class NavModel extends Eloquent
+class NavModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -15,11 +15,4 @@ class NavModel extends Eloquent
         'expectsRoot' => 'boolean',
         'maxDepth' => 'integer',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 }

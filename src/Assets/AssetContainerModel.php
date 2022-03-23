@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class AssetContainerModel extends Eloquent
+class AssetContainerModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -14,13 +14,6 @@ class AssetContainerModel extends Eloquent
     protected $casts = [
         'settings' => 'json',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function getAttribute($key)
     {

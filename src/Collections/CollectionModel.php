@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Collections;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Statamic\Eloquent\Database\BaseModel;
 
-class CollectionModel extends Eloquent
+class CollectionModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -22,11 +22,4 @@ class CollectionModel extends Eloquent
         'settings.default_publish_state' => 'boolean',
         'settings.ampable' => 'boolean',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 }

@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Structures;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Statamic\Eloquent\Database\BaseModel;
 
-class TreeModel extends Eloquent
+class TreeModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -13,11 +13,4 @@ class TreeModel extends Eloquent
     protected $casts = [
         'tree' => 'json',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 }

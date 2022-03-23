@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class TaxonomyModel extends Eloquent
+class TaxonomyModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -15,13 +15,6 @@ class TaxonomyModel extends Eloquent
         'settings' => 'json',
         'sites' => 'json',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function getAttribute($key)
     {

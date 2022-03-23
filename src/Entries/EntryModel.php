@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Entries;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class EntryModel extends Eloquent
+class EntryModel extends BaseModel
 {
     protected $guarded = [];
 
@@ -16,13 +16,6 @@ class EntryModel extends Eloquent
         'data' => 'json',
         'published' => 'boolean',
     ];
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
-    }
 
     public function origin()
     {

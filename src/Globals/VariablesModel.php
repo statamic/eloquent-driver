@@ -2,18 +2,16 @@
 
 namespace Statamic\Eloquent\Globals;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Arr;
+use Statamic\Eloquent\Database\BaseModel;
 
-class VariablesModel extends Eloquent
+class VariablesModel extends BaseModel
 {
     protected $guarded = [];
 
     protected $table = 'global_set_variables';
 
-    protected $casts = [
-
-    ];
+    protected $casts = [];
 
     public function getAttribute($key)
     {
