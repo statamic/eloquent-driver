@@ -59,7 +59,7 @@ class Collection extends FileEntry
                 'search_index' => $this->searchIndex,
                 'revisions' => $this->revisionsEnabled(),
                 'default_status' => $this->defaultPublishState,
-                'structure' => $this->hasStructure() ? $this->structureContents() : [],
+                'structure' => $this->hasStructure() ? true : null,
                 'sort_dir' => $this->sortDirection(),
                 'sort_field' => $this->sortField(),
                 'taxonomies' => $this->taxonomies,
