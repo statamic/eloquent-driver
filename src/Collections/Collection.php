@@ -27,7 +27,7 @@ class Collection extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? null)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->defaultPublishState($model->settings['default_status'] ?? true)
-            ->structureContents($model->settings['structure'] ?? [])
+            ->structure($model->settings['structure'] ?? null)
             ->sortDirection($model->settings['sort_dir'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
             ->taxonomies($model->settings['taxonomies'] ?? null)
@@ -59,7 +59,7 @@ class Collection extends FileEntry
                 'search_index' => $this->searchIndex,
                 'revisions' => $this->revisionsEnabled(),
                 'default_status' => $this->defaultPublishState,
-                'structure' => $this->hasStructure() ? $this->structureContents() : null,
+                'structure' => $this->hasStructure() ? $this->structureContents() : [],
                 'sort_dir' => $this->sortDirection(),
                 'sort_field' => $this->sortField(),
                 'taxonomies' => $this->taxonomies,

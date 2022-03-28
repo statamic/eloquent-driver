@@ -49,7 +49,7 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        $this->publishes([$config => config_path('statamic.eloquent-driver.php')]);
+        $this->publishes([$config => config_path('statamic/eloquent-driver.php')], 'statamic-eloquent-config');
 
         $this->publishes([
             __DIR__.'/../database/publish/create_entries_table.php' => $this->migrationsPath('create_entries_table'),
