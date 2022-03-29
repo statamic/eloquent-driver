@@ -44,7 +44,7 @@ class Revision extends FileEntry
             'action' => $this->action(),
             'user' => $this->user()->id(),
             'message' => $this->message(),
-            'attributes' => $this->attributes()->except('id'),
+            'attributes' => collect($this->attributes())->except('id'),
         ]);
     }
     
