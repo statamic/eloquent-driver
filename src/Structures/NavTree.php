@@ -27,7 +27,7 @@ class NavTree extends FileEntry
             'handle' => $this->handle(),
             'initialPath' => $this->initialPath(),
             'locale' => $this->locale(),
-            'tree' => $this->tree(),
+            'tree' => $this->model ? $this->tree() : [],
             'type' => 'navigation',
         ]);
     }
