@@ -32,7 +32,7 @@ return [
 
     'forms' => [
         'driver' => 'eloquent',
-        'model' =>  \Statamic\Eloquent\Forms\Form::class,
+        'model' =>  \Statamic\Eloquent\Forms\FormModel::class,
         'submissions-model' =>  \Statamic\Eloquent\Forms\FormSubmission::class,
     ],
 
