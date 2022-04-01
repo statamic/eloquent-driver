@@ -11,7 +11,8 @@ class Variables extends FileEntry
     {
         return (new static)
             ->locale($model->locale)
-            ->data($model->data);
+            ->data($model->data)
+            ->origin($model->origin);
     }
 
     public function toModel()
@@ -23,6 +24,7 @@ class Variables extends FileEntry
         return $class::make([
             'locale' => $this->locale,
             'data' => $data,
+            'origin' => $this->origin,
         ]);
     }
 }
