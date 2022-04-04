@@ -27,7 +27,7 @@ class Collection extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? null)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->defaultPublishState($model->settings['default_status'] ?? true)
-            ->structureContents($model->settings['structure'] ?? [])
+            ->structureContents($model->settings['structure'] ?? null)
             ->sortDirection($model->settings['sort_dir'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
             ->taxonomies($model->settings['taxonomies'] ?? null)
