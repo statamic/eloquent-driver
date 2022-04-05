@@ -95,7 +95,7 @@ class BlueprintRepository extends BaseBlueprintRepository
                 ->setOrder(Arr::get($model->data, 'order'))
                 ->setHandle($model->handle)
                 ->setNamespace($model->namespace)
-                ->setContents($model->data);
+                ->setContents($this->updateOrderFromBlueprintSections($model->data));
         });
     }
 
@@ -117,7 +117,7 @@ class BlueprintRepository extends BaseBlueprintRepository
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
-        $model->data = $blueprint->contents();
+        $model->data = $this->addOrderToBlueprintSections($blueprint->contents());
         $model->save();
     }
 
@@ -130,5 +130,31 @@ class BlueprintRepository extends BaseBlueprintRepository
         if ($model) {
             $model->delete();
         }
+    }
+
+    private function addOrderToBlueprintSections($contents)
+    {
+        $count = 0;
+        $contents['sections'] = collect($contents['sections'])
+            ->map(function($section) use (&$count) {
+                $section['__count'] = $count++;
+                return $section;
+            })
+            ->toArray();
+
+        return $contents;        
+    }
+
+    private function updateOrderFromBlueprintSections($contents)
+    {
+        $contents['sections'] = collect($contents['sections'])
+            ->sortBy('__count')
+            ->map(function($section) {
+                unset($section['__count']);
+                return $section;
+            })
+            ->toArray();
+
+        return $contents;        
     }
 }
