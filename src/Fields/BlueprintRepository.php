@@ -135,7 +135,7 @@ class BlueprintRepository extends BaseBlueprintRepository
     private function addOrderToBlueprintSections($contents)
     {
         $count = 0;
-        $contents['sections'] = collect($contents['sections'])
+        $contents['sections'] = collect($contents['sections'] ?? [])
             ->map(function($section) use (&$count) {
                 $section['__count'] = $count++;
                 return $section;
@@ -147,7 +147,7 @@ class BlueprintRepository extends BaseBlueprintRepository
 
     private function updateOrderFromBlueprintSections($contents)
     {
-        $contents['sections'] = collect($contents['sections'])
+        $contents['sections'] = collect($contents['sections'] ?? [])
             ->sortBy('__count')
             ->map(function($section) {
                 unset($section['__count']);
