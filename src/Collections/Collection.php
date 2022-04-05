@@ -28,12 +28,13 @@ class Collection extends FileEntry
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->defaultPublishState($model->settings['default_status'] ?? true)
             ->structureContents($model->settings['structure'] ?? null)
-            ->sortDirection($model->settings['sort_dir'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
+            ->sortDirection($model->settings['sort_dir'] ?? null)
             ->taxonomies($model->settings['taxonomies'] ?? null)
             ->propagate($model->settings['propagate'] ?? null)
             ->futureDateBehavior($model->settings['future_date_behavior'] ?? null)
             ->pastDateBehavior($model->settings['past_date_behavior'] ?? null)
+            ->previewTargets($model->settings['preview_targets'] ?? [])
             ->handle($model->handle)
             ->model($model);            
     }
@@ -66,6 +67,7 @@ class Collection extends FileEntry
                 'propagate' => $this->propagate(),
                 'past_date_behavior' => $this->pastDateBehavior(),
                 'future_date_behavior' => $this->futureDateBehavior(),
+                'preview_targets' => $this->previewTargets(),
             ]
         ]);
     }
@@ -81,13 +83,5 @@ class Collection extends FileEntry
         $this->id($model->id);
 
         return $this;
-    }
-
-    protected function makeStructureFromContents()
-    {
-        return (new CollectionStructure)
-            ->handle($this->handle())
-            ->expectsRoot($this->structureContents->root ?? false)
-            ->maxDepth($this->structureContents->max_depth ?? null);
     }
 }
