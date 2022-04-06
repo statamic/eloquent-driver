@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Revisions;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Revisions\RevisionRepository as StacheRepository;
+use Statamic\Revisions\WorkingCopy;
 
 class RevisionRepository extends StacheRepository
 {
@@ -43,6 +44,11 @@ class RevisionRepository extends StacheRepository
 
     public function delete(RevisionContract $revision)
     {
+        if ($revision instanceof WorkingCopy) {
+            $this->findWorkingCopyByKey($revision->key())?->delete();
+            return;    
+        }
+        
         $revision->model?->delete();
     }
 
