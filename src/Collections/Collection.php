@@ -84,4 +84,13 @@ class Collection extends FileEntry
 
         return $this;
     }
+    
+    protected function makeStructureFromContents()
+    {
+        return (new CollectionStructure)
+            ->handle($this->handle())
+            ->expectsRoot($this->structureContents['root'] ?? false)
+            ->showSlugs($this->structureContents['slugs'] ?? false)
+            ->maxDepth($this->structureContents['max_depth'] ?? null);
+    }
 }
