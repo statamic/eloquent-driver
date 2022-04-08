@@ -25,7 +25,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     protected function column($column)
     {
-        if (is_callable($column)) {
+        if (! is_string($column)) {
             return $column;
         }
 

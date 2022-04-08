@@ -33,7 +33,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function column($column)
     {
-        if (is_callable($column)) {
+        if (! is_string($column)) {
             return $column;
         }
 
