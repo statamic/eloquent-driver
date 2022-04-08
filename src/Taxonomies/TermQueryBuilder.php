@@ -32,6 +32,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function column($column)
     {
+        if (is_callable($column)) {
+            return $column;
+        }
+
         if (! in_array($column, $this->columns)) {
             $column = 'data->'.$column;
         }
