@@ -11,17 +11,29 @@ class Term extends FileEntry
 
     public static function fromModel(Model $model)
     {
+        $data = $model->data;
+        
         /** @var Term $term */
         $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
-            ->data($model->data)
             ->model($model)
             ->blueprint($model->data['blueprint'] ?? null);
 
-        collect($model->data['localizations'] ?? [])->each(function ($data, $locale) use ($term) {
-            $term->dataForLocale($locale, $data);
-        });
+        collect($data['localizations'] ?? [])
+            ->except($term->defaultLocale())
+            ->each(function ($localeData, $locale) use ($term) {
+                $term->dataForLocale($locale, $localeData);
+            });
+        
+        unset($data['localizations']);
+        
+        if (isset($data['collection'])) {
+            $term->collection($data['collection']);
+            unset($data['collection']);
+        }
+     
+        $term->data($data);
 
         return $term;
     }
@@ -41,7 +53,11 @@ class Term extends FileEntry
 
             return $localizations;
         }, []);
-
+        
+        if ($collection = $this->collection()) {
+            $data['collection'] = $collection;
+        }
+                
         return $class::findOrNew($this->model?->id)->fill([
             'site' => $this->locale(),
             'slug' => $this->slug(),

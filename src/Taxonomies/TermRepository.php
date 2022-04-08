@@ -21,10 +21,10 @@ class TermRepository extends StacheRepository
 
         $term = $this->query()
             ->where('taxonomy', $handle)
-            ->where('slug', $slug);
-        $term = $term->first();
+            ->where('slug', $slug)
+            ->get();
 
-        return $term;
+        return $term ? $term->first() : null;
     }
 
     public function save($entry)
