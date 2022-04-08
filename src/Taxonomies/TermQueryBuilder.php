@@ -52,11 +52,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (in_array($column, ['collection', 'collections'])) {
-            if (is_null($value)) {
+            if (! $value) {
                 return $this;
             }
             
-            $this->collections[] = array_merge($this->collections, $values);
+            $this->collections[] = array_merge($this->collections, $value);
             $column = 'collection';
         }
         
@@ -75,7 +75,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (in_array($column, ['collection', 'collections'])) {
-            if (is_null($value)) {
+            if (! $values) {
                 return $this;
             }
             
