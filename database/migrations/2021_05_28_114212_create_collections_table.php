@@ -29,6 +29,7 @@ class CreateCollectionsTable extends Migration
             $table->string('sort_dir')->nullable();
             $table->string('sort_field')->nullable();
             $table->string('mount')->nullable();
+            $table->string('search_index')->nullable();
             $table->json('taxonomies')->nullable();
             $table->boolean('revisions')->default(false);
             $table->json('inject')->nullable();

@@ -13,6 +13,7 @@ class Collection extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static)
+            ->searchIndex($model->search_index)
             ->structureContents($model->structure)
             ->sortDirection($model->sort_dir)
             ->sortField($model->sort_field)
@@ -49,6 +50,7 @@ class Collection extends FileEntry
             'layout' => $this->layout,
             'sort_dir' => $this->sortDirection(),
             'sort_field' => $this->sortField(),
+            'search_index' => $this->searchIndex(),
             'mount' => $this->mount,
             'taxonomies' => $this->taxonomies,
             'revisions' => $this->revisions,
