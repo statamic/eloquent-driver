@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Entries;
 
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\QueryBuilder;
+use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\EntryRepository as StacheRepository;
 
 class EntryRepository extends StacheRepository
@@ -14,6 +15,13 @@ class EntryRepository extends StacheRepository
             EntryContract::class => app('statamic.eloquent.entries.entry'),
             QueryBuilder::class => EntryQueryBuilder::class,
         ];
+    }
+    
+    public function find($id): ?Entry
+    {
+        return Blink::once("eloquent-entry-{$id}", function() use ($id) {
+            return $this->query()->where('id', $id)->first();
+        });
     }
 
     public function save($entry)

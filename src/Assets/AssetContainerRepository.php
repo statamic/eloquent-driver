@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
+use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\AssetContainerRepository as StacheRepository;
 
 class AssetContainerRepository extends StacheRepository
@@ -12,21 +13,27 @@ class AssetContainerRepository extends StacheRepository
 
     public function all(): Collection
     {
-        return app('statamic.eloquent.assets.container-model')::all()
-            ->map(function($model) {
-                return app(AssetContainerContract::class)->fromModel($model);
-            });
+        return Blink::once("eloquent-assetcontainers-all", function() {
+            return app('statamic.eloquent.assets.container-model')::all()
+                ->map(function($model) {
+                    return Blink::once("eloquent-assetcontainers-{$model->handle}", function() use ($model) {
+                        return app(AssetContainerContract::class)->fromModel($model);
+                    });
+                });
+        });
     }
 
     public function findByHandle(string $handle): ?AssetContainerContract
     {
-        $model = app('statamic.eloquent.assets.container-model')::whereHandle($handle)->first();
-
-        if (! $model) {
-            return null;
-        }
-
-        return app(AssetContainerContract::class)->fromModel($model);
+        return Blink::once("eloquent-assetcontainers-{$handle}", function() use ($handle) {
+            $model = app('statamic.eloquent.assets.container-model')::whereHandle($handle)->first();
+    
+            if (! $model) {
+                return null;
+            }
+    
+            return app(AssetContainerContract::class)->fromModel($model);
+        });
     }
 
     public function make(string $handle = null): AssetContainerContract
@@ -37,11 +44,16 @@ class AssetContainerRepository extends StacheRepository
     public function save(AssetContainerContract $container)
     {
         $container->toModel()->save();
+        
+        Blink::forget("eloquent-assetcontainers-{$container->handle()}");
     }
 
     public function delete($container)
     {
         $container->delete();
+        
+        Blink::forget("eloquent-assetcontainers-{$container->handle()}");
+        Blink::forget("eloquent-assetcontainers-all");
     }
 
     public static function bindings(): array

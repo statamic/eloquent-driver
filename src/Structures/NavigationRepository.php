@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Structures;
 
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Structures\Nav as NavContract;
+use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\NavigationRepository as StacheRepository;
 
 class NavigationRepository extends StacheRepository
@@ -29,11 +30,15 @@ class NavigationRepository extends StacheRepository
 
     public function findByHandle($handle): ?NavContract
     {
-        $model = NavModel::whereHandle($handle)->first();
+        return Blink::once("eloquent-nav-{$handle}", function() use ($handle) {
 
-        return $model
-            ? app(NavContract::class)->fromModel($model)
-            : null;
+            $model = NavModel::whereHandle($handle)->first();
+    
+            return $model
+                ? app(NavContract::class)->fromModel($model)
+                : null;
+                
+        });
     }
 
     public function save($entry)
@@ -41,6 +46,8 @@ class NavigationRepository extends StacheRepository
         $model = $entry->toModel();
 
         $model->save();
+        
+        Blink::forget("eloquent-nav-{$model->handle}");
 
         $entry->model($model->fresh());
     }

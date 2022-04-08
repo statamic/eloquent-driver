@@ -4,10 +4,10 @@ namespace Statamic\Eloquent\Fields;
 
 use Statamic\Facades\Blink;
 use Statamic\Fields\Blueprint;
-use Statamic\Fields\BlueprintRepository as BaseBlueprintRepository;
+use Statamic\Fields\BlueprintRepository as StacheRepository;
 use Statamic\Support\Arr;
 
-class BlueprintRepository extends BaseBlueprintRepository
+class BlueprintRepository extends StacheRepository
 {
     private const BLINK_FOUND = 'blueprints.found';
     private const BLINK_FROM_FILE = 'blueprints.from-file';
@@ -95,7 +95,7 @@ class BlueprintRepository extends BaseBlueprintRepository
                 ->setOrder(Arr::get($model->data, 'order'))
                 ->setHandle($model->handle)
                 ->setNamespace($model->namespace)
-                ->setContents($this->updateOrderFromBlueprintSections($model->data));
+                ->setContents($model->data);
         });
     }
 
@@ -117,7 +117,7 @@ class BlueprintRepository extends BaseBlueprintRepository
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
-        $model->data = $this->addOrderToBlueprintSections($blueprint->contents());
+        $model->data = $blueprint->contents();
         $model->save();
     }
 
@@ -130,31 +130,5 @@ class BlueprintRepository extends BaseBlueprintRepository
         if ($model) {
             $model->delete();
         }
-    }
-
-    private function addOrderToBlueprintSections($contents)
-    {
-        $count = 0;
-        $contents['sections'] = collect($contents['sections'] ?? [])
-            ->map(function($section) use (&$count) {
-                $section['__count'] = $count++;
-                return $section;
-            })
-            ->toArray();
-
-        return $contents;        
-    }
-
-    private function updateOrderFromBlueprintSections($contents)
-    {
-        $contents['sections'] = collect($contents['sections'] ?? [])
-            ->sortBy('__count')
-            ->map(function($section) {
-                unset($section['__count']);
-                return $section;
-            })
-            ->toArray();
-
-        return $contents;        
     }
 }

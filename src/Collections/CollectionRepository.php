@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Collections;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Eloquent\Entries\EntryModel;
+use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository
@@ -24,25 +25,27 @@ class CollectionRepository extends StacheRepository
 
     public function all(): IlluminateCollection
     {
-        return $this->transform(app('statamic.eloquent.collections.model')::all());
+        return Blink::once("eloquent-collections-all", function() {
+            return $this->transform(app('statamic.eloquent.collections.model')::all());
+        });
     }
 
     public function find($handle): ?CollectionContract
     {
-        $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
-
-        return $model
-            ? app(CollectionContract::class)->fromModel($model)
-            : null;
+        return Blink::once("eloquent-collection-{$handle}", function() use ($handle) {
+        
+            $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
+    
+            return $model
+                ? app(CollectionContract::class)->fromModel($model)
+                : null;
+                
+        });
     }
 
     public function findByHandle($handle): ?CollectionContract
     {
-        $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
-
-        return $model
-            ? app(CollectionContract::class)->fromModel($model)
-            : null;
+        return $this->find($handle);
     }
 
     public function save($entry)
@@ -50,6 +53,8 @@ class CollectionRepository extends StacheRepository
         $model = $entry->toModel();
 
         $model->save();
+        
+        Blink::forget("eloquent-collection-{$model->handle}");
 
         $entry->model($model->fresh());
     }
@@ -62,7 +67,9 @@ class CollectionRepository extends StacheRepository
     protected function transform($items, $columns = [])
     {
         return IlluminateCollection::make($items)->map(function ($model) {
-            return Collection::fromModel($model);
+            return Blink::once("eloquent-collection-{$model->handle}", function() use ($model) {
+                return app(CollectionContract::class)::fromModel($model);
+            });
         });
     }
 

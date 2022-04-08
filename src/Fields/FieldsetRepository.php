@@ -5,44 +5,41 @@ namespace Statamic\Eloquent\Fields;
 use Illuminate\Support\Collection;
 use Statamic\Facades\Blink;
 use Statamic\Fields\Fieldset;
-use Statamic\Fields\FieldsetRepository as BaseFieldsetRepository;
+use Statamic\Fields\FieldsetRepository as StacheRepository;
 
-class FieldsetRepository extends BaseFieldsetRepository
+class FieldsetRepository extends StacheRepository
 {
     public function all(): Collection
     {
-        return Blink::once('fieldsets', function () {
+        return Blink::once("eloquent-fieldsets-all", function () {
             if (count(($models = app('statamic.eloquent.blueprints.fieldsets-model')::get() ?? collect())) === 0) {
                 return collect();
             }
-
+            
             return $models->map(function ($model) {
-                return (new Fieldset)
-                    ->setHandle($model->handle)
-                    ->setContents($model->data);
+                return Blink::once("eloquent-fieldset-{$model->handle}", function() use ($model) {
+                    return (new Fieldset)
+                        ->setHandle($model->handle)
+                        ->setContents($model->data);
+                });
             });
         });
     }
 
     public function find($handle): ?Fieldset
     {
-        if ($cached = array_get($this->fieldsets, $handle)) {
-            return $cached;
-        }
-
         $handle = str_replace('/', '.', $handle);
+        
+        return Blink::once("eloquent-fieldset-{$handle}", function() use ($handle) {
 
-        if (($model = app('statamic.eloquent.blueprints.fieldsets-model')::where('handle', $handle)->first()) === null) {
-            return null;
-        }
-
-        $fieldset = (new Fieldset)
-            ->setHandle($handle)
-            ->setContents($model->data);
-
-        $this->fieldsets[$handle] = $fieldset;
-
-        return $fieldset;
+            if (($model = app('statamic.eloquent.blueprints.fieldsets-model')::where('handle', $handle)->first()) === null) {
+                return null;
+            }
+    
+            return (new Fieldset)
+                ->setHandle($handle)
+                ->setContents($model->data);            
+        });
     }
 
     public function save(Fieldset $fieldset)
@@ -63,6 +60,8 @@ class FieldsetRepository extends BaseFieldsetRepository
 
         $model->data = $fieldset->contents();
         $model->save();
+        
+        Blink::forget("eloquent-fieldset-{$model->handle}");        
     }
 
     public function deleteModel($fieldset)
@@ -72,5 +71,8 @@ class FieldsetRepository extends BaseFieldsetRepository
         if ($model) {
             $model->delete();
         }
+        
+        Blink::forget("eloquent-fieldset-{$model->handle}"); 
+        Blink::forget("eloquent-fieldsets-all");        
     }
 }
