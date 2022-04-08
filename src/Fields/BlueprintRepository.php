@@ -144,7 +144,7 @@ class BlueprintRepository extends StacheRepository
             })
             ->toArray();
 
-        return $contents;        
+        return $contents;
     }
 
     private function updateOrderFromBlueprintSections($contents)
@@ -157,6 +157,6 @@ class BlueprintRepository extends StacheRepository
             })
             ->toArray();
 
-        return $contents;        
+        return $contents;
     }
 }

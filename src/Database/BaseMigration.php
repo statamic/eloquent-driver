@@ -16,7 +16,7 @@ class BaseMigration extends Migration
         if ($connection = config('statamic.eloquent-driver.connection', false)) {
             return $connection;
         }
-        
+
         return parent::getConnection();
     }
 }

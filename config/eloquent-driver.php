@@ -1,7 +1,7 @@
 <?php
 
 return [
-    
+
     'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
     'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
 
@@ -48,7 +48,7 @@ return [
         'tree' => \Statamic\Eloquent\Structures\NavTree::class,
         'tree-model' =>  \Statamic\Eloquent\Structures\TreeModel::class,
     ],
-    
+
     'revisions' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Revisions\RevisionModel::class,

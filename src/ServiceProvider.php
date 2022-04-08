@@ -92,11 +92,11 @@ class ServiceProvider extends AddonServiceProvider
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
-            
+
         $this->app->bind('statamic.eloquent.assets.container-model', function () {
             return config('statamic.eloquent-driver.assets.container-model');
         });
-        
+
         $this->app->bind('statamic.eloquent.assets.model', function () {
             return config('statamic.eloquent-driver.assets.model');
         });
@@ -206,7 +206,7 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.global-sets.variables-model');
         });
     }
-    
+
     private function registerRevisions()
     {
         // if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
@@ -214,7 +214,7 @@ class ServiceProvider extends AddonServiceProvider
         // }
 
         Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);
-            
+
         $this->app->bind('statamic.eloquent.revisions.model', function () {
             return config('statamic.eloquent-driver.revisions.model');
         });

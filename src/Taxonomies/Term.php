@@ -12,7 +12,7 @@ class Term extends FileEntry
     public static function fromModel(Model $model)
     {
         $data = $model->data;
-        
+
         /** @var Term $term */
         $term = (new static)
             ->slug($model->slug)
@@ -25,14 +25,14 @@ class Term extends FileEntry
             ->each(function ($localeData, $locale) use ($term) {
                 $term->dataForLocale($locale, $localeData);
             });
-        
+
         unset($data['localizations']);
-        
+
         if (isset($data['collection'])) {
             $term->collection($data['collection']);
             unset($data['collection']);
         }
-     
+
         $term->data($data);
 
         return $term;
@@ -53,11 +53,11 @@ class Term extends FileEntry
 
             return $localizations;
         }, []);
-        
+
         if ($collection = $this->collection()) {
             $data['collection'] = $collection;
         }
-                
+
         return $class::findOrNew($this->model?->id)->fill([
             'site' => $this->locale(),
             'slug' => $this->slug(),

@@ -23,7 +23,7 @@ class Revision extends FileEntry
     protected $model;
 
     public static function fromModel(Model $model)
-    {        
+    {
         return (new static)
             ->key($model->key)
             ->action($model->action ?? false)
@@ -47,7 +47,7 @@ class Revision extends FileEntry
             'attributes' => collect($this->attributes())->except('id'),
         ]);
     }
-    
+
     public function fromRevisionOrWorkingCopy($item)
     {
         return (new static)
@@ -56,7 +56,7 @@ class Revision extends FileEntry
             ->date($item->date())
             ->user($item->user()?->id() ?? false)
             ->message($item->message() ?? '')
-            ->attributes($item->attributes() ?? []);      
+            ->attributes($item->attributes() ?? []);
     }
 
     public function model($model = null)

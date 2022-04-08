@@ -36,7 +36,7 @@ class Collection extends FileEntry
             ->pastDateBehavior($model->settings['past_date_behavior'] ?? null)
             ->previewTargets($model->settings['preview_targets'] ?? [])
             ->handle($model->handle)
-            ->model($model);            
+            ->model($model);
     }
 
     public function toModel()
@@ -84,7 +84,7 @@ class Collection extends FileEntry
 
         return $this;
     }
-    
+
     protected function makeStructureFromContents()
     {
         return (new CollectionStructure)

@@ -36,7 +36,7 @@ class TaxonomyRepository extends StacheRepository
     {
         return Blink::once("eloquent-taxonomies-{$handle}", function() use ($handle) {
             $taxonomyModel = app('statamic.eloquent.taxonomies.model')::whereHandle($handle)->first();
-    
+
             return $taxonomyModel
                 ? app(TaxonomyContract::class)->fromModel($taxonomyModel)
                 : null;
@@ -49,7 +49,7 @@ class TaxonomyRepository extends StacheRepository
         $model->save();
 
         $entry->model($model->fresh());
-        
+
         Blink::forget("eloquent-taxonomies-{$model->handle}");
     }
 
@@ -57,7 +57,7 @@ class TaxonomyRepository extends StacheRepository
     {
         $model = $entry->model();
         $model->delete();
-        
+
         Blink::forget("eloquent-taxonomies-{$model->handle}");
         Blink::forget("eloquent-taxonomies-all");
     }

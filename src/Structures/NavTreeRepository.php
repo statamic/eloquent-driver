@@ -11,16 +11,16 @@ class NavTreeRepository extends StacheRepository
     public function find(string $handle, string $site): ?TreeContract
     {
         return Blink::once("eloquent-nav-tree-{$handle}-{$site}", function() use ($handle, $site) {
-        
+
             $model = app('statamic.eloquent.navigations.tree-model')::whereHandle($handle)
                 ->whereType('navigation')
                 ->where('locale', $site)
                 ->first();
-    
+
             return $model
                 ? app(app('statamic.eloquent.navigations.tree'))->fromModel($model)
                 : null;
-                    
+
         });
     }
 
@@ -29,7 +29,7 @@ class NavTreeRepository extends StacheRepository
         $model = $entry->toModel();
 
         $model->save();
-        
+
         Blink::forget("eloquent-nav-tree-{$model->handle}-{$model->locale}");
 
         $entry->model($model->fresh());

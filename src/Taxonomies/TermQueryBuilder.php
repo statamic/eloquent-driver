@@ -14,7 +14,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected $collections = [];
     protected $site = null;
     protected $taxonomies = [];
-    
+
     protected $columns = [
         'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
     ];
@@ -45,13 +45,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
     }
 
     public function where($column, $operator = null, $value = null, $boolean = 'and')
-    {     
+    {
         if ($column === 'site') {
             $this->site = $operator;
 
             return $this;
         }
-        
+
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $value) {
                 return $this;
@@ -65,19 +65,19 @@ class TermQueryBuilder extends EloquentQueryBuilder
             if (! $value) {
                 return $this;
             }
-            
+
             $this->collections = array_merge($this->collections, $value);
             return $this;
         }
-        
+
         if (in_array($column, ['id'])) {
             $column = 'slug';
             $value = Str::after($value, '::');
         }
-         
+
         return parent::where($column, $operator, $value, $boolean);
     }
-    
+
     public function whereIn($column, $values, $boolean = 'and')
     {
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
@@ -97,19 +97,19 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $this->collections = array_merge($this->collections, collect($values)->all());
             return $this;
         }
-        
+
         if (in_array($column, ['id'])) {
             $column = 'slug';
             $values = collect($values)
                 ->map(function ($value) {
                     return Str::after($value, '::');
                 })
-                ->all();   
+                ->all();
         }
-        
+
         return parent::whereIn($column, $values, $boolean);
     }
-    
+
     public function get($columns = ['*'])
     {
         if (! empty($this->collections)) {
@@ -123,15 +123,15 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
             $this->taxonomies = array_merge($this->taxonomies, $collectionTaxonomies->all());
         }
-        
+
         $queryTaxonomies = collect($this->taxonomies)
             ->filter()
             ->unique();
-            
+
         if ($queryTaxonomies->count() > 0) {
             $this->builder->whereIn('taxonomy', $queryTaxonomies->all());
         }
-                
+
         $items = parent::get($columns);
 
         // If a single collection has been queried, we'll supply it to the terms so
@@ -140,7 +140,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         if ($this->collections && count($this->collections) == 1) {
             $items->each->collection(Collection::findByHandle($this->collections[0]));
         }
-        
+
         return $items;
     }
 }

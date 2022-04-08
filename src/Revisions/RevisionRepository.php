@@ -16,7 +16,7 @@ class RevisionRepository extends StacheRepository
 
     public function whereKey($key)
     {
-        return app('statamic.eloquent.revisions.model')::where('key', $key) 
+        return app('statamic.eloquent.revisions.model')::where('key', $key)
             ->get()
             ->map(function ($revision) use ($key) {
                 return $this->makeRevisionFromFile($key, $revision);
@@ -46,9 +46,9 @@ class RevisionRepository extends StacheRepository
     {
         if ($revision instanceof WorkingCopy) {
             $this->findWorkingCopyByKey($revision->key())?->delete();
-            return;    
+            return;
         }
-        
+
         $revision->model?->delete();
     }
 
@@ -56,7 +56,7 @@ class RevisionRepository extends StacheRepository
     {
         return (new Revision)
             ->fromModel($model);
-    }    
+    }
 
     public static function bindings(): array
     {

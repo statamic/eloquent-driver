@@ -27,11 +27,11 @@ class AssetContainerRepository extends StacheRepository
     {
         return Blink::once("eloquent-assetcontainers-{$handle}", function() use ($handle) {
             $model = app('statamic.eloquent.assets.container-model')::whereHandle($handle)->first();
-    
+
             if (! $model) {
                 return null;
             }
-    
+
             return app(AssetContainerContract::class)->fromModel($model);
         });
     }
@@ -44,14 +44,14 @@ class AssetContainerRepository extends StacheRepository
     public function save(AssetContainerContract $container)
     {
         $container->toModel()->save();
-        
+
         Blink::forget("eloquent-assetcontainers-{$container->handle()}");
     }
 
     public function delete($container)
     {
         $container->delete();
-        
+
         Blink::forget("eloquent-assetcontainers-{$container->handle()}");
         Blink::forget("eloquent-assetcontainers-all");
     }

@@ -15,7 +15,7 @@ class CollectionTreeRepository extends StacheRepository
                 ->where('locale', $site)
                 ->whereType('collection')
                 ->first();
-                
+
             return $model ? app(app('statamic.eloquent.collections.tree'))->fromModel($model) : null;
         });
     }
@@ -25,9 +25,9 @@ class CollectionTreeRepository extends StacheRepository
         $model = $entry->toModel();
 
         $model->save();
-        
+
         Blink::forget("eloquent-collection-tree-{$model->handle}-{$model->locale}");
-        
+
         $entry->model($model->fresh());
     }
 }
