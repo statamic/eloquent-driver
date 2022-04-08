@@ -21,7 +21,7 @@ class BlueprintRepository extends StacheRepository
                 return null;
             }
 
-            if (($blueprintModel = app('statamic.eloquent.blueprints.blueprint-model')::where('namespace', $namespace)->where('handle', $handle)->first()) === null) {
+            if (($blueprintModel = $this->filesIn($namespace)->where('handle', $handle)->first()) === null) {
                 throw_if(
                     $namespace === null && $handle === 'default',
                     Exception::class,
@@ -76,7 +76,7 @@ class BlueprintRepository extends StacheRepository
 
     private function filesIn($namespace)
     {
-        return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace, function () use ($namespace) {
+        return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
             if (count(($blueprintModels = BlueprintModel::where('namespace', $namespace)->get())) == 0) {
@@ -95,7 +95,7 @@ class BlueprintRepository extends StacheRepository
                 ->setOrder(Arr::get($model->data, 'order'))
                 ->setHandle($model->handle)
                 ->setNamespace($model->namespace)
-                ->setContents($model->data);
+                ->setContents($this->updateOrderFromBlueprintSections($model->data));
         });
     }
 
@@ -117,7 +117,7 @@ class BlueprintRepository extends StacheRepository
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
-        $model->data = $blueprint->contents();
+        $model->data = $this->addOrderToBlueprintSections($blueprint->contents());
         $model->save();
     }
 
@@ -130,5 +130,31 @@ class BlueprintRepository extends StacheRepository
         if ($model) {
             $model->delete();
         }
+    }
+
+    private function addOrderToBlueprintSections($contents)
+    {
+        $count = 0;
+        $contents['sections'] = collect($contents['sections'] ?? [])
+            ->map(function($section) use (&$count) {
+                $section['__count'] = $count++;
+                return $section;
+            })
+            ->toArray();
+
+        return $contents;        
+    }
+
+    private function updateOrderFromBlueprintSections($contents)
+    {
+        $contents['sections'] = collect($contents['sections'] ?? [])
+            ->sortBy('__count')
+            ->map(function($section) {
+                unset($section['__count']);
+                return $section;
+            })
+            ->toArray();
+
+        return $contents;        
     }
 }
