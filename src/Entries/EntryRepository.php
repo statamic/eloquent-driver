@@ -17,11 +17,18 @@ class EntryRepository extends StacheRepository
         ];
     }
     
-    public function find($id): ?Entry
+    public function find($id): ?EntryContract
     {
         return Blink::once("eloquent-entry-{$id}", function() use ($id) {
             return $this->query()->where('id', $id)->first();
         });
+    }
+    
+    public function findByUri(string $uri, string $site = null): ?EntryContract
+    {
+        return Blink::once("eloquent-entry-{$uri}", function() use ($uri, $site) {
+            return parent::findByUri($uri, $site);
+        });        
     }
 
     public function save($entry)
