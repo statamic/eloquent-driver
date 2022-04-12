@@ -19,7 +19,7 @@ class CreateEntriesTable extends Migration
             $table->unsignedInteger('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
-            $table->string('slug');
+            $table->string('slug')->nullable();
             $table->string('uri')->nullable();
             $table->string('date')->nullable();
             $table->string('collection');
