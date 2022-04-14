@@ -21,7 +21,7 @@ class NavTree extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.navigations.tree-model');
+        $class = app('statamic.eloquent.navigations.tree_model');
 
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),

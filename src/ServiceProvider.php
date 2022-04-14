@@ -93,8 +93,8 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 
-        $this->app->bind('statamic.eloquent.assets.container-model', function () {
-            return config('statamic.eloquent-driver.assets.container-model');
+        $this->app->bind('statamic.eloquent.assets.container_model', function () {
+            return config('statamic.eloquent-driver.assets.container_model');
         });
 
         $this->app->bind('statamic.eloquent.assets.model', function () {
@@ -118,12 +118,12 @@ class ServiceProvider extends AddonServiceProvider
             'Statamic\Eloquent\Fields\FieldsetRepository'
         );
 
-        $this->app->bind('statamic.eloquent.blueprints.blueprint-model', function () {
-            return config('statamic.eloquent-driver.blueprints.blueprint-model');
+        $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
+            return config('statamic.eloquent-driver.blueprints.blueprint_model');
         });
 
-        $this->app->bind('statamic.eloquent.blueprints.fieldsets-model', function () {
-            return config('statamic.eloquent-driver.blueprints.fieldsets-model');
+        $this->app->bind('statamic.eloquent.blueprints.fieldsets_model', function () {
+            return config('statamic.eloquent-driver.blueprints.fieldsets_model');
         });
     }
 
@@ -145,8 +145,8 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.collections.tree');
         });
 
-        $this->app->bind('statamic.eloquent.collections.tree-model', function () {
-            return config('statamic.eloquent-driver.collections.tree-model');
+        $this->app->bind('statamic.eloquent.collections.tree_model', function () {
+            return config('statamic.eloquent-driver.collections.tree_model');
         });
     }
 
@@ -185,25 +185,25 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.forms.model');
         });
 
-        $this->app->bind('statamic.eloquent.forms.submissions-model', function () {
-            return config('statamic.eloquent-driver.forms.submissions-model');
+        $this->app->bind('statamic.eloquent.forms.submissions_model', function () {
+            return config('statamic.eloquent-driver.forms.submissions_model');
         });
     }
 
     private function registerGlobals()
     {
-        if (config('statamic.eloquent-driver.global-sets.driver', 'file') != 'eloquent') {
+        if (config('statamic.eloquent-driver.global_sets.driver', 'file') != 'eloquent') {
             return;
         }
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
 
-        $this->app->bind('statamic.eloquent.global-sets.model', function () {
-            return config('statamic.eloquent-driver.global-sets.model');
+        $this->app->bind('statamic.eloquent.global_sets.model', function () {
+            return config('statamic.eloquent-driver.global_sets.model');
         });
 
-        $this->app->bind('statamic.eloquent.global-sets.variables-model', function () {
-            return config('statamic.eloquent-driver.global-sets.variables-model');
+        $this->app->bind('statamic.eloquent.global_sets.variables_model', function () {
+            return config('statamic.eloquent-driver.global_sets.variables_model');
         });
     }
 
@@ -238,8 +238,8 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.navigations.tree');
         });
 
-        $this->app->bind('statamic.eloquent.navigations.tree-model', function () {
-            return config('statamic.eloquent-driver.navigations.tree-model');
+        $this->app->bind('statamic.eloquent.navigations.tree_model', function () {
+            return config('statamic.eloquent-driver.navigations.tree_model');
         });
     }
 
@@ -254,12 +254,12 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind(TermQueryBuilder::class, function ($app) {
             return new TermQueryBuilder(
-                $app['statamic.eloquent.taxonomies.term-model']::query()
+                $app['statamic.eloquent.taxonomies.term_model']::query()
             );
         });
 
-        $this->app->bind('statamic.eloquent.taxonomies.term-model', function () {
-            return config('statamic.eloquent-driver.taxonomies.term-model');
+        $this->app->bind('statamic.eloquent.taxonomies.term_model', function () {
+            return config('statamic.eloquent-driver.taxonomies.term_model');
         });
 
         $this->app->bind('statamic.eloquent.taxonomies.model', function () {

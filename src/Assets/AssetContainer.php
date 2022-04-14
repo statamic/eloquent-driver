@@ -40,7 +40,7 @@ class AssetContainer extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.assets.container-model');
+        $class = app('statamic.eloquent.assets.container_model');
 
         return $class::findOrNew($this->model?->id)->fill([
             'title' => $this->title(),

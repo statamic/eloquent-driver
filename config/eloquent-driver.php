@@ -7,21 +7,21 @@ return [
 
     'assets' => [
         'driver' => 'eloquent',
-        'container-model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
+        'container_model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
         'model' => \Statamic\Eloquent\Assets\AssetModel::class,
     ],
 
     'blueprints' => [
         'driver' => 'eloquent',
-        'blueprint-model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
-        'fieldsets-model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+        'blueprint_model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+        'fieldsets_model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
     ],
 
     'collections' => [
         'driver' => 'eloquent',
         'model' => \Statamic\Eloquent\Collections\CollectionModel::class,
         'tree' => \Statamic\Eloquent\Structures\CollectionTree::class,
-        'tree-model' => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
     ],
 
     'entries' => [
@@ -33,20 +33,20 @@ return [
     'forms' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Forms\FormModel::class,
-        'submissions-model' =>  \Statamic\Eloquent\Forms\FormSubmission::class,
+        'submissions_model' =>  \Statamic\Eloquent\Forms\FormSubmission::class,
     ],
 
-    'global-sets' => [
+    'global_sets' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Globals\GlobalSetModel::class,
-        'variables-model' =>  \Statamic\Eloquent\Globals\VariablesModel::class,
+        'variables_model' =>  \Statamic\Eloquent\Globals\VariablesModel::class,
     ],
 
     'navigations' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Structures\NavModel::class,
         'tree' => \Statamic\Eloquent\Structures\NavTree::class,
-        'tree-model' =>  \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree_model' =>  \Statamic\Eloquent\Structures\TreeModel::class,
     ],
 
     'revisions' => [
@@ -57,6 +57,6 @@ return [
     'taxonomies' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
-        'term-model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
+        'term_model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
 ];

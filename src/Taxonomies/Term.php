@@ -40,7 +40,7 @@ class Term extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.taxonomies.term-model');
+        $class = app('statamic.eloquent.taxonomies.term_model');
 
         $data = $this->data();
 

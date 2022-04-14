@@ -11,7 +11,7 @@ class CollectionTreeRepository extends StacheRepository
     public function find(string $handle, string $site): ?TreeContract
     {
         return Blink::once("eloquent-collection-tree-{$handle}-{$site}", function() use ($handle, $site) {
-            $model = app('statamic.eloquent.collections.tree-model')::whereHandle($handle)
+            $model = app('statamic.eloquent.collections.tree_model')::whereHandle($handle)
                 ->where('locale', $site)
                 ->whereType('collection')
                 ->first();

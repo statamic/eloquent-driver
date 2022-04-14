@@ -12,7 +12,7 @@ class NavTreeRepository extends StacheRepository
     {
         return Blink::once("eloquent-nav-tree-{$handle}-{$site}", function() use ($handle, $site) {
 
-            $model = app('statamic.eloquent.navigations.tree-model')::whereHandle($handle)
+            $model = app('statamic.eloquent.navigations.tree_model')::whereHandle($handle)
                 ->whereType('navigation')
                 ->where('locale', $site)
                 ->first();

@@ -23,7 +23,7 @@ class CollectionTree extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.collections.tree-model');
+        $class = app('statamic.eloquent.collections.tree_model');
 
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),

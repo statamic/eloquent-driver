@@ -81,7 +81,7 @@ class ImportBlueprints extends Command
                 ->setNamespace($namespace ?? null)
                 ->setContents($contents);
 
-            $model = app('statamic.eloquent.blueprints.blueprint-model')::firstOrNew([
+            $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
                 'handle' => $blueprint->handle(),
                 'namespace' => $blueprint->namespace() ?? null,
             ]);
@@ -116,7 +116,7 @@ class ImportBlueprints extends Command
                 ->setHandle($handle)
                 ->setContents(YAML::file($file)->parse());
 
-            $model = app('statamic.eloquent.blueprints.fieldset-model')::firstOrNew([
+            $model = app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
                 'handle' => $fieldset->handle(),
             ]);
 

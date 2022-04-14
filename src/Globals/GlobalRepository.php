@@ -22,7 +22,7 @@ class GlobalRepository extends StacheRepository
     public function find($handle): ?GlobalSetContract
     {
         return Blink::once("eloquent-globalsets-{$handle}", function() use ($handle) {
-            return app(GlobalSetContract::class)->fromModel(app('statamic.eloquent.global-sets.model')::whereHandle($handle)->firstOrFail());
+            return app(GlobalSetContract::class)->fromModel(app('statamic.eloquent.global_sets.model')::whereHandle($handle)->firstOrFail());
         });
     }
 
@@ -34,7 +34,7 @@ class GlobalRepository extends StacheRepository
     public function all(): GlobalCollection
     {
         return Blink::once("eloquent-globalsets-all", function() {
-            return $this->transform(app('statamic.eloquent.global-sets.model')::all());
+            return $this->transform(app('statamic.eloquent.global_sets.model')::all());
         });
     }
 

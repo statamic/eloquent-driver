@@ -14,7 +14,7 @@ class AssetContainerRepository extends StacheRepository
     public function all(): Collection
     {
         return Blink::once("eloquent-assetcontainers-all", function() {
-            return app('statamic.eloquent.assets.container-model')::all()
+            return app('statamic.eloquent.assets.container_model')::all()
                 ->map(function($model) {
                     return Blink::once("eloquent-assetcontainers-{$model->handle}", function() use ($model) {
                         return app(AssetContainerContract::class)->fromModel($model);
@@ -26,7 +26,7 @@ class AssetContainerRepository extends StacheRepository
     public function findByHandle(string $handle): ?AssetContainerContract
     {
         return Blink::once("eloquent-assetcontainers-{$handle}", function() use ($handle) {
-            $model = app('statamic.eloquent.assets.container-model')::whereHandle($handle)->first();
+            $model = app('statamic.eloquent.assets.container_model')::whereHandle($handle)->first();
 
             if (! $model) {
                 return null;

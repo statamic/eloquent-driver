@@ -114,7 +114,7 @@ class BlueprintRepository extends StacheRepository
 
     public function updateModel($blueprint)
     {
-        $model = app('statamic.eloquent.blueprints.blueprint-model')::firstOrNew([
+        $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
             'handle' => $blueprint->handle(),
             'namespace' => $blueprint->namespace() ?? null,
         ]);
@@ -125,7 +125,7 @@ class BlueprintRepository extends StacheRepository
 
     public function deleteModel($blueprint)
     {
-        $model = app('statamic.eloquent.blueprints.blueprint-model')::where('namespace', $blueprint->namespace() ?? null)
+        $model = app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
             ->where('handle', $blueprint->handle())
             ->first();
 

@@ -12,7 +12,7 @@ class FieldsetRepository extends StacheRepository
     public function all(): Collection
     {
         return Blink::once("eloquent-fieldsets-all", function () {
-            if (count(($models = app('statamic.eloquent.blueprints.fieldsets-model')::get() ?? collect())) === 0) {
+            if (count(($models = app('statamic.eloquent.blueprints.fieldsets_model')::get() ?? collect())) === 0) {
                 return collect();
             }
 
@@ -32,7 +32,7 @@ class FieldsetRepository extends StacheRepository
 
         return Blink::once("eloquent-fieldset-{$handle}", function() use ($handle) {
 
-            if (($model = app('statamic.eloquent.blueprints.fieldsets-model')::where('handle', $handle)->first()) === null) {
+            if (($model = app('statamic.eloquent.blueprints.fieldsets_model')::where('handle', $handle)->first()) === null) {
                 return null;
             }
 
@@ -54,7 +54,7 @@ class FieldsetRepository extends StacheRepository
 
     public function updateModel($fieldset)
     {
-        $model = app('statamic.eloquent.blueprints.fieldsets-model')::firstOrNew([
+        $model = app('statamic.eloquent.blueprints.fieldsets_model')::firstOrNew([
             'handle' => $fieldset->handle(),
         ]);
 
@@ -66,7 +66,7 @@ class FieldsetRepository extends StacheRepository
 
     public function deleteModel($fieldset)
     {
-        $model = app('statamic.eloquent.blueprints.fieldsets-model')::where('handle', $fieldset->handle())->first();
+        $model = app('statamic.eloquent.blueprints.fieldsets_model')::where('handle', $fieldset->handle())->first();
 
         if ($model) {
             $model->delete();
