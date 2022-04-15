@@ -13,7 +13,7 @@ class Collection extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static)
-            ->title($model->title)
+            ->title($model->title ?? null)
             ->routes($model->settings['routes'] ?? null)
             ->requiresSlugs($model->settings['slugs'] ?? true)
             ->titleFormats($model->settings['title_formats'] ?? null)
@@ -44,12 +44,12 @@ class Collection extends FileEntry
         $class = app('statamic.eloquent.collections.model');
 
         return $class::findOrNew($this->model?->id)->fill([
-            'title' => $this->title,
+            'title' => $this->title ?? '',
             'handle' => $this->handle,
             'settings' => [
                 'routes' => $this->routes,
                 'slugs' => $this->requiresSlugs(),
-                'title_formats' => collect($this->titleFormats())->filter()->values(),
+                'title_formats' => collect($this->titleFormats())->filter(),
                 'mount' => $this->mount,
                 'dated' => $this->dated,
                 'ampable' => $this->ampable,

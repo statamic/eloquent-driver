@@ -8,6 +8,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $shouldFakeVersion = true;
     protected $shouldPreventNavBeingBuilt = true;
+    protected $shouldUseStringEntryIds = false;
 
     protected function setUp(): void
     {
@@ -20,6 +21,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         if ($this->shouldFakeVersion) {
             \Facades\Statamic\Version::shouldReceive('get')->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
+        }
+
+        if ($this->shouldUseStringEntryIds) {
+            $this->loadMigrationsForUUIDEntries();
+        } else {
+            $this->loadMigrationsForIncrementingEntries();
         }
     }
 

@@ -9,12 +9,6 @@ use Statamic\Eloquent\Entries\EntryModel;
 
 class EntryTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->loadMigrationsForIncrementingEntries();
-    }
-
     /** @test */
     public function it_loads_from_entry_model()
     {
@@ -40,13 +34,13 @@ class EntryTest extends TestCase
             'data' => [
                 'foo' => 'bar'
             ],
-            'origin_id' => null,
             'site' => 'en',
             'uri' => '/blog/the-slug',
             'date' => null,
             'collection' => 'blog',
             'published' => null,
             'status' => 'draft',
+            'origin_id' => null,
         ]);
 
         $collection = Collection::make('blog')->title('blog')->routes([
