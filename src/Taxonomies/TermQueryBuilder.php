@@ -61,6 +61,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 return $this;
             }
 
+            if (! is_array($value)) {
+                $value = [$value];
+            }
+
             $this->taxonomies = array_merge($this->taxonomies, $value);
             return $this;
         }
@@ -68,6 +72,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
         if (in_array($column, ['collection', 'collections'])) {
             if (! $value) {
                 return $this;
+            }
+
+            if (! is_array($value)) {
+                $value = [$value];
             }
 
             $this->collections = array_merge($this->collections, $value);
@@ -93,10 +101,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function whereIn($column, $values, $boolean = 'and')
     {
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
-
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $values) {
                 return $this;
