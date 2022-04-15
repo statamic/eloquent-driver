@@ -21,8 +21,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             \Facades\Statamic\Version::shouldReceive('get')->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
         }
-
-        $this->addGqlMacros();
     }
 
     public function tearDown(): void
@@ -74,29 +72,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
-        // $app['config']->set('statamic.stache.stores.taxonomies.directory', __DIR__.'/__fixtures__/content/taxonomies');
-        // $app['config']->set('statamic.stache.stores.terms.directory', __DIR__.'/__fixtures__/content/taxonomies');
-        // $app['config']->set('statamic.stache.stores.collections.directory', __DIR__.'/__fixtures__/content/collections');
-        // $app['config']->set('statamic.stache.stores.entries.directory', __DIR__.'/__fixtures__/content/collections');
-        // $app['config']->set('statamic.stache.stores.navigation.directory', __DIR__.'/__fixtures__/content/navigation');
-        // $app['config']->set('statamic.stache.stores.globals.directory', __DIR__.'/__fixtures__/content/globals');
-        // $app['config']->set('statamic.stache.stores.asset-containers.directory', __DIR__.'/__fixtures__/content/assets');
-        // $app['config']->set('statamic.stache.stores.nav-trees.directory', __DIR__.'/__fixtures__/content/structures/navigation');
-        // $app['config']->set('statamic.stache.stores.collection-trees.directory', __DIR__.'/__fixtures__/content/structures/collections');
-
-        $app['config']->set('statamic.api.enabled', true);
-        $app['config']->set('statamic.graphql.enabled', true);
         $app['config']->set('statamic.editions.pro', true);
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
             'path' => storage_path('framework/cache/outpost-data'),
         ]);
-
-//         $viewPaths = $app['config']->get('view.paths');
-//         $viewPaths[] = __DIR__.'/__fixtures__/views/';
-//
-//         $app['config']->set('view.paths', $viewPaths);
     }
 
     protected function assertEveryItem($items, $callback)
@@ -194,47 +175,5 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->artisan('vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"');
         $this->loadMigrationsFrom('../database/migrations');
         $this->artisan('migrate');
-    }
-
-    private function addGqlMacros()
-    {
-        $testResponseClass = version_compare($this->app->version(), 7, '<')
-            ? \Illuminate\Foundation\Testing\TestResponse::class
-            : \Illuminate\Testing\TestResponse::class;
-
-        $testResponseClass::macro('assertGqlOk', function () {
-            $this->assertOk();
-
-            $json = $this->json();
-
-            if (isset($json['errors'])) {
-                throw new \PHPUnit\Framework\ExpectationFailedException(
-                    'GraphQL response contained errors',
-                    new \SebastianBergmann\Comparator\ComparisonFailure('', '', '', json_encode($json, JSON_PRETTY_PRINT))
-                );
-            }
-
-            return $this;
-        });
-
-        $testResponseClass::macro('assertGqlUnauthorized', function () {
-            $this->assertOk();
-
-            $json = $this->json();
-
-            if (! isset($json['errors'])) {
-                throw new \PHPUnit\Framework\ExpectationFailedException(
-                    'GraphQL response contained no errors',
-                    new \SebastianBergmann\Comparator\ComparisonFailure('', '', json_encode(['errors' => [['message' => 'Unauthorized']]], JSON_PRETTY_PRINT), json_encode($json, JSON_PRETTY_PRINT))
-                );
-            }
-
-            Assert::assertTrue(
-                collect($json['errors'])->map->message->contains('Unauthorized'),
-                'No unauthorized error message in response'
-            );
-
-            return $this;
-        });
     }
 }
