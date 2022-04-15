@@ -269,7 +269,7 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function migrationsPath($filename)
     {
-        $date = date('Y_m_d_His');
+        $date = date('2021_05_16_160811');
 
         return database_path("migrations/{$date}_{$filename}.php");
     }
