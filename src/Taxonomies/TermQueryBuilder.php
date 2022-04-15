@@ -75,7 +75,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $value = Str::after($value, '::');
         }
 
-        return parent::where($column, $operator, $value, $boolean);
+        parent::where($column, $operator, $value, $boolean);
+
+        return $this;
     }
 
     public function whereIn($column, $values, $boolean = 'and')
@@ -107,7 +109,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 ->all();
         }
 
-        return parent::whereIn($column, $values, $boolean);
+        parent::whereIn($column, $values, $boolean);
+
+        return $this;
     }
 
     public function get($columns = ['*'])
