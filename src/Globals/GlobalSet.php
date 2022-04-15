@@ -60,4 +60,9 @@ class GlobalSet extends FileEntry
 
         return $this;
     }
+
+    public function path()
+    {
+        return $this->handle();
+    }
 }

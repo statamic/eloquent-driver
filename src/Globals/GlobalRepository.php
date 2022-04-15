@@ -22,7 +22,12 @@ class GlobalRepository extends StacheRepository
     public function find($handle): ?GlobalSetContract
     {
         return Blink::once("eloquent-globalsets-{$handle}", function() use ($handle) {
-            return app(GlobalSetContract::class)->fromModel(app('statamic.eloquent.global_sets.model')::whereHandle($handle)->firstOrFail());
+            $model = app('statamic.eloquent.global_sets.model')::whereHandle($handle)->first();
+            if (! $model) {
+                return;
+            }
+
+            return app(GlobalSetContract::class)->fromModel($model);
         });
     }
 

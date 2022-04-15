@@ -28,7 +28,7 @@ class AssetContainer extends FileEntry
         return (new static)
             ->title($model->title)
             ->handle($model->handle)
-            ->disk($model->disk)
+            ->disk($model->disk ?? null)
             ->allowUploads($model->settings['allow_uploads'] ?? null)
             ->allowDownloading($model->settings['allow_downloading'] ?? null)
             ->allowMoving($model->settings['allow_moving'] ?? null)
@@ -45,7 +45,7 @@ class AssetContainer extends FileEntry
         return $class::findOrNew($this->model?->id)->fill([
             'title' => $this->title(),
             'handle' => $this->handle(),
-            'disk' => $this->diskHandle(),
+            'disk' => $this->diskHandle() ?? '',
             'settings' => [
                 'allow_uploads' => $this->allowUploads(),
                 'allow_downloading' => $this->allowDownloading(),

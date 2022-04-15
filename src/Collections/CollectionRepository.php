@@ -55,13 +55,19 @@ class CollectionRepository extends StacheRepository
         $model->save();
 
         Blink::forget("eloquent-collection-{$model->handle}");
+        Blink::forget("eloquent-collections-all");
 
         $entry->model($model->fresh());
     }
 
     public function delete($entry)
     {
-        $entry->model()->delete();
+        $model = $entry->model();
+        $model->delete();
+
+        Blink::forget("eloquent-collection-{$model->handle}");
+        Blink::forget("eloquent-collections-all");
+
     }
 
     protected function transform($items, $columns = [])
