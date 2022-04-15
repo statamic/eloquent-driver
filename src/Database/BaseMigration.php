@@ -13,7 +13,7 @@ class BaseMigration extends Migration
      */
     public function getConnection()
     {
-        if ($connection = config('statamic.eloquent-driver.connection', false)) {
+        if ($connection = config('statamic.eloquent_driver.connection', false)) {
             return $connection;
         }
 
