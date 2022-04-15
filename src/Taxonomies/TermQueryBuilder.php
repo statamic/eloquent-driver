@@ -52,6 +52,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
             return $this;
         }
 
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value, $operator, func_num_args() === 2
+        );
+
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $value) {
                 return $this;
@@ -70,8 +74,15 @@ class TermQueryBuilder extends EloquentQueryBuilder
             return $this;
         }
 
-        if (in_array($column, ['id'])) {
+        if (in_array($column, ['id', 'slug'])) {
             $column = 'slug';
+
+            $taxonomy = Str::before($value.'', '::');
+
+            if ($taxonomy) {
+                $this->taxonomies[] = $taxonomy;
+            }
+
             $value = Str::after($value, '::');
         }
 
@@ -82,6 +93,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function whereIn($column, $values, $boolean = 'and')
     {
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value, $operator, func_num_args() === 2
+        );
+
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $values) {
                 return $this;
@@ -100,7 +115,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             return $this;
         }
 
-        if (in_array($column, ['id'])) {
+        if (in_array($column, ['id', 'slug'])) {
             $column = 'slug';
             $values = collect($values)
                 ->map(function ($value) {
