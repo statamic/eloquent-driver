@@ -3,7 +3,7 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Eloquent\Taxonomies\TaxonomyModel as Model;
-use Statamic\Taxonomies\Taxonomy  as FileEntry;
+use Statamic\Taxonomies\Taxonomy as FileEntry;
 
 class Taxonomy extends FileEntry
 {
