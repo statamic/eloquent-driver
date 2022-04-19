@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Support\Carbon;
+use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
 
@@ -35,7 +36,7 @@ class Entry extends FileEntry
         }
 
         return $class::findOrNew($this->id())->fill([
-            'origin_id' => $this->originId(),
+            'origin_id' => $this->origin()?->id(),
             'site' => $this->locale(),
             'slug' => $this->slug(),
             'uri' => $this->uri(),
@@ -96,6 +97,14 @@ class Entry extends FileEntry
         }
 
         if ($this->origin) {
+
+            if (! $this->origin instanceof EntryContract) {
+                $class = app('statamic.eloquent.entries.model');
+                if ($model = $class::find($this->origin)) {
+                    $this->origin = self::fromModel($model);
+                }
+            }
+
             return $this->origin;
         }
 
@@ -104,15 +113,5 @@ class Entry extends FileEntry
         }
 
         return self::fromModel($this->model->origin_id);
-    }
-
-    public function originId()
-    {
-        return optional($this->origin)->id() ?? optional($this->model)->origin_id;
-    }
-
-    public function hasOrigin()
-    {
-        return $this->originId() !== null;
     }
 }
