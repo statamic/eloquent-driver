@@ -96,10 +96,11 @@ class Entry extends FileEntry
             return $this;
         }
 
+        $class = app('statamic.eloquent.entries.model');
+
         if ($this->origin) {
 
             if (! $this->origin instanceof EntryContract) {
-                $class = app('statamic.eloquent.entries.model');
                 if ($model = $class::find($this->origin)) {
                     $this->origin = self::fromModel($model);
                 }
@@ -112,6 +113,10 @@ class Entry extends FileEntry
             return;
         }
 
-        return self::fromModel($this->model->origin_id);
+        if ($model = $class::find($this->model->origin_id)) {
+            $this->origin = self::fromModel($model);
+        }
+
+        return $this->origin ?? null;
     }
 }
