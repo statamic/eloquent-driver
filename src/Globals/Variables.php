@@ -27,4 +27,9 @@ class Variables extends FileEntry
             'origin' => $this->origin,
         ]);
     }
+
+    protected function getOriginByString($origin)
+    {
+        return $this->globalSet()->in($origin);
+    }
 }
