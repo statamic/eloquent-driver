@@ -66,7 +66,7 @@ class TaxonomyRepository extends StacheRepository
         // then look for whats after it to get our handle.
         $uri = Str::after(Str::ensureLeft($uri, '/'), '/');
 
-        return $this->findByHandle($uri)->collection($collection);
+        return ($taxonomy = $this->findByHandle($uri)) ? $taxonomy->collection($collection) : null;
     }
 
     public function save($entry)
