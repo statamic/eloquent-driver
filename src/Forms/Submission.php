@@ -64,6 +64,11 @@ class Submission extends FileEntry
 
     public function delete()
     {
+        if (!$this->model) {
+            $class = app('statamic.eloquent.forms.submissions_model');
+            $this->model = $class::findOrNew($this->id);    
+        }
+        
         $this->model->delete();
 
         SubmissionDeleted::dispatch($this);
