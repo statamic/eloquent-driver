@@ -30,16 +30,9 @@ class FieldsetRepository extends StacheRepository
     {
         $handle = str_replace('/', '.', $handle);
 
-        return Blink::once("eloquent-fieldset-{$handle}", function() use ($handle) {
-
-            if (($model = app('statamic.eloquent.blueprints.fieldsets_model')::where('handle', $handle)->first()) === null) {
-                return null;
-            }
-
-            return (new Fieldset)
-                ->setHandle($handle)
-                ->setContents($model->data);
-        });
+        return $this->all()->filter(function ($fieldset) use ($handle) {
+            return $fieldset->handle() == $handle;
+        })->first();
     }
 
     public function save(Fieldset $fieldset)
