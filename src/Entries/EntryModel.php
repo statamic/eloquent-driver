@@ -22,6 +22,11 @@ class EntryModel extends BaseModel
         return $this->belongsTo(static::class);
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(static::class, 'data->parent');
+    }
+
     public function getAttribute($key)
     {
         // Because the import script was importing `updated_at` into the
