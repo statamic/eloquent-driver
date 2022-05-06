@@ -17,6 +17,11 @@ class EntryModel extends BaseModel
         'published' => 'boolean',
     ];
 
+    public function author()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'data->author');
+    }
+
     public function origin()
     {
         return $this->belongsTo(static::class);
