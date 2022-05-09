@@ -83,8 +83,6 @@ class AssetContainer extends FileEntry
 
     public function delete()
     {
-        $this->submissions()->each->delete();
-
         $this->model()->delete();
 
         AssetContainerDeleted::dispatch($this);
