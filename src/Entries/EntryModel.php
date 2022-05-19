@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Entries;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Statamic\Eloquent\Database\BaseModel;
 use Illuminate\Support\Arr;
 
-class EntryModel extends Eloquent
+class EntryModel extends BaseModel
 {
     protected $guarded = [];
 

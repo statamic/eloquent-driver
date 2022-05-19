@@ -19,7 +19,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     protected function transform($items, $columns = [])
     {
         return EntryCollection::make($items)->map(function ($model) {
-            return Entry::fromModel($model);
+            return app('statamic.eloquent.entries.entry')::fromModel($model);
         });
     }
 
@@ -43,11 +43,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return parent::get($columns);
     }
 
-    public function paginate($perPage = null, $columns = ['*'])
+    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = NULL)
     {
         $this->addTaxonomyWheres();
 
-        return parent::paginate($perPage, $columns);
+        return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
     public function count()

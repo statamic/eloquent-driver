@@ -13,7 +13,7 @@ class CreateEntriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('entries', function (Blueprint $table) {
+        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'entries', function (Blueprint $table) {
             $table->increments('id');
             $table->string('site');
             $table->unsignedInteger('origin_id')->nullable();
@@ -35,6 +35,6 @@ class CreateEntriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('entries');
+        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'entries');
     }
 }
