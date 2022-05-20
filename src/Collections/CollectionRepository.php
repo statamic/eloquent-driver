@@ -1,7 +1,8 @@
 <?php
 
-namespace Statamic\Eloquent\Entries;
+namespace Statamic\Eloquent\Collections;
 
+use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository
@@ -15,7 +16,14 @@ class CollectionRepository extends StacheRepository
         }
 
         $query->get()->each(function ($entry) {
-            EntryModel::find($entry->id())->update(['uri' => $entry->uri()]);
+            app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
         });
+    }
+
+    public static function bindings(): array
+    {
+        return [
+            CollectionContract::class => Collection::class,
+        ];
     }
 }

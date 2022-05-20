@@ -9,5 +9,16 @@ return [
     'taxonomies' => [
         'term_model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
+    'collections' => [
+        'driver' => 'eloquent',
+        'tree' => \Statamic\Eloquent\Structures\CollectionTree::class,
+        'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
+    ],
+    'navigations' => [
+        'driver' => 'eloquent',
+        'model' =>  \Statamic\Eloquent\Structures\NavModel::class,
+        'tree' => \Statamic\Eloquent\Structures\NavTree::class,
+        'tree_model' =>  \Statamic\Eloquent\Structures\TreeModel::class,
+    ],
 
 ];
