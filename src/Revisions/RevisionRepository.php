@@ -38,7 +38,7 @@ class RevisionRepository extends StacheRepository
     {
         if ($copy instanceof WorkingCopy) {
             app('statamic.eloquent.revisions.model')::where('key', $copy->key())
-                ->update(['action' => 'revision']);
+                ->delete();
         }
 
         $revision = (new Revision())
