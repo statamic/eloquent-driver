@@ -3,8 +3,9 @@
 namespace Statamic\Eloquent;
 
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
-use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
+use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
@@ -13,11 +14,12 @@ use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
-use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
-use Statamic\Eloquent\Taxonomies\TermRepository;
+use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
+use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
+use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -46,17 +48,14 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations/create_entries_table.php' => $this->migrationsPath('create_entries_table'),
             __DIR__.'/../database/migrations/create_taxonomy_terms_table.php' => $this->migrationsPath('create_taxonomy_terms_table'),
-            __DIR__.'/../database/migrations/create_navigation_trees_table.php' => $this->migrationsPath('create_navigation_trees_table'),
+            __DIR__.'/../database/migrations/create_trees_table.php' => $this->migrationsPath('create_trees_table'),
             __DIR__.'/../database/migrations/create_navigations_table.php' => $this->migrationsPath('create_navigations_table'),
+            __DIR__.'/../database/migrations/create_revisions_table.php' => $this->migrationsPath('create_revisions_table'),
         ], 'statamic-eloquent-tables');
 
         // $this->publishes([
         //     __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php' => $this->migrationsPath('create_entries_table_with_string_ids'),
         // ], 'statamic-eloquent-entries-table-with-string-ids');
-
-        $this->publishes([
-            __DIR__.'/../database/migrations/create_taxonomy_terms_table.php' => $this->migrationsPath('create_taxonomy_terms_table'),
-        ], 'statamic-eloquent-taxonomy-terms-table');
 
         $this->commands([ImportEntries::class]);
     }
@@ -67,6 +66,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerCollections();
         $this->registerCollectionTrees();
         $this->registerTaxonomyTerms();
+        $this->registerRevisions();
         $this->registerStructures();
     }
 
@@ -107,8 +107,6 @@ class ServiceProvider extends AddonServiceProvider
     private function registerTaxonomyTerms() {
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 
-
-
         $this->app->bind(TermQueryBuilder::class, function ($app) {
             return new TermQueryBuilder(
                 $app['statamic.eloquent.taxonomies.term_model']::query()
@@ -122,14 +120,17 @@ class ServiceProvider extends AddonServiceProvider
 
     }
 
+    private function registerRevisions()
+    {
+        Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);
 
+        $this->app->bind('statamic.eloquent.revisions.model', function () {
+            return config('statamic.eloquent-driver.revisions.model');
+        });
+    }
 
     private function registerStructures()
     {
-        if (config('statamic.eloquent-driver.navigations.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
 
         $this->app->bind('statamic.eloquent.navigations.model', function () {
