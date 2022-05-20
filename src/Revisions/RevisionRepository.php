@@ -37,7 +37,10 @@ class RevisionRepository extends StacheRepository
     public function save(RevisionContract $copy)
     {
         if ($copy instanceof WorkingCopy) {
-            app('statamic.eloquent.revisions.model')::where('key', $copy->key())
+            app('statamic.eloquent.revisions.model')::where([
+                    'key' => $copy->key(),
+                    'action' => 'working',
+                ])
                 ->delete();
         }
 
