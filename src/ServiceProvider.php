@@ -5,6 +5,7 @@ namespace Statamic\Eloquent;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
@@ -14,6 +15,7 @@ use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
+use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -51,6 +53,7 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_trees_table.php' => $this->migrationsPath('create_trees_table'),
             __DIR__.'/../database/migrations/create_navigations_table.php' => $this->migrationsPath('create_navigations_table'),
             __DIR__.'/../database/migrations/create_revisions_table.php' => $this->migrationsPath('create_revisions_table'),
+            __DIR__.'/../database/migrations/create_globals_table.php' => $this->migrationsPath('create_globals_table'),
         ], 'statamic-eloquent-tables');
 
         // $this->publishes([
@@ -66,6 +69,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerCollections();
         $this->registerCollectionTrees();
         $this->registerTaxonomyTerms();
+        $this->registerGlobals();
         $this->registerRevisions();
         $this->registerStructures();
     }
@@ -120,6 +124,23 @@ class ServiceProvider extends AddonServiceProvider
         });
 
 
+    }
+
+    private function registerGlobals()
+    {
+        if (config('statamic.eloquent-driver.global_sets.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+
+        $this->app->bind('statamic.eloquent.global_sets.model', function () {
+            return config('statamic.eloquent-driver.global_sets.model');
+        });
+
+        $this->app->bind('statamic.eloquent.global_sets.variables_model', function () {
+            return config('statamic.eloquent-driver.global_sets.variables_model');
+        });
     }
 
     private function registerRevisions()
