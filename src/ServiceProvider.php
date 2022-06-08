@@ -145,6 +145,10 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerRevisions()
     {
+        if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
+            return;
+        }
+
         Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);
 
         $this->app->bind('statamic.eloquent.revisions.model', function () {
