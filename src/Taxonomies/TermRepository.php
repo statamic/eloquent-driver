@@ -3,11 +3,11 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Stache\Repositories\TermRepository as StacheRepository;
+use Statamic\Taxonomies\LocalizedTerm;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Taxonomy;
-use Statamic\Stache\Repositories\TermRepository as StacheRepository;
 use Statamic\Support\Str;
-use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
 {
@@ -66,14 +66,13 @@ class TermRepository extends StacheRepository
         $term = $this->query()
             ->where('slug', $slug)
             ->where('taxonomy', $taxonomy)
-            ->where('site', $site)
             ->first();
 
         if (! $term) {
             return null;
         }
 
-        return $term->collection($collection);
+        return $term->in($site)?->collection($collection);
     }
 
     private function findTaxonomyHandleByUri($uri)
