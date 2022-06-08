@@ -44,6 +44,10 @@ class Term extends FileEntry
 
         $data = $this->data();
 
+        if (is_null($data['template'])) {
+            unset($data['template']);
+        }
+
         if ($this->blueprint && $this->taxonomy()->termBlueprints()->count() > 1) {
             $data['blueprint'] = $this->blueprint;
         }
