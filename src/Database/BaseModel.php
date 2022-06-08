@@ -10,10 +10,10 @@ class BaseModel extends Eloquent
     {
         parent::__construct($attributes);
 
-        $this->setTable(config('statamic.eloquent-driver.table_prefix', '').$this->getTable());
+        $this->setTable(config('statamic.eloquent_driver.table_prefix', '').$this->getTable());
 
-        // if ($connection = config('statamic.eloquent_driver.connection', false)) {
-        //     $this->setConnection($connection);
-        // }
+        if ($connection = config('statamic.eloquent_driver.connection', false)) {
+            $this->setConnection($connection);
+        }
     }
 }

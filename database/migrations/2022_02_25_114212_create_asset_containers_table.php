@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateGlobalsTable extends Migration
+class CreateAssetContainersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateGlobalsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'global_sets', function (Blueprint $table) {
+        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'asset_containers', function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->string('title');
-            $table->json('localizations');
+            $table->string('disk');
+            $table->json('settings')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateGlobalsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'global_sets');
+        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'asset_containers');
     }
 }

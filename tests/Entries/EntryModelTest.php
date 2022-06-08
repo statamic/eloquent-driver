@@ -2,7 +2,7 @@
 
 namespace Tests\Entries;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use Statamic\Eloquent\Entries\EntryModel;
 
 class EntryModelTest extends TestCase

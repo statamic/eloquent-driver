@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
 
 class CreateEntriesTable extends Migration
 {
@@ -19,7 +19,7 @@ class CreateEntriesTable extends Migration
             $table->unsignedInteger('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
-            $table->string('slug');
+            $table->string('slug')->nullable();
             $table->string('uri')->nullable();
             $table->string('date')->nullable();
             $table->string('collection');
