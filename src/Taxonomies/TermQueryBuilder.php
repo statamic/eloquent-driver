@@ -164,7 +164,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $items->each->collection(Collection::findByHandle($this->collections[0]));
         }
 
-        return $items;
+        return $items->map(function($term) {
+            if ($this->site) {
+                return $term->in($this->site);
+            }
+
+            return $term->inDefaultLocale();
+        });
     }
 
     public function prepareValueAndOperator($value, $operator, $useDefault = false)
