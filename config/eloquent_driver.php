@@ -57,6 +57,10 @@ return [
     'taxonomies' => [
         'driver' => 'eloquent',
         'model' =>  \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
-        'term_model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
+    ],
+
+    'terms' => [
+        'driver' => 'eloquent',
+        'model' =>  \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
 ];

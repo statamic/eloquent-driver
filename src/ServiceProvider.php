@@ -82,6 +82,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerRevisions();
         $this->registerStructures();
         $this->registerTaxonomies();
+        $this->registerTerms();
     }
 
     private function registerAssets()
@@ -250,20 +251,28 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
-        Statamic::repository(TermRepositoryContract::class, TermRepository::class);
-
-        $this->app->bind(TermQueryBuilder::class, function ($app) {
-            return new TermQueryBuilder(
-                $app['statamic.eloquent.taxonomies.term_model']::query()
-            );
-        });
-
-        $this->app->bind('statamic.eloquent.taxonomies.term_model', function () {
-            return config('statamic.eloquent_driver.taxonomies.term_model');
-        });
 
         $this->app->bind('statamic.eloquent.taxonomies.model', function () {
             return config('statamic.eloquent_driver.taxonomies.model');
+        });
+    }
+
+    public function registerTerms()
+    {
+        if (config('statamic.eloquent_driver.terms.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+
+        $this->app->bind('statamic.eloquent.terms.model', function () {
+            return config('statamic.eloquent_driver.terms.model');
+        });
+
+        $this->app->bind(TermQueryBuilder::class, function ($app) {
+            return new TermQueryBuilder(
+                $app['statamic.eloquent.terms.model']::query()
+            );
         });
     }
 
