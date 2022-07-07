@@ -27,5 +27,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.4"
-    }
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    },
 }
