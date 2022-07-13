@@ -4,7 +4,6 @@ namespace Statamic\Eloquent\Collections;
 
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
@@ -25,21 +24,19 @@ class CollectionRepository extends StacheRepository
 
     public function all(): IlluminateCollection
     {
-        return Blink::once("eloquent-collections-all", function() {
+        return Blink::once('eloquent-collections-all', function () {
             return $this->transform(app('statamic.eloquent.collections.model')::all());
         });
     }
 
     public function find($handle): ?CollectionContract
     {
-        return Blink::once("eloquent-collection-{$handle}", function() use ($handle) {
-
+        return Blink::once("eloquent-collection-{$handle}", function () use ($handle) {
             $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
 
             return $model
                 ? app(CollectionContract::class)->fromModel($model)
                 : null;
-
         });
     }
 
@@ -55,7 +52,7 @@ class CollectionRepository extends StacheRepository
         $model->save();
 
         Blink::forget("eloquent-collection-{$model->handle}");
-        Blink::forget("eloquent-collections-all");
+        Blink::forget('eloquent-collections-all');
 
         $entry->model($model->fresh());
     }
@@ -66,14 +63,13 @@ class CollectionRepository extends StacheRepository
         $model->delete();
 
         Blink::forget("eloquent-collection-{$model->handle}");
-        Blink::forget("eloquent-collections-all");
-
+        Blink::forget('eloquent-collections-all');
     }
 
     protected function transform($items, $columns = [])
     {
         return IlluminateCollection::make($items)->map(function ($model) {
-            return Blink::once("eloquent-collection-{$model->handle}", function() use ($model) {
+            return Blink::once("eloquent-collection-{$model->handle}", function () use ($model) {
                 return app(CollectionContract::class)::fromModel($model);
             });
         });

@@ -4,8 +4,8 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Eloquent\Globals\GlobalSet;
 use Statamic\Stache\Repositories\GlobalRepository;
 use Statamic\Statamic;

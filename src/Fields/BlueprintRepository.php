@@ -10,14 +10,16 @@ use Statamic\Support\Arr;
 class BlueprintRepository extends StacheRepository
 {
     private const BLINK_FOUND = 'blueprints.found';
+
     private const BLINK_FROM_FILE = 'blueprints.from-file';
+
     private const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
 
     public function find($blueprint): ?Blueprint
     {
         return Blink::store(self::BLINK_FOUND)->once($blueprint, function () use ($blueprint) {
             [$namespace, $handle] = $this->getNamespaceAndHandle($blueprint);
-            if (!$blueprint) {
+            if (! $blueprint) {
                 return null;
             }
 
@@ -91,7 +93,7 @@ class BlueprintRepository extends StacheRepository
 
     private function makeBlueprintFromModel($model)
     {
-        return Blink::store(self::BLINK_FROM_FILE)->once('database:blueprints:' . $model->id, function () use ($model) {
+        return Blink::store(self::BLINK_FROM_FILE)->once('database:blueprints:'.$model->id, function () use ($model) {
             return (new Blueprint)
                 ->setHidden(Arr::get($model->data, 'hide'))
                 ->setOrder(Arr::get($model->data, 'order'))
@@ -138,8 +140,9 @@ class BlueprintRepository extends StacheRepository
     {
         $count = 0;
         $contents['sections'] = collect($contents['sections'] ?? [])
-            ->map(function($section) use (&$count) {
+            ->map(function ($section) use (&$count) {
                 $section['__count'] = $count++;
+
                 return $section;
             })
             ->toArray();
@@ -151,8 +154,9 @@ class BlueprintRepository extends StacheRepository
     {
         $contents['sections'] = collect($contents['sections'] ?? [])
             ->sortBy('__count')
-            ->map(function($section) {
+            ->map(function ($section) {
                 unset($section['__count']);
+
                 return $section;
             })
             ->toArray();

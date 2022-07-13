@@ -66,7 +66,6 @@ class ImportBlueprints extends Command
         $bar = $this->output->createProgressBar($files->count());
 
         $files->each(function ($path) use ($bar, $directory) {
-
             [$namespace, $handle] = $this->getNamespaceAndHandle(
                 Str::after(Str::before($path, '.yaml'), $directory.'/')
             );
@@ -107,7 +106,6 @@ class ImportBlueprints extends Command
         $bar = $this->output->createProgressBar($files->count());
 
         $files->each(function ($file) use ($bar) {
-
             $basename = str_after($file, str_finish($this->directory, '/'));
             $handle = str_before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);

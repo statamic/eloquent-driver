@@ -10,6 +10,7 @@ use Statamic\Forms\Submission as FileEntry;
 class Submission extends FileEntry
 {
     protected $model;
+
     private $id;
 
     public static function fromModel(Model $model)

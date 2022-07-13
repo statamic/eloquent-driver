@@ -6,12 +6,12 @@ use BadMethodCallException;
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Contracts\Support\Arrayable;
 use Mockery;
+use Statamic\Eloquent\Globals\Variables;
 use Statamic\Facades;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\GlobalSet;
 use Statamic\Fields\Fieldtype;
 use Statamic\Fields\Value;
-use Statamic\Eloquent\Globals\Variables;
 use Statamic\Support\Arr;
 use Tests\TestCase;
 
@@ -333,6 +333,7 @@ EOT;
         $relationshipFieldtype = new class extends Fieldtype
         {
             protected static $handle = 'relationship';
+
             protected $relationship = true;
 
             public function augment($values)

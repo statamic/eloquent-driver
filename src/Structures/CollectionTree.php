@@ -4,7 +4,6 @@ namespace Statamic\Eloquent\Structures;
 
 use Statamic\Eloquent\Structures\TreeModel as Model;
 use Statamic\Structures\CollectionTree as FileEntry;
-use Statamic\Structures\CollectionTreeDiff;
 
 class CollectionTree extends FileEntry
 {

@@ -15,7 +15,7 @@ class Asset extends FileAsset
             return $this->metaValue($key);
         }
 
-        if (!config('statamic.assets.cache_meta')) {
+        if (! config('statamic.assets.cache_meta')) {
             return $this->generateMeta();
         }
 
@@ -24,7 +24,7 @@ class Asset extends FileAsset
         }
 
         return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
-            if ($model = app('statamic.eloquent.assets.model')::where('handle', $this->container()->handle() . '::' . $this->metaPath())->first()) {
+            if ($model = app('statamic.eloquent.assets.model')::where('handle', $this->container()->handle().'::'.$this->metaPath())->first()) {
                 return $model->data;
             }
 
@@ -36,11 +36,11 @@ class Asset extends FileAsset
 
     public function exists()
     {
-        $files = Blink::once($this->container()->handle() . '::files', function () {
+        $files = Blink::once($this->container()->handle().'::files', function () {
             return $this->container()->files();
         });
 
-        if (!$path = $this->path()) {
+        if (! $path = $this->path()) {
             return false;
         }
 
@@ -51,7 +51,7 @@ class Asset extends FileAsset
     {
         $value = Arr::get($this->meta(), $key);
 
-        if (!is_null($value)) {
+        if (! is_null($value)) {
             return $value;
         }
 
@@ -67,7 +67,7 @@ class Asset extends FileAsset
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'handle' => $this->container()->handle() . '::' . $this->metaPath()
+            'handle' => $this->container()->handle().'::'.$this->metaPath(),
         ]);
 
         $model->data = $meta;

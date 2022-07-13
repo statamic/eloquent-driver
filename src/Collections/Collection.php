@@ -68,7 +68,7 @@ class Collection extends FileEntry
                 'past_date_behavior' => $this->pastDateBehavior(),
                 'future_date_behavior' => $this->futureDateBehavior(),
                 'preview_targets' => $this->previewTargets(),
-            ]
+            ],
         ]);
     }
 
