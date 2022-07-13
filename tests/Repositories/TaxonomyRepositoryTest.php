@@ -2,6 +2,7 @@
 
 namespace Tests\Stache\Repositories;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
@@ -13,6 +14,8 @@ use Tests\TestCase;
 
 class TaxonomyRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();

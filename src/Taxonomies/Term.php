@@ -44,7 +44,7 @@ class Term extends FileEntry
 
         $data = $this->data();
 
-        if (is_null($data['template'])) {
+        if (! isset($data['template'])) {
             unset($data['template']);
         }
 

@@ -2,15 +2,18 @@
 
 namespace Tests\Repositories;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Assets\AssetContainer;
-use Statamic\Facades;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
+use Statamic\Facades;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
 
 class AssetContainerRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();

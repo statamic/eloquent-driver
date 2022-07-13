@@ -12,7 +12,9 @@ use Statamic\Taxonomies\TermCollection;
 class TermQueryBuilder extends EloquentQueryBuilder
 {
     protected $collections = [];
+
     protected $site = null;
+
     protected $taxonomies = [];
 
     protected $columns = [
@@ -22,11 +24,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected function transform($items, $columns = [])
     {
         $site = $this->site;
-        if(!$site) {
+        if (! $site) {
             $site = Site::default()->handle();
         }
 
-        return TermCollection::make($items)->map(function ($model) use($site) {
+        return TermCollection::make($items)->map(function ($model) use ($site) {
             return app(TermContract::class)::fromModel($model)->in($site);
         });
     }
@@ -52,9 +54,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
             return $this;
         }
 
-        [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
 
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $value) {
@@ -66,6 +68,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             }
 
             $this->taxonomies = array_merge($this->taxonomies, $value);
+
             return $this;
         }
 
@@ -79,6 +82,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             }
 
             $this->collections = array_merge($this->collections, $value);
+
             return $this;
         }
 
@@ -107,6 +111,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             }
 
             $this->taxonomies = array_merge($this->taxonomies, collect($values)->all());
+
             return $this;
         }
 
@@ -116,6 +121,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             }
 
             $this->collections = array_merge($this->collections, collect($values)->all());
+
             return $this;
         }
 
@@ -164,23 +170,12 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $items->each->collection(Collection::findByHandle($this->collections[0]));
         }
 
-        return $items->map(function($term) {
+        return $items->map(function ($term) {
             if ($this->site) {
                 return $term->in($this->site);
             }
 
             return $term->inDefaultLocale();
         });
-    }
-
-    public function prepareValueAndOperator($value, $operator, $useDefault = false)
-    {
-        if ($useDefault) {
-            return [$operator, '='];
-        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
-            throw new InvalidArgumentException('Illegal operator and value combination.');
-        }
-
-        return [$value, $operator];
     }
 }

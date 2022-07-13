@@ -2,6 +2,7 @@
 
 namespace Tests\Repositories;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Structures\Structure;
 use Statamic\Eloquent\Structures\Nav;
@@ -11,6 +12,8 @@ use Tests\TestCase;
 
 class NavigationRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();

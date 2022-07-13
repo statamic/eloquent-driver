@@ -43,7 +43,7 @@ class AssetContainerRepository extends StacheRepository
 
     public function save(AssetContainerContract $container)
     {
-        $container->toModel()->save();
+        $container->save();
 
         Blink::forget("eloquent-assetcontainers-{$container->handle()}");
     }

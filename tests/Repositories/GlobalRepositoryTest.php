@@ -2,16 +2,19 @@
 
 namespace Tests\Repositories;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Contracts\Globals\GlobalSet;
-use Statamic\Facades\GlobalSet as GlobalSetAPI;
-use Statamic\Globals\GlobalCollection;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\Variables;
+use Statamic\Facades\GlobalSet as GlobalSetAPI;
+use Statamic\Globals\GlobalCollection;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
 
 class GlobalRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();
