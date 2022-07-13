@@ -2,6 +2,7 @@
 
 namespace Tests\Data\Assets;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\AssetContainer;
@@ -10,6 +11,8 @@ use Tests\TestCase;
 
 class AssetQueryBuilderTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();

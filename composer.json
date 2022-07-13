@@ -30,5 +30,8 @@
         "doctrine/dbal": "^3.3",
         "orchestra/testbench": "^6.7.0 || ^7.0",
         "phpunit/phpunit": "^9.4"
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

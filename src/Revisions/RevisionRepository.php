@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Revisions;
 
-use Illuminate\Support\Collection;
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Revisions\RevisionRepository as StacheRepository;
 use Statamic\Revisions\WorkingCopy;
@@ -38,10 +37,9 @@ class RevisionRepository extends StacheRepository
     {
         if ($copy instanceof WorkingCopy) {
             app('statamic.eloquent.revisions.model')::where([
-                    'key' => $copy->key(),
-                    'action' => 'working',
-                ])
-                ->delete();
+                'key' => $copy->key(),
+                'action' => 'working',
+            ])->delete();
         }
 
         $revision = (new Revision())
@@ -54,6 +52,7 @@ class RevisionRepository extends StacheRepository
     {
         if ($revision instanceof WorkingCopy) {
             $this->findWorkingCopyByKey($revision->key())?->delete();
+
             return;
         }
 
@@ -62,8 +61,7 @@ class RevisionRepository extends StacheRepository
 
     protected function makeRevisionFromFile($key, $model)
     {
-        return (new Revision)
-            ->fromModel($model);
+        return (new Revision)->fromModel($model);
     }
 
     public static function bindings(): array

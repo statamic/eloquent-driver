@@ -3,6 +3,7 @@
 namespace Tests\Data\Taxonomies;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Site;
@@ -14,6 +15,8 @@ use Tests\TestCase;
 
 class TermQueryBuilderTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function it_gets_terms()
     {
@@ -282,13 +285,13 @@ class TermQueryBuilderTest extends TestCase
 
         $found = Term::query()->where('id', 'tags::tag-2')->first();
         $this->assertNotNull($found);
-        $this->assertNotSame($found, $substitute);
+        $this->assertNotEquals($found, $substitute);
 
         Term::substitute($substitute);
 
         $found = Term::query()->where('id', 'tags::tag-2')->first();
         $this->assertNotNull($found);
-        $this->assertSame($found, $substitute);
+        $this->assertEquals($found, $substitute);
     }
 
     /** @test */
@@ -303,7 +306,7 @@ class TermQueryBuilderTest extends TestCase
 
         $found = Term::findByUri('/tags/tag-2');
         $this->assertNotNull($found);
-        $this->assertNotSame($found, $substitute);
+        $this->assertNotEquals($found, $substitute);
 
         $this->assertNull(Term::findByUri('/tags/replaced-tag-2'));
 
@@ -311,7 +314,7 @@ class TermQueryBuilderTest extends TestCase
 
         $found = Term::findByUri('/tags/replaced-tag-2');
         $this->assertNotNull($found);
-        $this->assertSame($found, $substitute);
+        $this->assertEquals($found, $substitute);
     }
 
     /** @test */
@@ -381,12 +384,7 @@ class TermQueryBuilderTest extends TestCase
     {
         $this->createWhereDateTestTerms();
 
-        $entries = Term::query()->whereDate('test_date', '2021-11-15')->get('');
-
-        $this->assertCount(2, $entries);
-        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
-
-        $entries = Term::query()->whereDate('test_date', 1637000264)->get();
+        $entries = Term::query()->whereDate('test_date', '2021-11-15')->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
@@ -450,12 +448,12 @@ class TermQueryBuilderTest extends TestCase
     {
         $this->createWhereDateTestTerms();
 
-        $entries = Term::query()->whereTime('test_date', '09:00')->get();
+        $entries = Term::query()->whereTime('test_date', '09:00:00')->get();
 
         $this->assertCount(1, $entries);
         $this->assertEquals(['Post 2'], $entries->map->title->all());
 
-        $entries = Term::query()->whereTime('test_date', '>', '09:00')->get();
+        $entries = Term::query()->whereTime('test_date', '>', '09:00:00')->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 1', 'Post 4'], $entries->map->title->all());
@@ -477,6 +475,10 @@ class TermQueryBuilderTest extends TestCase
     /** @test **/
     public function terms_are_found_using_where_json_contains()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
@@ -498,6 +500,10 @@ class TermQueryBuilderTest extends TestCase
     /** @test **/
     public function terms_are_found_using_where_json_doesnt_contain()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
@@ -519,6 +525,10 @@ class TermQueryBuilderTest extends TestCase
     /** @test **/
     public function terms_are_found_using_or_where_json_contains()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
@@ -535,6 +545,10 @@ class TermQueryBuilderTest extends TestCase
     /** @test **/
     public function terms_are_found_using_or_where_json_doesnt_contain()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
@@ -545,7 +559,7 @@ class TermQueryBuilderTest extends TestCase
         $entries = Term::query()->whereJsonContains('test_taxonomy', ['taxonomy-1'])->orWhereJsonDoesntContain('test_taxonomy', ['taxonomy-5'])->get();
 
         $this->assertCount(4, $entries);
-        $this->assertEquals(['1', '3', '2', '4'], $entries->map->slug()->all());
+        $this->assertEquals(['1', '2', '3', '4'], $entries->map->slug()->all());
     }
 
     /** @test **/

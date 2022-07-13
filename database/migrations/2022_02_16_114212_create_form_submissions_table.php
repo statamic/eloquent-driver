@@ -13,9 +13,9 @@ class CreateFormSubmissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'form_submissions', function (Blueprint $table) {
+        Schema::create($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained(config('statamic.eloquent-driver.table_prefix', '').'forms');
+            $table->foreignId('form_id')->constrained($this->prefix('forms'));
             $table->json('data')->nullable();
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ class CreateFormSubmissionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'form_submissions');
+        Schema::dropIfExists($this->prefix('form_submissions'));
     }
 }

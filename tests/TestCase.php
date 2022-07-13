@@ -7,7 +7,9 @@ use PHPUnit\Framework\Assert;
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $shouldFakeVersion = true;
+
     protected $shouldPreventNavBeingBuilt = true;
+
     protected $shouldUseStringEntryIds = false;
 
     protected function setUp(): void

@@ -3,7 +3,6 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
-use Statamic\Eloquent\Database\Seeders\DefaultBlueprintSeeder;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
 class CreateBlueprintsTable extends Migration
@@ -15,7 +14,7 @@ class CreateBlueprintsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'blueprints', function (Blueprint $table) {
+        Schema::create($this->prefix('blueprints'), function (Blueprint $table) {
             $table->id();
             $table->string('namespace')->nullable()->default(null);
             $table->string('handle');
@@ -33,53 +32,51 @@ class CreateBlueprintsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'blueprints');
+        Schema::dropIfExists($this->prefix('blueprints'));
     }
 
     public function seedDefaultBlueprint()
     {
         try {
-
             $config = json_encode([
-                'fields'  => [
+                'fields' => [
                     [
-                        'field'  => [
-                            'type'        => 'markdown',
-                            'display'     => 'Content',
-                            'localizable' => true
-                        ],
-                        'handle' => 'content'
-                    ],
-                    [
-                        'field'  => [
-                            'type'        => 'users',
-                            'display'     => 'Author',
-                            'default'     => 'current',
+                        'field' => [
+                            'type' => 'markdown',
+                            'display' => 'Content',
                             'localizable' => true,
-                            'max_items'   => 1
                         ],
-                        'handle' => 'author'
+                        'handle' => 'content',
                     ],
                     [
-                        'field'  => [
-                            'type'        => 'template',
-                            'display'     => 'Template',
-                            'localizable' => true
+                        'field' => [
+                            'type' => 'users',
+                            'display' => 'Author',
+                            'default' => 'current',
+                            'localizable' => true,
+                            'max_items' => 1,
                         ],
-                        'handle' => 'template'
+                        'handle' => 'author',
                     ],
-                ]
+                    [
+                        'field' => [
+                            'type' => 'template',
+                            'display' => 'Template',
+                            'localizable' => true,
+                        ],
+                        'handle' => 'template',
+                    ],
+                ],
             ]);
-
         } catch (\JsonException $e) {
             $config = '[]';
         }
 
-        DB::table(config('statamic.eloquent-driver.table_prefix', '').'blueprints')->insert([
-            'namespace'  => null,
-            'handle'     => 'default',
-            'data'       => $config,
-            'created_at' => Carbon::now()
+        DB::table($this->prefix('blueprints'))->insert([
+            'namespace' => null,
+            'handle' => 'default',
+            'data' => $config,
+            'created_at' => Carbon::now(),
         ]);
     }
 }

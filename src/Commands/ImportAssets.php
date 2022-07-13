@@ -4,8 +4,8 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
+use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainer;
 use Statamic\Stache\Repositories\AssetContainerRepository;
 use Statamic\Statamic;

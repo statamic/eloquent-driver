@@ -17,12 +17,10 @@ use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
-use Statamic\Eloquent\Commands;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
-use Statamic\Eloquent\Globals\Variables;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -106,7 +104,7 @@ class ServiceProvider extends AddonServiceProvider
     private function registerBlueprints()
     {
         if (config('statamic.eloquent_driver.blueprints.driver', 'file') != 'eloquent') {
-           return;
+            return;
         }
 
         $this->app->singleton(

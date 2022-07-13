@@ -56,17 +56,14 @@ class ImportForms extends Command
         $bar = $this->output->createProgressBar($forms->count());
 
         $forms->each(function ($form) use ($bar) {
-
             $model = $form->toModel();
             $model->save();
 
-            $form->fileSubmissions()->each(function($submission) use ($model) {
-
+            $form->fileSubmissions()->each(function ($submission) use ($model) {
                 $model->submissions()->create([
                     'created_at' => $submission->date(),
                     'data' => $submission->data(),
                 ]);
-
             });
 
             $bar->advance();

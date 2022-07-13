@@ -7,7 +7,9 @@ use Statamic\Facades\GlobalSet;
 class GlobalFactory
 {
     protected $id;
+
     protected $handle;
+
     protected $data = [];
 
     public function id($id)

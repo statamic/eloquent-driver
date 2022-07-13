@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Revisions;
 
-use Statamic\Contracts\Revisions\Revision as Contract;
 use Statamic\Eloquent\Revisions\RevisionModel as Model;
 use Statamic\Events\RevisionDeleted;
 use Statamic\Events\RevisionSaved;
@@ -12,12 +11,19 @@ use Statamic\Revisions\WorkingCopy;
 class Revision extends FileEntry
 {
     protected $id;
+
     protected $key;
+
     protected $date;
+
     protected $user;
+
     protected $userId;
+
     protected $message;
+
     protected $action = 'revision';
+
     protected $attributes = [];
 
     protected $model;

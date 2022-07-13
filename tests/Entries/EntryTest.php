@@ -2,21 +2,24 @@
 
 namespace Tests\Entries;
 
-use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
+use Tests\TestCase;
 
 class EntryTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function it_loads_from_entry_model()
     {
         $model = new EntryModel([
             'slug' => 'the-slug',
             'data' => [
-                'foo' => 'bar'
-            ]
+                'foo' => 'bar',
+            ],
         ]);
 
         $entry = (new Entry)->fromModel($model);
@@ -32,7 +35,7 @@ class EntryTest extends TestCase
         $model = new EntryModel([
             'slug' => 'the-slug',
             'data' => [
-                'foo' => 'bar'
+                'foo' => 'bar',
             ],
             'site' => 'en',
             'uri' => '/blog/the-slug',

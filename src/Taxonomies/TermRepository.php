@@ -3,11 +3,11 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
-use Statamic\Stache\Repositories\TermRepository as StacheRepository;
-use Statamic\Taxonomies\LocalizedTerm;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Taxonomy;
+use Statamic\Stache\Repositories\TermRepository as StacheRepository;
 use Statamic\Support\Str;
+use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
 {
@@ -83,7 +83,6 @@ class TermRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         $entry->model($model->fresh());

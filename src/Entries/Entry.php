@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Entries;
 
-use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
@@ -64,7 +63,7 @@ class Entry extends FileEntry
     /**
      * This overwrite is needed to prevent Statamic to save updated_at also into the data. We track updated_at already in the database.
      *
-     * @param null $user
+     * @param  null  $user
      * @return $this|Entry|FileEntry|\Statamic\Taxonomies\LocalizedTerm
      */
     public function updateLastModified($user = null)
@@ -99,7 +98,6 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         if ($this->origin) {
-
             if (! $this->origin instanceof EntryContract) {
                 if ($model = $class::find($this->origin)) {
                     $this->origin = self::fromModel($model);

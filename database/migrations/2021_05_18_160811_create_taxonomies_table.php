@@ -13,7 +13,7 @@ class CreateTaxonomiesTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'taxonomies', function (Blueprint $table) {
+        Schema::create($this->prefix('taxonomies'), function (Blueprint $table) {
             $table->increments('id');
             $table->string('handle');
             $table->string('title');
@@ -30,6 +30,6 @@ class CreateTaxonomiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'taxonomies');
+        Schema::dropIfExists($this->prefix('taxonomies'));
     }
 }

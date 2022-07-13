@@ -13,14 +13,14 @@ class CreateNavigationsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'navigations', function (Blueprint $table) {
+        Schema::create($this->prefix('navigations'), function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->string('title');
             $table->json('collections')->nullable();
-            $table->integer('maxDepth')->nullable();
-            $table->boolean('expectsRoot')->default(false);
-            $table->string('initialPath')->nullable();
+            $table->integer('max_depth')->nullable();
+            $table->boolean('expects_root')->default(false);
+            $table->string('initial_path')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ class CreateNavigationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'navigations');
+        Schema::dropIfExists($this->prefix('navigations'));
     }
 }

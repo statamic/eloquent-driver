@@ -10,7 +10,7 @@ class CollectionTreeRepository extends StacheRepository
 {
     public function find(string $handle, string $site): ?TreeContract
     {
-        return Blink::once("eloquent-collection-tree-{$handle}-{$site}", function() use ($handle, $site) {
+        return Blink::once("eloquent-collection-tree-{$handle}-{$site}", function () use ($handle, $site) {
             $model = app('statamic.eloquent.collections.tree_model')::whereHandle($handle)
                 ->where('locale', $site)
                 ->whereType('collection')
@@ -23,7 +23,6 @@ class CollectionTreeRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         Blink::forget("eloquent-collection-tree-{$model->handle}-{$model->locale}");

@@ -30,21 +30,16 @@ class NavigationRepository extends StacheRepository
 
     public function findByHandle($handle): ?NavContract
     {
-        return Blink::once("eloquent-nav-{$handle}", function() use ($handle) {
-
+        return Blink::once("eloquent-nav-{$handle}", function () use ($handle) {
             $model = NavModel::whereHandle($handle)->first();
 
-            return $model
-                ? app(NavContract::class)->fromModel($model)
-                : null;
-
+            return $model ? app(NavContract::class)->fromModel($model) : null;
         });
     }
 
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         Blink::forget("eloquent-nav-{$model->handle}");

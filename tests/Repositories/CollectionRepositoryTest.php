@@ -2,15 +2,18 @@
 
 namespace Tests\Repositories;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Eloquent\Collections\Collection;
-use Statamic\Facades\Collection as CollectionAPI;
 use Statamic\Eloquent\Collections\CollectionRepository;
+use Statamic\Facades\Collection as CollectionAPI;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
 
 class CollectionRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function setUp(): void
     {
         parent::setUp();

@@ -13,7 +13,7 @@ class CreateAssetTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'assets_meta', function (Blueprint $table) {
+        Schema::create($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->json('data')->nullable();
@@ -28,6 +28,6 @@ class CreateAssetTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'assets_meta');
+        Schema::dropIfExists($this->prefix('assets_meta'));
     }
 }
