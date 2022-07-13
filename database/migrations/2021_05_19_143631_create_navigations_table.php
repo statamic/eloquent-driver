@@ -18,9 +18,9 @@ class CreateNavigationsTable extends Migration
             $table->string('handle');
             $table->string('title');
             $table->json('collections')->nullable();
-            $table->integer('maxDepth')->nullable();
-            $table->boolean('expectsRoot')->default(false);
-            $table->string('initialPath')->nullable();
+            $table->integer('max_depth')->nullable();
+            $table->boolean('expects_root')->default(false);
+            $table->string('initial_path')->nullable();
             $table->timestamps();
         });
     }

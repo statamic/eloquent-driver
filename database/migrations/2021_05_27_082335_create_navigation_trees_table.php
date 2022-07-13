@@ -17,7 +17,7 @@ class CreateNavigationTreesTable extends Migration
             $table->id();
             $table->string('handle');
             $table->string('type');
-            $table->string('initialPath')->nullable();
+            $table->string('initial_path')->nullable();
             $table->string('locale')->nullable();
             $table->json('tree')->nullable();
             $table->timestamps();

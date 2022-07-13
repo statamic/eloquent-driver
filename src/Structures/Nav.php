@@ -15,9 +15,9 @@ class Nav extends FileEntry
             ->handle($model->handle)
             ->title($model->title)
             ->collections($model->collections)
-            ->maxDepth($model->maxDepth)
-            ->expectsRoot($model->expectsRoot)
-            ->initialPath($model->initialPath)
+            ->maxDepth($model->max_depth)
+            ->expectsRoot($model->expects_root)
+            ->initialPath($model->initial_path)
             ->model($model);
     }
 
@@ -34,9 +34,9 @@ class Nav extends FileEntry
             'handle' => $this->handle(),
             'title' => $this->title(),
             'collections' => $this->collections()->map->handle(),
-            'maxDepth' => $this->maxDepth(),
-            'expectsRoot' => $this->expectsRoot(),
-            'initialPath' => $this->initialPath(),
+            'max_depth' => $this->maxDepth(),
+            'expects_root' => $this->expectsRoot(),
+            'initial_path' => $this->initialPath(),
         ]);
     }
 

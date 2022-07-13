@@ -15,7 +15,7 @@ class CollectionTree extends FileEntry
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
-            ->initialPath($model->initialPath)
+            ->initialPath($model->initial_path)
             ->syncOriginal()
             ->model($model);
     }
@@ -26,7 +26,7 @@ class CollectionTree extends FileEntry
 
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),
-            'initialPath' => $this->initialPath(),
+            'initial_path' => $this->initialPath(),
             'locale' => $this->locale(),
             'tree' => $this->tree(),
             'type' => 'collection',
