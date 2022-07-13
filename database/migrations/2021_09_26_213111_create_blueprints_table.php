@@ -14,7 +14,7 @@ class CreateBlueprintsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'blueprints', function (Blueprint $table) {
+        Schema::create($this->prefix('blueprints'), function (Blueprint $table) {
             $table->id();
             $table->string('namespace')->nullable()->default(null);
             $table->string('handle');
@@ -32,7 +32,7 @@ class CreateBlueprintsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'blueprints');
+        Schema::dropIfExists($this->prefix('blueprints'));
     }
 
     public function seedDefaultBlueprint()
@@ -72,7 +72,7 @@ class CreateBlueprintsTable extends Migration
             $config = '[]';
         }
 
-        DB::table(config('statamic.eloquent-driver.table_prefix', '').'blueprints')->insert([
+        DB::table($this->prefix('blueprints'))->insert([
             'namespace' => null,
             'handle' => 'default',
             'data' => $config,

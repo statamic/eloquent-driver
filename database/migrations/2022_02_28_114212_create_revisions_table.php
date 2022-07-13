@@ -13,7 +13,7 @@ class CreateRevisionsTable extends Migration
      */
     public function up()
     {
-        Schema::create(config('statamic.eloquent-driver.table_prefix', '').'revisions', function (Blueprint $table) {
+        Schema::create($this->prefix('revisions'), function (Blueprint $table) {
             $table->id();
             $table->string('key');
             $table->string('action');
@@ -31,6 +31,6 @@ class CreateRevisionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('statamic.eloquent-driver.table_prefix', '').'revisions');
+        Schema::dropIfExists($this->prefix('revisions'));
     }
 }

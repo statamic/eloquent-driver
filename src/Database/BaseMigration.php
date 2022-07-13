@@ -19,4 +19,15 @@ class BaseMigration extends Migration
 
         return parent::getConnection();
     }
+
+    /**
+     * Prefixes table if defined.
+     *
+     * @param  string  $table
+     * @return string
+     */
+    protected function prefix(string $table): string
+    {
+        return config('statamic.eloquent-driver.table_prefix', '').$table;
+    }
 }
