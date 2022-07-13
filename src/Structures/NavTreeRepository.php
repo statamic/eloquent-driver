@@ -16,9 +16,7 @@ class NavTreeRepository extends StacheRepository
                 ->where('locale', $site)
                 ->first();
 
-            return $model
-                ? app(app('statamic.eloquent.navigations.tree'))->fromModel($model)
-                : null;
+            return $model ? app(app('statamic.eloquent.navigations.tree'))->fromModel($model) : null;
         });
     }
 
