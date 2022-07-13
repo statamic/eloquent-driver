@@ -33,7 +33,12 @@ class AssetContainer extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static)->fillFromModel($model);
+    }
+
+    public function fillFromModel(Model $model)
+    {
+        $this
             ->title($model->title)
             ->handle($model->handle)
             ->disk($model->disk ?? config('filesystems.default'))
@@ -44,6 +49,8 @@ class AssetContainer extends FileEntry
             ->createFolders($model->settings['create_folders'] ?? null)
             ->searchIndex($model->settings['search_index'] ?? null)
             ->model($model);
+
+        return $this;
     }
 
     public function toModel()
@@ -81,16 +88,7 @@ class AssetContainer extends FileEntry
         $model = $this->toModel();
         $model->save();
 
-        $this->model($model->fresh())
-            ->title($model->title)
-            ->handle($model->handle)
-            ->disk($model->disk ?? config('filesystems.default'))
-            ->allowUploads($model->settings['allow_uploads'] ?? null)
-            ->allowDownloading($model->settings['allow_downloading'] ?? null)
-            ->allowMoving($model->settings['allow_moving'] ?? null)
-            ->allowRenaming($model->settings['allow_renaming'] ?? null)
-            ->createFolders($model->settings['create_folders'] ?? null)
-            ->searchIndex($model->settings['search_index'] ?? null);
+        $this->fillFromModel($model->fresh());
 
         AssetContainerSaved::dispatch($this);
 
