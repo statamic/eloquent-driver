@@ -55,7 +55,6 @@ class Submission extends FileEntry
     public function save()
     {
         $model = $this->toModel();
-
         $model->save();
 
         $this->model($model->fresh());

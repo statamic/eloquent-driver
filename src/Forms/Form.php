@@ -51,7 +51,6 @@ class Form extends FileEntry
     public function save()
     {
         $model = $this->toModel();
-
         $model->save();
 
         $this->model($model->fresh());
@@ -62,7 +61,6 @@ class Form extends FileEntry
     public function delete()
     {
         $this->submissions()->each->delete();
-
         $this->model()->delete();
 
         FormDeleted::dispatch($this);

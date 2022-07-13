@@ -42,7 +42,6 @@ class NavigationRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         Blink::forget("eloquent-nav-{$model->handle}");

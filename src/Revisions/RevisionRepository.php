@@ -39,8 +39,7 @@ class RevisionRepository extends StacheRepository
             app('statamic.eloquent.revisions.model')::where([
                 'key' => $copy->key(),
                 'action' => 'working',
-            ])
-                ->delete();
+            ])->delete();
         }
 
         $revision = (new Revision())
@@ -62,8 +61,7 @@ class RevisionRepository extends StacheRepository
 
     protected function makeRevisionFromFile($key, $model)
     {
-        return (new Revision)
-            ->fromModel($model);
+        return (new Revision)->fromModel($model);
     }
 
     public static function bindings(): array

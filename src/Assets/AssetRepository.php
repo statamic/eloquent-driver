@@ -14,7 +14,8 @@ namespace Statamic\Eloquent\Assets;
      {
          $asset->container()->contents()->forget($asset->path())->save();
 
-         app('statamic.eloquent.assets.model')::where('handle', $asset->containerHandle().'::'.$asset->metaPath())->first()->delete();
+         $handle = $asset->containerHandle().'::'.$asset->metaPath();
+         app('statamic.eloquent.assets.model')::where('handle', $handle)->first()->delete();
 
          Stache::store('assets::'.$asset->containerHandle())->delete($asset);
      }

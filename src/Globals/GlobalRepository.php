@@ -46,7 +46,6 @@ class GlobalRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         $entry->model($model->fresh());

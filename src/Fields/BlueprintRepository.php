@@ -23,7 +23,9 @@ class BlueprintRepository extends StacheRepository
                 return null;
             }
 
-            $blueprintModel = ($namespace ? $this->filesIn($namespace) : BlueprintModel::whereNull('namespace'))->where('handle', $handle)->first();
+            $blueprintModel = ($namespace ? $this->filesIn($namespace) : BlueprintModel::whereNull('namespace'))
+                ->where('handle', $handle)
+                ->first();
 
             if (! $blueprintModel) {
                 throw_if(

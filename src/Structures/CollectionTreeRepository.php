@@ -23,7 +23,6 @@ class CollectionTreeRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         Blink::forget("eloquent-collection-tree-{$model->handle}-{$model->locale}");

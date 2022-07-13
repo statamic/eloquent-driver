@@ -34,9 +34,7 @@ class CollectionRepository extends StacheRepository
         return Blink::once("eloquent-collection-{$handle}", function () use ($handle) {
             $model = app('statamic.eloquent.collections.model')::whereHandle($handle)->first();
 
-            return $model
-                ? app(CollectionContract::class)->fromModel($model)
-                : null;
+            return $model ? app(CollectionContract::class)->fromModel($model) : null;
         });
     }
 
@@ -48,7 +46,6 @@ class CollectionRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-
         $model->save();
 
         Blink::forget("eloquent-collection-{$model->handle}");
