@@ -15,7 +15,7 @@ class CreateAssetTable extends Migration
     {
         Schema::create($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
+            $table->string('handle')->index();
             $table->json('data')->nullable();
             $table->timestamps();
         });

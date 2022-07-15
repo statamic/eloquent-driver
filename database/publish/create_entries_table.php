@@ -14,15 +14,15 @@ class CreateEntriesTable extends Migration
     public function up()
     {
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('site');
+            $table->id();
+            $table->string('site')->index();
             $table->unsignedInteger('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
-            $table->string('uri')->nullable();
+            $table->string('uri')->nullable()->index();
             $table->string('date')->nullable();
-            $table->string('collection');
+            $table->string('collection')->index();
             $table->json('data');
             $table->timestamps();
         });

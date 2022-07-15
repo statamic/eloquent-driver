@@ -14,15 +14,15 @@ class CreateEntriesTableWithStringIds extends Migration
     public function up()
     {
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
-            $table->string('id');
-            $table->string('site');
+            $table->uuid('id')->primary();
+            $table->string('site')->index();
             $table->string('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
-            $table->string('uri')->nullable();
+            $table->string('uri')->nullable()->index();
             $table->string('date')->nullable();
-            $table->string('collection');
+            $table->string('collection')->index();
             $table->json('data');
             $table->timestamps();
         });

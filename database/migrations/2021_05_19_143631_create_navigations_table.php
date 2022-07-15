@@ -15,7 +15,7 @@ class CreateNavigationsTable extends Migration
     {
         Schema::create($this->prefix('navigations'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
+            $table->string('handle')->unique();
             $table->string('title');
             $table->json('collections')->nullable();
             $table->integer('max_depth')->nullable();

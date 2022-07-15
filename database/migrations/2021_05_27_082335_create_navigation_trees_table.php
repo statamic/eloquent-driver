@@ -15,10 +15,10 @@ class CreateNavigationTreesTable extends Migration
     {
         Schema::create($this->prefix('trees'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
-            $table->string('type');
+            $table->string('handle')->index();
+            $table->string('type')->index();
             $table->string('initial_path')->nullable();
-            $table->string('locale')->nullable();
+            $table->string('locale')->nullable()->index();
             $table->json('tree')->nullable();
             $table->timestamps();
         });

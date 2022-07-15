@@ -15,10 +15,10 @@ class CreateTermsTable extends Migration
     {
         Schema::create($this->prefix('taxonomy_terms'), function (Blueprint $table) {
             $table->id();
-            $table->string('site');
+            $table->string('site')->index();
             $table->string('slug');
-            $table->string('uri')->nullable();
-            $table->string('taxonomy');
+            $table->string('uri')->nullable()->index();
+            $table->string('taxonomy')->index();
             $table->json('data');
             $table->timestamps();
         });

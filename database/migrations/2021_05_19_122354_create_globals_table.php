@@ -15,7 +15,7 @@ class CreateGlobalsTable extends Migration
     {
         Schema::create($this->prefix('global_sets'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
+            $table->string('handle')->unique();
             $table->string('title');
             $table->json('localizations');
             $table->timestamps();

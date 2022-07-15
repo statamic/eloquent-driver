@@ -15,7 +15,7 @@ class CreateFieldsetsTable extends Migration
     {
         Schema::create($this->prefix('fieldsets'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
+            $table->string('handle')->unique();
             $table->json('data');
             $table->timestamps();
         });

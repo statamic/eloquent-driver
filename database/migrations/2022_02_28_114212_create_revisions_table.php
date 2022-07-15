@@ -15,7 +15,7 @@ class CreateRevisionsTable extends Migration
     {
         Schema::create($this->prefix('revisions'), function (Blueprint $table) {
             $table->id();
-            $table->string('key');
+            $table->string('key')->index();
             $table->string('action');
             $table->string('user');
             $table->string('message')->nullable();

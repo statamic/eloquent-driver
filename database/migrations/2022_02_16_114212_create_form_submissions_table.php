@@ -15,7 +15,7 @@ class CreateFormSubmissionsTable extends Migration
     {
         Schema::create($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained($this->prefix('forms'));
+            $table->foreignId('form_id')->constrained($this->prefix('forms'))->cascadeOnDelete();
             $table->json('data')->nullable();
             $table->timestamps();
         });

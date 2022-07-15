@@ -15,7 +15,7 @@ class CreateAssetContainersTable extends Migration
     {
         Schema::create($this->prefix('asset_containers'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle');
+            $table->string('handle')->unique();
             $table->string('title');
             $table->string('disk');
             $table->json('settings')->nullable();

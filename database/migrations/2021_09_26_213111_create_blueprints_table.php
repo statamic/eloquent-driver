@@ -16,8 +16,8 @@ class CreateBlueprintsTable extends Migration
     {
         Schema::create($this->prefix('blueprints'), function (Blueprint $table) {
             $table->id();
-            $table->string('namespace')->nullable()->default(null);
-            $table->string('handle');
+            $table->string('namespace')->nullable()->default(null)->index();
+            $table->string('handle')->index();
             $table->json('data');
             $table->timestamps();
         });

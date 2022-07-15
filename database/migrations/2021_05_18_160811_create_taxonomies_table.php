@@ -14,8 +14,8 @@ class CreateTaxonomiesTable extends Migration
     public function up()
     {
         Schema::create($this->prefix('taxonomies'), function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('handle');
+            $table->id();
+            $table->string('handle')->unique();
             $table->string('title');
             $table->json('sites')->nullable();
             $table->json('settings')->nullable();
