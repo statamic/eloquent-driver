@@ -14,9 +14,9 @@ class CreateEntriesTableWithStringIds extends Migration
     public function up()
     {
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->uuid('id');
             $table->string('site')->index();
-            $table->string('origin_id')->nullable();
+            $table->uuid('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
@@ -25,6 +25,12 @@ class CreateEntriesTableWithStringIds extends Migration
             $table->string('collection')->index();
             $table->json('data');
             $table->timestamps();
+
+            $table->primary('id');
+            $table->foreign('origin_id')
+                ->references('id')
+                ->on($this->prefix('entries_uuid'))
+                ->onDelete('set null');
         });
     }
 

@@ -16,7 +16,7 @@ class CreateEntriesTable extends Migration
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
             $table->id();
             $table->string('site')->index();
-            $table->unsignedInteger('origin_id')->nullable();
+            $table->unsignedBigInteger('origin_id')->nullable();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
@@ -25,6 +25,11 @@ class CreateEntriesTable extends Migration
             $table->string('collection')->index();
             $table->json('data');
             $table->timestamps();
+
+            $table->foreign('origin_id')
+                ->references('id')
+                ->on($this->prefix('entries'))
+                ->onDelete('set null');
         });
     }
 
