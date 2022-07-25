@@ -77,7 +77,7 @@ class TermRepository extends StacheRepository
 
     private function findTaxonomyHandleByUri($uri)
     {
-        return Taxonomy::findByHandle($uri)->handle();
+        return Taxonomy::findByHandle($uri)?->handle();
     }
 
     public function save($entry)
