@@ -25,7 +25,7 @@ class NavTree extends FileEntry
 
         return $class::findOrNew($this->model?->id)->fill([
             'handle' => $this->handle(),
-            'initial_path' => $this->initialPath(),
+            'initialPath' => $this->initialPath(),
             'locale' => $this->locale(),
             'tree' => $this->model ? $this->tree() : [],
             'type' => 'navigation',
