@@ -4,13 +4,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateFormSubmissionsTable extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
         Schema::create($this->prefix('form_submissions'), function (Blueprint $table) {
@@ -21,13 +15,8 @@ class CreateFormSubmissionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists($this->prefix('form_submissions'));
     }
-}
+};
