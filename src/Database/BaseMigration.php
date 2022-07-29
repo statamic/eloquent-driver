@@ -28,6 +28,6 @@ class BaseMigration extends Migration
      */
     protected function prefix(string $table): string
     {
-        return config('statamic.eloquent-driver.table_prefix', '').$table;
+        return config('statamic.eloquent_driver.table_prefix', '').$table;
     }
 }
