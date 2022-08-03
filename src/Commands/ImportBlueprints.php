@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
+use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\File;
 use Statamic\Facades\YAML;
