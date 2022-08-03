@@ -29,7 +29,7 @@ class CreateEntriesTableWithStringIds extends Migration
             $table->primary('id');
             $table->foreign('origin_id')
                 ->references('id')
-                ->on($this->prefix('entries_uuid'))
+                ->on($this->prefix('entries'))
                 ->onDelete('set null');
         });
     }
