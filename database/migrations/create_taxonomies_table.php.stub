@@ -4,13 +4,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateTaxonomiesTable extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
         Schema::create($this->prefix('taxonomies'), function (Blueprint $table) {
@@ -32,4 +26,4 @@ class CreateTaxonomiesTable extends Migration
     {
         Schema::dropIfExists($this->prefix('taxonomies'));
     }
-}
+};

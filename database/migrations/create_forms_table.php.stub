@@ -4,16 +4,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateCollectionsTable extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
-        Schema::create($this->prefix('collections'), function (Blueprint $table) {
+        Schema::create($this->prefix('forms'), function (Blueprint $table) {
             $table->id();
             $table->string('handle');
             $table->string('title');
@@ -22,13 +16,8 @@ class CreateCollectionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists($this->prefix('collections'));
+        Schema::dropIfExists($this->prefix('forms'));
     }
-}
+};

@@ -12,6 +12,22 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected $shouldUseStringEntryIds = false;
 
+    protected $baseMigrations = [
+        __DIR__.'/../database/migrations/create_taxonomies_table.php.stub',
+        __DIR__.'/../database/migrations/create_terms_table.php.stub',
+        __DIR__.'/../database/migrations/create_globals_table.php.stub',
+        __DIR__.'/../database/migrations/create_navigations_table.php.stub',
+        __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub',
+        __DIR__.'/../database/migrations/create_collections_table.php.stub',
+        __DIR__.'/../database/migrations/create_blueprints_table.php.stub',
+        __DIR__.'/../database/migrations/create_fieldsets_table.php.stub',
+        __DIR__.'/../database/migrations/create_forms_table.php.stub',
+        __DIR__.'/../database/migrations/create_form_submissions_table.php.stub',
+        __DIR__.'/../database/migrations/create_asset_containers_table.php.stub',
+        __DIR__.'/../database/migrations/create_asset_table.php.stub',
+        __DIR__.'/../database/migrations/create_revisions_table.php.stub',
+    ];
+
     protected function setUp(): void
     {
         require_once __DIR__.'/ConsoleKernel.php';
@@ -26,9 +42,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }
 
         if ($this->shouldUseStringEntryIds) {
-            $this->loadMigrationsForUUIDEntries();
+            $this->runMigrationsForUUIDEntries();
         } else {
-            $this->loadMigrationsForIncrementingEntries();
+            $this->runMigrationsForIncrementingEntries();
         }
     }
 
@@ -172,17 +188,27 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             : parent::assertRegExp($pattern, $string, $message);
     }
 
-    public function loadMigrationsForIncrementingEntries()
+    public function runBaseMigrations()
     {
-        $this->artisan('vendor:publish --tag="statamic-eloquent-entries-table"');
-        $this->loadMigrationsFrom('../database/migrations');
-        $this->artisan('migrate');
+        foreach ($this->baseMigrations as $migration) {
+            $migration = require $migration;
+            $migration->up();
+        }
     }
 
-    public function loadMigrationsForUUIDEntries()
+    public function runMigrationsForIncrementingEntries()
     {
-        $this->artisan('vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"');
-        $this->loadMigrationsFrom('../database/migrations');
-        $this->artisan('migrate');
+        $this->runBaseMigrations();
+
+        $migration = require __DIR__.'/../database/migrations/create_entries_table.php.stub';
+        $migration->up();
+    }
+
+    public function runMigrationsForUUIDEntries()
+    {
+        $this->runBaseMigrations();
+
+        $migration = require __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub';
+        $migration->up();
     }
 }
