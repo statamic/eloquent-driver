@@ -13,8 +13,8 @@ class EntryModelTest extends TestCase
         $model = new EntryModel([
             'slug' => 'the-slug',
             'data' => [
-                'foo' => 'bar'
-            ]
+                'foo' => 'bar',
+            ],
         ]);
 
         $this->assertEquals('the-slug', $model->slug);

@@ -6,7 +6,6 @@ use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContr
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Eloquent\Commands\ImportEntries;
 use Statamic\Eloquent\Entries\CollectionRepository;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Providers\AddonServiceProvider;
