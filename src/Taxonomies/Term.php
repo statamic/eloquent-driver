@@ -68,7 +68,9 @@ class Term extends FileEntry
             $data['collection'] = $collection;
         }
 
-        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+        $isFileEntry = get_class($source) == FileEntry::class;
+
+        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
             ->fill([
                 'site' => $source->locale(),
                 'slug' => $source->slug(),

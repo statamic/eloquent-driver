@@ -29,7 +29,9 @@ class Taxonomy extends FileEntry
     {
         $class = app('statamic.eloquent.taxonomies.model');
 
-        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+        $isFileEntry = get_class($source) == FileEntry::class;
+
+        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
             ->fill([
                 'handle' => $source->handle(),
                 'title' => $source->title(),

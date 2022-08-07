@@ -28,12 +28,14 @@ class NavTree extends FileEntry
     {
         $class = app('statamic.eloquent.navigations.tree_model');
 
-        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+        $isFileEntry = get_class($source) == FileEntry::class;
+
+        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
             ->fill([
                 'handle' => $source->handle(),
                 'initial_path' => $source->initialPath(),
                 'locale' => $source->locale(),
-                'tree' => $source->tree() ?? [],
+                'tree' => ($isFileEntry || $source->model) ? $source->tree() : [],
                 'type' => 'navigation',
             ]);
     }
