@@ -5,9 +5,12 @@ namespace Statamic\Eloquent\Commands;
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
+use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Eloquent\Forms\Form;
+use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository;
+use Statamic\Forms\Submission as StacheSubmission;
 use Statamic\Statamic;
 
 class ImportForms extends Command
@@ -44,22 +47,20 @@ class ImportForms extends Command
 
     private function useDefaultRepositories()
     {
-        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
-
-        // bind to the eloquent container class so we can use toModel()
-        app()->bind(FormContract::class, Form::class);
+        app()->bind(FormContract::class, StacheForm::class);
+        app()->bind(SubmissionContract::class, StacheSubmission::class);
     }
 
     private function importForms()
     {
-        $forms = \Statamic\Facades\Form::all();
+        $forms = (new \Statamic\Forms\FormRepository)->all();
         $bar = $this->output->createProgressBar($forms->count());
 
         $forms->each(function ($form) use ($bar) {
-            $model = $form->toModel();
+            $model = Form::makeModelFromContract($form);
             $model->save();
 
-            $form->fileSubmissions()->each(function ($submission) use ($model) {
+            $form->submissions()->each(function ($submission) use ($model) {
                 $model->submissions()->create([
                     'created_at' => $submission->date(),
                     'data' => $submission->data(),
