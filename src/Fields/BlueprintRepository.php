@@ -96,7 +96,7 @@ class BlueprintRepository extends StacheRepository
     private function makeBlueprintFromModel($model)
     {
         return Blink::store(self::BLINK_FROM_FILE)->once('database:blueprints:'.$model->id, function () use ($model) {
-            return (new Blueprint)
+            return Blueprint::make()
                 ->setHidden(Arr::get($model->data, 'hide'))
                 ->setOrder(Arr::get($model->data, 'order'))
                 ->setHandle($model->handle)
