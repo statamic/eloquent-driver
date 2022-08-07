@@ -53,12 +53,11 @@ class ImportForms extends Command
 
     private function importForms()
     {
-        $forms = (new \Statamic\Forms\FormRepository)->all();
+        $forms = (new FormRepository)->all();
         $bar = $this->output->createProgressBar($forms->count());
 
         $forms->each(function ($form) use ($bar) {
-            $model = Form::makeModelFromContract($form);
-            $model->save();
+            $model = tap(Form::makeModelFromContract($form))->save();
 
             $form->submissions()->each(function ($submission) use ($model) {
                 $model->submissions()->create([
