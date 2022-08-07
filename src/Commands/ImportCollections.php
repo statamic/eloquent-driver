@@ -8,7 +8,9 @@ use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Eloquent\Collections\Collection as EloquentCollection;
-use Statamic\Facades\Collection;
+use Statamic\Eloquent\Structures\CollectionTree as EloquentCollectionTree;
+use Statamic\Entries\Collection as StacheCollection;
+use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Stache\Repositories\CollectionRepository;
 use Statamic\Stache\Repositories\CollectionTreeRepository;
 use Statamic\Statamic;
@@ -49,19 +51,21 @@ class ImportCollections extends Command
     {
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
-
-        // bind to the eloquent collection class so we can use toModel()
-        app()->bind(CollectionContract::class, EloquentCollection::class);
+        app()->bind(CollectionContract::class, StacheCollection::class);
     }
 
     private function importCollections()
     {
-        $collections = Collection::all();
+        $collections = CollectionFacade::all();
         $bar = $this->output->createProgressBar($collections->count());
 
         $collections->each(function ($collection) use ($bar) {
-            $collection->toModel()->save();
-            $collection->tree()->toModel()->save();
+            $model = tap(EloquentCollection::makeModelFromContract($collection))->save();
+            if ($structure = $collection->structure()) {
+                $structure->trees()->each(function($tree) {
+                    EloquentCollectionTree::makeModelFromContract($tree)->save();
+                });
+            }
             $bar->advance();
         });
 

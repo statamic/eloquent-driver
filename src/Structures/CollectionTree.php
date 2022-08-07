@@ -22,15 +22,21 @@ class CollectionTree extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract($source)
+    {
         $class = app('statamic.eloquent.collections.tree_model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'handle' => $this->handle(),
-            'initial_path' => $this->initialPath(),
-            'locale' => $this->locale(),
-            'tree' => $this->tree(),
-            'type' => 'collection',
-        ]);
+        return $class::findOrNew($source instanceof \Statamic\Structures\CollectionTree ? null : $this->model?->id)
+            ->fill([
+                'handle' => $source->handle(),
+                'initial_path' => $source->initialPath(),
+                'locale' => $source->locale(),
+                'tree' => $source->tree(),
+                'type' => 'collection',
+            ]);
     }
 
     public function model($model = null)

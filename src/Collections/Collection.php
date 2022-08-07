@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Collections;
 
+use Statamic\Contracts\Entries\Collection as Contract;
 use Statamic\Eloquent\Collections\CollectionModel as Model;
 use Statamic\Eloquent\Structures\CollectionStructure;
 use Statamic\Entries\Collection as FileEntry;
@@ -41,33 +42,38 @@ class Collection extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.collections.model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'title' => $this->title ?? '',
-            'handle' => $this->handle,
+        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)->fill([
+            'title' => $source->title ?? '',
+            'handle' => $source->handle,
             'settings' => [
-                'routes' => $this->routes,
-                'slugs' => $this->requiresSlugs(),
-                'title_formats' => collect($this->titleFormats())->filter(),
-                'mount' => $this->mount,
-                'dated' => $this->dated,
-                'ampable' => $this->ampable,
-                'sites' => $this->sites,
-                'template' => $this->template,
-                'layout' => $this->layout,
-                'inject' => $this->cascade,
-                'search_index' => $this->searchIndex,
-                'revisions' => $this->revisionsEnabled(),
-                'default_status' => $this->defaultPublishState,
-                'structure' => $this->structureContents(),
-                'sort_dir' => $this->sortDirection(),
-                'sort_field' => $this->sortField(),
-                'taxonomies' => $this->taxonomies,
-                'propagate' => $this->propagate(),
-                'past_date_behavior' => $this->pastDateBehavior(),
-                'future_date_behavior' => $this->futureDateBehavior(),
-                'preview_targets' => $this->previewTargets(),
+                'routes' => $source->routes,
+                'slugs' => $source->requiresSlugs(),
+                'title_formats' => collect($source->titleFormats())->filter(),
+                'mount' => $source->mount,
+                'dated' => $source->dated,
+                'ampable' => $source->ampable,
+                'sites' => $source->sites,
+                'template' => $source->template,
+                'layout' => $source->layout,
+                'inject' => $source->cascade,
+                'search_index' => $source->searchIndex,
+                'revisions' => $source->revisionsEnabled(),
+                'default_status' => $source->defaultPublishState,
+                'structure' => $source->structureContents(),
+                'sort_dir' => $source->sortDirection(),
+                'sort_field' => $source->sortField(),
+                'taxonomies' => $source->taxonomies,
+                'propagate' => $source->propagate(),
+                'past_date_behavior' => $source->pastDateBehavior(),
+                'future_date_behavior' => $source->futureDateBehavior(),
+                'preview_targets' => $source->previewTargets(),
             ],
         ]);
     }
