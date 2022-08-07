@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Statamic\Contracts\Taxonomies\Taxonomy as Contract;
 use Statamic\Eloquent\Taxonomies\TaxonomyModel as Model;
 use Statamic\Taxonomies\Taxonomy as FileEntry;
 
@@ -21,16 +22,22 @@ class Taxonomy extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.taxonomies.model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'handle' => $this->handle(),
-            'title' => $this->title(),
-            'sites' => $this->sites(),
-            'settings' => [
-                'revisions' => $this->revisionsEnabled(),
-            ],
-        ]);
+        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+            ->fill([
+                'handle' => $source->handle(),
+                'title' => $source->title(),
+                'sites' => $source->sites(),
+                'settings' => [
+                    'revisions' => $source->revisionsEnabled(),
+                ],
+            ]);
     }
 
     public function model($model = null)
