@@ -21,15 +21,21 @@ class NavTree extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract($source)
+    {
         $class = app('statamic.eloquent.navigations.tree_model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'handle' => $this->handle(),
-            'initial_path' => $this->initialPath(),
-            'locale' => $this->locale(),
-            'tree' => $this->model ? $this->tree() : [],
-            'type' => 'navigation',
-        ]);
+        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+            ->fill([
+                'handle' => $source->handle(),
+                'initial_path' => $source->initialPath(),
+                'locale' => $source->locale(),
+                'tree' => $source->tree() ?? [],
+                'type' => 'navigation',
+            ]);
     }
 
     public function model($model = null)

@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Structures;
 
+use Statamic\Contracts\Structures\Nav as Contract;
 use Statamic\Eloquent\Structures\NavModel as Model;
 use Statamic\Structures\Nav as FileEntry;
 
@@ -28,16 +29,22 @@ class Nav extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.navigations.model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'handle' => $this->handle(),
-            'title' => $this->title(),
-            'collections' => $this->collections()->map->handle(),
-            'max_depth' => $this->maxDepth(),
-            'expects_root' => $this->expectsRoot(),
-            'initial_path' => $this->initialPath(),
-        ]);
+        return $class::findOrNew($source instanceof FileEntry ? null : $source->model?->id)
+            ->fill([
+                'handle' => $source->handle(),
+                'title' => $source->title(),
+                'collections' => $source->collections()->map->handle(),
+                'max_depth' => $source->maxDepth(),
+                'expects_root' => $source->expectsRoot(),
+                'initial_path' => $source->initialPath(),
+            ]);
     }
 
     public function model($model = null)
