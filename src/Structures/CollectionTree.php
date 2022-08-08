@@ -29,7 +29,7 @@ class CollectionTree extends FileEntry
     {
         $class = app('statamic.eloquent.collections.tree_model');
 
-        return $class::findOrNew($source instanceof \Statamic\Structures\CollectionTree ? null : $this->model?->id)
+        return $class::findOrNew($source instanceof FileEntry ? null : $this->model?->id)
             ->fill([
                 'handle' => $source->handle(),
                 'initial_path' => $source->initialPath(),
