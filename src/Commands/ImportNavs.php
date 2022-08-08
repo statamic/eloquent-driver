@@ -8,7 +8,8 @@ use Statamic\Contracts\Structures\Nav as NavContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Structures\Tree as TreeContract;
-use Statamic\Eloquent\Structures\Nav;
+use Statamic\Eloquent\Structures\Nav as EloquentNav;
+use Statamic\Eloquent\Structures\NavTree as EloquentNavTree;
 use Statamic\Eloquent\Structures\Tree;
 use Statamic\Stache\Repositories\NavigationRepository;
 use Statamic\Stache\Repositories\NavTreeRepository;
@@ -62,9 +63,11 @@ class ImportNavs extends Command
         $bar = $this->output->createProgressBar($navs->count());
 
         $navs->each(function ($nav) use ($bar) {
-            $nav->toModel()->save();
+            $model = tap(EloquentNav::makeModelFromContract($nav))->save();
 
-            $nav->tree->save();
+            $nav->trees()->each(function($tree) {
+                EloquentNavTree::makeModelFromContract($tree)->save();
+            });
 
             $bar->advance();
         });

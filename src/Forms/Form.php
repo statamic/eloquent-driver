@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Forms;
 
+use Statamic\Contracts\Forms\Form as Contract;
 use Statamic\Eloquent\Forms\FormModel as Model;
 use Statamic\Events\FormDeleted;
 use Statamic\Events\FormSaved;
@@ -24,17 +25,25 @@ class Form extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.forms.model');
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'title' => $this->title(),
-            'handle' => $this->handle(),
-            'settings' => [
-                'store' => $this->store(),
-                'email' => $this->email(),
-                'honeypot' => $this->honeypot(),
-            ],
-        ]);
+        $isFileEntry = get_class($source) == FileEntry::class;
+
+        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
+            ->fill([
+                'title' => $source->title(),
+                'handle' => $source->handle(),
+                'settings' => [
+                    'store' => $source->store(),
+                    'email' => $source->email(),
+                    'honeypot' => $source->honeypot(),
+                ],
+            ]);
     }
 
     public function model($model = null)

@@ -8,10 +8,12 @@ use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
-use Statamic\Eloquent\Taxonomies\Taxonomy;
-use Statamic\Eloquent\Taxonomies\Term;
+use Statamic\Eloquent\Taxonomies\Taxonomy as EloquentTaxonomy;
+use Statamic\Eloquent\Taxonomies\Term as EloquentTerm;
 use Statamic\Stache\Repositories\TaxonomyRepository;
 use Statamic\Stache\Repositories\TermRepository;
+use Statamic\Taxonomies\Taxonomy as StacheTaxonomy;
+use Statamic\Taxonomies\Term as StacheTerm;
 use Statamic\Statamic;
 
 class ImportTaxonomies extends Command
@@ -53,8 +55,8 @@ class ImportTaxonomies extends Command
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 
         // bind to the eloquent container class so we can use toModel()
-        app()->bind(TaxonomyContract::class, Taxonomy::class);
-        app()->bind(TermContract::class, Term::class);
+        app()->bind(TaxonomyContract::class, StacheTaxonomy::class);
+        app()->bind(TermContract::class, StacheTerm::class);
     }
 
     private function importTaxonomies()
@@ -63,8 +65,7 @@ class ImportTaxonomies extends Command
         $bar = $this->output->createProgressBar($taxonomies->count());
 
         $taxonomies->each(function ($taxonomy) use ($bar) {
-            $model = $taxonomy->toModel();
-            $model->save();
+            $model = tap(EloquentTaxonomy::makeModelFromContract($taxonomy))->save();
 
             $bar->advance();
         });
@@ -77,11 +78,18 @@ class ImportTaxonomies extends Command
     private function importTerms()
     {
         $terms = \Statamic\Facades\Term::all();
-        $bar = $this->output->createProgressBar($terms->count());
 
-        $terms->each(function ($term) use ($bar) {
-            $model = $term->toModel();
-            $model->save();
+        $parentTerms = collect();
+        $terms->each(function ($term) use ($parentTerms) {
+            $parentTerms->push($term->term());
+        });
+
+        $parentTerms = $parentTerms->unique();
+
+        $bar = $this->output->createProgressBar($parentTerms->count());
+
+        $parentTerms->each(function($term) use ($bar) {
+            $model = tap(EloquentTerm::makeModelFromContract($term))->save();
 
             $bar->advance();
         });

@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
+use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\File;
 use Statamic\Facades\YAML;
@@ -72,7 +73,7 @@ class ImportBlueprints extends Command
 
             $contents = YAML::file($path)->parse();
 
-            $blueprint = (new Blueprint)
+            $blueprint = Blueprint::make()
                 ->setHidden(Arr::pull($contents, 'hide'))
                 ->setOrder(Arr::pull($contents, 'order'))
                 ->setInitialPath($path)
@@ -110,7 +111,7 @@ class ImportBlueprints extends Command
             $handle = str_before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
-            $fieldset = (new Fieldset)
+            $fieldset = Fieldset::make()
                 ->setHandle($handle)
                 ->setContents(YAML::file($file)->parse());
 

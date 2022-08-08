@@ -4,19 +4,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateFormsTable extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
-        Schema::create($this->prefix('forms'), function (Blueprint $table) {
+        Schema::create($this->prefix('taxonomies'), function (Blueprint $table) {
             $table->id();
             $table->string('handle')->unique();
             $table->string('title');
+            $table->json('sites')->nullable();
             $table->json('settings')->nullable();
             $table->timestamps();
         });
@@ -29,6 +24,6 @@ class CreateFormsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists($this->prefix('forms'));
+        Schema::dropIfExists($this->prefix('taxonomies'));
     }
-}
+};

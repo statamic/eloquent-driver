@@ -24,6 +24,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 
 - Delete `content/collections/pages/home.md`
 - Change the structure `tree` in `content/collections/pages.yaml` to `{}`.
+- Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations"`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table"`.
 - Run `php artisan migrate`.
 
@@ -32,6 +33,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 If you're planning to use existing content, we can use the existing UUIDs. This will prevent you from needing to update any data or relationships.
 
 - In the `config/statamic/eloquent-driver.php` file, change `model` to `UuidEntryModel`.
+- Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations"`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"`.
 - Run `php artisan migrate`.
 - Import entries into database with `php please eloquent:import-entries`.

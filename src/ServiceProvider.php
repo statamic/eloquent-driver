@@ -35,6 +35,8 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $config = false;
 
+    protected $migrationCount = 0;
+
     public function boot()
     {
         parent::boot();
@@ -50,11 +52,27 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([$config => config_path('statamic/eloquent_driver.php')], 'statamic-eloquent-config');
 
         $this->publishes([
-            __DIR__.'/../database/publish/create_entries_table.php' => $this->migrationsPath('create_entries_table'),
+            __DIR__.'/../database/migrations/create_taxonomies_table.php.stub' => $this->migrationsPath('create_taxonomies_table.php'),
+            __DIR__.'/../database/migrations/create_terms_table.php.stub' => $this->migrationsPath('create_terms_table.php'),
+            __DIR__.'/../database/migrations/create_globals_table.php.stub' => $this->migrationsPath('create_globals_table.php'),
+            __DIR__.'/../database/migrations/create_navigations_table.php.stub' => $this->migrationsPath('create_navigations_table.php'),
+            __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
+            __DIR__.'/../database/migrations/create_collections_table.php.stub' => $this->migrationsPath('create_collections_table.php'),
+            __DIR__.'/../database/migrations/create_blueprints_table.php.stub' => $this->migrationsPath('create_blueprints_table.php'),
+            __DIR__.'/../database/migrations/create_fieldsets_table.php.stub' => $this->migrationsPath('create_fieldsets_table.php'),
+            __DIR__.'/../database/migrations/create_forms_table.php.stub' => $this->migrationsPath('create_forms_table.php'),
+            __DIR__.'/../database/migrations/create_form_submissions_table.php.stub' => $this->migrationsPath('create_form_submissions_table.php'),
+            __DIR__.'/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
+            __DIR__.'/../database/migrations/create_asset_table.php.stub' => $this->migrationsPath('create_asset_table.php'),
+            __DIR__.'/../database/migrations/create_revisions_table.php.stub' => $this->migrationsPath('create_revisions_table.php'),
+        ], 'migrations');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/create_entries_table.php.stub' => $this->migrationsPath('create_entries_table'),
         ], 'statamic-eloquent-entries-table');
 
         $this->publishes([
-            __DIR__.'/../database/publish/create_entries_table_with_string_ids.php' => $this->migrationsPath('create_entries_table_with_string_ids'),
+            __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
@@ -276,8 +294,6 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function migrationsPath($filename)
     {
-        $date = date('2021_05_16_160811');
-
-        return database_path("migrations/{$date}_{$filename}.php");
+        return database_path('migrations/'.date('Y_m_d_His', time() + (++$this->migrationCount + 60))."_{$filename}.php");
     }
 }

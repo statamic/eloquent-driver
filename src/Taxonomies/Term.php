@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Statamic\Contracts\Taxonomies\Term as Contract;
 use Statamic\Eloquent\Taxonomies\TermModel as Model;
 use Statamic\Taxonomies\Term as FileEntry;
 
@@ -40,35 +41,43 @@ class Term extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.terms.model');
 
-        $data = $this->data();
+        $data = $source->data();
 
         if (! isset($data['template'])) {
             unset($data['template']);
         }
 
-        if ($this->blueprint && $this->taxonomy()->termBlueprints()->count() > 1) {
-            $data['blueprint'] = $this->blueprint;
+        if ($source->blueprint && $source->taxonomy()->termBlueprints()->count() > 1) {
+            $data['blueprint'] = $source->blueprint;
         }
 
-        $data['localizations'] = $this->localizations()->keys()->reduce(function ($localizations, $locale) {
-            $localizations[$locale] = $this->dataForLocale($locale)->toArray();
+        $data['localizations'] = $source->localizations()->keys()->reduce(function ($localizations, $locale) use ($source) {
+            $localizations[$locale] = $source->dataForLocale($locale)->toArray();
 
             return $localizations;
         }, []);
 
-        if ($collection = $this->collection()) {
+        if ($collection = $source->collection()) {
             $data['collection'] = $collection;
         }
 
-        return $class::findOrNew($this->model?->id)->fill([
-            'site' => $this->locale(),
-            'slug' => $this->slug(),
-            'uri' => $this->uri(),
-            'taxonomy' => $this->taxonomy(),
-            'data' => $data,
-        ]);
+        $isFileEntry = get_class($source) == FileEntry::class;
+
+        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
+            ->fill([
+                'site' => $source->locale(),
+                'slug' => $source->slug(),
+                'uri' => $source->uri(),
+                'taxonomy' => $source->taxonomy(),
+                'data' => $data,
+            ]);
     }
 
     public function model($model = null)

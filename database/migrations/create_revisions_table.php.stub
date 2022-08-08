@@ -4,13 +4,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-class CreateRevisionsTable extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+return new class extends Migration {
     public function up()
     {
         Schema::create($this->prefix('revisions'), function (Blueprint $table) {
@@ -24,13 +18,9 @@ class CreateRevisionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
+
     public function down()
     {
         Schema::dropIfExists($this->prefix('revisions'));
     }
-}
+};
