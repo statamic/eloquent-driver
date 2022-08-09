@@ -10,7 +10,7 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Contracts\Structures\Tree as TreeContract;
 use Statamic\Eloquent\Structures\Nav as EloquentNav;
 use Statamic\Eloquent\Structures\NavTree as EloquentNavTree;
-use Statamic\Eloquent\Structures\Tree;
+use Statamic\Eloquent\Structures\Tree as EloquentTree;
 use Statamic\Stache\Repositories\NavigationRepository;
 use Statamic\Stache\Repositories\NavTreeRepository;
 use Statamic\Statamic;
@@ -53,8 +53,8 @@ class ImportNavs extends Command
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
         // bind to the eloquent container class so we can use toModel()
-        app()->bind(NavContract::class, Nav::class);
-        app()->bind(TreeContract::class, Tree::class);
+        app()->bind(NavContract::class, EloquentNav::class);
+        app()->bind(TreeContract::class, EloquentTree::class);
     }
 
     private function importNavs()
@@ -65,7 +65,7 @@ class ImportNavs extends Command
         $navs->each(function ($nav) use ($bar) {
             $model = tap(EloquentNav::makeModelFromContract($nav))->save();
 
-            $nav->trees()->each(function($tree) {
+            $nav->trees()->each(function ($tree) {
                 EloquentNavTree::makeModelFromContract($tree)->save();
             });
 

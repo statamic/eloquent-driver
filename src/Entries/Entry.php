@@ -35,6 +35,7 @@ class Entry extends FileEntry
         }
 
         return $class::findOrNew($this->id())->fill([
+            'id' => $this->id(),
             'origin_id' => $this->origin()?->id(),
             'site' => $this->locale(),
             'slug' => $this->slug(),

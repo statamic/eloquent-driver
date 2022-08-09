@@ -36,17 +36,14 @@ class Nav extends FileEntry
     {
         $class = app('statamic.eloquent.navigations.model');
 
-        $isFileEntry = get_class($source) == FileEntry::class;
-
-        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
-            ->fill([
-                'handle' => $source->handle(),
-                'title' => $source->title(),
-                'collections' => $source->collections()->map->handle(),
-                'max_depth' => $source->maxDepth(),
-                'expects_root' => $source->expectsRoot(),
-                'initial_path' => $source->initialPath(),
-            ]);
+        return $class::firstOrNew(['handle' => $source->handle()])->fill([
+            'handle' => $source->handle(),
+            'title' => $source->title(),
+            'collections' => $source->collections()->map->handle(),
+            'max_depth' => $source->maxDepth(),
+            'expects_root' => $source->expectsRoot(),
+            'initial_path' => $source->initialPath(),
+        ]);
     }
 
     public function model($model = null)

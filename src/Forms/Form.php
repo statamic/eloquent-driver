@@ -32,18 +32,15 @@ class Form extends FileEntry
     {
         $class = app('statamic.eloquent.forms.model');
 
-        $isFileEntry = get_class($source) == FileEntry::class;
-
-        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
-            ->fill([
-                'title' => $source->title(),
-                'handle' => $source->handle(),
-                'settings' => [
-                    'store' => $source->store(),
-                    'email' => $source->email(),
-                    'honeypot' => $source->honeypot(),
-                ],
-            ]);
+        return $class::firstOrNew(['handle' => $source->handle()])->fill([
+            'title' => $source->title(),
+            'handle' => $source->handle(),
+            'settings' => [
+                'store' => $source->store(),
+                'email' => $source->email(),
+                'honeypot' => $source->honeypot(),
+            ],
+        ]);
     }
 
     public function model($model = null)

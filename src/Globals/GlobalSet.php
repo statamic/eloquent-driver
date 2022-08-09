@@ -34,7 +34,7 @@ class GlobalSet extends FileEntry
             return $value->toModel()->toArray();
         });
 
-        return $class::findOrNew($this->model?->id)->fill([
+        return $class::firstOrNew(['handle' => $this->handle()])->fill([
             'handle' => $this->handle(),
             'title' => $this->title(),
             'localizations' => $localizations,

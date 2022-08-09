@@ -14,7 +14,7 @@ return [
     'blueprints' => [
         'driver' => 'eloquent',
         'blueprint_model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
-        'fieldsets_model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+        'fieldset_model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
     ],
 
     'collections' => [
@@ -33,7 +33,7 @@ return [
     'forms' => [
         'driver' => 'eloquent',
         'model' => \Statamic\Eloquent\Forms\FormModel::class,
-        'submissions_model' => \Statamic\Eloquent\Forms\SubmissionModel::class,
+        'submission_model' => \Statamic\Eloquent\Forms\SubmissionModel::class,
     ],
 
     'global_sets' => [

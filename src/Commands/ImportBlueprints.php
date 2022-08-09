@@ -106,13 +106,12 @@ class ImportBlueprints extends Command
 
         $bar = $this->output->createProgressBar($files->count());
 
-        $files->each(function ($file) use ($bar) {
-            $basename = str_after($file, str_finish($this->directory, '/'));
+        $files->each(function ($file) use ($bar, $directory) {
+            $basename = str_after($file, str_finish($directory, '/'));
             $handle = str_before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
-            $fieldset = Fieldset::make()
-                ->setHandle($handle)
+            $fieldset = Fieldset::make($handle)
                 ->setContents(YAML::file($file)->parse());
 
             $model = app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([

@@ -24,7 +24,7 @@ class Submission extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.forms.submissions_model');
+        $class = app('statamic.eloquent.forms.submission_model');
 
         return $class::findOrNew($this->model?->id)->fill([
             'form_id' => $this->form->model()->id,
@@ -65,7 +65,7 @@ class Submission extends FileEntry
     public function delete()
     {
         if (! $this->model) {
-            $class = app('statamic.eloquent.forms.submissions_model');
+            $class = app('statamic.eloquent.forms.submission_model');
             $this->model = $class::findOrNew($this->id);
         }
 

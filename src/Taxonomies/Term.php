@@ -68,16 +68,17 @@ class Term extends FileEntry
             $data['collection'] = $collection;
         }
 
-        $isFileEntry = get_class($source) == FileEntry::class;
-
-        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
-            ->fill([
-                'site' => $source->locale(),
-                'slug' => $source->slug(),
-                'uri' => $source->uri(),
-                'taxonomy' => $source->taxonomy(),
-                'data' => $data,
-            ]);
+        return $class::firstOrNew([
+            'slug' => $source->slug(),
+            'taxonomy' => $source->taxonomy(),
+            'site' => $source->locale(),
+        ])->fill([
+            'site' => $source->locale(),
+            'slug' => $source->slug(),
+            'uri' => $source->uri(),
+            'taxonomy' => $source->taxonomy(),
+            'data' => $data,
+        ]);
     }
 
     public function model($model = null)
