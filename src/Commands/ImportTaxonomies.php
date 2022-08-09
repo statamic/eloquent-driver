@@ -12,9 +12,9 @@ use Statamic\Eloquent\Taxonomies\Taxonomy as EloquentTaxonomy;
 use Statamic\Eloquent\Taxonomies\Term as EloquentTerm;
 use Statamic\Stache\Repositories\TaxonomyRepository;
 use Statamic\Stache\Repositories\TermRepository;
+use Statamic\Statamic;
 use Statamic\Taxonomies\Taxonomy as StacheTaxonomy;
 use Statamic\Taxonomies\Term as StacheTerm;
-use Statamic\Statamic;
 
 class ImportTaxonomies extends Command
 {
@@ -88,7 +88,7 @@ class ImportTaxonomies extends Command
 
         $bar = $this->output->createProgressBar($parentTerms->count());
 
-        $parentTerms->each(function($term) use ($bar) {
+        $parentTerms->each(function ($term) use ($bar) {
             $model = tap(EloquentTerm::makeModelFromContract($term))->save();
 
             $bar->advance();

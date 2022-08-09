@@ -6,12 +6,10 @@ use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
-use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
-use Statamic\Statamic;
 
 class ImportForms extends Command
 {

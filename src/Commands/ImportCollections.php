@@ -62,7 +62,7 @@ class ImportCollections extends Command
         $collections->each(function ($collection) use ($bar) {
             $model = tap(EloquentCollection::makeModelFromContract($collection))->save();
             if ($structure = $collection->structure()) {
-                $structure->trees()->each(function($tree) {
+                $structure->trees()->each(function ($tree) {
                     EloquentCollectionTree::makeModelFromContract($tree)->save();
                 });
             }

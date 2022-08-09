@@ -57,7 +57,7 @@ class AssetContainer extends FileEntry
     {
         $class = app('statamic.eloquent.assets.container_model');
 
-        return $class::findOrNew($this->model?->id)->fill([
+        return $class::firstOrNew(['handle' => $this->handle()])->fill([
             'title' => $this->title(),
             'handle' => $this->handle(),
             'disk' => $this->diskHandle() ?? config('filesystems.default'),

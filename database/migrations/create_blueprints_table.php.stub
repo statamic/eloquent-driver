@@ -10,10 +10,12 @@ return new class extends Migration {
     {
         Schema::create($this->prefix('blueprints'), function (Blueprint $table) {
             $table->id();
-            $table->string('namespace')->nullable()->default(null);
+            $table->string('namespace')->nullable()->default(null)->index();
             $table->string('handle');
             $table->json('data');
             $table->timestamps();
+
+            $table->unique(['handle', 'namespace']);
         });
 
         $this->seedDefaultBlueprint();

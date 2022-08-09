@@ -15,7 +15,7 @@ class NavTree extends FileEntry
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
-            ->initialPath($model->initial_path)
+            ->initialPath($model->settings['initial_path'] ?? null)
             ->model($model);
     }
 
@@ -30,14 +30,19 @@ class NavTree extends FileEntry
 
         $isFileEntry = get_class($source) == FileEntry::class;
 
-        return $class::findOrNew($isFileEntry ? null : $source->model?->id)
-            ->fill([
-                'handle' => $source->handle(),
+        return $class::firstOrNew([
+            'handle' => $source->handle(),
+            'type' => 'navigation',
+            'locale' => $source->locale(),
+        ])->fill([
+            'handle' => $source->handle(),
+            'locale' => $source->locale(),
+            'tree' => ($isFileEntry || $source->model) ? $source->tree() : [],
+            'type' => 'navigation',
+            'settings' => [
                 'initial_path' => $source->initialPath(),
-                'locale' => $source->locale(),
-                'tree' => ($isFileEntry || $source->model) ? $source->tree() : [],
-                'type' => 'navigation',
-            ]);
+            ],
+        ]);
     }
 
     public function model($model = null)

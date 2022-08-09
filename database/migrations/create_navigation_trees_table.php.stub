@@ -10,11 +10,13 @@ return new class extends Migration {
         Schema::create($this->prefix('trees'), function (Blueprint $table) {
             $table->id();
             $table->string('handle');
-            $table->string('type');
-            $table->string('initial_path')->nullable();
-            $table->string('locale')->nullable();
+            $table->string('type')->index();
+            $table->string('locale')->nullable()->index();
             $table->json('tree')->nullable();
+            $table->json('settings')->nullable();
             $table->timestamps();
+
+            $table->unique(['handle', 'type', 'locale']);
         });
     }
 

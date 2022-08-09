@@ -15,8 +15,7 @@ class CollectionTree extends FileEntry
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
-            ->initialPath($model->initial_path)
-            ->syncOriginal()
+            ->initialPath($model->settings['initial_path'] ?? null)
             ->model($model);
     }
 
@@ -27,16 +26,21 @@ class CollectionTree extends FileEntry
 
     public static function makeModelFromContract($source)
     {
-        $class = app('statamic.eloquent.collections.tree_model');
+        $class = app('statamic.eloquent.navigations.tree_model');
 
-        return $class::findOrNew($source instanceof FileEntry ? null : $this->model?->id)
-            ->fill([
-                'handle' => $source->handle(),
+        return $class::firstOrNew([
+            'handle' => $source->handle(),
+            'type' => 'collection',
+            'locale' => $source->locale(),
+        ])->fill([
+            'handle' => $source->handle(),
+            'locale' => $source->locale(),
+            'tree' => $source->tree(),
+            'type' => 'collection',
+            'settings' => [
                 'initial_path' => $source->initialPath(),
-                'locale' => $source->locale(),
-                'tree' => $source->tree(),
-                'type' => 'collection',
-            ]);
+            ],
+        ]);
     }
 
     public function model($model = null)

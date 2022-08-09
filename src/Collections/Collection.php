@@ -49,10 +49,8 @@ class Collection extends FileEntry
     {
         $class = app('statamic.eloquent.collections.model');
 
-        $isFileEntry = get_class($source) == FileEntry::class;
-
-        return $class::findOrNew($isFileEntry ? null : $source->model?->id)->fill([
-            'title' => $source->title ?? '',
+        return $class::firstOrNew(['handle' => $source->handle])->fill([
+            'title' => $source->title ?? $source->handle,
             'handle' => $source->handle,
             'settings' => [
                 'routes' => $source->routes,
