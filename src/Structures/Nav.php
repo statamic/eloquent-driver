@@ -15,10 +15,10 @@ class Nav extends FileEntry
         return (new static)
             ->handle($model->handle)
             ->title($model->title)
-            ->collections($model->collections)
-            ->maxDepth($model->max_depth)
-            ->expectsRoot($model->expects_root)
-            ->initialPath($model->initial_path)
+            ->collections($model->settings['collections'] ?? null)
+            ->maxDepth($model->settings['max_depth'] ?? null)
+            ->expectsRoot($model->settings['expects_root'] ?? false)
+            ->initialPath($model->settings['initial_path'] ?? null)
             ->model($model);
     }
 
@@ -39,10 +39,12 @@ class Nav extends FileEntry
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
             'handle' => $source->handle(),
             'title' => $source->title(),
-            'collections' => $source->collections()->map->handle(),
-            'max_depth' => $source->maxDepth(),
-            'expects_root' => $source->expectsRoot(),
-            'initial_path' => $source->initialPath(),
+            'settings' => [
+                'collections' => $source->collections()->map->handle(),
+                'max_depth' => $source->maxDepth(),
+                'expects_root' => $source->expectsRoot(),
+                'initial_path' => $source->initialPath(),
+            ],
         ]);
     }
 

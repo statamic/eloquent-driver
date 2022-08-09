@@ -11,8 +11,6 @@ class NavModel extends BaseModel
     protected $table = 'navigations';
 
     protected $casts = [
-        'collections' => 'json',
-        'expectsRoot' => 'boolean',
-        'maxDepth' => 'integer',
+        'settings' => 'json',
     ];
 }

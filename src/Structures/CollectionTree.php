@@ -15,8 +15,7 @@ class CollectionTree extends FileEntry
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
-            ->initialPath($model->initial_path)
-            ->syncOriginal()
+            ->initialPath($model->settings['initial_path'] ?? null)
             ->model($model);
     }
 
@@ -35,10 +34,12 @@ class CollectionTree extends FileEntry
             'locale' => $source->locale(),
         ])->fill([
             'handle' => $source->handle(),
-            'initial_path' => $source->initialPath(),
             'locale' => $source->locale(),
             'tree' => $source->tree(),
             'type' => 'collection',
+            'settings' => [
+                'initial_path' => $source->initialPath(),
+            ],
         ]);
     }
 

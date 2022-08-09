@@ -11,10 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('handle')->unique();
             $table->string('title');
-            $table->json('collections')->nullable();
-            $table->integer('max_depth')->nullable();
-            $table->boolean('expects_root')->default(false);
-            $table->string('initial_path')->nullable();
+            $table->json('settings')->nullable();
             $table->timestamps();
         });
     }
