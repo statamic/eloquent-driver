@@ -59,7 +59,6 @@ class AssetContainer extends FileEntry
 
         return $class::firstOrNew(['handle' => $this->handle()])->fill([
             'title' => $this->title(),
-            'handle' => $this->handle(),
             'disk' => $this->diskHandle() ?? config('filesystems.default'),
             'settings' => [
                 'allow_uploads' => $this->allowUploads(),

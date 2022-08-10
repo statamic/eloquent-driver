@@ -34,7 +34,6 @@ class Form extends FileEntry
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title' => $source->title(),
-            'handle' => $source->handle(),
             'settings' => [
                 'store' => $source->store(),
                 'email' => $source->email(),

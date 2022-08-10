@@ -73,10 +73,7 @@ class Term extends FileEntry
             'taxonomy' => $source->taxonomy(),
             'site' => $source->locale(),
         ])->fill([
-            'site' => $source->locale(),
-            'slug' => $source->slug(),
             'uri' => $source->uri(),
-            'taxonomy' => $source->taxonomy(),
             'data' => $data,
         ]);
     }

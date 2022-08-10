@@ -37,7 +37,6 @@ class Nav extends FileEntry
         $class = app('statamic.eloquent.navigations.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'handle' => $source->handle(),
             'title' => $source->title(),
             'settings' => [
                 'collections' => $source->collections()->map->handle(),
