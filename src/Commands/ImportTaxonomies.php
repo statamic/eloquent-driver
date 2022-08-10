@@ -10,6 +10,8 @@ use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Taxonomies\Taxonomy as EloquentTaxonomy;
 use Statamic\Eloquent\Taxonomies\Term as EloquentTerm;
+use Statamic\Facades\Taxonomy as TaxonomyFacade;
+use Statamic\Facades\Term as TermFacade;
 use Statamic\Stache\Repositories\TaxonomyRepository;
 use Statamic\Stache\Repositories\TermRepository;
 use Statamic\Statamic;
@@ -61,7 +63,7 @@ class ImportTaxonomies extends Command
 
     private function importTaxonomies()
     {
-        $taxonomies = \Statamic\Facades\Taxonomy::all();
+        $taxonomies = TaxonomyFacade::all();
         $bar = $this->output->createProgressBar($taxonomies->count());
 
         $taxonomies->each(function ($taxonomy) use ($bar) {
@@ -77,7 +79,7 @@ class ImportTaxonomies extends Command
 
     private function importTerms()
     {
-        $terms = \Statamic\Facades\Term::all();
+        $terms = TermFacade::all();
 
         $parentTerms = collect();
         $terms->each(function ($term) use ($parentTerms) {

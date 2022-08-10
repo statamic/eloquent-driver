@@ -7,6 +7,7 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Eloquent\Globals\GlobalSet;
+use Statamic\Facades\GlobalSet as GlobalSetFacade;
 use Statamic\Stache\Repositories\GlobalRepository;
 use Statamic\Statamic;
 
@@ -52,7 +53,7 @@ class ImportGlobals extends Command
 
     private function importGlobals()
     {
-        $globalsets = \Statamic\Facades\GlobalSet::all();
+        $globalsets = GlobalSetFacade::all();
         $bar = $this->output->createProgressBar($globalsets->count());
 
         $globalsets->each(function ($globalset) use ($bar) {
