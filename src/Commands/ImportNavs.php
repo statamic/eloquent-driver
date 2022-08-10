@@ -11,6 +11,7 @@ use Statamic\Contracts\Structures\Tree as TreeContract;
 use Statamic\Eloquent\Structures\Nav as EloquentNav;
 use Statamic\Eloquent\Structures\NavTree as EloquentNavTree;
 use Statamic\Eloquent\Structures\Tree as EloquentTree;
+use Statamic\Facades\Nav as NavFacade;
 use Statamic\Stache\Repositories\NavigationRepository;
 use Statamic\Stache\Repositories\NavTreeRepository;
 use Statamic\Statamic;
@@ -59,7 +60,7 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
-        $navs = \Statamic\Facades\Nav::all();
+        $navs = NavFacade::all();
         $bar = $this->output->createProgressBar($navs->count());
 
         $navs->each(function ($nav) use ($bar) {

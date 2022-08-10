@@ -72,6 +72,17 @@ class ImportBlueprints extends Command
             );
 
             $contents = YAML::file($path)->parse();
+            // Ensure sections are ordered correctly.
+            if (isset($contents['sections']) && is_array($contents['sections'])) {
+                $count = 0;
+                $contents['sections'] = collect($contents['sections'])
+                    ->map(function ($section) use (&$count) {
+                        $section['__count'] = $count++;
+
+                        return $section;
+                    })
+                    ->toArray();
+            }
 
             $blueprint = Blueprint::make()
                 ->setHidden(Arr::pull($contents, 'hide'))

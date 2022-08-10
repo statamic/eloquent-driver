@@ -35,10 +35,7 @@ class NavTree extends FileEntry
             'type' => 'navigation',
             'locale' => $source->locale(),
         ])->fill([
-            'handle' => $source->handle(),
-            'locale' => $source->locale(),
             'tree' => ($isFileEntry || $source->model) ? $source->tree() : [],
-            'type' => 'navigation',
             'settings' => [
                 'initial_path' => $source->initialPath(),
             ],

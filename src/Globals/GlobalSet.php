@@ -35,7 +35,6 @@ class GlobalSet extends FileEntry
         });
 
         return $class::firstOrNew(['handle' => $this->handle()])->fill([
-            'handle' => $this->handle(),
             'title' => $this->title(),
             'localizations' => $localizations,
         ]);

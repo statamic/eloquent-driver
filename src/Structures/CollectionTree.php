@@ -33,10 +33,7 @@ class CollectionTree extends FileEntry
             'type' => 'collection',
             'locale' => $source->locale(),
         ])->fill([
-            'handle' => $source->handle(),
-            'locale' => $source->locale(),
             'tree' => $source->tree(),
-            'type' => 'collection',
             'settings' => [
                 'initial_path' => $source->initialPath(),
             ],

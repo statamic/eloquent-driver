@@ -51,7 +51,6 @@ class Collection extends FileEntry
 
         return $class::firstOrNew(['handle' => $source->handle])->fill([
             'title' => $source->title ?? $source->handle,
-            'handle' => $source->handle,
             'settings' => [
                 'routes' => $source->routes,
                 'slugs' => $source->requiresSlugs(),

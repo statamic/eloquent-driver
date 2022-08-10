@@ -24,7 +24,8 @@ class Asset extends FileAsset
         }
 
         return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
-            if ($model = app('statamic.eloquent.assets.model')::where('handle', $this->container()->handle().'::'.$this->metaPath())->first()) {
+            $handle = $this->container()->handle().'::'.$this->metaPath();
+            if ($model = app('statamic.eloquent.assets.model')::where('handle', $handle)->first()) {
                 return $model->data;
             }
 
