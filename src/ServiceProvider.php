@@ -83,6 +83,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportForms::class,
             Commands\ImportGlobals::class,
             Commands\ImportNavs::class,
+            Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
         ]);
     }

@@ -26,7 +26,8 @@ class RevisionRepository extends StacheRepository
 
     public function findWorkingCopyByKey($key)
     {
-        if (! $revision = app('statamic.eloquent.revisions.model')::where(['key' => $key, 'action' => 'working'])->first()) {
+        $class = app('statamic.eloquent.revisions.model');
+        if (! $revision = $class::where(['key' => $key, 'action' => 'working'])->first()) {
             return null;
         }
 
