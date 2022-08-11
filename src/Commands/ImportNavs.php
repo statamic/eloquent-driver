@@ -53,7 +53,6 @@ class ImportNavs extends Command
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
-        // bind to the eloquent container class so we can use toModel()
         app()->bind(NavContract::class, EloquentNav::class);
         app()->bind(TreeContract::class, EloquentTree::class);
     }
@@ -61,20 +60,22 @@ class ImportNavs extends Command
     private function importNavs()
     {
         $navs = NavFacade::all();
-        $bar = $this->output->createProgressBar($navs->count());
 
-        $navs->each(function ($nav) use ($bar) {
-            $model = tap(EloquentNav::makeModelFromContract($nav))->save();
+        $this->withProgressBar($navs, function ($nav) {
+            $lastModified = $nav->fileLastModified();
+            EloquentNav::makeModelFromContract($nav)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
 
             $nav->trees()->each(function ($tree) {
-                EloquentNavTree::makeModelFromContract($tree)->save();
+                $lastModified = $tree->fileLastModified();
+                EloquentNavTree::makeModelFromContract($tree)
+                    ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                    ->save();
             });
-
-            $bar->advance();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Navs imported');
     }
 }

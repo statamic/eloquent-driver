@@ -25,9 +25,12 @@ class Submission extends FileEntry
     public function toModel()
     {
         $class = app('statamic.eloquent.forms.submission_model');
+        $timestamp = (new $class)->fromDateTime($this->date());
 
-        return $class::findOrNew($this->model?->id)->fill([
+        return $class::firstOrNew([
             'form_id' => $this->form->model()->id,
+            'created_at' => $timestamp,
+        ])->fill([
             'data' => $this->data,
         ]);
     }

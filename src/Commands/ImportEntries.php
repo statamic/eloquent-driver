@@ -49,22 +49,19 @@ class ImportEntries extends Command
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
-        // bind to the eloquent entry class so we can use toModel()
         app()->bind(EntryContract::class, app('statamic.eloquent.entries.entry'));
     }
 
     private function importEntries()
     {
         $entries = Entry::all();
-        $bar = $this->output->createProgressBar($entries->count());
 
-        $entries->each(function ($entry) use ($bar) {
-            $entry->toModel()->save();
-            $bar->advance();
+        $this->withProgressBar($entries, function ($entry) {
+            $lastModified = $entry->fileLastModified();
+            $entry->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Entries imported');
     }
 }

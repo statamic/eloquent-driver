@@ -55,7 +55,6 @@ class ImportAssets extends Command
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 
-        // bind to the eloquent container class so we can use toModel()
         app()->bind(AssetContainerContract::class, AssetContainer::class);
         app()->bind(AssetContract::class, Asset::class);
     }
@@ -63,14 +62,12 @@ class ImportAssets extends Command
     private function importAssetContainers()
     {
         $containers = AssetContainerFacade::all();
-        $bar = $this->output->createProgressBar($containers->count());
 
-        $containers->each(function ($container) use ($bar) {
-            $container->toModel()->save();
-            $bar->advance();
+        $this->withProgressBar($containers, function ($container) {
+            $lastModified = $container->fileLastModified();
+            $container->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
         });
 
-        $bar->finish();
         $this->line('');
         $this->info('Asset containers imported');
     }
@@ -78,18 +75,15 @@ class ImportAssets extends Command
     private function importAssets()
     {
         $assets = AssetFacade::all();
-        $bar = $this->output->createProgressBar($assets->count());
 
-        $assets->each(function ($asset) use ($bar) {
+        $this->withProgressBar($assets, function ($asset) {
             if ($contents = $asset->disk()->get($path = $asset->metaPath())) {
                 $metadata = YAML::file($path)->parse($contents);
                 $asset->writeMeta($metadata);
             }
-            $bar->advance();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Assets imported');
     }
 }

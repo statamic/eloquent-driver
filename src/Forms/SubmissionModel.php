@@ -14,8 +14,10 @@ class SubmissionModel extends BaseModel
         'data' => 'json',
     ];
 
+    protected $dateFormat = 'Y-m-d H:i:s.u';
+
     public function form()
     {
-        return $this->hasOne(FormModel::class, 'id');
+        return $this->belongsTo(FormModel::class, 'id');
     }
 }

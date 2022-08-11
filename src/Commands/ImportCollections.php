@@ -51,26 +51,31 @@ class ImportCollections extends Command
     {
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
         app()->bind(CollectionContract::class, StacheCollection::class);
     }
 
     private function importCollections()
     {
         $collections = CollectionFacade::all();
-        $bar = $this->output->createProgressBar($collections->count());
 
-        $collections->each(function ($collection) use ($bar) {
-            $model = tap(EloquentCollection::makeModelFromContract($collection))->save();
+        $this->withProgressBar($collections, function ($collection) {
+            $lastModified = $collection->fileLastModified();
+            EloquentCollection::makeModelFromContract($collection)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
+
             if ($structure = $collection->structure()) {
                 $structure->trees()->each(function ($tree) {
-                    EloquentCollectionTree::makeModelFromContract($tree)->save();
+                    $lastModified = $tree->fileLastModified();
+                    EloquentCollectionTree::makeModelFromContract($tree)
+                        ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                        ->save();
                 });
             }
-            $bar->advance();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Collections imported');
     }
 }

@@ -47,24 +47,19 @@ class ImportGlobals extends Command
     {
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
 
-        // bind to the eloquent container class so we can use toModel()
         app()->bind(GlobalSetContract::class, GlobalSet::class);
     }
 
     private function importGlobals()
     {
-        $globalsets = GlobalSetFacade::all();
-        $bar = $this->output->createProgressBar($globalsets->count());
+        $sets = GlobalSetFacade::all();
 
-        $globalsets->each(function ($globalset) use ($bar) {
-            $model = $globalset->toModel();
-            $model->save();
-
-            $bar->advance();
+        $this->withProgressBar($sets, function ($set) {
+            $lastModified = $set->fileLastModified();
+            $set->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Globals imported');
     }
 }

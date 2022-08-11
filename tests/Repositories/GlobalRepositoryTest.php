@@ -39,7 +39,7 @@ class GlobalRepositoryTest extends TestCase
         $this->assertCount(2, $sets);
         $this->assertEveryItemIsInstanceOf(GlobalSet::class, $sets);
 
-        $ordered = $sets->sortBy->path()->values();
+        $ordered = $sets->sortBy->handle()->values();
         $this->assertEquals(['contact', 'global'], $ordered->map->id()->all());
         $this->assertEquals(['contact', 'global'], $ordered->map->handle()->all());
         $this->assertEquals(['Contact Details', 'General'], $ordered->map->title()->all());

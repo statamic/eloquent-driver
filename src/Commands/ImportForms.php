@@ -3,10 +3,13 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Eloquent\Forms\Form;
+use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Facades\File;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
@@ -52,23 +55,26 @@ class ImportForms extends Command
     private function importForms()
     {
         $forms = (new FormRepository)->all();
-        $bar = $this->output->createProgressBar($forms->count());
 
-        $forms->each(function ($form) use ($bar) {
-            $model = tap(Form::makeModelFromContract($form))->save();
+        $this->withProgressBar($forms, function ($form) {
+            $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
+            $model = Form::makeModelFromContract($form)->fill([
+                'created_at' => $lastModified,
+                'updated_at' => $lastModified,
+            ]);
+            $model->save();
 
             $form->submissions()->each(function ($submission) use ($model) {
-                $model->submissions()->create([
-                    'created_at' => $submission->date(),
-                    'data' => $submission->data(),
-                ]);
-            });
+                $timestamp = (new SubmissionModel)->fromDateTime($submission->date());
 
-            $bar->advance();
+                $model->submissions()->firstOrNew(['created_at' => $timestamp])->fill([
+                    'data' => $submission->data(),
+                    'updated_at' => $timestamp,
+                ])->save();
+            });
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Forms imported');
     }
 }

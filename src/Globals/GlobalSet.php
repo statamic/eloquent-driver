@@ -30,9 +30,7 @@ class GlobalSet extends FileEntry
     {
         $class = app('statamic.eloquent.global_sets.model');
 
-        $localizations = $this->localizations()->map(function ($value, $key) {
-            return $value->toModel()->toArray();
-        });
+        $localizations = $this->localizations()->map(fn ($value) => $value->toModel()->toArray());
 
         return $class::firstOrNew(['handle' => $this->handle()])->fill([
             'title' => $this->title(),
@@ -58,10 +56,5 @@ class GlobalSet extends FileEntry
         $this->id($model->id);
 
         return $this;
-    }
-
-    public function path()
-    {
-        return $this->handle();
     }
 }
