@@ -12,7 +12,5 @@ class AssetModel extends BaseModel
 
     protected $casts = [
         'data' => 'json',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
     ];
 }

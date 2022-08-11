@@ -69,9 +69,13 @@ class Asset extends FileAsset
 
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
             'handle' => $this->container()->handle().'::'.$this->metaPath(),
-        ]);
+        ])->fill(['data' => $meta]);
 
-        $model->data = $meta;
+        // Set initial timestamps.
+        if (empty($model->created_at)) {
+            $model->created_at = $meta['last_modified'];
+            $model->updated_at = $meta['last_modified'];
+        }
 
         $model->save();
     }
