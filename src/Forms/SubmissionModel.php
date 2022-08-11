@@ -16,6 +16,6 @@ class SubmissionModel extends BaseModel
 
     public function form()
     {
-        return $this->hasOne(FormModel::class, 'id');
+        return $this->belongsTo(FormModel::class, 'id');
     }
 }

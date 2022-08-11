@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Statamic\Console\RunsInPlease;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
@@ -64,9 +65,7 @@ class ImportBlueprints extends Command
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
 
-        $bar = $this->output->createProgressBar($files->count());
-
-        $files->each(function ($path) use ($bar, $directory) {
+        $this->withProgressBar($files, function ($path) use ($directory) {
             [$namespace, $handle] = $this->getNamespaceAndHandle(
                 Str::after(Str::before($path, '.yaml'), $directory.'/')
             );
@@ -91,20 +90,21 @@ class ImportBlueprints extends Command
                 ->setHandle($handle)
                 ->setNamespace($namespace ?? null)
                 ->setContents($contents);
+            $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
             $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
                 'handle' => $blueprint->handle(),
                 'namespace' => $blueprint->namespace() ?? null,
+            ])->fill([
+                'data' => $blueprint->contents(),
+                'created_at' => $lastModified,
+                'updated_at' => $lastModified,
             ]);
 
-            $model->data = $blueprint->contents();
             $model->save();
-
-            $bar->advance();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Blueprints imported');
     }
 
@@ -115,28 +115,27 @@ class ImportBlueprints extends Command
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
 
-        $bar = $this->output->createProgressBar($files->count());
-
-        $files->each(function ($file) use ($bar, $directory) {
-            $basename = str_after($file, str_finish($directory, '/'));
+        $this->withProgressBar($files, function ($path) use ($directory) {
+            $basename = str_after($path, str_finish($directory, '/'));
             $handle = str_before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
             $fieldset = Fieldset::make($handle)
-                ->setContents(YAML::file($file)->parse());
+                ->setContents(YAML::file($path)->parse());
+            $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
             $model = app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
                 'handle' => $fieldset->handle(),
+            ])->fill([
+                'data' => $fieldset->contents(),
+                'created_at' => $lastModified,
+                'updated_at' => $lastModified,
             ]);
 
-            $model->data = $fieldset->contents();
             $model->save();
-
-            $bar->advance();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Fieldsets imported');
     }
 

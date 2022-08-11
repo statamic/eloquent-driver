@@ -50,6 +50,7 @@ class Revision extends FileEntry
             'user' => $this->user()?->id(),
             'message' => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
             'attributes' => collect($this->attributes())->except('id'),
+            'updated_at' => $this->date(),
         ]);
     }
 

@@ -56,7 +56,6 @@ class ImportTaxonomies extends Command
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 
-        // bind to the eloquent container class so we can use toModel()
         app()->bind(TaxonomyContract::class, StacheTaxonomy::class);
         app()->bind(TermContract::class, StacheTerm::class);
     }
@@ -64,40 +63,34 @@ class ImportTaxonomies extends Command
     private function importTaxonomies()
     {
         $taxonomies = TaxonomyFacade::all();
-        $bar = $this->output->createProgressBar($taxonomies->count());
 
-        $taxonomies->each(function ($taxonomy) use ($bar) {
-            $model = tap(EloquentTaxonomy::makeModelFromContract($taxonomy))->save();
-
-            $bar->advance();
+        $this->withProgressBar($taxonomies, function ($taxonomy) {
+            $lastModified = $taxonomy->fileLastModified();
+            EloquentTaxonomy::makeModelFromContract($taxonomy)->fill([
+                'created_at' => $lastModified,
+                'updated_at' => $lastModified,
+            ])->save();
         });
 
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Taxonomies imported');
     }
 
     private function importTerms()
     {
         $terms = TermFacade::all();
+        // Grab unique parent terms.
+        $terms = $terms->map->term()->unique();
 
-        $parentTerms = collect();
-        $terms->each(function ($term) use ($parentTerms) {
-            $parentTerms->push($term->term());
+        $this->withProgressBar($terms, function ($term) {
+            $lastModified = $term->fileLastModified();
+            EloquentTerm::makeModelFromContract($term)->fill([
+                'created_at' => $lastModified,
+                'updated_at' => $lastModified,
+            ])->save();
         });
 
-        $parentTerms = $parentTerms->unique();
-
-        $bar = $this->output->createProgressBar($parentTerms->count());
-
-        $parentTerms->each(function ($term) use ($bar) {
-            $model = tap(EloquentTerm::makeModelFromContract($term))->save();
-
-            $bar->advance();
-        });
-
-        $bar->finish();
-        $this->line('');
+        $this->newLine();
         $this->info('Terms imported');
     }
 }

@@ -68,8 +68,6 @@ class AssetContainer extends FileEntry
                 'create_folders' => $this->createFolders(),
                 'search_index' => $this->searchIndex(),
             ],
-            'created_at' => $this->fileLastModified(),
-            'updated_at' => $this->fileLastModified(),
         ]);
     }
 

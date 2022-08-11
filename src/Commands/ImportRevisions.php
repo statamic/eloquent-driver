@@ -61,7 +61,7 @@ class ImportRevisions extends Command
             $revision->toModel()->save();
         });
 
-        $this->line('');
+        $this->newLine();
         $this->info('Revisions imported');
     }
 }
