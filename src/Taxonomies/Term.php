@@ -34,6 +34,7 @@ class Term extends FileEntry
             unset($data['collection']);
         }
 
+        $term->syncOriginal();
         $term->data($data);
 
         return $term;
