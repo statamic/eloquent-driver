@@ -8,6 +8,7 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Eloquent\Forms\Form;
+use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Facades\File;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository;
@@ -64,12 +65,12 @@ class ImportForms extends Command
             $model->save();
 
             $form->submissions()->each(function ($submission) use ($model) {
-                // @TODO: Account for microsecond precision.
-                $model->submissions()->create([
+                $timestamp = (new SubmissionModel)->fromDateTime($submission->date());
+
+                $model->submissions()->firstOrNew(['created_at' => $timestamp])->fill([
                     'data' => $submission->data(),
-                    'created_at' => $submission->date(),
-                    'updated_at' => $submission->date(),
-                ]);
+                    'updated_at' => $timestamp,
+                ])->save();
             });
         });
 
