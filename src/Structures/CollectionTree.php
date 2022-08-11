@@ -3,6 +3,8 @@
 namespace Statamic\Eloquent\Structures;
 
 use Statamic\Eloquent\Structures\TreeModel as Model;
+use Statamic\Events\CollectionTreeDeleted;
+use Statamic\Events\CollectionTreeSaved;
 use Statamic\Structures\CollectionTree as FileEntry;
 
 class CollectionTree extends FileEntry
@@ -49,5 +51,15 @@ class CollectionTree extends FileEntry
         $this->model = $model;
 
         return $this;
+    }
+
+    protected function dispatchSavedEvent()
+    {
+        CollectionTreeSaved::dispatch($this);
+    }
+
+    protected function dispatchDeletedEvent()
+    {
+        CollectionTreeDeleted::dispatch($this);
     }
 }
