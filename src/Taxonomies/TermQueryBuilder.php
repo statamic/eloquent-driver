@@ -89,13 +89,17 @@ class TermQueryBuilder extends EloquentQueryBuilder
         if (in_array($column, ['id', 'slug'])) {
             $column = 'slug';
 
-            $taxonomy = Str::before($value.'', '::');
+            if (str_contains($value, '::')) {
 
-            if ($taxonomy) {
-                $this->taxonomies[] = $taxonomy;
+                $taxonomy = Str::before($value.'', '::');
+
+                if ($taxonomy) {
+                    $this->taxonomies[] = $taxonomy;
+                }
+
+                $value = Str::after($value, '::');
+
             }
-
-            $value = Str::after($value, '::');
         }
 
         parent::where($column, $operator, $value, $boolean);
@@ -141,6 +145,42 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function get($columns = ['*'])
     {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        $items = parent::get($columns);
+
+        // If a single collection has been queried, we'll supply it to the terms so
+        // things like URLs will be scoped to the collection. We can't do it when
+        // multiple collections are queried because it would be ambiguous.
+        if ($this->collections && count($this->collections) == 1) {
+            $items->each->collection(Collection::findByHandle($this->collections[0]));
+        }
+
+        return $items->map(function ($term) {
+            if ($this->site) {
+                return $term->in($this->site);
+            }
+
+            return $term->inDefaultLocale();
+        });
+    }
+
+    public function count()
+    {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        return parent::count();
+    }
+
+    public function paginate($perPage = null, $columns = [], $pageName = 'page', $page = null)
+    {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        return parent::paginate($perPage = null, $columns = [], $pageName = 'page', $page = null);
+    }
+
+    private function applyCollectionAndTaxonomyWheres()
+    {
         if (! empty($this->collections)) {
             $collectionTaxonomies = collect($this->collections)
                 ->map(function ($handle) {
@@ -160,22 +200,5 @@ class TermQueryBuilder extends EloquentQueryBuilder
         if ($queryTaxonomies->count() > 0) {
             $this->builder->whereIn('taxonomy', $queryTaxonomies->all());
         }
-
-        $items = parent::get($columns);
-
-        // If a single collection has been queried, we'll supply it to the terms so
-        // things like URLs will be scoped to the collection. We can't do it when
-        // multiple collections are queried because it would be ambiguous.
-        if ($this->collections && count($this->collections) == 1) {
-            $items->each->collection(Collection::findByHandle($this->collections[0]));
-        }
-
-        return $items->map(function ($term) {
-            if ($this->site) {
-                return $term->in($this->site);
-            }
-
-            return $term->inDefaultLocale();
-        });
     }
 }
