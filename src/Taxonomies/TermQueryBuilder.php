@@ -40,7 +40,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (! in_array($column, $this->columns)) {
-            $column = 'data->'.$column;
+            if (! Str::startsWith($column, 'data->')) {
+                $column = 'data->'.$column;
+            }
         }
 
         return $column;
@@ -188,6 +190,8 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 })
                 ->flatten()
                 ->filter()
+                ->map
+                ->handle()
                 ->unique();
 
             $this->taxonomies = array_merge($this->taxonomies, $collectionTaxonomies->all());

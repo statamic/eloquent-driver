@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Entries\EntryCollection;
 use Statamic\Query\EloquentQueryBuilder;
@@ -34,7 +35,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         }
 
         if (! in_array($column, self::COLUMNS)) {
-            $column = 'data->'.$column;
+            if (! Str::startsWith($column, 'data->')) {
+                $column = 'data->'.$column;
+            }
         }
 
         return $column;

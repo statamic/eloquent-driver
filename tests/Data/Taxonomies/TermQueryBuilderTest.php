@@ -3,7 +3,6 @@
 namespace Tests\Data\Taxonomies;
 
 use Facades\Tests\Factories\EntryFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Site;
@@ -15,8 +14,6 @@ use Tests\TestCase;
 
 class TermQueryBuilderTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** @test */
     public function it_gets_terms()
     {
@@ -416,7 +413,7 @@ class TermQueryBuilderTest extends TestCase
     {
         $this->createWhereDateTestTerms();
 
-        $entries = Term::query()->whereDay('test_date', 15)->get();
+        $entries = Term::query()->whereDay('test_date', 15)->dd()->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
