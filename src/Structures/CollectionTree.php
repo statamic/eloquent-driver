@@ -27,7 +27,7 @@ class CollectionTree extends FileEntry
 
     public static function makeModelFromContract($source)
     {
-        $class = app('statamic.eloquent.navigations.tree_model');
+        $class = app('statamic.eloquent.collections.tree_model');
 
         return $class::firstOrNew([
             'handle' => $source->handle(),
