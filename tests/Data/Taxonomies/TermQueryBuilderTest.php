@@ -279,14 +279,17 @@ class TermQueryBuilderTest extends TestCase
         Term::make('tag-3')->dataForLocale('en', [])->taxonomy('tags')->save();
 
         $substitute = Term::make('tag-2')->taxonomy('tags')->dataForLocale('en', ['title' => 'Replaced'])->in('en');
+        $substitute->save();
 
         $found = Term::query()->where('id', 'tags::tag-2')->first();
+
         $this->assertNotNull($found);
-        $this->assertNotEquals($found, $substitute);
+        $this->assertNotEquals($found->toArray(), $substitute->toArray());
 
         Term::substitute($substitute);
 
         $found = Term::query()->where('id', 'tags::tag-2')->first();
+
         $this->assertNotNull($found);
         $this->assertEquals($found, $substitute);
     }

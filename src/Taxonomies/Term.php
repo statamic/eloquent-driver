@@ -59,10 +59,10 @@ class Term extends FileEntry
             $data['blueprint'] = $source->blueprint;
         }
 
-        $data['localizations'] = $source->localizations()->keys()->reduce(function ($localizations, $locale) use ($source) {
-            $localizations[$locale] = $source->dataForLocale($locale)->toArray();
+        $source->localizations()->keys()->reduce(function ($data, $locale) use ($source) {
+            $data[$locale] = $source->dataForLocale($locale)->toArray();
 
-            return $localizations;
+            return $data;
         }, []);
 
         if ($collection = $source->collection()) {
