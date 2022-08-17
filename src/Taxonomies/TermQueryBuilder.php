@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Collection;
+use Statamic\Facades\Taxonony;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Query\EloquentQueryBuilder;
@@ -186,44 +187,48 @@ class TermQueryBuilder extends EloquentQueryBuilder
     private function applyCollectionAndTaxonomyWheres()
     {
         if (! empty($this->collections)) {
-            $taxonomies = empty($this->taxonomies)
-                ? Facades\Taxonomy::handles()
-                : $this->taxonomies;
+            $this->builder->where(function ($query) {
 
-            // get entries in each collection that have a value for the taxonomies we are querying
-            // or the ones associated with the collection
-            // what we ultimately want is a subquery for terms in the form:
-            // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
-            Entry::whereInCollection($this->collections)
-                ->get($taxonomies)
-                ->flatMap(function ($entry) use ($taxonomies) {
-                    $slugs = [];
-                    foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
-                        if (in_array($taxonomy, $taxonomies)) {
-                            foreach ($entry->get($taxonomy, []) as $term) {
-                                $slugs[] = $taxonomy.'::'.$term;
+                $taxonomies = empty($this->taxonomies)
+                    ? Taxonomy::handles()->all()
+                    : $this->taxonomies;
+
+                // get entries in each collection that have a value for the taxonomies we are querying
+                // or the ones associated with the collection
+                // what we ultimately want is a subquery for terms in the form:
+                // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
+                Entry::whereInCollection($this->collections)
+                    ->flatMap(function ($entry) use ($taxonomies) {
+                        $slugs = [];
+                        foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
+                            if (in_array($taxonomy, $taxonomies)) {
+                                foreach ($entry->get($taxonomy, []) as $term) {
+                                    $slugs[] = $taxonomy.'::'.$term;
+                                }
                             }
                         }
-                    }
 
-                    return $slugs;
-                })
-                ->unique()
-                ->map(function ($term) {
-                    return [
-                        'taxonomy' => Str::before($term, '::'),
-                        'term' => Str::after($term, '::'),
-                    ];
-                })
-                ->mapIntoGroups(function ($value) {
-                    return [$item['taxonomy'] => $item['term']];
-                })
-                ->each(function ($terms, $taxonomy) {
-                    $this->builder->where(function ($query) use ($terms, $taxonomy) {
-                        $query->where('taxonomy', $taxonomy)
-                            ->whereIn('slug', $terms);
+                        return $slugs;
+                    })
+                    ->unique()
+                    ->map(function ($term) {
+                        return [
+                            'taxonomy' => Str::before($term, '::'),
+                            'term' => Str::after($term, '::'),
+                        ];
+                    })
+                    ->mapToGroups(function ($item) {
+                        return [$item['taxonomy'] => $item['term']];
+                    })
+                    ->each(function ($terms, $taxonomy) use ($query) {
+                        $query->orWhere(function ($query) use ($terms, $taxonomy) {
+                            $query->where('taxonomy', $taxonomy)
+                                ->whereIn('slug', $terms);
+                        });
                     });
-                });
+
+            });
+
         }
 
         if (! empty($this->taxonomies)) {

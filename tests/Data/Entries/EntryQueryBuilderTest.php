@@ -28,6 +28,10 @@ class EntryQueryBuilderTest extends TestCase
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $retrievedEntry = Entry::query()->find($searchedEntry->id());
 
+        // models wont be the same, so null them as we know that
+        $retrievedEntry->model(null);
+        $searchedEntry->model(null);
+
         $this->assertSame($searchedEntry, $retrievedEntry);
     }
 
@@ -37,6 +41,9 @@ class EntryQueryBuilderTest extends TestCase
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $columns = ['title'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
+
+        $retrievedEntry->model(null);
+        $searchedEntry->model(null);
 
         $this->assertSame($searchedEntry, $retrievedEntry);
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
@@ -656,7 +663,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 1', 'Post 2', 'Post 3'], $entries->map->title->all());
 
-        $entries = Entry::query()->offset(1)->get();
+        $entries = Entry::query()->limit(10)->offset(1)->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());

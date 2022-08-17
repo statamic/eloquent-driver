@@ -69,14 +69,21 @@ class TaxonomyRepository extends StacheRepository
         return ($taxonomy = $this->findByHandle($uri)) ? $taxonomy->collection($collection) : null;
     }
 
+    public function handles(): Collection
+    {
+        return $this->all()->map->handle();
+    }
+
     public function save($entry)
     {
         $model = $entry->toModel();
         $model->save();
 
-        $entry->model($model->fresh());
+        $fresh = $model->fresh();
 
-        Blink::store("eloquent-taxonomies-{$model->handle}", $model);
+        $entry->model($fresh);
+
+        Blink::put("eloquent-taxonomies-{$fresh->handle}", $fresh);
     }
 
     public function delete($entry)

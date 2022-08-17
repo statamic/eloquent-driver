@@ -413,7 +413,7 @@ class TermQueryBuilderTest extends TestCase
     {
         $this->createWhereDateTestTerms();
 
-        $entries = Term::query()->whereDay('test_date', 15)->dd()->get();
+        $entries = Term::query()->whereDay('test_date', 15)->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
