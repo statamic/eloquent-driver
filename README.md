@@ -39,7 +39,7 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 
 ## Configuration
 
-The configuration file (`statamic.eloquent_driver`) allows you to choose which repositories you want to be driven by eloquent. By default, all are selected, but if you want to opt out simple change `driver` from `eloquent` to `file`.
+The configuration file (`statamic.eloquent_driver`) allows you to choose which repositories you want to be driven by eloquent. By default, all are selected, but if you want to opt out simply change `driver` from `eloquent` to `file` for that repository.
 
 You may also specify your own models for each respository, should you wish to use something different from the one provided.
 
