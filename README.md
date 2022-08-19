@@ -63,4 +63,4 @@ Statamic has a [built-in users eloquent driver](https://statamic.dev/tips/storin
 
 ## Mixed driver entries and collections
 
-This driver **does not** make it possible to have some collections/entries file driven and some eloquent driver. If that is your requirement you may want to look into using [Runway](https://statamic.com/addons/double-three-digital/runway).
+This driver **does not** make it possible to have some collections/entries file driven and some eloquent driven. If that is your requirement you may want to look into using [Runway](https://statamic.com/addons/double-three-digital/runway).
