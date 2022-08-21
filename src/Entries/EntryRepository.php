@@ -20,7 +20,12 @@ class EntryRepository extends StacheRepository
     public function find($id): ?EntryContract
     {
         return Blink::once("eloquent-entry-{$id}", function () use ($id) {
-            return $this->query()->where('id', $id)->first();
+            $model = $this->query()->where('id', $id)->first();
+            if (! $model) {
+                return;
+            }
+
+            return app('statamic.eloquent.entries.entry')::fromModel($model);
         });
     }
 
