@@ -19,7 +19,8 @@ class EntryRepository extends StacheRepository
 
     public function find($id): ?EntryContract
     {
-        return Blink::once("eloquent-entry-{$id}", function () use ($id) {
+        $blinkKey = "eloquent-entry-{$id}";
+        $item = Blink::once($blinkKey, function () use ($id) {
             $model = $this->query()->where('id', $id)->first();
             if (! $model) {
                 return;
@@ -27,13 +28,28 @@ class EntryRepository extends StacheRepository
 
             return app('statamic.eloquent.entries.entry')::fromModel($model);
         });
+
+        if (! $item) {
+            Blink::forget($blinkKey);
+            return null;
+        }
+
+        return $this->substitutionsById[$item->id()] ?? $item;
     }
 
     public function findByUri(string $uri, string $site = null): ?EntryContract
     {
-        return Blink::once("eloquent-entry-{$uri}", function () use ($uri, $site) {
+        $blinkKey = "eloquent-entry-{$uri}".($site ? '-'.$site : '');
+        $item = Blink::once($blinkKey, function () use ($uri, $site) {
             return parent::findByUri($uri, $site);
         });
+
+        if (! $item) {
+            Blink::forget($blinkKey);
+            return null;
+        }
+
+        return $this->substitutionsById[$item->id()] ?? $item;
     }
 
     public function save($entry)

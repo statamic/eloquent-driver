@@ -32,7 +32,7 @@ class EntryQueryBuilderTest extends TestCase
         $retrievedEntry->model(null);
         $searchedEntry->model(null);
 
-        $this->assertSame($searchedEntry, $retrievedEntry);
+        $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
     }
 
     /** @test **/
@@ -45,7 +45,7 @@ class EntryQueryBuilderTest extends TestCase
         $retrievedEntry->model(null);
         $searchedEntry->model(null);
 
-        $this->assertSame($searchedEntry, $retrievedEntry);
+        $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
     }
 

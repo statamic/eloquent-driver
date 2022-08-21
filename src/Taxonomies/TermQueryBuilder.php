@@ -148,9 +148,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
         return $this;
     }
 
-    public function find($id)
+    public function find($id, $columns = ['*'])
     {
-        $model = parent::find($id);
+        $model = parent::find($id, $columns);
 
         if ($model) {
             $site = $this->site;
@@ -158,7 +158,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 $site = Site::default()->handle();
             }
 
-            return app(TermContract::class)::fromModel($model)->in($site);
+            return app(TermContract::class)::fromModel($model)
+                ->in($site)
+                ->selectedQueryColumns($columns);
         }
     }
 
