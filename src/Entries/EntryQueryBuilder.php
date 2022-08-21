@@ -43,6 +43,15 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return $column;
     }
 
+    public function find($id)
+    {
+        $model = parent::find($id);
+
+        if ($model) {
+            return app('statamic.eloquent.entries.entry')::fromModel($model);
+        }
+    }
+
     public function get($columns = ['*'])
     {
         $this->addTaxonomyWheres();

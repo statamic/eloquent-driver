@@ -148,6 +148,20 @@ class TermQueryBuilder extends EloquentQueryBuilder
         return $this;
     }
 
+    public function find($id)
+    {
+        $model = parent::find($id);
+
+        if ($model) {
+            $site = $this->site;
+            if (! $site) {
+                $site = Site::default()->handle();
+            }
+
+            return app(TermContract::class)::fromModel($model)->in($site);
+        }
+    }
+
     public function get($columns = ['*'])
     {
         $this->applyCollectionAndTaxonomyWheres();
