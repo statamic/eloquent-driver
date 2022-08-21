@@ -380,6 +380,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_contains()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
@@ -400,6 +404,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_doesnt_contain()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
@@ -420,6 +428,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_contains()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
@@ -435,6 +447,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_doesnt_contain()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
@@ -450,6 +466,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_length()
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
