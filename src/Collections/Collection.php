@@ -85,7 +85,9 @@ class Collection extends FileEntry
 
         $this->model = $model;
 
-        $this->id($model->id);
+        if (! is_null($model)) {
+            $this->id($model->id);
+        }
 
         return $this;
     }
