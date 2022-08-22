@@ -21,12 +21,7 @@ class EntryRepository extends StacheRepository
     {
         $blinkKey = "eloquent-entry-{$id}";
         $item = Blink::once($blinkKey, function () use ($id) {
-            $model = $this->query()->where('id', $id)->first();
-            if (! $model) {
-                return;
-            }
-
-            return app('statamic.eloquent.entries.entry')::fromModel($model);
+            return $this->query()->where('id', $id)->first();
         });
 
         if (! $item) {
