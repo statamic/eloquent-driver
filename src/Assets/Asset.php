@@ -72,7 +72,7 @@ class Asset extends FileAsset
         ])->fill(['data' => $meta]);
 
         // Set initial timestamps.
-        if (empty($model->created_at)) {
+        if (empty($model->created_at) && isset($meta['last_modified'])) {
             $model->created_at = $meta['last_modified'];
             $model->updated_at = $meta['last_modified'];
         }
