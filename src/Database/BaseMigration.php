@@ -13,7 +13,7 @@ class BaseMigration extends Migration
      */
     public function getConnection()
     {
-        if ($connection = config('statamic.eloquent_driver.connection', false)) {
+        if ($connection = config('statamic.eloquent-driver.connection', false)) {
             return $connection;
         }
 
@@ -28,6 +28,6 @@ class BaseMigration extends Migration
      */
     protected function prefix(string $table): string
     {
-        return config('statamic.eloquent_driver.table_prefix', '').$table;
+        return config('statamic.eloquent-driver.table_prefix', '').$table;
     }
 }

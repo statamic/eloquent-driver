@@ -14,7 +14,7 @@ class MoveConfig extends UpdateScript
     public function update()
     {
         $oldPath = config_path('statamic-eloquent-driver.php');
-        $newPath = config_path('statamic/eloquent_driver.php');
+        $newPath = config_path('statamic/eloquent-driver.php');
 
         if ($this->files->exists($newPath) || ! $this->files->exists($oldPath)) {
             return;
@@ -22,6 +22,6 @@ class MoveConfig extends UpdateScript
 
         $this->files->move($oldPath, $newPath);
 
-        $this->console()->info('Eloquent driver config successfully moved to [config/statamic/eloquent_driver.php]!');
+        $this->console()->info('Eloquent driver config successfully moved to [config/statamic/eloquent-driver.php]!');
     }
 }
