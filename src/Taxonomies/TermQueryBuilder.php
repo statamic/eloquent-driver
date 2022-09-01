@@ -2,13 +2,12 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Collection;
-use Statamic\Facades\Taxonony;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
+use Statamic\Facades\Taxonony;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
 
