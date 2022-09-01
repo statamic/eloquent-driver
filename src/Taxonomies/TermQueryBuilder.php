@@ -7,7 +7,7 @@ use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
-use Statamic\Facades\Taxonony;
+use Statamic\Facades\Taxonomy;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
 
