@@ -2,8 +2,8 @@
 
 namespace Tests\Entries;
 
-use PHPUnit\Framework\TestCase;
 use Statamic\Eloquent\Entries\EntryModel;
+use Tests\TestCase;
 
 class EntryModelTest extends TestCase
 {
@@ -13,8 +13,8 @@ class EntryModelTest extends TestCase
         $model = new EntryModel([
             'slug' => 'the-slug',
             'data' => [
-                'foo' => 'bar'
-            ]
+                'foo' => 'bar',
+            ],
         ]);
 
         $this->assertEquals('the-slug', $model->slug);

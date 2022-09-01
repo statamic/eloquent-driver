@@ -7,6 +7,7 @@ use Statamic\Support\Str;
 class UuidEntryModel extends EntryModel
 {
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected static function boot()

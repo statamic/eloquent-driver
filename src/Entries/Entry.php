@@ -2,6 +2,8 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Carbon;
+use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
 
@@ -11,7 +13,8 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        $entry = (new static)
+            ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
             ->date($model->date)
@@ -20,6 +23,12 @@ class Entry extends FileEntry
             ->blueprint($model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
+
+        if (config('statamic.system.track_last_update')) {
+            $entry->set('updated_at', $model->updated_at ?? $model->created_at);
+        }
+
+        return $entry;
     }
 
     public function toModel()
@@ -34,7 +43,7 @@ class Entry extends FileEntry
 
         return $class::findOrNew($this->id())->fill([
             'id' => $this->id(),
-            'origin_id' => $this->originId(),
+            'origin_id' => $this->origin()?->id(),
             'site' => $this->locale(),
             'slug' => $this->slug(),
             'uri' => $this->uri(),
@@ -43,6 +52,7 @@ class Entry extends FileEntry
             'data' => $data->except(EntryQueryBuilder::COLUMNS),
             'published' => $this->published(),
             'status' => $this->status(),
+            'updated_at' => $this->lastModified(),
         ]);
     }
 
@@ -54,14 +64,16 @@ class Entry extends FileEntry
 
         $this->model = $model;
 
-        $this->id($model->id);
+        if (! is_null($model)) {
+            $this->id($model->id);
+        }
 
         return $this;
     }
 
-    public function lastModified()
+    public function fileLastModified()
     {
-        return $this->model->updated_at;
+        return $this->model?->updated_at ?? Carbon::now();
     }
 
     public function origin($origin = null)
@@ -72,24 +84,26 @@ class Entry extends FileEntry
             return $this;
         }
 
+        $class = app('statamic.eloquent.entries.model');
+
         if ($this->origin) {
+            if (! $this->origin instanceof EntryContract) {
+                if ($model = $class::find($this->origin)) {
+                    $this->origin = self::fromModel($model);
+                }
+            }
+
             return $this->origin;
         }
 
-        if (! $this->model->origin) {
-            return null;
+        if (! $this->model?->origin_id) {
+            return;
         }
 
-        return self::fromModel($this->model->origin);
-    }
+        if ($model = $class::find($this->model->origin_id)) {
+            $this->origin = self::fromModel($model);
+        }
 
-    public function originId()
-    {
-        return optional($this->origin)->id() ?? optional($this->model)->origin_id;
-    }
-
-    public function hasOrigin()
-    {
-        return $this->originId() !== null;
+        return $this->origin ?? null;
     }
 }

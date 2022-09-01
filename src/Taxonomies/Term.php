@@ -1,0 +1,107 @@
+<?php
+
+namespace Statamic\Eloquent\Taxonomies;
+
+use Illuminate\Support\Carbon;
+use Statamic\Contracts\Taxonomies\Term as Contract;
+use Statamic\Eloquent\Taxonomies\TermModel as Model;
+use Statamic\Taxonomies\Term as FileEntry;
+
+class Term extends FileEntry
+{
+    protected $model;
+
+    public static function fromModel(Model $model)
+    {
+        $data = $model->data;
+
+        /** @var Term $term */
+        $term = (new static)
+            ->slug($model->slug)
+            ->taxonomy($model->taxonomy)
+            ->model($model)
+            ->blueprint($model->data['blueprint'] ?? null);
+
+        collect($data['localizations'] ?? [])
+            ->except($term->defaultLocale())
+            ->each(function ($localeData, $locale) use ($term) {
+                $term->dataForLocale($locale, $localeData);
+            });
+
+        unset($data['localizations']);
+
+        if (isset($data['collection'])) {
+            $term->collection($data['collection']);
+            unset($data['collection']);
+        }
+
+        $term->syncOriginal();
+        $term->data($data);
+
+        if (config('statamic.system.track_last_update')) {
+            $term->set('updated_at', $model->updated_at ?? $model->created_at);
+        }
+
+        return $term;
+    }
+
+    public function toModel()
+    {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
+        $class = app('statamic.eloquent.terms.model');
+
+        $data = $source->data();
+
+        if (! isset($data['template'])) {
+            unset($data['template']);
+        }
+
+        if ($source->blueprint && $source->taxonomy()->termBlueprints()->count() > 1) {
+            $data['blueprint'] = $source->blueprint;
+        }
+
+        $source->localizations()->keys()->reduce(function ($data, $locale) use ($source) {
+            $data[$locale] = $source->dataForLocale($locale)->toArray();
+
+            return $data;
+        }, []);
+
+        if ($collection = $source->collection()) {
+            $data['collection'] = $collection;
+        }
+
+        return $class::firstOrNew([
+            'slug' => $source->slug(),
+            'taxonomy' => $source->taxonomy(),
+            'site' => $source->locale(),
+        ])->fill([
+            'uri' => $source->uri(),
+            'data' => $data,
+            'updated_at' => $source->lastModified(),
+        ]);
+    }
+
+    public function model($model = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->model;
+        }
+
+        $this->model = $model;
+
+        if (! is_null($model)) {
+            $this->id($model->id);
+        }
+
+        return $this;
+    }
+
+    public function fileLastModified()
+    {
+        return $this->model?->updated_at ?? Carbon::now();
+    }
+}
