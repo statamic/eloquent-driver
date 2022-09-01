@@ -41,7 +41,7 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 
 The configuration file (`statamic.eloquent_driver`) allows you to choose which repositories you want to be driven by eloquent. By default, all are selected, but if you want to opt out simply change `driver` from `eloquent` to `file` for that repository.
 
-You may also specify your own models for each respository, should you wish to use something different from the one provided.
+You may also specify your own models for each repository, should you wish to use something different from the one provided.
 
 ## Importing existing file based content
 
@@ -63,4 +63,4 @@ Statamic has a [built-in users eloquent driver](https://statamic.dev/tips/storin
 
 ## Mixed driver entries and collections
 
-This driver **does not** make it possible to have some collections/entries file driven and some eloquent driven. If that is your requirement you may want to look into using [Runway](https://statamic.com/addons/double-three-digital/runway).
+This driver **does not** make it possible to have some collections/entries file driven and some eloquent driven. If that is your requirement you may want to look into using [Runway](https://statamic.com/addons/duncanmcclean/runway).
