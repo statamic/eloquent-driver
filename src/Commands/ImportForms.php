@@ -54,7 +54,7 @@ class ImportForms extends Command
 
     private function importForms()
     {
-        $forms = (new FormRepository)->all();
+        $forms = (new FormRepository())->all();
 
         $this->withProgressBar($forms, function ($form) {
             $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
@@ -65,10 +65,10 @@ class ImportForms extends Command
             $model->save();
 
             $form->submissions()->each(function ($submission) use ($model) {
-                $timestamp = (new SubmissionModel)->fromDateTime($submission->date());
+                $timestamp = (new SubmissionModel())->fromDateTime($submission->date());
 
                 $model->submissions()->firstOrNew(['created_at' => $timestamp])->fill([
-                    'data' => $submission->data(),
+                    'data'       => $submission->data(),
                     'updated_at' => $timestamp,
                 ])->save();
             });

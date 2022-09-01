@@ -29,7 +29,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     protected function column($column)
     {
-        if (! is_string($column)) {
+        if (!is_string($column)) {
             return $column;
         }
 
@@ -37,8 +37,8 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        if (! in_array($column, self::COLUMNS)) {
-            if (! Str::startsWith($column, 'data->')) {
+        if (!in_array($column, self::COLUMNS)) {
+            if (!Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }
         }

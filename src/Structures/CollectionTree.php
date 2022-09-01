@@ -11,7 +11,7 @@ class CollectionTree extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
@@ -31,10 +31,10 @@ class CollectionTree extends FileEntry
 
         return $class::firstOrNew([
             'handle' => $source->handle(),
-            'type' => 'collection',
+            'type'   => 'collection',
             'locale' => $source->locale(),
         ])->fill([
-            'tree' => $source->tree(),
+            'tree'     => $source->tree(),
             'settings' => [
                 'initial_path' => $source->initialPath(),
             ],

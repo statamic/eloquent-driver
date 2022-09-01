@@ -20,11 +20,11 @@ class VariablesTest extends TestCase
     /** @test */
     public function it_gets_file_contents_for_saving()
     {
-        $entry = (new Variables)->data([
-            'array' => ['first one', 'second one'],
+        $entry = (new Variables())->data([
+            'array'  => ['first one', 'second one'],
             'string' => 'The string',
-            'null' => null, // this...
-            'empty' => [],  // and this should get stripped out because it's the root. there's no origin to fall back to.
+            'null'   => null, // this...
+            'empty'  => [],  // and this should get stripped out because it's the root. there's no origin to fall back to.
         ]);
 
         $expected = <<<'EOT'
@@ -43,24 +43,24 @@ EOT;
         $global = GlobalSet::make('test');
 
         $a = $global->makeLocalization('a')->data([
-            'array' => ['first one', 'second one'],
+            'array'  => ['first one', 'second one'],
             'string' => 'The string',
-            'null' => null, // this...
-            'empty' => [],  // and this should get stripped out because there's no origin to fall back to.
+            'null'   => null, // this...
+            'empty'  => [],  // and this should get stripped out because there's no origin to fall back to.
         ]);
 
         $b = $global->makeLocalization('b')->origin($a)->data([
-            'array' => ['first one', 'second one'],
+            'array'  => ['first one', 'second one'],
             'string' => 'The string',
-            'null' => null, // this...
-            'empty' => [],  // and this should not get stripped out, otherwise it would fall back to the origin.
+            'null'   => null, // this...
+            'empty'  => [],  // and this should not get stripped out, otherwise it would fall back to the origin.
         ]);
 
         $c = $global->makeLocalization('c')->data([
-            'array' => ['first one', 'second one'],
+            'array'  => ['first one', 'second one'],
             'string' => 'The string',
-            'null' => null, // this...
-            'empty' => [],  // and this should get stripped out because there's no origin to fall back to.
+            'null'   => null, // this...
+            'empty'  => [],  // and this should get stripped out because there's no origin to fall back to.
         ]);
 
         $expected = <<<'EOT'
@@ -100,10 +100,10 @@ EOT;
         $global = GlobalSet::make('test');
 
         $a = $global->makeLocalization('a')->data([
-            'one' => 'alfa',
-            'two' => 'bravo',
+            'one'   => 'alfa',
+            'two'   => 'bravo',
             'three' => 'charlie',
-            'four' => 'delta',
+            'four'  => 'delta',
         ]);
 
         // originates from a
@@ -119,8 +119,8 @@ EOT;
 
         // does not originate from anything
         $d = $global->makeLocalization('d')->data([
-            'one' => 'golf',
-            'two' => 'hotel',
+            'one'   => 'golf',
+            'two'   => 'hotel',
             'three' => 'india',
         ]);
 
@@ -131,10 +131,10 @@ EOT;
         ]);
 
         $this->assertEquals([
-            'one' => 'alfa',
-            'two' => 'bravo',
+            'one'   => 'alfa',
+            'two'   => 'bravo',
             'three' => 'charlie',
-            'four' => 'delta',
+            'four'  => 'delta',
         ], $a->values()->all());
         $this->assertEquals('alfa', $a->value('one'));
         $this->assertEquals('bravo', $a->value('two'));
@@ -142,10 +142,10 @@ EOT;
         $this->assertEquals('delta', $a->value('four'));
 
         $this->assertEquals([
-            'one' => 'echo',
-            'two' => null,
+            'one'   => 'echo',
+            'two'   => null,
             'three' => 'charlie',
-            'four' => 'delta',
+            'four'  => 'delta',
         ], $b->values()->all());
         $this->assertEquals('echo', $b->value('one'));
         $this->assertEquals(null, $b->value('two'));
@@ -153,10 +153,10 @@ EOT;
         $this->assertEquals('delta', $b->value('four'));
 
         $this->assertEquals([
-            'one' => 'echo',
-            'two' => null,
+            'one'   => 'echo',
+            'two'   => null,
             'three' => 'foxtrot',
-            'four' => 'delta',
+            'four'  => 'delta',
         ], $c->values()->all());
         $this->assertEquals('echo', $c->value('one'));
         $this->assertEquals(null, $c->value('two'));
@@ -164,8 +164,8 @@ EOT;
         $this->assertEquals('delta', $c->value('four'));
 
         $this->assertEquals([
-            'one' => 'golf',
-            'two' => 'hotel',
+            'one'   => 'golf',
+            'two'   => 'hotel',
             'three' => 'india',
         ], $d->values()->all());
         $this->assertEquals('golf', $d->value('one'));
@@ -174,8 +174,8 @@ EOT;
         $this->assertEquals(null, $d->value('four'));
 
         $this->assertEquals([
-            'one' => 'juliett',
-            'two' => null,
+            'one'   => 'juliett',
+            'two'   => null,
             'three' => 'india',
         ], $e->values()->all());
         $this->assertEquals('juliett', $e->value('one'));
@@ -187,7 +187,7 @@ EOT;
     /** @test */
     public function it_sets_data_values_using_magic_properties()
     {
-        $variables = new Variables;
+        $variables = new Variables();
         $this->assertNull($variables->get('foo'));
 
         $variables->foo = 'bar';
@@ -199,8 +199,7 @@ EOT;
     /** @test */
     public function it_gets_evaluated_augmented_value_using_magic_property()
     {
-        (new class extends Fieldtype
-        {
+        (new class() extends Fieldtype {
             protected static $handle = 'test';
 
             public function augment($value)
@@ -231,8 +230,7 @@ EOT;
         $builder->shouldReceive('get')->times(2)->andReturn('query builder results');
         app()->instance('mocked-builder', $builder);
 
-        (new class extends Fieldtype
-        {
+        (new class() extends Fieldtype {
             protected static $handle = 'test';
 
             public function augment($value)
@@ -273,8 +271,7 @@ EOT;
     /** @test */
     public function it_converts_to_an_array()
     {
-        $fieldtype = new class extends Fieldtype
-        {
+        $fieldtype = new class() extends Fieldtype {
             protected static $handle = 'test';
 
             public function augment($value)
@@ -319,8 +316,7 @@ EOT;
     /** @test */
     public function only_requested_relationship_fields_are_included_in_to_array()
     {
-        $regularFieldtype = new class extends Fieldtype
-        {
+        $regularFieldtype = new class() extends Fieldtype {
             protected static $handle = 'regular';
 
             public function augment($value)
@@ -330,8 +326,7 @@ EOT;
         };
         $regularFieldtype::register();
 
-        $relationshipFieldtype = new class extends Fieldtype
-        {
+        $relationshipFieldtype = new class() extends Fieldtype {
             protected static $handle = 'relationship';
 
             protected $relationship = true;
@@ -344,8 +339,8 @@ EOT;
         $relationshipFieldtype::register();
 
         $blueprint = Blueprint::makeFromFields([
-            'alfa' => ['type' => 'regular'],
-            'bravo' => ['type' => 'relationship'],
+            'alfa'    => ['type' => 'regular'],
+            'bravo'   => ['type' => 'relationship'],
             'charlie' => ['type' => 'relationship'],
         ]);
         BlueprintRepository::shouldReceive('find')->with('globals.settings')->andReturn($blueprint);
@@ -356,8 +351,8 @@ EOT;
         $variables->set('charlie', ['c', 'd']);
 
         $this->assertEquals([
-            'alfa' => 'augmented one',
-            'bravo' => ['a', 'b'],
+            'alfa'    => 'augmented one',
+            'bravo'   => ['a', 'b'],
             'charlie' => ['augmented c', 'augmented d'],
         ], Arr::only($variables->selectedQueryRelations(['charlie'])->toArray(), ['alfa', 'bravo', 'charlie']));
     }

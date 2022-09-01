@@ -15,7 +15,7 @@ class Asset extends FileAsset
             return $this->metaValue($key);
         }
 
-        if (! config('statamic.assets.cache_meta')) {
+        if (!config('statamic.assets.cache_meta')) {
             return $this->generateMeta();
         }
 
@@ -41,7 +41,7 @@ class Asset extends FileAsset
             return $this->container()->files();
         });
 
-        if (! $path = $this->path()) {
+        if (!$path = $this->path()) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class Asset extends FileAsset
     {
         $value = Arr::get($this->meta(), $key);
 
-        if (! is_null($value)) {
+        if (!is_null($value)) {
             return $value;
         }
 

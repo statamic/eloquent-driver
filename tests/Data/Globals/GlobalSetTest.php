@@ -13,15 +13,15 @@ class GlobalSetTest extends TestCase
     {
         Site::setConfig([
             'default' => 'en',
-            'sites' => [
+            'sites'   => [
                 'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             ],
         ]);
 
-        $set = (new GlobalSet)->title('The title');
+        $set = (new GlobalSet())->title('The title');
 
         $variables = $set->makeLocalization('en')->data([
-            'array' => ['first one', 'second one'],
+            'array'  => ['first one', 'second one'],
             'string' => 'The string',
         ]);
 
@@ -44,25 +44,25 @@ EOT;
     {
         Site::setConfig([
             'default' => 'en',
-            'sites' => [
+            'sites'   => [
                 'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
                 'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
                 'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
             ],
         ]);
 
-        $set = (new GlobalSet)->title('The title');
+        $set = (new GlobalSet())->title('The title');
 
         // We set the data but it's basically irrelevant since it won't get saved to this file.
         $set->in('en', function ($loc) {
             $loc->data([
-                'array' => ['first one', 'second one'],
+                'array'  => ['first one', 'second one'],
                 'string' => 'The string',
             ]);
         });
         $set->in('fr', function ($loc) {
             $loc->data([
-                'array' => ['le first one', 'le second one'],
+                'array'  => ['le first one', 'le second one'],
                 'string' => 'Le string',
             ]);
         });

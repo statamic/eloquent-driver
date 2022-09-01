@@ -23,7 +23,7 @@ class GlobalRepository extends StacheRepository
     {
         return Blink::once("eloquent-globalsets-{$handle}", function () use ($handle) {
             $model = app('statamic.eloquent.global_sets.model')::whereHandle($handle)->first();
-            if (! $model) {
+            if (!$model) {
                 return;
             }
 

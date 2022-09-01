@@ -14,7 +14,7 @@ class Form extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->title($model->title)
             ->handle($model->handle)
             ->store($model->settings['store'] ?? null)
@@ -33,10 +33,10 @@ class Form extends FileEntry
         $class = app('statamic.eloquent.forms.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title' => $source->title(),
+            'title'    => $source->title(),
             'settings' => [
-                'store' => $source->store(),
-                'email' => $source->email(),
+                'store'    => $source->store(),
+                'email'    => $source->email(),
                 'honeypot' => $source->honeypot(),
             ],
         ]);

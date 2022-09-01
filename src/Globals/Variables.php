@@ -9,7 +9,7 @@ class Variables extends FileEntry
 {
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->locale($model->locale)
             ->data($model->data)
             ->origin($model->origin ?? null);
@@ -23,7 +23,7 @@ class Variables extends FileEntry
 
         return $class::make([
             'locale' => $this->locale,
-            'data' => $data,
+            'data'   => $data,
             'origin' => $this->origin ?? null,
         ]);
     }

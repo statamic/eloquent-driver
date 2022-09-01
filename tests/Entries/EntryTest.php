@@ -22,7 +22,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry)->fromModel($model);
+        $entry = (new Entry())->fromModel($model);
 
         $this->assertEquals('the-slug', $entry->slug());
         $this->assertEquals('bar', $entry->data()->get('foo'));
@@ -37,21 +37,21 @@ class EntryTest extends TestCase
             'data' => [
                 'foo' => 'bar',
             ],
-            'site' => 'en',
-            'uri' => '/blog/the-slug',
-            'date' => null,
+            'site'       => 'en',
+            'uri'        => '/blog/the-slug',
+            'date'       => null,
             'collection' => 'blog',
-            'published' => false,
-            'status' => 'draft',
-            'origin_id' => null,
-            'id' => null,
+            'published'  => false,
+            'status'     => 'draft',
+            'origin_id'  => null,
+            'id'         => null,
         ]);
 
         $collection = Collection::make('blog')->title('blog')->routes([
             'en' => '/blog/{slug}',
         ])->save();
 
-        $entry = (new Entry)->fromModel($model)->collection($collection);
+        $entry = (new Entry())->fromModel($model)->collection($collection);
 
         $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
     }

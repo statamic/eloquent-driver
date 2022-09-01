@@ -93,10 +93,10 @@ class ImportBlueprints extends Command
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
             $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
-                'handle' => $blueprint->handle(),
+                'handle'    => $blueprint->handle(),
                 'namespace' => $blueprint->namespace() ?? null,
             ])->fill([
-                'data' => $blueprint->contents(),
+                'data'       => $blueprint->contents(),
                 'created_at' => $lastModified,
                 'updated_at' => $lastModified,
             ]);
@@ -127,7 +127,7 @@ class ImportBlueprints extends Command
             $model = app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
                 'handle' => $fieldset->handle(),
             ])->fill([
-                'data' => $fieldset->contents(),
+                'data'       => $fieldset->contents(),
                 'created_at' => $lastModified,
                 'updated_at' => $lastModified,
             ]);

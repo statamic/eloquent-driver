@@ -13,7 +13,7 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $entry = (new static)
+        $entry = (new static())
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
@@ -42,16 +42,16 @@ class Entry extends FileEntry
         }
 
         return $class::findOrNew($this->id())->fill([
-            'id' => $this->id(),
-            'origin_id' => $this->origin()?->id(),
-            'site' => $this->locale(),
-            'slug' => $this->slug(),
-            'uri' => $this->uri(),
-            'date' => $this->hasDate() ? $this->date() : null,
+            'id'         => $this->id(),
+            'origin_id'  => $this->origin()?->id(),
+            'site'       => $this->locale(),
+            'slug'       => $this->slug(),
+            'uri'        => $this->uri(),
+            'date'       => $this->hasDate() ? $this->date() : null,
             'collection' => $this->collectionHandle(),
-            'data' => $data->except(EntryQueryBuilder::COLUMNS),
-            'published' => $this->published(),
-            'status' => $this->status(),
+            'data'       => $data->except(EntryQueryBuilder::COLUMNS),
+            'published'  => $this->published(),
+            'status'     => $this->status(),
             'updated_at' => $this->lastModified(),
         ]);
     }
@@ -64,7 +64,7 @@ class Entry extends FileEntry
 
         $this->model = $model;
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $this->id($model->id);
         }
 
@@ -87,7 +87,7 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         if ($this->origin) {
-            if (! $this->origin instanceof EntryContract) {
+            if (!$this->origin instanceof EntryContract) {
                 if ($model = $class::find($this->origin)) {
                     $this->origin = self::fromModel($model);
                 }
@@ -96,7 +96,7 @@ class Entry extends FileEntry
             return $this->origin;
         }
 
-        if (! $this->model?->origin_id) {
+        if (!$this->model?->origin_id) {
             return;
         }
 

@@ -30,7 +30,7 @@ class Revision extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->key($model->key)
             ->action($model->action ?? false)
             ->id($model->created_at->timestamp)
@@ -46,9 +46,9 @@ class Revision extends FileEntry
         $class = app('statamic.eloquent.revisions.model');
 
         return $class::firstOrNew(['key' => $this->key(), 'created_at' => $this->date()])->fill([
-            'action' => $this->action(),
-            'user' => $this->user()?->id(),
-            'message' => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
+            'action'     => $this->action(),
+            'user'       => $this->user()?->id(),
+            'message'    => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
             'attributes' => collect($this->attributes())->except('id'),
             'updated_at' => $this->date(),
         ]);
@@ -56,7 +56,7 @@ class Revision extends FileEntry
 
     public function fromRevisionOrWorkingCopy($item)
     {
-        return (new static)
+        return (new static())
             ->key($item->key())
             ->action($item instanceof WorkingCopy ? 'working' : $item->action())
             ->date($item->date())

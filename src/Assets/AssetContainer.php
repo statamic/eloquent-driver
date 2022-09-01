@@ -33,7 +33,7 @@ class AssetContainer extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)->fillFromModel($model);
+        return (new static())->fillFromModel($model);
     }
 
     public function fillFromModel(Model $model)
@@ -58,15 +58,15 @@ class AssetContainer extends FileEntry
         $class = app('statamic.eloquent.assets.container_model');
 
         return $class::firstOrNew(['handle' => $this->handle()])->fill([
-            'title' => $this->title(),
-            'disk' => $this->diskHandle() ?? config('filesystems.default'),
+            'title'    => $this->title(),
+            'disk'     => $this->diskHandle() ?? config('filesystems.default'),
             'settings' => [
-                'allow_uploads' => $this->allowUploads(),
+                'allow_uploads'     => $this->allowUploads(),
                 'allow_downloading' => $this->allowDownloading(),
-                'allow_moving' => $this->allowMoving(),
-                'allow_renaming' => $this->allowRenaming(),
-                'create_folders' => $this->createFolders(),
-                'search_index' => $this->searchIndex(),
+                'allow_moving'      => $this->allowMoving(),
+                'allow_renaming'    => $this->allowRenaming(),
+                'create_folders'    => $this->createFolders(),
+                'search_index'      => $this->searchIndex(),
             ],
         ]);
     }

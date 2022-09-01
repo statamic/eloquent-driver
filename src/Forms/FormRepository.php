@@ -12,7 +12,7 @@ class FormRepository extends StacheRepository
     {
         $model = app('statamic.eloquent.forms.model')::whereHandle($handle)->first();
 
-        if (! $model) {
+        if (!$model) {
             return;
         }
 
@@ -41,7 +41,7 @@ class FormRepository extends StacheRepository
     public static function bindings(): array
     {
         return [
-            FormContract::class => Form::class,
+            FormContract::class       => Form::class,
             SubmissionContract::class => Submission::class,
         ];
     }

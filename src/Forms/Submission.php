@@ -15,7 +15,7 @@ class Submission extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->id($model->id)
             ->date($model->created_at)
             ->data($model->data)
@@ -25,10 +25,10 @@ class Submission extends FileEntry
     public function toModel()
     {
         $class = app('statamic.eloquent.forms.submission_model');
-        $timestamp = (new $class)->fromDateTime($this->date());
+        $timestamp = (new $class())->fromDateTime($this->date());
 
         return $class::firstOrNew([
-            'form_id' => $this->form->model()->id,
+            'form_id'    => $this->form->model()->id,
             'created_at' => $timestamp,
         ])->fill([
             'data' => $this->data,
@@ -48,7 +48,7 @@ class Submission extends FileEntry
 
     public function date($date = null)
     {
-        if (! is_null($date)) {
+        if (!is_null($date)) {
             $this->date = $date;
         }
 
@@ -67,7 +67,7 @@ class Submission extends FileEntry
 
     public function delete()
     {
-        if (! $this->model) {
+        if (!$this->model) {
             $class = app('statamic.eloquent.forms.submission_model');
             $this->model = $class::findOrNew($this->id);
         }

@@ -12,7 +12,7 @@ class Nav extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->handle($model->handle)
             ->title($model->title)
             ->collections($model->settings['collections'] ?? null)
@@ -37,10 +37,10 @@ class Nav extends FileEntry
         $class = app('statamic.eloquent.navigations.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title' => $source->title(),
+            'title'    => $source->title(),
             'settings' => [
-                'collections' => $source->collections()->map->handle(),
-                'max_depth' => $source->maxDepth(),
+                'collections'  => $source->collections()->map->handle(),
+                'max_depth'    => $source->maxDepth(),
                 'expects_root' => $source->expectsRoot(),
                 'initial_path' => $source->initialPath(),
             ],

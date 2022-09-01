@@ -10,21 +10,21 @@ namespace Statamic\Eloquent\Assets;
 
  class AssetRepository extends BaseRepository
  {
-    public function delete($asset)
-    {
-        $asset->container()->contents()->forget($asset->path())->save();
+     public function delete($asset)
+     {
+         $asset->container()->contents()->forget($asset->path())->save();
 
-        $handle = $asset->containerHandle().'::'.$asset->metaPath();
-        app('statamic.eloquent.assets.model')::where('handle', $handle)->first()->delete();
+         $handle = $asset->containerHandle().'::'.$asset->metaPath();
+         app('statamic.eloquent.assets.model')::where('handle', $handle)->first()->delete();
 
-        Stache::store('assets::'.$asset->containerHandle())->delete($asset);
-    }
+         Stache::store('assets::'.$asset->containerHandle())->delete($asset);
+     }
 
-    public static function bindings(): array
-    {
-        return [
-            AssetContract::class => Asset::class,
-            QueryBuilderContract::class => QueryBuilder::class,
-        ];
-    }
+     public static function bindings(): array
+     {
+         return [
+             AssetContract::class        => Asset::class,
+             QueryBuilderContract::class => QueryBuilder::class,
+         ];
+     }
  }

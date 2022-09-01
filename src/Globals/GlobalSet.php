@@ -12,7 +12,7 @@ class GlobalSet extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $global = (new static)
+        $global = (new static())
             ->handle($model->handle)
             ->title($model->title)
             ->model($model);
@@ -33,7 +33,7 @@ class GlobalSet extends FileEntry
         $localizations = $this->localizations()->map(fn ($value) => $value->toModel()->toArray());
 
         return $class::firstOrNew(['handle' => $this->handle()])->fill([
-            'title' => $this->title(),
+            'title'         => $this->title(),
             'localizations' => $localizations,
         ]);
     }
@@ -53,7 +53,7 @@ class GlobalSet extends FileEntry
 
         $this->model = $model;
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $this->id($model->id);
         }
 

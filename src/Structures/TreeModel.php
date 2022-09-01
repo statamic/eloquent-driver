@@ -11,7 +11,7 @@ class TreeModel extends BaseModel
     protected $table = 'trees';
 
     protected $casts = [
-        'tree' => 'json',
+        'tree'     => 'json',
         'settings' => 'json',
     ];
 }

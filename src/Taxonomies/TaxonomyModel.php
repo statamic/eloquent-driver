@@ -13,7 +13,7 @@ class TaxonomyModel extends BaseModel
 
     protected $casts = [
         'settings' => 'json',
-        'sites' => 'json',
+        'sites'    => 'json',
     ];
 
     public function getAttribute($key)

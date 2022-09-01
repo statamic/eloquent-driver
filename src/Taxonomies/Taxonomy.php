@@ -12,7 +12,7 @@ class Taxonomy extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->handle($model->handle)
             ->title($model->title)
             ->sites($model->sites)
@@ -30,8 +30,8 @@ class Taxonomy extends FileEntry
         $class = app('statamic.eloquent.taxonomies.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title' => $source->title(),
-            'sites' => $source->sites(),
+            'title'    => $source->title(),
+            'sites'    => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
             ],
@@ -46,7 +46,7 @@ class Taxonomy extends FileEntry
 
         $this->model = $model;
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $this->id($model->id);
         }
 

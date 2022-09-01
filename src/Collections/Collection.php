@@ -13,7 +13,7 @@ class Collection extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        return (new static())
             ->title($model->title ?? null)
             ->routes($model->settings['routes'] ?? null)
             ->requiresSlugs($model->settings['slugs'] ?? true)
@@ -50,29 +50,29 @@ class Collection extends FileEntry
         $class = app('statamic.eloquent.collections.model');
 
         return $class::firstOrNew(['handle' => $source->handle])->fill([
-            'title' => $source->title ?? $source->handle,
+            'title'    => $source->title ?? $source->handle,
             'settings' => [
-                'routes' => $source->routes,
-                'slugs' => $source->requiresSlugs(),
-                'title_formats' => collect($source->titleFormats())->filter(),
-                'mount' => $source->mount,
-                'dated' => $source->dated,
-                'ampable' => $source->ampable,
-                'sites' => $source->sites,
-                'template' => $source->template,
-                'layout' => $source->layout,
-                'inject' => $source->cascade,
-                'search_index' => $source->searchIndex,
-                'revisions' => $source->revisionsEnabled(),
-                'default_status' => $source->defaultPublishState,
-                'structure' => $source->structureContents(),
-                'sort_dir' => $source->sortDirection(),
-                'sort_field' => $source->sortField(),
-                'taxonomies' => $source->taxonomies,
-                'propagate' => $source->propagate(),
-                'past_date_behavior' => $source->pastDateBehavior(),
+                'routes'               => $source->routes,
+                'slugs'                => $source->requiresSlugs(),
+                'title_formats'        => collect($source->titleFormats())->filter(),
+                'mount'                => $source->mount,
+                'dated'                => $source->dated,
+                'ampable'              => $source->ampable,
+                'sites'                => $source->sites,
+                'template'             => $source->template,
+                'layout'               => $source->layout,
+                'inject'               => $source->cascade,
+                'search_index'         => $source->searchIndex,
+                'revisions'            => $source->revisionsEnabled(),
+                'default_status'       => $source->defaultPublishState,
+                'structure'            => $source->structureContents(),
+                'sort_dir'             => $source->sortDirection(),
+                'sort_field'           => $source->sortField(),
+                'taxonomies'           => $source->taxonomies,
+                'propagate'            => $source->propagate(),
+                'past_date_behavior'   => $source->pastDateBehavior(),
                 'future_date_behavior' => $source->futureDateBehavior(),
-                'preview_targets' => $source->previewTargets(),
+                'preview_targets'      => $source->previewTargets(),
             ],
         ]);
     }
@@ -85,7 +85,7 @@ class Collection extends FileEntry
 
         $this->model = $model;
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $this->id($model->id);
         }
 
@@ -94,7 +94,7 @@ class Collection extends FileEntry
 
     protected function makeStructureFromContents()
     {
-        return (new CollectionStructure)
+        return (new CollectionStructure())
             ->handle($this->handle())
             ->expectsRoot($this->structureContents['root'] ?? false)
             ->showSlugs($this->structureContents['slugs'] ?? false)

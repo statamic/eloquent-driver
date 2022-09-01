@@ -7,7 +7,7 @@ use Illuminate\Database\Migrations\Migration;
 class BaseMigration extends Migration
 {
     /**
-     * Use the connection specified in config
+     * Use the connection specified in config.
      *
      * @return void
      */
@@ -23,7 +23,8 @@ class BaseMigration extends Migration
     /**
      * Prefixes table if defined.
      *
-     * @param  string  $table
+     * @param string $table
+     *
      * @return string
      */
     protected function prefix(string $table): string

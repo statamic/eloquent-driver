@@ -16,7 +16,7 @@ class Term extends FileEntry
         $data = $model->data;
 
         /** @var Term $term */
-        $term = (new static)
+        $term = (new static())
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
             ->model($model)
@@ -56,7 +56,7 @@ class Term extends FileEntry
 
         $data = $source->data();
 
-        if (! isset($data['template'])) {
+        if (!isset($data['template'])) {
             unset($data['template']);
         }
 
@@ -75,12 +75,12 @@ class Term extends FileEntry
         }
 
         return $class::firstOrNew([
-            'slug' => $source->slug(),
+            'slug'     => $source->slug(),
             'taxonomy' => $source->taxonomy(),
-            'site' => $source->locale(),
+            'site'     => $source->locale(),
         ])->fill([
-            'uri' => $source->uri(),
-            'data' => $data,
+            'uri'        => $source->uri(),
+            'data'       => $data,
             'updated_at' => $source->lastModified(),
         ]);
     }
@@ -93,7 +93,7 @@ class Term extends FileEntry
 
         $this->model = $model;
 
-        if (! is_null($model)) {
+        if (!is_null($model)) {
             $this->id($model->id);
         }
 

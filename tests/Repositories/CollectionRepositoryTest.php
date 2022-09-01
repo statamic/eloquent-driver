@@ -18,7 +18,7 @@ class CollectionRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $stache = (new Stache)->sites(['en', 'fr']);
+        $stache = (new Stache())->sites(['en', 'fr']);
         $this->app->instance(Stache::class, $stache);
         $this->repo = new CollectionRepository($stache);
 

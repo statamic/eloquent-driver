@@ -18,7 +18,7 @@ class FieldsetRepository extends StacheRepository
 
             return $models->map(function ($model) {
                 return Blink::once("eloquent-fieldset-{$model->handle}", function () use ($model) {
-                    return (new Fieldset)
+                    return (new Fieldset())
                         ->setHandle($model->handle)
                         ->setContents($model->data);
                 });
