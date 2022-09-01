@@ -291,7 +291,7 @@ class TermQueryBuilderTest extends TestCase
         $found = Term::query()->where('id', 'tags::tag-2')->first();
 
         $this->assertNotNull($found);
-        $this->assertEquals($found, $substitute);
+        $this->assertEquals(collect($found->toArray())->except(['updated_at'])->all(), collect($substitute->toArray())->except(['updated_at'])->all());
     }
 
     /** @test */

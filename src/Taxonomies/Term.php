@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Support\Carbon;
 use Statamic\Contracts\Taxonomies\Term as Contract;
 use Statamic\Eloquent\Taxonomies\TermModel as Model;
 use Statamic\Taxonomies\Term as FileEntry;
@@ -36,6 +37,10 @@ class Term extends FileEntry
 
         $term->syncOriginal();
         $term->data($data);
+
+        if (config('statamic.system.track_last_update')) {
+            $term->set('updated_at', $model->updated_at ?? $model->created_at);
+        }
 
         return $term;
     }
@@ -76,6 +81,7 @@ class Term extends FileEntry
         ])->fill([
             'uri' => $source->uri(),
             'data' => $data,
+            'updated_at' => $source->lastModified(),
         ]);
     }
 
@@ -94,8 +100,8 @@ class Term extends FileEntry
         return $this;
     }
 
-    public function lastModified()
+    public function fileLastModified()
     {
-        return $this->model?->updated_at;
+        return $this->model?->updated_at ?? Carbon::now();
     }
 }

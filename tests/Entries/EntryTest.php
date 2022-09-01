@@ -26,7 +26,7 @@ class EntryTest extends TestCase
 
         $this->assertEquals('the-slug', $entry->slug());
         $this->assertEquals('bar', $entry->data()->get('foo'));
-        $this->assertEquals(['foo' => 'bar'], $entry->data()->toArray());
+        $this->assertEquals(['foo' => 'bar'], $entry->data()->except(['updated_at'])->toArray());
     }
 
     /** @test */
@@ -41,7 +41,7 @@ class EntryTest extends TestCase
             'uri' => '/blog/the-slug',
             'date' => null,
             'collection' => 'blog',
-            'published' => null,
+            'published' => false,
             'status' => 'draft',
             'origin_id' => null,
             'id' => null,
@@ -53,6 +53,6 @@ class EntryTest extends TestCase
 
         $entry = (new Entry)->fromModel($model)->collection($collection);
 
-        $this->assertEquals($model->toArray(), $entry->toModel()->toArray());
+        $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
     }
 }
