@@ -8,6 +8,7 @@ use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Facades\Taxonomy;
+use Statamic\Facades\Term;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
 
@@ -176,7 +177,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $items->each->collection(Collection::findByHandle($this->collections[0]));
         }
 
+        $items = Term::applySubstitutions($items);
+
         return $items->map(function ($term) {
+
             if ($this->site) {
                 return $term->in($this->site);
             }
