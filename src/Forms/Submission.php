@@ -48,7 +48,7 @@ class Submission extends FileEntry
 
     public function date($date = null)
     {
-        if (!is_null($date)) {
+        if (! is_null($date)) {
             $this->date = $date;
         }
 
@@ -67,7 +67,7 @@ class Submission extends FileEntry
 
     public function delete()
     {
-        if (!$this->model) {
+        if (! $this->model) {
             $class = app('statamic.eloquent.forms.submission_model');
             $this->model = $class::findOrNew($this->id);
         }

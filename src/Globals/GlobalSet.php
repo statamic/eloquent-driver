@@ -53,7 +53,7 @@ class GlobalSet extends FileEntry
 
         $this->model = $model;
 
-        if (!is_null($model)) {
+        if (! is_null($model)) {
             $this->id($model->id);
         }
 

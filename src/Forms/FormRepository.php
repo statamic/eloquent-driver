@@ -12,7 +12,7 @@ class FormRepository extends StacheRepository
     {
         $model = app('statamic.eloquent.forms.model')::whereHandle($handle)->first();
 
-        if (!$model) {
+        if (! $model) {
             return;
         }
 

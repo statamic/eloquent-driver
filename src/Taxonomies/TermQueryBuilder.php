@@ -27,7 +27,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected function transform($items, $columns = [])
     {
         $site = $this->site;
-        if (!$site) {
+        if (! $site) {
             $site = Site::default()->handle();
         }
 
@@ -38,12 +38,12 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function column($column)
     {
-        if (!is_string($column)) {
+        if (! is_string($column)) {
             return $column;
         }
 
-        if (!in_array($column, $this->columns)) {
-            if (!Str::startsWith($column, 'data->')) {
+        if (! in_array($column, $this->columns)) {
+            if (! Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }
         }
@@ -64,11 +64,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
-            if (!$value) {
+            if (! $value) {
                 return $this;
             }
 
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $value = [$value];
             }
 
@@ -78,11 +78,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (in_array($column, ['collection', 'collections'])) {
-            if (!$value) {
+            if (! $value) {
                 return $this;
             }
 
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $value = [$value];
             }
 
@@ -113,7 +113,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     public function whereIn($column, $values, $boolean = 'and')
     {
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
-            if (!$values) {
+            if (! $values) {
                 return $this;
             }
 
@@ -123,7 +123,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         }
 
         if (in_array($column, ['collection', 'collections'])) {
-            if (!$values) {
+            if (! $values) {
                 return $this;
             }
 
@@ -152,7 +152,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
         if ($model) {
             $site = $this->site;
-            if (!$site) {
+            if (! $site) {
                 $site = Site::default()->handle();
             }
 
@@ -202,7 +202,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     private function applyCollectionAndTaxonomyWheres()
     {
-        if (!empty($this->collections)) {
+        if (! empty($this->collections)) {
             $this->builder->where(function ($query) {
                 $taxonomies = empty($this->taxonomies)
                     ? Taxonomy::handles()->all()
@@ -244,7 +244,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             });
         }
 
-        if (!empty($this->taxonomies)) {
+        if (! empty($this->taxonomies)) {
             $queryTaxonomies = collect($this->taxonomies)
                 ->filter()
                 ->unique();

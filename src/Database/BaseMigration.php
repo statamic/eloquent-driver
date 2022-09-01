@@ -23,8 +23,7 @@ class BaseMigration extends Migration
     /**
      * Prefixes table if defined.
      *
-     * @param string $table
-     *
+     * @param  string  $table
      * @return string
      */
     protected function prefix(string $table): string

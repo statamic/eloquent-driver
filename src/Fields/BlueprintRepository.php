@@ -19,7 +19,7 @@ class BlueprintRepository extends StacheRepository
     {
         return Blink::store(self::BLINK_FOUND)->once($blueprint, function () use ($blueprint) {
             [$namespace, $handle] = $this->getNamespaceAndHandle($blueprint);
-            if (!$blueprint) {
+            if (! $blueprint) {
                 return null;
             }
 
@@ -27,7 +27,7 @@ class BlueprintRepository extends StacheRepository
                 ->where('handle', $handle)
                 ->first();
 
-            if (!$blueprintModel) {
+            if (! $blueprintModel) {
                 throw_if(
                     $namespace === null && $handle === 'default',
                     Exception::class,

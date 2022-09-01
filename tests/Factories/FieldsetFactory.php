@@ -17,7 +17,7 @@ class FieldsetFactory
 
     public function withSections($sections)
     {
-        if (!$this->contents) {
+        if (! $this->contents) {
             $this->contents = [];
         }
 
@@ -37,7 +37,7 @@ class FieldsetFactory
 
     public function withFields($fields)
     {
-        if (!$this->contents) {
+        if (! $this->contents) {
             $this->contents = [];
         }
 

@@ -55,11 +55,11 @@ class TermRepository extends StacheRepository
 
         [$taxonomy, $slug] = array_pad(explode('/', $uri), 2, null);
 
-        if (!$slug) {
+        if (! $slug) {
             return null;
         }
 
-        if (!$taxonomy = $this->findTaxonomyHandleByUri($taxonomy)) {
+        if (! $taxonomy = $this->findTaxonomyHandleByUri($taxonomy)) {
             return null;
         }
 
@@ -68,7 +68,7 @@ class TermRepository extends StacheRepository
             ->where('taxonomy', $taxonomy)
             ->first();
 
-        if (!$term) {
+        if (! $term) {
             return null;
         }
 

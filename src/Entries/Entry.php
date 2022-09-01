@@ -64,7 +64,7 @@ class Entry extends FileEntry
 
         $this->model = $model;
 
-        if (!is_null($model)) {
+        if (! is_null($model)) {
             $this->id($model->id);
         }
 
@@ -87,7 +87,7 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         if ($this->origin) {
-            if (!$this->origin instanceof EntryContract) {
+            if (! $this->origin instanceof EntryContract) {
                 if ($model = $class::find($this->origin)) {
                     $this->origin = self::fromModel($model);
                 }
@@ -96,7 +96,7 @@ class Entry extends FileEntry
             return $this->origin;
         }
 
-        if (!$this->model?->origin_id) {
+        if (! $this->model?->origin_id) {
             return;
         }
 

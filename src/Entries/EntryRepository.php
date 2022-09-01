@@ -24,7 +24,7 @@ class EntryRepository extends StacheRepository
             return $this->query()->where('id', $id)->first();
         });
 
-        if (!$item) {
+        if (! $item) {
             Blink::forget($blinkKey);
 
             return null;
@@ -40,7 +40,7 @@ class EntryRepository extends StacheRepository
             return parent::findByUri($uri, $site);
         });
 
-        if (!$item) {
+        if (! $item) {
             Blink::forget($blinkKey);
 
             return null;

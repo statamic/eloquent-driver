@@ -56,7 +56,7 @@ class Term extends FileEntry
 
         $data = $source->data();
 
-        if (!isset($data['template'])) {
+        if (! isset($data['template'])) {
             unset($data['template']);
         }
 
@@ -93,7 +93,7 @@ class Term extends FileEntry
 
         $this->model = $model;
 
-        if (!is_null($model)) {
+        if (! is_null($model)) {
             $this->id($model->id);
         }
 
