@@ -72,7 +72,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         parent::resolveApplicationConfiguration($app);
 
         $configs = [
-            'eloquent_driver',
+            'eloquent-driver',
         ];
 
         foreach ($configs as $config) {
