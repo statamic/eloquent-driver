@@ -76,7 +76,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         return parent::count();
     }
-    
+
     protected function selectableColumns($columns = ['*'])
     {
         $columns = parent::selectableColumns($columns);
@@ -85,6 +85,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // it helps to resolve the problem of same column name
         //  overrided by a joint table
         $result = array_map(fn ($column) => $this->builder->getModel()->getTable().".$column", $columns);
+
         return $result;
     }
 }
