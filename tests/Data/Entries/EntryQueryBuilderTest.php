@@ -688,7 +688,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
     }
-    
+
     /** @test */
     public function entries_retrieval_with_join_table()
     {
@@ -698,32 +698,29 @@ class EntryQueryBuilderTest extends TestCase
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'author' => 'John Doe'])->create();
         Collection::make('locations')->save();
 
-        foreach(range(4,6) as $index) {
+        foreach (range(4, 6) as $index) {
             EntryFactory::id($index)->slug('location-'.$index)->collection('locations')
             ->data(['title' => 'Location '.$index])->create();
         }
 
         $query = Entry::query()
-            ->join('entries as e',fn($join) => $join
+            ->join('entries as e', fn ($join) => $join
                 ->whereColumn('e.id', 'entries.id')
                 ->where('e.collection', 'posts')
-            )->leftJoin('entries as locations', function($join) {
+            )->leftJoin('entries as locations', function ($join) {
                 $join
                     ->where('locations.collection', 'locations')
-                    ->on('locations.id', 'e.data->location')
-                    ;
-            })
-            ;
-        ;
+                    ->on('locations.id', 'e.data->location');
+            });
 
         $entries = $query->get();
 
-        foreach($entries as $entry) {
+        foreach ($entries as $entry) {
             // ensure no null id
             $this->assertNotNull($entry->id);
         }
 
         // the collection should be posts but not locations
-        $this->assertNotEquals($entries->first()->collection->handle, 'locations');        
+        $this->assertNotEquals($entries->first()->collection->handle, 'locations');
     }
 }
