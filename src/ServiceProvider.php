@@ -77,7 +77,6 @@ class ServiceProvider extends AddonServiceProvider
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands(array_keys(ClassMapGenerator::createMap(__DIR__. '/Commands')));
-
     }
 
     public function register()
