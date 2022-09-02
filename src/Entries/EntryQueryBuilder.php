@@ -84,7 +84,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // force the column returns with table name as alias
         // it helps to resolve the problem of same column name
         //  overrided by a joint table
-        $result = array_map(fn($column) => $this->builder->getModel()->getTable() . ".$column", $columns);
+        $result = array_map(fn ($column) => $this->builder->getModel()->getTable().".$column", $columns);
         return $result;
     }
 }
