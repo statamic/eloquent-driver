@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent;
 
+use Composer\ClassMapGenerator\ClassMapGenerator;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -75,17 +76,8 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
-        $this->commands([
-            Commands\ImportAssets::class,
-            Commands\ImportBlueprints::class,
-            Commands\ImportCollections::class,
-            Commands\ImportEntries::class,
-            Commands\ImportForms::class,
-            Commands\ImportGlobals::class,
-            Commands\ImportNavs::class,
-            Commands\ImportRevisions::class,
-            Commands\ImportTaxonomies::class,
-        ]);
+        $this->commands(array_keys(ClassMapGenerator::createMap(__DIR__. '/Commands')));
+
     }
 
     public function register()
