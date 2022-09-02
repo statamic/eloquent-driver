@@ -690,7 +690,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     /** @test */
-    public function entries_retrieval_with_join_table()
+    public function entries_can_be_retrieved_and_are_not_null_when_using_join()
     {
         Collection::make('posts')->save();
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'author' => 'John Doe', 'location' => 4])->create();
