@@ -76,7 +76,7 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
-        $this->commands(array_keys(ClassMapGenerator::createMap(__DIR__. '/Commands')));
+        $this->commands(array_keys(ClassMapGenerator::createMap(__DIR__.'/Commands')));
     }
 
     public function register()
