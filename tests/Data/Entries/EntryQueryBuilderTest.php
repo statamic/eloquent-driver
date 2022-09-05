@@ -688,4 +688,46 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
     }
+
+    /** @test */
+    public function entries_can_be_retrieved_on_join_table_conditions()
+    {
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'author' => 'John Doe', 'location' => 4])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'author' => 'John Doe'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'author' => 'John Doe', 'location' => 4])->create();
+        Collection::make('locations')->save();
+
+        $locations = [
+            4 => ['slug' => 'shaldon', 'title' => 'Shaldon'],
+            5 => ['slug' => 'cambridge', 'title' => 'Cambridge'],
+            6 => ['slug' => 'london', 'title' => 'London'],
+        ];
+
+        foreach (range(4, 6) as $index) {
+
+
+            EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
+            ->data(['title' => $locations[$index]['title']])->create();
+        }
+
+        $query = Entry::query()
+            ->setApplyColumnCheck(false)
+            ->join('entries as e', fn ($join) => $join
+                ->whereColumn('e.id', 'entries.id')
+                ->where('e.collection', 'posts')
+            )->leftJoin('entries as locations', function ($join) {
+                $join
+                    ->where('locations.collection', 'locations')
+                    ->on('locations.id', 'e.data->location');
+            })
+            ->where('e.data->title', 'like', '%post%')
+            ->where('locations.slug', 'shaldon')
+            ;
+
+        $entries = $query->get();
+
+        // successfully retrieved 2 results
+        $this->assertCount(2, $entries);
+    }
 }
