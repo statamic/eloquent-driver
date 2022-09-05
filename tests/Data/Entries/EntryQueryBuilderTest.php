@@ -719,8 +719,7 @@ class EntryQueryBuilderTest extends TestCase
                     ->on('locations.id', 'e.data->location');
             })
             ->where('e.data->title', 'like', '%post%')
-            ->where('locations.slug', 'shaldon')
-            ;
+            ->where('locations.slug', 'shaldon');
 
         $entries = $query->get();
 

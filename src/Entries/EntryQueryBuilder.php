@@ -32,7 +32,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         if (! is_string($column)) {
             return $column;
         }
-        
+
         $table = Str::contains($column, '.') ? Str::before($column, '.') : '';
         $column = Str::after($column, '.');
 
