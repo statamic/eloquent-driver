@@ -41,6 +41,10 @@ class Entry extends FileEntry
             $data['blueprint'] = $this->blueprint;
         }
 
+        if ($this->hasStructure()) {
+            $data['order'] = $this->order();
+        }
+
         return $class::findOrNew($this->id())->fill([
             'id'         => $this->id(),
             'origin_id'  => $this->origin()?->id(),

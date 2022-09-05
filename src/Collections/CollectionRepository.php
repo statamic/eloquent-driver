@@ -78,4 +78,13 @@ class CollectionRepository extends StacheRepository
             CollectionContract::class => Collection::class,
         ];
     }
+
+    public function updateEntryOrder(CollectionContract $collection, $ids = null)
+    {
+        $collection->queryEntries()
+            ->get()
+            ->each(function ($entry) {
+                $entry->save();
+            });
+    }
 }
