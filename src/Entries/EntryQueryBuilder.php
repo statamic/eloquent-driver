@@ -18,8 +18,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'date', 'collection', 'created_at', 'updated_at',
     ];
 
-    protected $isApplyColumnCheck = true;
-
     protected function transform($items, $columns = [])
     {
         $items = EntryCollection::make($items)->map(function ($model) {
@@ -34,20 +32,21 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         if (! is_string($column)) {
             return $column;
         }
+        
+        $table = Str::contains($column, '.') ? Str::before($column, '.') : '';
+        $column = Str::after($column, '.');
 
         if ($column == 'origin') {
             $column = 'origin_id';
         }
 
-        if ($this->isApplyColumnCheck() && ! in_array($column, self::COLUMNS)) {
-            if (! Str::startsWith($column, 'data->')) {
+        if (! in_array($column, self::COLUMNS)) {
+            if (! Str::contains($column, 'data->')) {
                 $column = 'data->'.$column;
             }
-        } else {
-            $column = parent::column($column);
         }
 
-        return $column;
+        return ($table ? $table.'.' : '').$column;
     }
 
     public function find($id, $columns = ['*'])
@@ -79,17 +78,5 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $this->addTaxonomyWheres();
 
         return parent::count();
-    }
-
-    public function setApplyColumnCheck($value = true)
-    {
-        $this->isApplyColumnCheck = $value;
-
-        return $this;
-    }
-
-    public function isApplyColumnCheck($value = null)
-    {
-        return $this->isApplyColumnCheck;
     }
 }

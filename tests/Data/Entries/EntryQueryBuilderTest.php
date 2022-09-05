@@ -710,7 +710,6 @@ class EntryQueryBuilderTest extends TestCase
         }
 
         $query = Entry::query()
-            ->setApplyColumnCheck(false)
             ->join('entries as e', fn ($join) => $join
                 ->whereColumn('e.id', 'entries.id')
                 ->where('e.collection', 'posts')
@@ -720,7 +719,8 @@ class EntryQueryBuilderTest extends TestCase
                     ->on('locations.id', 'e.data->location');
             })
             ->where('e.data->title', 'like', '%post%')
-            ->where('locations.slug', 'shaldon');
+            ->where('locations.slug', 'shaldon')
+            ;
 
         $entries = $query->get();
 
