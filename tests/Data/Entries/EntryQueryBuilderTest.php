@@ -705,8 +705,6 @@ class EntryQueryBuilderTest extends TestCase
         ];
 
         foreach (range(4, 6) as $index) {
-
-
             EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
             ->data(['title' => $locations[$index]['title']])->create();
         }
@@ -722,8 +720,7 @@ class EntryQueryBuilderTest extends TestCase
                     ->on('locations.id', 'e.data->location');
             })
             ->where('e.data->title', 'like', '%post%')
-            ->where('locations.slug', 'shaldon')
-            ;
+            ->where('locations.slug', 'shaldon');
 
         $entries = $query->get();
 

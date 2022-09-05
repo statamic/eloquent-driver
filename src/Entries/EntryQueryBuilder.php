@@ -81,12 +81,15 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return parent::count();
     }
 
-    public function setApplyColumnCheck($value = true) {
+    public function setApplyColumnCheck($value = true)
+    {
         $this->isApplyColumnCheck = $value;
+
         return $this;
     }
 
-    public function isApplyColumnCheck($value = null) {
+    public function isApplyColumnCheck($value = null)
+    {
         return $this->isApplyColumnCheck;
     }
 }
