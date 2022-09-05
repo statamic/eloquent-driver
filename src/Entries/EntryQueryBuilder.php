@@ -63,6 +63,24 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return parent::get($columns);
     }
 
+    public function orderBy($field, $direction = 'asc')
+    {
+        if ($field == 'order') {
+
+            // get around wrapJsonSelector being a protected method (sigh)
+            $grammar = $this->builder->getGrammar();
+            $reflector = new \ReflectionObject($grammar);
+            $method = $reflector->getMethod('wrapJsonSelector');
+            $method->setAccessible(true);
+            $field = $method->invoke($grammar, 'data->order');
+
+            // cast as real - this will work on mysql, postgres and sqlite
+            return $this->builder->orderByRaw("CAST({$field} AS REAL) ".($direction == 'asc' ? "ASC" : "DESC"));
+        }
+
+        return parent::orderBy($field, $direction);
+    }
+
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
         $this->addTaxonomyWheres();
