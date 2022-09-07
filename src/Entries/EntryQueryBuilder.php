@@ -76,4 +76,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         return parent::count();
     }
+
+    public function with($relations, $callback = null)
+    {
+        return $this;
+    }
 }

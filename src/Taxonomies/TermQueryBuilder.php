@@ -254,4 +254,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
             }
         }
     }
+
+    public function with($relations, $callback = null)
+    {
+        return $this;
+    }
 }
