@@ -52,7 +52,7 @@ class Submission extends FileEntry
             $this->date = $date;
         }
 
-        return $this->date;
+        return $this->date = Carbon::now();
     }
 
     public function save()
