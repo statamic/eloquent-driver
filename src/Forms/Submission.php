@@ -8,7 +8,6 @@ use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;
 use Statamic\Forms\Submission as FileEntry;
 
-
 class Submission extends FileEntry
 {
     protected $model;
