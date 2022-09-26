@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Forms;
 
+use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Forms\SubmissionModel as Model;
 use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;
@@ -25,14 +26,15 @@ class Submission extends FileEntry
     public function toModel()
     {
         $class = app('statamic.eloquent.forms.submission_model');
+        $timestamp = (new $class)->fromDateTime($this->date());
 
         $model = $class::findOrNew($this->id());
-
         return (! empty($model->id)) ? $model->fill([
             'data' => $this->data,
         ]) : $model->fill([
             'data' => $this->data,
             'form_id' => $this->form->model()->id,
+            'created_at' => $timestamp,
         ]);
     }
 
@@ -45,6 +47,15 @@ class Submission extends FileEntry
         $this->model = $model;
 
         return $this;
+    }
+
+    public function date($date = null)
+    {
+        if (! is_null($date)) {
+            $this->date = $date;
+        }
+
+        return $this->date ?? ($this->date = Carbon::now());
     }
 
     public function save()
