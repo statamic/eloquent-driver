@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class FormSubmissionTest extends TestCase
 {
-
     /** @test */
     public function it_should_have_timestamps()
     {
