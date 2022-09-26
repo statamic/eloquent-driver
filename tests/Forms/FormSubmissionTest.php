@@ -3,7 +3,6 @@
 namespace Tests\Forms;
 
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Tests\TestCase;

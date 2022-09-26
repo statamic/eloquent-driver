@@ -28,7 +28,7 @@ class Submission extends FileEntry
 
         $model = $class::findOrNew($this->id());
 
-        return (!empty($model->id)) ? $model->fill([
+        return (! empty($model->id)) ? $model->fill([
             'data' => $this->data,
         ]) : $model->fill([
             'data' => $this->data,
