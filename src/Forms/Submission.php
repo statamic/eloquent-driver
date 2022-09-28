@@ -29,6 +29,7 @@ class Submission extends FileEntry
         $timestamp = (new $class)->fromDateTime($this->date());
 
         $model = $class::findOrNew($this->id());
+
         return (! empty($model->id)) ? $model->fill([
             'data' => $this->data,
         ]) : $model->fill([

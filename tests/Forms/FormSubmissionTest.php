@@ -28,7 +28,8 @@ class FormSubmissionTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $submission->updated_at);
     }
 
-    public function it_should_save_to_DB()
+    /** @test */
+    public function it_should_save_to_the_database()
     {
         $form = FormModel::create([
             'handle' => 'test',
@@ -49,5 +50,30 @@ class FormSubmissionTest extends TestCase
                 'name' => 'John Doe',
             ]),
         ]);
+    }
+
+    /** @test */
+    public function it_should_not_overwrite_submissions()
+    {
+        $form = FormModel::create([
+            'handle' => 'test',
+            'title' => 'Test',
+        ]);
+
+        $submission = SubmissionModel::create([
+            'form_id' => $form->id,
+            'data' => [
+                'name' => 'John Doe',
+            ],
+        ]);
+
+        $submission = SubmissionModel::create([
+            'form_id' => $form->id,
+            'data' => [
+                'name' => 'Billy Doe',
+            ],
+        ]);
+
+        $this->assertCount(2, $form->submissions()->get());
     }
 }
