@@ -75,7 +75,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $field = $method->invoke($grammar, 'data->order');
 
             // cast as real - this will work on mysql, postgres and sqlite
-            return $this->builder->orderByRaw("CAST({$field} AS REAL) ".($direction == 'asc' ? 'ASC' : 'DESC'));
+            return $this->builder->orderByRaw("CAST({$field} AS DOUBLE PRECISION) ".($direction == 'asc' ? 'ASC' : 'DESC'));
         }
 
         return parent::orderBy($field, $direction);
