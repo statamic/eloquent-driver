@@ -55,6 +55,8 @@ class EntryRepository extends StacheRepository
         $model->save();
 
         $entry->model($model->fresh());
+
+        Blink::put("eloquent-entry-{$entry->id()}", $entry);
     }
 
     public function delete($entry)
