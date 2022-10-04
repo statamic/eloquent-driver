@@ -75,10 +75,10 @@ class Entry extends FileEntry
     {
         return $this->model?->updated_at ?? Carbon::now();
     }
-    
+
     public function lastModified()
     {
-        return $this->model?->updated_at ?? Carbon::now();
+        return $this->fileLastModified();
     }
 
     public function origin($origin = null)
