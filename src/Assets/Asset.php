@@ -94,7 +94,6 @@ class Asset extends FileAsset
         parent::move($folder, $filename);
 
         if ($oldMeta != $this->metaPath()) {
-
             if ($oldMeta = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMeta)->first()) {
                 $oldMeta->delete();
             }
