@@ -79,4 +79,29 @@ class Asset extends FileAsset
 
         $model->save();
     }
+
+    /**
+     * Move the asset to a different location.
+     *
+     * @param  string  $folder  The folder relative to the container.
+     * @param  string|null  $filename  The new filename, if renaming.
+     * @return $this
+     */
+    public function move($folder, $filename = null)
+    {
+        $oldMeta = $this->metaPath();
+
+        parent::move($folder, $filename);
+
+        if ($oldMeta != $this->metaPath()) {
+
+            if ($oldMeta = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMeta)->first()) {
+                $oldMeta->delete();
+            }
+
+            $this->writeMeta($this->meta());
+        }
+
+        return $this;
+    }
 }
