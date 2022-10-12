@@ -67,7 +67,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         $this->addTaxonomyWheres();
 
-        return parent::paginate($perPage, $columns, $pageName = 'page', $page = null);
+        return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
     public function count()
