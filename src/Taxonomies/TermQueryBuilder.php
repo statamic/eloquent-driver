@@ -197,7 +197,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     {
         $this->applyCollectionAndTaxonomyWheres();
 
-        return parent::paginate($perPage = null, $columns = [], $pageName = 'page', $page = null);
+        return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
     private function applyCollectionAndTaxonomyWheres()
