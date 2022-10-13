@@ -76,6 +76,11 @@ class Entry extends FileEntry
         return $this->model?->updated_at ?? Carbon::now();
     }
 
+    public function lastModified()
+    {
+        return $this->fileLastModified();
+    }
+
     public function origin($origin = null)
     {
         if (func_num_args() > 0) {
