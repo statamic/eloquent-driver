@@ -57,7 +57,7 @@ class ImportEntries extends Command
         $entries = Entry::all();
 
         $entriesWithOrigin = $entries->filter->hasOrigin();
-        $entriesWithoutOrigin = $entries->filter(function($entry) {
+        $entriesWithoutOrigin = $entries->filter(function ($entry) {
             return ! $entry->hasOrigin();
         });
 
