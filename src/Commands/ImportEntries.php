@@ -57,7 +57,9 @@ class ImportEntries extends Command
         $entries = Entry::all();
 
         $entriesWithOrigin = $entries->filter->hasOrigin();
-        $entriesWithoutOrigin = $entries->filter(function($entry) { return ! $entry->hasOrigin(); });
+        $entriesWithoutOrigin = $entries->filter(function($entry) {
+            return ! $entry->hasOrigin();
+        });
 
         if ($entriesWithOrigin->count() > 0) {
             $this->info('Importing origin entries');
