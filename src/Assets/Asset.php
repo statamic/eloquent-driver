@@ -22,7 +22,14 @@ class Asset extends FileAsset
         }
 
         if ($this->meta) {
-            return array_merge($this->meta, ['data' => $this->data->all()]);
+            $meta = $this->meta;
+
+            $meta['data'] = collect(Arr::get($meta, 'data', []))
+                ->merge($this->data->all())
+                ->except($this->removedData)
+                ->all();
+
+            return $meta;
         }
 
         return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
