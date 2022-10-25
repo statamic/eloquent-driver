@@ -13,7 +13,11 @@ return new class extends Migration {
             $table->string('action')->index();
             $table->string('user')->nullable();
             $table->string('message')->nullable();
-            $table->json('attributes')->nullable();
+            if (DB::connection()->getDriverName() === 'pgsql') {
+                $table->jsonb('attributes')->nullable();
+            } else {
+                $table->json('attributes')->nullable();
+            }
             $table->timestamps();
 
             $table->unique(['key', 'created_at']);
