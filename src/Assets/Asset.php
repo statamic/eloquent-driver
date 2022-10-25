@@ -102,7 +102,7 @@ class Asset extends FileAsset
         $this->save();
 
         if ($oldMetaPath != $this->metaPath()) {
-            if ($oldMetaPath = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMeta)->first()) {
+            if ($oldMetaPath = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMetaPath)->first()) {
                 $oldMetaPath->delete();
             }
 
