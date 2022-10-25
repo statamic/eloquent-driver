@@ -11,6 +11,8 @@ use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
+    protected $removedData = [];
+
     public function meta($key = null)
     {
         if (func_num_args() === 1) {
