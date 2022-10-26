@@ -85,8 +85,6 @@ class TermRepository extends StacheRepository
         $model = $entry->toModel();
         $model->save();
 
-        //var_dump($entry->data());
-
         $entry->model($model->fresh());
     }
 
