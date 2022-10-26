@@ -56,10 +56,29 @@ class ImportEntries extends Command
     {
         $entries = Entry::all();
 
-        $this->withProgressBar($entries, function ($entry) {
+        $entriesWithOrigin = $entries->filter->hasOrigin();
+        $entriesWithoutOrigin = $entries->filter(function ($entry) {
+            return ! $entry->hasOrigin();
+        });
+
+        if ($entriesWithOrigin->count() > 0) {
+            $this->info('Importing origin entries');
+        }
+
+        $this->withProgressBar($entriesWithoutOrigin, function ($entry) {
             $lastModified = $entry->fileLastModified();
             $entry->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
         });
+
+        if ($entriesWithOrigin->count() > 0) {
+            $this->newLine();
+            $this->info('Importing localized entries');
+
+            $this->withProgressBar($entriesWithOrigin, function ($entry) {
+                $lastModified = $entry->fileLastModified();
+                $entry->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+            });
+        }
 
         $this->newLine();
         $this->info('Entries imported');
