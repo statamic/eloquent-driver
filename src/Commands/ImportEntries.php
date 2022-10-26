@@ -72,7 +72,7 @@ class ImportEntries extends Command
 
         if ($entriesWithOrigin->count() > 0) {
             $this->newLine();
-            $this->info('Importing multi-site entries');
+            $this->info('Importing localized entries');
 
             $this->withProgressBar($entriesWithOrigin, function ($entry) {
                 $lastModified = $entry->fileLastModified();
