@@ -202,6 +202,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $migration = require __DIR__.'/../database/migrations/create_entries_table.php.stub';
         $migration->up();
+
+        $migration = require __DIR__.'/../database/migrations/2022_10_27_add_order_to_entries_table.php.stub';
+        $migration->up();
     }
 
     public function runMigrationsForUUIDEntries()
@@ -209,6 +212,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->runBaseMigrations();
 
         $migration = require __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub';
+        $migration->up();
+
+        $migration = require __DIR__.'/../database/migrations/2022_10_27_add_order_to_entries_table.php.stub';
         $migration->up();
     }
 }
