@@ -15,7 +15,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at',
+        'date', 'collection', 'created_at', 'updated_at', 'sort_order',
     ];
 
     protected function transform($items, $columns = [])
@@ -35,6 +35,10 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         if ($column == 'origin') {
             $column = 'origin_id';
+        }
+
+        if ($column == 'order') {
+            $column = 'sort_order';
         }
 
         if (! in_array($column, self::COLUMNS)) {
@@ -61,24 +65,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $this->addTaxonomyWheres();
 
         return parent::get($columns);
-    }
-
-    public function orderBy($field, $direction = 'asc')
-    {
-        if ($field == 'order') {
-
-            // get around wrapJsonSelector being a protected method (sigh)
-            $grammar = $this->builder->getGrammar();
-            $reflector = new \ReflectionObject($grammar);
-            $method = $reflector->getMethod('wrapJsonSelector');
-            $method->setAccessible(true);
-            $field = $method->invoke($grammar, 'data->order');
-
-            // cast as real - this will work on mysql, postgres and sqlite
-            return $this->builder->orderByRaw("CAST({$field} AS DOUBLE PRECISION) ".($direction == 'asc' ? 'ASC' : 'DESC'));
-        }
-
-        return parent::orderBy($field, $direction);
     }
 
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)

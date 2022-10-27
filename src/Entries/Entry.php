@@ -41,10 +41,6 @@ class Entry extends FileEntry
             $data['blueprint'] = $this->blueprint;
         }
 
-        if ($this->hasStructure()) {
-            $data['order'] = $this->order();
-        }
-
         return $class::findOrNew($this->id())->fill([
             'id'         => $this->id(),
             'origin_id'  => $this->origin()?->id(),
@@ -57,6 +53,7 @@ class Entry extends FileEntry
             'published'  => $this->published(),
             'status'     => $this->status(),
             'updated_at' => $this->lastModified(),
+            'sort_order' => $this->order(),
         ]);
     }
 
