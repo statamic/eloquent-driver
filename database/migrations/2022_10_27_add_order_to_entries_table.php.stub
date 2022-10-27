@@ -8,14 +8,14 @@ return new class extends Migration {
     public function up()
     {
         Schema::table($this->prefix('entries'), function (Blueprint $table) {
-            $table->integer('sort_order')->after('collection')->nullable();
+            $table->integer('order')->after('collection')->nullable();
         });
     }
 
     public function down()
     {
         Schema::table($this->prefix('entries'), function (Blueprint $table) {
-            $table->dropColumn('sort_order');
+            $table->dropColumn('order');
         });
     }
 };

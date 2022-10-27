@@ -15,7 +15,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at', 'sort_order',
+        'date', 'collection', 'created_at', 'updated_at', 'order',
     ];
 
     protected function transform($items, $columns = [])
@@ -35,10 +35,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         if ($column == 'origin') {
             $column = 'origin_id';
-        }
-
-        if ($column == 'order') {
-            $column = 'sort_order';
         }
 
         if (! in_array($column, self::COLUMNS)) {
