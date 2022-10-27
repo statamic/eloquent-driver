@@ -37,6 +37,11 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $migrationCount = 0;
 
+    protected $updateScripts = [
+        \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+    ];
+
+
     public function boot()
     {
         parent::boot();
@@ -65,7 +70,6 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
             __DIR__.'/../database/migrations/create_asset_table.php.stub' => $this->migrationsPath('create_asset_table.php'),
             __DIR__.'/../database/migrations/create_revisions_table.php.stub' => $this->migrationsPath('create_revisions_table.php'),
-            __DIR__.'/../database/migrations/2022_10_27_add_order_to_entries_table.php.stub' => $this->migrationsPath('update_2022_10_27_add_order_to_entries_table.php'),
         ], 'migrations');
 
         $this->publishes([
