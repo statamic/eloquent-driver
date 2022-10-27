@@ -41,7 +41,6 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
     ];
 
-
     public function boot()
     {
         parent::boot();
