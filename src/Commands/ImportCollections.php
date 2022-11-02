@@ -2,7 +2,9 @@
 
 namespace Statamic\Eloquent\Commands;
 
+use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -40,19 +42,34 @@ class ImportCollections extends Command
      */
     public function handle()
     {
-        $this->useDefaultRepositories();
+        $this->usingDefaultRepositories(function () {
+            $this->importCollections();
+        });
 
-        $this->importCollections();
+        $this->updateEntryOrder();
+
+        $this->newLine();
+        $this->info('Collections imported');
 
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function usingDefaultRepositories(Closure $callback)
     {
+        $originalRepo = get_class(app()->make(CollectionRepositoryContract::class));
+        $originalTreeRepo = get_class(app()->make(CollectionTreeRepositoryContract::class));
+        $originalCollection = get_class(app()->make(CollectionContract::class));
+
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
-
         app()->bind(CollectionContract::class, StacheCollection::class);
+
+        $callback();
+
+        Statamic::repository(CollectionRepositoryContract::class, $originalRepo);
+        Statamic::repository(CollectionTreeRepositoryContract::class, $originalTreeRepo);
+        app()->bind(CollectionContract::class, $originalCollection);
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
     }
 
     private function importCollections()
@@ -74,8 +91,12 @@ class ImportCollections extends Command
                 });
             }
         });
+    }
 
-        $this->newLine();
-        $this->info('Collections imported');
+    private function updateEntryOrder()
+    {
+        $this->withProgressBar(CollectionFacade::all(), function ($collections) {
+            $collections->updateEntryOrder();
+        });
     }
 }
