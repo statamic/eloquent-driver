@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Collection;
@@ -217,7 +218,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         $slugs = [];
                         foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
                             if (in_array($taxonomy, $taxonomies)) {
-                                foreach ($entry->get($taxonomy, []) as $term) {
+                                foreach (Arr::wrap($entry->get($taxonomy, [])) as $term) {
                                     $slugs[] = $taxonomy.'::'.$term;
                                 }
                             }
