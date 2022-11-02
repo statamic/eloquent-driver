@@ -28,6 +28,7 @@ class Collection extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? null)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->defaultPublishState($model->settings['default_status'] ?? true)
+            ->originBehavior($model->settings['origin_behavior'] ?? 'select')
             ->structureContents($model->settings['structure'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
             ->sortDirection($model->settings['sort_dir'] ?? null)
@@ -73,6 +74,7 @@ class Collection extends FileEntry
                 'past_date_behavior'   => $source->pastDateBehavior(),
                 'future_date_behavior' => $source->futureDateBehavior(),
                 'preview_targets'      => $source->previewTargets(),
+                'origin_behavior'      => $source->originBehavior(),
             ],
         ]);
     }
