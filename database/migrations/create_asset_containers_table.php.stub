@@ -13,11 +13,7 @@ return new class extends Migration {
             $table->string('handle')->unique();
             $table->string('title');
             $table->string('disk');
-            if (DB::connection()->getDriverName() === 'pgsql') {
-                $table->jsonb('settings')->nullable();
-            } else {
-                $table->json('settings')->nullable();
-            }
+            $table->jsonb('settings')->nullable();
             $table->timestamps();
         });
     }

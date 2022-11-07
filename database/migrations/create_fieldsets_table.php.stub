@@ -11,11 +11,7 @@ return new class extends Migration {
         Schema::create($this->prefix('fieldsets'), function (Blueprint $table) {
             $table->id();
             $table->string('handle')->unique();
-            if (DB::connection()->getDriverName() === 'pgsql') {
-                $table->jsonb('data');
-            } else {
-                $table->json('data');
-            }
+            $table->jsonb('data');
             $table->timestamps();
         });
     }

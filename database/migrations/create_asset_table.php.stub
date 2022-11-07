@@ -11,11 +11,7 @@ return new class extends Migration {
         Schema::create($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->id();
             $table->string('handle')->index();
-            if (DB::connection()->getDriverName() === 'pgsql') {
-                $table->jsonb('data')->nullable();
-            } else {
-                $table->json('data')->nullable();
-            }
+            $table->jsonb('data')->nullable();
             $table->timestamps();
         });
     }
