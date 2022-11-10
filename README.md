@@ -9,6 +9,8 @@ Install using Composer:
 composer require statamic/eloquent-driver
 ```
 
+**NOTE**: If you use Postgres, you'll need to [composer patch](https://rias.be/blog/using-composer-patches) in this [PR](https://github.com/statamic/eloquent-driver/pull/68)
+
 Publish the config file:
 
 ```
