@@ -16,8 +16,9 @@ return new class extends Migration {
             $table->string('slug')->nullable();
             $table->string('uri')->nullable()->index();
             $table->string('date')->nullable();
+            $table->integer('order')->nullable();
             $table->string('collection')->index();
-            $table->json('data');
+            $table->jsonb('data');
             $table->timestamps();
 
             $table->primary('id');

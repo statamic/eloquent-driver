@@ -37,6 +37,10 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $migrationCount = 0;
 
+    protected $updateScripts = [
+        \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+    ];
+
     public function boot()
     {
         parent::boot();

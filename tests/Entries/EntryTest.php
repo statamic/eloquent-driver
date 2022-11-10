@@ -44,6 +44,7 @@ class EntryTest extends TestCase
             'published'  => false,
             'status'     => 'draft',
             'origin_id'  => null,
+            'order'      => null,
         ]);
 
         $collection = Collection::make('blog')->title('blog')->routes([

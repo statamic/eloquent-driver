@@ -52,6 +52,7 @@ class Entry extends FileEntry
             'published'  => $this->published(),
             'status'     => $this->status(),
             'updated_at' => $this->lastModified(),
+            'order'      => $this->order(),
         ]);
     }
 

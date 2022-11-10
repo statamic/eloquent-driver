@@ -15,13 +15,14 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at',
+        'date', 'collection', 'created_at', 'updated_at', 'order',
     ];
 
     protected function transform($items, $columns = [])
     {
-        $items = EntryCollection::make($items)->map(function ($model) {
-            return app('statamic.eloquent.entries.entry')::fromModel($model);
+        $items = EntryCollection::make($items)->map(function ($model) use ($columns) {
+            return app('statamic.eloquent.entries.entry')::fromModel($model)
+                ->selectedQueryColumns($columns);
         });
 
         return Entry::applySubstitutions($items);

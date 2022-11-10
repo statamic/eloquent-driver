@@ -54,7 +54,7 @@ class Term extends FileEntry
     {
         $class = app('statamic.eloquent.terms.model');
 
-        $data = $source->data();
+        $data = $source->fileData();
 
         if (! isset($data['template'])) {
             unset($data['template']);
