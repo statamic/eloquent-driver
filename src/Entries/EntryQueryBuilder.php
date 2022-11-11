@@ -41,7 +41,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         }
 
         if (! in_array($column, self::COLUMNS)) {
-            if (! Str::contains($column, 'data->')) {
+            if (! Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }
         }
