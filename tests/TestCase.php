@@ -37,7 +37,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $uses = array_flip(class_uses_recursive(static::class));
 
         if ($this->shouldFakeVersion) {
-            \Facades\Statamic\Version::shouldReceive('get')->andReturn('3.0.0-testing');
+            \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
         }
 
