@@ -41,8 +41,7 @@ class Entry extends FileEntry
             $data['blueprint'] = $this->blueprint;
         }
 
-        return $class::findOrNew($this->id())->fill([
-            'id'         => $this->id(),
+        $attributes = [
             'origin_id'  => $this->origin()?->id(),
             'site'       => $this->locale(),
             'slug'       => $this->slug(),
@@ -54,7 +53,13 @@ class Entry extends FileEntry
             'status'     => $this->status(),
             'updated_at' => $this->lastModified(),
             'order'      => $this->order(),
-        ]);
+        ];
+
+        if ($id = $this->id()) {
+            $attributes['id'] = $id;
+        }
+
+        return $class::findOrNew($id)->fill($attributes);
     }
 
     public function model($model = null)
