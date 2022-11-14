@@ -380,7 +380,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_contains()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -404,7 +404,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_doesnt_contain()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -428,7 +428,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_contains()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -447,7 +447,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_doesnt_contain()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
