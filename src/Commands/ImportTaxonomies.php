@@ -62,6 +62,10 @@ class ImportTaxonomies extends Command
 
     private function importTaxonomies()
     {
+        if (! $this->confirm('Do you want to import taxonomies?')) {
+            return;
+        }
+
         $taxonomies = TaxonomyFacade::all();
 
         $this->withProgressBar($taxonomies, function ($taxonomy) {
@@ -78,6 +82,10 @@ class ImportTaxonomies extends Command
 
     private function importTerms()
     {
+        if (! $this->confirm('Do you want to import terms?')) {
+            return;
+        }
+
         $terms = TermFacade::all();
         // Grab unique parent terms.
         $terms = $terms->map->term()->unique();
