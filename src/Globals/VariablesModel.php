@@ -17,4 +17,15 @@ class VariablesModel extends BaseModel
     {
         return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
     }
+
+    public function toArray()
+    {
+        $attrs = parent::toArray();
+        // Ensure that origin is properly serialized as locale string.
+        if (isset($attrs['origin']) && $attrs['origin'] instanceof Variables) {
+            $attrs['origin'] = $attrs['origin']->locale();
+        }
+
+        return $attrs;
+    }
 }
