@@ -361,4 +361,21 @@ EOT;
             'charlie' => ['augmented c', 'augmented d'],
         ], Arr::only($variables->selectedQueryRelations(['charlie'])->toArray(), ['alfa', 'bravo', 'charlie']));
     }
+
+    /** @test */
+    public function it_serializes_origin_to_string()
+    {
+        $global = GlobalSet::make('test');
+
+        $a = $global->makeLocalization('a');
+        $x = $a->toModel()->toArray();
+        $this->assertSame('a', $x['locale']);
+        $this->assertSame(null, $x['origin']);
+
+        // originates from a
+        $b = $global->makeLocalization('b')->origin($a);
+        $y = $b->toModel()->toArray();
+        $this->assertSame('b', $y['locale']);
+        $this->assertSame('a', $y['origin']);
+    }
 }
