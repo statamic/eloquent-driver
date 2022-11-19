@@ -9,11 +9,9 @@ use Statamic\Support\Arr;
 
 class BlueprintRepository extends StacheRepository
 {
-    private const BLINK_FOUND = 'blueprints.found';
-
-    private const BLINK_FROM_FILE = 'blueprints.from-file';
-
-    private const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
+    protected const BLINK_FOUND = 'blueprints.found';
+    protected const BLINK_FROM_FILE = 'blueprints.from-file';
+    protected const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
 
     public function find($blueprint): ?Blueprint
     {
@@ -80,7 +78,7 @@ class BlueprintRepository extends StacheRepository
             ->keyBy->handle();
     }
 
-    private function filesIn($namespace)
+    protected function filesIn($namespace)
     {
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
@@ -105,7 +103,7 @@ class BlueprintRepository extends StacheRepository
         });
     }
 
-    private function getNamespaceAndHandle($blueprint)
+    protected function getNamespaceAndHandle($blueprint)
     {
         $blueprint = str_replace('/', '.', $blueprint);
         $parts = explode('.', $blueprint);
