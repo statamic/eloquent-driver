@@ -19,12 +19,8 @@ return new class extends Migration {
             $table->integer('order')->nullable();
             $table->string('collection')->index();
             $table->jsonb('data');
+            $table->unsignedBigInteger('origin_id')->nullable();
             $table->timestamps();
-
-            $table->foreign('origin_id')
-                ->references('id')
-                ->on($this->prefix('entries'))
-                ->onDelete('set null');
         });
     }
 
