@@ -5,7 +5,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-return new class extends Migration {
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::create($this->prefix('blueprints'), function (Blueprint $table) {
@@ -21,11 +27,21 @@ return new class extends Migration {
         $this->seedDefaultBlueprint();
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::dropIfExists($this->prefix('blueprints'));
     }
 
+    /**
+     * Seed default blueprint.
+     *
+     * @return void
+     */
     public function seedDefaultBlueprint()
     {
         try {
@@ -33,26 +49,26 @@ return new class extends Migration {
                 'fields' => [
                     [
                         'field' => [
-                            'type' => 'markdown',
-                            'display' => 'Content',
+                            'type'        => 'markdown',
+                            'display'     => 'Content',
                             'localizable' => true,
                         ],
                         'handle' => 'content',
                     ],
                     [
                         'field' => [
-                            'type' => 'users',
-                            'display' => 'Author',
-                            'default' => 'current',
+                            'type'        => 'users',
+                            'display'     => 'Author',
+                            'default'     => 'current',
                             'localizable' => true,
-                            'max_items' => 1,
+                            'max_items'   => 1,
                         ],
                         'handle' => 'author',
                     ],
                     [
                         'field' => [
-                            'type' => 'template',
-                            'display' => 'Template',
+                            'type'        => 'template',
+                            'display'     => 'Template',
                             'localizable' => true,
                         ],
                         'handle' => 'template',
@@ -64,9 +80,9 @@ return new class extends Migration {
         }
 
         DB::table($this->prefix('blueprints'))->insert([
-            'namespace' => null,
-            'handle' => 'default',
-            'data' => $config,
+            'namespace'  => null,
+            'handle'     => 'default',
+            'data'       => $config,
             'created_at' => Carbon::now(),
         ]);
     }

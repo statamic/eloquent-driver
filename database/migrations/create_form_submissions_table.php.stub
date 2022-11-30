@@ -4,12 +4,18 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-return new class extends Migration {
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::create($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained($this->prefix('forms'))->cascadeOnDelete();
+            $table->unsignedBigInteger('form_id')->index();
             $table->jsonb('data')->nullable();
             $table->timestamps(6);
 
@@ -17,6 +23,11 @@ return new class extends Migration {
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::dropIfExists($this->prefix('form_submissions'));
