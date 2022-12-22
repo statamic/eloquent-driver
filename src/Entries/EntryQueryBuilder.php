@@ -62,6 +62,10 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function get($columns = ['*'])
     {
+        if ($columns !== ['*']) {
+            $columns = array_unique(array_merge($columns, ['site', 'origin_id', 'slug', 'collection', 'created_at', 'updated_at']));
+        }
+
         $this->addTaxonomyWheres();
 
         return parent::get($columns);
