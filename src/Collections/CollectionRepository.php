@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Collections;
 
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
+use Statamic\Eloquent\Jobs\UpdateCollectionEntryOrder;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
@@ -81,6 +82,11 @@ class CollectionRepository extends StacheRepository
 
     public function updateEntryOrder(CollectionContract $collection, $ids = null)
     {
-        $collection->queryEntries()->get()->each->save();
+        $collection->queryEntries()
+            ->get(['id'])
+            ->each(function ($entry) {
+                UpdateCollectionEntryOrder::dispatch($entry->id())
+                    ->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
+            });
     }
 }
