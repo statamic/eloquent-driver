@@ -83,6 +83,7 @@ class TermRepository extends StacheRepository
 
         if (! $term) {
             Blink::forget($blinkKey);
+
             return null;
         }
 
