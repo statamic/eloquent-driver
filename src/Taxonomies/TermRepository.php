@@ -19,7 +19,7 @@ class TermRepository extends StacheRepository
         return app(TermQueryBuilder::class);
     }
 
-    public function find($id): ?LocalizedTerm
+    public function find($id): ?TermContract
     {
         [$handle, $slug] = explode('::', $id);
 
@@ -28,7 +28,8 @@ class TermRepository extends StacheRepository
             return $this->query()
                 ->where('taxonomy', $handle)
                 ->where('slug', $slug)
-                ->get();
+                ->get()
+                ->first();
         });
 
         if (! $term) {
@@ -37,7 +38,7 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        return $term->first();
+        return $term;
     }
 
     public function findByUri(string $uri, string $site = null): ?TermContract
