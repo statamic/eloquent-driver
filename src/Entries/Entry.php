@@ -13,13 +13,15 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
+        $data = isset($model->data['localized_fields']) ? collect($model->data)->only($model->data['localized_fields']) : $model->data;
+
         $entry = (new static())
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
             ->date($model->date)
             ->collection($model->collection)
-            ->data($model->data)
+            ->data($data)
             ->blueprint($model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
@@ -37,8 +39,14 @@ class Entry extends FileEntry
 
         $data = $this->data();
 
+        if ($origin = $this->origin()) {
+            $localizedFields = $data->keys()->all();
+            $data = $origin->data()->merge($data);
+            $data->put('localized_fields', $localizedFields);
+        }
+
         if ($this->blueprint && $this->collection()->entryBlueprints()->count() > 1) {
-            $data['blueprint'] = $this->blueprint;
+            $data->put('blueprint', $this->blueprint);
         }
 
         $attributes = [
