@@ -8,7 +8,6 @@ use Statamic\Facades\Collection;
 use Statamic\Facades\Taxonomy;
 use Statamic\Stache\Repositories\TermRepository as StacheRepository;
 use Statamic\Support\Str;
-use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
 {
