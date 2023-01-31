@@ -34,6 +34,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return $column;
         }
 
+        $table = Str::contains($column, '.') ? Str::before($column, '.') : '';
+        $column = Str::after($column, '.');
+
         if ($column == 'origin') {
             $column = 'origin_id';
         }
@@ -44,7 +47,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             }
         }
 
-        return $column;
+        return ($table ? $table.'.' : '').$column;
     }
 
     public function find($id, $columns = ['*'])
