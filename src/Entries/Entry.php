@@ -42,13 +42,11 @@ class Entry extends FileEntry
         $date = $this->hasDate() ? $this->date() : null;
 
         if ($blueprint = $this->blueprint()) {
-
             if ($this->collection()->entryBlueprints()->count() > 1) {
                 $data->put('blueprint', $blueprint->handle());
             }
 
             if ($origin) {
-
                 $localizedFields = $blueprint
                     ->fields()
                     ->localizable()
