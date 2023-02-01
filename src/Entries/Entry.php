@@ -38,15 +38,33 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         $data = $this->data();
+        $origin = $this->origin();
+        $date = $this->hasDate() ? $this->date() : null;
 
-        if ($origin = $this->origin()) {
-            $localizedFields = $data->keys()->all();
-            $data = $origin->data()->merge($data);
-            $data->put('localized_fields', $localizedFields);
-        }
+        if ($blueprint = $this->blueprint()) {
 
-        if ($this->blueprint && $this->collection()->entryBlueprints()->count() > 1) {
-            $data->put('blueprint', $this->blueprint);
+            if ($this->collection()->entryBlueprints()->count() > 1) {
+                $data->put('blueprint', $blueprint->handle());
+            }
+
+            if ($origin) {
+
+                $localizedFields = $blueprint
+                    ->fields()
+                    ->localizable()
+                    ->all()
+                    ->map
+                    ->handle()
+                    ->all();
+
+                $data = $origin->data()->merge($data);
+
+                $data->put('localized_fields', $localizedFields);
+
+                if (! in_array('date', $localizedFields)) {
+                    $date = $origin->hasDate() ? $origin->date() : null;
+                }
+            }
         }
 
         $attributes = [
@@ -54,7 +72,7 @@ class Entry extends FileEntry
             'site'       => $this->locale(),
             'slug'       => $this->slug(),
             'uri'        => $this->uri(),
-            'date'       => $this->hasDate() ? $this->date() : null,
+            'date'       => $date,
             'collection' => $this->collectionHandle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $this->published(),
@@ -124,5 +142,13 @@ class Entry extends FileEntry
         }
 
         return $this->origin ?? null;
+    }
+
+    public function makeLocalization($site)
+    {
+        $this->localizations = null;
+
+        return parent::makeLocalization($site)
+            ->data($this->data());
     }
 }
