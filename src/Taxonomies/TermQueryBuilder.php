@@ -214,7 +214,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 // or the ones associated with the collection
                 // what we ultimately want is a subquery for terms in the form:
                 // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
-                $collectionHash = md5(collect($this->collections)->merge($this->taxonomies)->sort()->join('-'));
+                $collectionHash = md5(collect($this->collections)->merge(collect($taxonomies))->sort()->join('-'));
 
                 Blink::once("eloquent-taxonomy-{$collectionHash}", function () use ($taxonomies) {
                     return Entry::query()
