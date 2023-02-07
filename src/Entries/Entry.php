@@ -25,7 +25,7 @@ class Entry extends FileEntry
             ->model($model);
 
         if (config('statamic.system.track_last_update')) {
-            $entry->set('updated_at', $model->updated_at ?? $model->created_at);
+            $entry->set('updated_at', ($model->updated_at ?? $model->created_at)->timestamp);
         }
 
         return $entry;
