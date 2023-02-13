@@ -38,6 +38,8 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         $data = $this->data();
+        $data->put('parent', $this->parent());
+
         $origin = $this->origin();
         $date = $this->hasDate() ? $this->date() : null;
 
