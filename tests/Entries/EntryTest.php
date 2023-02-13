@@ -38,6 +38,7 @@ class EntryTest extends TestCase
             'slug' => 'the-slug',
             'data' => [
                 'foo' => 'bar',
+                'parent' => null,
             ],
             'site'       => 'en',
             'uri'        => '/blog/the-slug',
