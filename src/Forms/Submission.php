@@ -4,8 +4,10 @@ namespace Statamic\Eloquent\Forms;
 
 use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Forms\SubmissionModel as Model;
+use Statamic\Events\SubmissionCreated;
 use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;
+use Statamic\Events\SubmissionSaving;
 use Statamic\Forms\Submission as FileEntry;
 
 class Submission extends FileEntry
@@ -61,11 +63,19 @@ class Submission extends FileEntry
 
     public function save()
     {
+        if (SubmissionSaving::dispatch($this) === false) {
+            return false;
+        }
+        
         $model = $this->toModel();
         $model->save();
-
+        $isNew = $model->wasRecentlyCreated;
+        
         $this->model($model->fresh());
-
+        
+        if ($isNew) {
+            SubmissionCreated::dispatch($this);
+        }
         SubmissionSaved::dispatch($this);
     }
 
