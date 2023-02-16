@@ -66,13 +66,13 @@ class Submission extends FileEntry
         if (SubmissionSaving::dispatch($this) === false) {
             return false;
         }
-        
+
         $model = $this->toModel();
         $model->save();
         $isNew = $model->wasRecentlyCreated;
-        
+
         $this->model($model->fresh());
-        
+
         if ($isNew) {
             SubmissionCreated::dispatch($this);
         }
