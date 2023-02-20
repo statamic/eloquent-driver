@@ -49,13 +49,23 @@ class Entry extends FileEntry
             }
 
             if ($origin) {
-                $localizedFields = $blueprint
+                $localizedBlueprintFields = $blueprint
                     ->fields()
                     ->localizable()
                     ->all()
                     ->map
                     ->handle()
                     ->all();
+
+                // remove any fields in entry data that are marked as localized but value is blank
+                $localizedFields = [];
+                foreach ($localizedBlueprintFields as $blueprintField) {
+                    if ($data->get($blueprintField) == '') {
+                        $data->forget($blueprintField);
+                    } else {
+                        $localizedFields[] = $blueprintField;
+                    }
+                }
 
                 $data = $origin->data()->merge($data);
 
