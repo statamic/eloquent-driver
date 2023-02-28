@@ -5,7 +5,6 @@ namespace Statamic\Eloquent\Commands;
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Facades\Entry;
-use Statamic\Statamic;
 
 class MigrateEntriesBlueprint extends Command
 {
