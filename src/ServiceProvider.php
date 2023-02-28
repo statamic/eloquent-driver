@@ -39,6 +39,7 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
     ];
 
     public function boot()
@@ -89,6 +90,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportNavs::class,
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
+            Commands\MigrateEntriesBlueprint::class,
         ]);
     }
 
