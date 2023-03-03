@@ -11,7 +11,9 @@ class VariablesModel extends BaseModel
 
     protected $table = 'global_set_variables';
 
-    protected $casts = [];
+    protected $casts = [
+        'origin' => 'collection',
+    ];
 
     public function getAttribute($key)
     {
