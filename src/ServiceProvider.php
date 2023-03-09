@@ -156,7 +156,7 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($collectionsDriver == 'eloquent') {
             Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-    
+
             $this->app->bind('statamic.eloquent.collections.model', function () {
                 return config('statamic.eloquent-driver.collections.model');
             });
@@ -164,11 +164,11 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($collectionsTreeDriver == 'eloquent') {
             Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
-    
+
             $this->app->bind('statamic.eloquent.collections.tree', function () {
                 return config('statamic.eloquent-driver.collections.tree');
             });
-    
+
             $this->app->bind('statamic.eloquent.collections.tree_model', function () {
                 return config('statamic.eloquent-driver.collections.tree_model');
             });
