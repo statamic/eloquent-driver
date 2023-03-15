@@ -24,7 +24,7 @@ class CollectionRepository extends StacheRepository
 
     public function all(): IlluminateCollection
     {
-        return Blink::once('eloquent-collections-all', function () {
+        return Blink::once('eloquent-collections', function () {
             return $this->transform(app('statamic.eloquent.collections.model')::all());
         });
     }
@@ -49,7 +49,7 @@ class CollectionRepository extends StacheRepository
         $model->save();
 
         Blink::forget("eloquent-collection-{$model->handle}");
-        Blink::forget('eloquent-collections-all');
+        Blink::forget('eloquent-collections');
 
         $entry->model($model->fresh());
     }
@@ -60,7 +60,7 @@ class CollectionRepository extends StacheRepository
         $model->delete();
 
         Blink::forget("eloquent-collection-{$model->handle}");
-        Blink::forget('eloquent-collections-all');
+        Blink::forget('eloquent-collections');
     }
 
     protected function transform($items, $columns = [])
