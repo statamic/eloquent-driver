@@ -12,7 +12,7 @@ class FieldsetRepository extends StacheRepository
     public function all(): Collection
     {
         return Blink::once('eloquent-fieldsets', function () {
-            if (count(($models = app('statamic.eloquent.blueprints.fieldset_model')::get() ?? collect())) === 0) {
+            if (count($models = app('statamic.eloquent.blueprints.fieldset_model')::get() ?? collect()) === 0) {
                 return collect();
             }
 
