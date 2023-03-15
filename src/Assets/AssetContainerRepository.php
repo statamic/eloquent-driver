@@ -25,7 +25,7 @@ class AssetContainerRepository extends StacheRepository
 
     public function findByHandle(string $handle): ?AssetContainerContract
     {
-        return Blink::once("eloquent-assetcontainers-{$handle}", function () use ($handle) {
+        return Blink::once("eloquent-assetcontainers-handle-{$handle}", function () use ($handle) {
             $model = app('statamic.eloquent.assets.container_model')::whereHandle($handle)->first();
 
             if (! $model) {
