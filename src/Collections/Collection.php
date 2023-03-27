@@ -68,7 +68,7 @@ class Collection extends FileEntry
                 'default_status'       => $source->defaultPublishState,
                 'structure'            => $source->structureContents(),
                 'sort_dir'             => $source->sortDirection(),
-                'sort_field'           => $source->sortField(),
+                'sort_field'           => $source->orderable() ? null : $source->sortField(),
                 'taxonomies'           => $source->taxonomies,
                 'propagate'            => $source->propagate(),
                 'past_date_behavior'   => $source->pastDateBehavior(),
