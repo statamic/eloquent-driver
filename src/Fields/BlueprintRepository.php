@@ -83,7 +83,7 @@ class BlueprintRepository extends StacheRepository
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
-            if (count(($blueprintModels = BlueprintModel::where('namespace', $namespace)->get())) == 0) {
+            if (count($blueprintModels = BlueprintModel::where('namespace', $namespace)->get()) == 0) {
                 return collect();
             }
 

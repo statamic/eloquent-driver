@@ -83,6 +83,7 @@ class ImportBlueprints extends Command
                             $tab['sections'] = collect($tab['sections'])
                                 ->map(function ($section) use (&$sectionCount) {
                                     $section['__count'] = $sectionCount++;
+
                                     return $section;
                                 });
                         }
