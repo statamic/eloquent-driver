@@ -148,6 +148,7 @@ class BlueprintRepository extends StacheRepository
                     $tab['sections'] = collect($tab['sections'])
                         ->map(function ($section) use (&$sectionCount) {
                             $section['__count'] = $sectionCount++;
+
                             return $section;
                         });
                 }
@@ -171,6 +172,7 @@ class BlueprintRepository extends StacheRepository
                         ->sortBy('__count')
                         ->map(function ($section) use (&$sectionCount) {
                             unset($section['__count']);
+
                             return $section;
                         })
                         ->toArray();
