@@ -177,14 +177,14 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.collections.tree', function () {
             // Use the old related config as a fallback to ensure backwards compatibility.
             $collectionsOldTree = config('statamic.eloquent-driver.collections.tree');
-            
+
             return config('statamic.eloquent-driver.collection_trees.tree', $collectionsOldTree);
         });
 
         $this->app->bind('statamic.eloquent.collections.tree_model', function () {
             // Use the old related config as a fallback to ensure backwards compatibility.
             $collectionsOldTreeModel = config('statamic.eloquent-driver.collections.tree_model');
-            
+
             return config('statamic.eloquent-driver.collection_trees.model', $collectionsOldTreeModel);
         });
     }
