@@ -18,12 +18,14 @@ return [
     ],
 
     'collections' => [
-        'driver'       => 'eloquent',
-        'model'        => \Statamic\Eloquent\Collections\CollectionModel::class,
-        // Uncomment the setting below if you need to specify a different driver for your collections tree.
-        // 'tree_driver' => 'eloquent',
-        'tree'         => \Statamic\Eloquent\Structures\CollectionTree::class,
-        'tree_model'   => \Statamic\Eloquent\Structures\TreeModel::class,
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Collections\CollectionModel::class,
+    ],
+
+    'collection_trees' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree'   => \Statamic\Eloquent\Structures\CollectionTree::class,
     ],
 
     'entries' => [

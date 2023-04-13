@@ -97,6 +97,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerAssets();
         $this->registerBlueprints();
         $this->registerCollections();
+        $this->registerCollectionTrees();
         $this->registerEntries();
         $this->registerForms();
         $this->registerGlobals();
@@ -151,28 +152,41 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerCollections()
     {
+        if (config('statamic.eloquent-driver.collections.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+
+        $this->app->bind('statamic.eloquent.collections.model', function () {
+            return config('statamic.eloquent-driver.collections.model');
+        });
+    }
+
+    private function registerCollectionTrees()
+    {
+        // Use the collections' driver as a fallback to ensure brackwards compatibility.
         $collectionsDriver = config('statamic.eloquent-driver.collections.driver', 'file');
-        $collectionsTreeDriver = config('statamic.eloquent-driver.collections.tree_driver', $collectionsDriver);
 
-        if ($collectionsDriver == 'eloquent') {
-            Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-
-            $this->app->bind('statamic.eloquent.collections.model', function () {
-                return config('statamic.eloquent-driver.collections.model');
-            });
+        if (config('statamic.eloquent-driver.collection_trees.driver', $collectionsDriver) != 'eloquent') {
+            return;
         }
 
-        if ($collectionsTreeDriver == 'eloquent') {
-            Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
 
-            $this->app->bind('statamic.eloquent.collections.tree', function () {
-                return config('statamic.eloquent-driver.collections.tree');
-            });
+        $this->app->bind('statamic.eloquent.collections.tree', function () {
+            // Use the old related config as a fallback to ensure backwards compatibility.
+            $collectionsOldTree = config('statamic.eloquent-driver.collections.tree');
+            
+            return config('statamic.eloquent-driver.collection_trees.tree', $collectionsOldTree);
+        });
 
-            $this->app->bind('statamic.eloquent.collections.tree_model', function () {
-                return config('statamic.eloquent-driver.collections.tree_model');
-            });
-        }
+        $this->app->bind('statamic.eloquent.collections.tree_model', function () {
+            // Use the old related config as a fallback to ensure backwards compatibility.
+            $collectionsOldTreeModel = config('statamic.eloquent-driver.collections.tree_model');
+            
+            return config('statamic.eloquent-driver.collection_trees.model', $collectionsOldTreeModel);
+        });
     }
 
     private function registerEntries()
