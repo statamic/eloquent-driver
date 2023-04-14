@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
@@ -13,13 +14,18 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
+        $data = $model->data;
+        if (isset($data['_localized'])) {
+            $data = Arr::only($data, $data['_localized']);
+        }
+
         $entry = (new static())
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
             ->date($model->date)
             ->collection($model->collection)
-            ->data($model->data)
+            ->data($data)
             ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
@@ -36,13 +42,42 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         $data = $this->data();
+        $date = $this->hasDate() ? $this->date() : null;
+
+        if ($this->hasOrigin()) {
+            $origin = $this->origin();
+            $fields = $this->blueprint()->fields()->localizable()->all()->keys();
+
+            $originData = $origin->data();
+            $localizedFields = [];
+            foreach ($fields as $field) {
+                if ($data->has($field)) {
+                    if ($data->get($field) === $originData->get($field)) {
+                        $data->forget($field);
+                    } else {
+                        $localizedFields[] = $field;
+                    }
+                }
+            }
+
+            $data = $originData->merge($data);
+            $data->put('_localized', $localizedFields);
+
+            if (! in_array('date', $localizedFields)) {
+                $date = $origin->hasDate() ? $origin->date() : null;
+            }
+        }
+
+        if ($parent = $this->parent()) {
+            $data->put('parent', (string) $parent->id);
+        }
 
         $attributes = [
             'origin_id'  => $this->origin()?->id(),
             'site'       => $this->locale(),
             'slug'       => $this->slug(),
             'uri'        => $this->uri(),
-            'date'       => $this->hasDate() ? $this->date() : null,
+            'date'       => $date,
             'collection' => $this->collectionHandle(),
             'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
@@ -113,5 +148,12 @@ class Entry extends FileEntry
         }
 
         return $this->origin ?? null;
+    }
+
+    public function makeLocalization($site)
+    {
+        $this->localizations = null;
+
+        return parent::makeLocalization($site)->data($this->data());
     }
 }
