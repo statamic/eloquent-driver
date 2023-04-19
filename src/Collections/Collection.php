@@ -20,7 +20,6 @@ class Collection extends FileEntry
             ->titleFormats($model->settings['title_formats'] ?? null)
             ->mount($model->settings['mount'] ?? null)
             ->dated($model->settings['dated'] ?? null)
-            ->ampable($model->settings['ampable'] ?? null)
             ->sites($model->settings['sites'] ?? null)
             ->template($model->settings['template'] ?? null)
             ->layout($model->settings['layout'] ?? null)
@@ -58,7 +57,6 @@ class Collection extends FileEntry
                 'title_formats'        => collect($source->titleFormats())->filter(),
                 'mount'                => $source->mount,
                 'dated'                => $source->dated,
-                'ampable'              => $source->ampable,
                 'sites'                => $source->sites,
                 'template'             => $source->template,
                 'layout'               => $source->layout,
