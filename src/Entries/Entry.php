@@ -24,7 +24,7 @@ class Entry extends FileEntry
             ->model($model);
 
         if ($model->date) {
-            $entry->date($model->date)
+            $entry->date($model->date);
         }
 
         if (config('statamic.system.track_last_update')) {
