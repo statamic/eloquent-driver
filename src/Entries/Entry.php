@@ -23,7 +23,7 @@ class Entry extends FileEntry
             ->published($model->published)
             ->model($model);
 
-        if ($model->date) {
+        if ($model->date && $entry->collection()->dated()) {
             $entry->date($model->date);
         }
 
