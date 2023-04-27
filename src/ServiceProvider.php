@@ -165,7 +165,7 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerCollectionTrees()
     {
-        // Use the collections' driver as a fallback to ensure brackwards compatibility.
+        // Use the collections' driver as a fallback to ensure backwards compatibility.
         $collectionsDriver = config('statamic.eloquent-driver.collections.driver', 'file');
 
         if (config('statamic.eloquent-driver.collection_trees.driver', $collectionsDriver) != 'eloquent') {
