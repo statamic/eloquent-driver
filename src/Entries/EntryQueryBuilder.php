@@ -24,8 +24,13 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $wheres = collect($this->builder->getQuery()->wheres);
 
         if (
-            $collection = $wheres->firstWhere('column', 'collection') and
-            $field = Collection::find($collection['value'])->entryBlueprint()->fields()->get($column) and
+            ($collection =
+                $wheres->firstWhere('column', 'collection')['value'] ??
+                null) and
+            ($field = Collection::find($collection)
+                ->entryBlueprint()
+                ->fields()
+                ->get($column)) and
             in_array($field->config()['type'], ['integer', 'float'])
         ) {
             $this->builder->orderByRaw("data->'{$column}' {$direction}");
