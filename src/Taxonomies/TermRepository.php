@@ -55,6 +55,8 @@ class TermRepository extends StacheRepository
 
         [$taxonomy, $slug] = array_pad(explode('/', $uri), 2, null);
 
+        $taxonomy = str_replace('-', '_', $taxonomy);
+
         if (! $slug) {
             return null;
         }
