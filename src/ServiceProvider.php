@@ -80,6 +80,7 @@ class ServiceProvider extends AddonServiceProvider
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
+            Commands\ExportBlueprints::class,
             Commands\ExportCollections::class,
             Commands\ExportForms::class,
             Commands\ImportAssets::class,
