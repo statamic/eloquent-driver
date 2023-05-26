@@ -4,7 +4,6 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
@@ -12,11 +11,9 @@ use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Forms\Submission;
-use Statamic\Facades\File;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository as StacheFormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
-use Statamic\Facades\Stache;
 use Statamic\Statamic;
 
 class ExportForms extends Command

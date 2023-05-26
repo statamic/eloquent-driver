@@ -4,13 +4,12 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
-use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Collections\Collection as EloquentCollection;
+use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Entries\Collection as StacheCollection;
 use Statamic\Facades\Blink;
