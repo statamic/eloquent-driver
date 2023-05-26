@@ -43,7 +43,7 @@ class ExportCollections extends Command
     public function handle()
     {
         $this->usingDefaultRepositories(function () {
-            $this->importCollections();
+            $this->exportCollections();
         });
 
         $this->newLine();
@@ -61,7 +61,7 @@ class ExportCollections extends Command
         $callback();
     }
 
-    private function importCollections()
+    private function exportCollections()
     {
         $collections = CollectionFacade::all();
 

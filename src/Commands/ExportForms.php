@@ -42,7 +42,7 @@ class ExportForms extends Command
     public function handle()
     {
         $this->usingDefaultRepositories(function () {
-            $this->importForms();
+            $this->exportForms();
         });
 
         $this->newLine();
@@ -59,7 +59,7 @@ class ExportForms extends Command
         $callback();
     }
 
-    private function importForms()
+    private function exportForms()
     {
         $forms = (new FormRepository())->all();
 
