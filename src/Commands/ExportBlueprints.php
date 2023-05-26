@@ -36,7 +36,7 @@ class ExportBlueprints extends Command
      */
     public function handle()
     {
-        $this->usingDefaultRepositories(function() {
+        $this->usingDefaultRepositories(function () {
             $this->exportBlueprints();
             $this->importFieldsets();
         });
