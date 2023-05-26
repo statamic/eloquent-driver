@@ -66,7 +66,6 @@ class ExportForms extends Command
         app()->bind(FormContract::class, StacheForm::class);
 
         $this->withProgressBar($forms, function ($form) {
-
             $newForm = (new StacheForm())
                 ->handle($form->handle())
                 ->title($form->title())
@@ -81,7 +80,6 @@ class ExportForms extends Command
             Statamic::repository(FormRepositoryContract::class, FormRepository::class);
 
             $form->submissions()->each(function ($submission) use ($newForm) {
-
                 $id = $submission->date()->getPreciseTimestamp(4);
                 $id = substr($id, 0, -4).'.'.substr($id, -4);
 
