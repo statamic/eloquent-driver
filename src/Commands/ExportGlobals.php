@@ -59,7 +59,6 @@ class ExportGlobals extends Command
         $sets = GlobalSetModel::all();
 
         $this->withProgressBar($sets, function ($model) {
-
             $global = GlobalSetFacade::make()
                 ->handle($model->handle)
                 ->title($model->title)
