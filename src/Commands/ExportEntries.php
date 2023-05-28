@@ -62,7 +62,7 @@ class ExportEntries extends Command
         $entries = EntryModel::all();
 
         $entriesWithOrigin = $entries->filter(function ($model) {
-            return !! $model->origin_id;
+            return (bool) $model->origin_id;
         });
 
         $entriesWithoutOrigin = $entries->filter(function ($model) {
