@@ -14,9 +14,9 @@ use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Facades\Nav as NavFacade;
 use Statamic\Stache\Repositories\NavigationRepository;
 use Statamic\Stache\Repositories\NavTreeRepository;
+use Statamic\Statamic;
 use Statamic\Structures\Nav;
 use Statamic\Structures\Tree;
-use Statamic\Statamic;
 
 class ExportNavs extends Command
 {
@@ -78,7 +78,6 @@ class ExportNavs extends Command
             TreeModel::where('handle', $model->handle)
                 ->get()
                 ->each(function ($treeModel) use ($nav) {
-
                     $nav->newTreeInstance()
                         ->tree($treeModel->tree)
                         ->handle($treeModel->handle)
@@ -86,7 +85,6 @@ class ExportNavs extends Command
                         ->initialPath($treeModel->settings['initial_path'] ?? null)
                         ->syncOriginal()
                         ->save();
-
                 });
         });
 
