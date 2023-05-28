@@ -84,6 +84,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ExportBlueprints::class,
             Commands\ExportCollections::class,
             Commands\ExportForms::class,
+            Commands\ExportGlobals::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
