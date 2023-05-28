@@ -13,11 +13,10 @@ use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
-use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Eloquent\Assets\AssetContainerModel;
+use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades\Asset as AssetFacade;
 use Statamic\Facades\AssetContainer as AssetContainerFacade;
-use Statamic\Facades\YAML;
 use Statamic\Stache\Repositories\AssetContainerRepository;
 use Statamic\Statamic;
 
