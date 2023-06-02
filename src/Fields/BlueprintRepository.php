@@ -83,7 +83,7 @@ class BlueprintRepository extends StacheRepository
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
-            if (count(($blueprintModels = BlueprintModel::where('namespace', $namespace)->get())) == 0) {
+            if (count($blueprintModels = BlueprintModel::where('namespace', $namespace)->get()) == 0) {
                 return collect();
             }
 
@@ -139,11 +139,21 @@ class BlueprintRepository extends StacheRepository
     private function addOrderToBlueprintSections($contents)
     {
         $count = 0;
-        $contents['sections'] = collect($contents['sections'] ?? [])
-            ->map(function ($section) use (&$count) {
-                $section['__count'] = $count++;
+        $contents['tabs'] = collect($contents['tabs'] ?? [])
+            ->map(function ($tab) use (&$count) {
+                $tab['__count'] = $count++;
 
-                return $section;
+                if (isset($tab['sections']) && is_array($tab['sections'])) {
+                    $sectionCount = 0;
+                    $tab['sections'] = collect($tab['sections'])
+                        ->map(function ($section) use (&$sectionCount) {
+                            $section['__count'] = $sectionCount++;
+
+                            return $section;
+                        });
+                }
+
+                return $tab;
             })
             ->toArray();
 
@@ -152,12 +162,23 @@ class BlueprintRepository extends StacheRepository
 
     private function updateOrderFromBlueprintSections($contents)
     {
-        $contents['sections'] = collect($contents['sections'] ?? [])
+        $contents['tabs'] = collect($contents['tabs'] ?? [])
             ->sortBy('__count')
-            ->map(function ($section) {
-                unset($section['__count']);
+            ->map(function ($tab) {
+                unset($tab['__count']);
 
-                return $section;
+                if (isset($tab['sections']) && is_array($tab['sections'])) {
+                    $tab['sections'] = collect($tab['sections'])
+                        ->sortBy('__count')
+                        ->map(function ($section) use (&$sectionCount) {
+                            unset($section['__count']);
+
+                            return $section;
+                        })
+                        ->toArray();
+                }
+
+                return $tab;
             })
             ->toArray();
 
