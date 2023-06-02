@@ -65,8 +65,8 @@ class Collection extends FileEntry
                 'revisions'            => $source->revisionsEnabled(),
                 'default_status'       => $source->defaultPublishState,
                 'structure'            => $source->structureContents(),
-                'sort_dir'             => $source->sortDirection(),
-                'sort_field'           => $source->sortField(),
+                'sort_dir'             => $source->customSortDirection(),
+                'sort_field'           => $source->customSortField(),
                 'taxonomies'           => $source->taxonomies,
                 'propagate'            => $source->propagate(),
                 'past_date_behavior'   => $source->pastDateBehavior(),
@@ -99,5 +99,15 @@ class Collection extends FileEntry
             ->expectsRoot($this->structureContents['root'] ?? false)
             ->showSlugs($this->structureContents['slugs'] ?? false)
             ->maxDepth($this->structureContents['max_depth'] ?? null);
+    }
+
+    public function customSortField()
+    {
+        return $this->sortField;
+    }
+
+    public function customSortDirection()
+    {
+        return $this->sortDirection;
     }
 }
