@@ -69,8 +69,8 @@ class AssetContainer extends FileEntry
                 'allow_renaming'    => $this->allowRenaming(),
                 'create_folders'    => $this->createFolders(),
                 'search_index'      => $this->searchIndex(),
-                'source_preset'     => $this->sourcePreset(),
-                'warm_presets'      => $this->warmPresets(),
+                'source_preset'     => $this->sourcePreset,
+                'warm_presets'      => $this->warmPresets,
             ],
         ]);
     }
