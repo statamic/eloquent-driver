@@ -17,12 +17,15 @@ class Entry extends FileEntry
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
-            ->date($model->date)
             ->collection($model->collection)
             ->data($model->data)
             ->blueprint($model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
+
+        if ($model->date && $entry->collection()->dated()) {
+            $entry->date($model->date);
+        }
 
         if (config('statamic.system.track_last_update')) {
             $entry->set('updated_at', $model->updated_at ?? $model->created_at);
