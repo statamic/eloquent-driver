@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
             $table->uuid('id');
             $table->string('site')->index();
-            $table->unsignedBigInteger('origin_id')->nullable()->index();
+            $table->uuid('origin_id')->nullable()->index();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
