@@ -98,7 +98,7 @@ class Entry extends FileEntry
             $this->origin = $origin;
 
             if ($this->model) {
-                $this->model->origin_id = $origin instanceof EntryContract ? $origin->id : $origin;
+                $this->model->origin_id = $origin instanceof EntryContract ? $origin->id() : $origin;
             }
 
             return $this;
