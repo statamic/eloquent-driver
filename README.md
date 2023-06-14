@@ -23,7 +23,7 @@ Since Statamic uses UUIDs within content files by default, we provide two soluti
 If you're starting from scratch, we can use traditional incrementing integers for IDs.
 
 - Delete `content/collections/pages/home.md`
-- Change the structure `tree` in `content/collections/pages.yaml` to `{}`.
+- Change the structure `tree` in `content/trees/collections/pages.yaml` to `{}`.
 - Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table"`.
 - Run `php artisan migrate`.

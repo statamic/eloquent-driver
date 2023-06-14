@@ -15,7 +15,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at', 'order',
+        'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
     protected function transform($items, $columns = [])

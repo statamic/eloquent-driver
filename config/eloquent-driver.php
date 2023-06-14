@@ -22,6 +22,7 @@ return [
         'model'      => \Statamic\Eloquent\Collections\CollectionModel::class,
         'tree'       => \Statamic\Eloquent\Structures\CollectionTree::class,
         'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
+        'update_entry_order_queue' => 'default',
     ],
 
     'entries' => [
