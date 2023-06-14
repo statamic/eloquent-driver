@@ -22,7 +22,7 @@ class Entry extends FileEntry
             ->date($model->date)
             ->collection($model->collection)
             ->data($data)
-            ->blueprint($model->data['blueprint'] ?? null)
+            ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
 
@@ -44,10 +44,6 @@ class Entry extends FileEntry
         $date = $this->hasDate() ? $this->date() : null;
 
         if ($blueprint = $this->blueprint()) {
-            if ($this->collection()->entryBlueprints()->count() > 1) {
-                $data->put('blueprint', $blueprint->handle());
-            }
-
             if ($origin) {
                 $localizedBlueprintFields = $blueprint
                     ->fields()
@@ -84,6 +80,7 @@ class Entry extends FileEntry
             'uri'        => $this->uri(),
             'date'       => $date,
             'collection' => $this->collectionHandle(),
+            'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $this->published(),
             'status'     => $this->status(),
