@@ -19,7 +19,7 @@ class Entry extends FileEntry
             ->slug($model->slug)
             ->collection($model->collection)
             ->data($model->data)
-            ->blueprint($model->data['blueprint'] ?? null)
+            ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
 
@@ -47,10 +47,6 @@ class Entry extends FileEntry
 
         $data = $source->data();
 
-        if ($source->blueprint && $source->collection()->entryBlueprints()->count() > 1) {
-            $data['blueprint'] = $source->blueprint;
-        }
-
         $attributes = [
             'origin_id'  => $source->origin()?->id(),
             'site'       => $source->locale(),
@@ -58,6 +54,7 @@ class Entry extends FileEntry
             'uri'        => $source->uri(),
             'date'       => $source->hasDate() ? $source->date() : null,
             'collection' => $source->collectionHandle(),
+            'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $source->published(),
             'status'     => $source->status(),
