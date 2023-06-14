@@ -2,8 +2,6 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\Assert;
-
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $shouldFakeVersion = true;
