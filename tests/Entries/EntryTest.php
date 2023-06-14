@@ -158,6 +158,7 @@ class EntryTest extends TestCase
 
         $collection = (new Collection)
             ->handle('pages')
+            ->dated(true)
             ->propagate(true)
             ->sites(['en', 'fr', 'de'])
             ->save();
