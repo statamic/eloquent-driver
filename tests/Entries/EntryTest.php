@@ -165,9 +165,9 @@ class EntryTest extends TestCase
 
         $entry = (new Entry)
             ->id(1)
+            ->collection($collection)
             ->date('2023-01-01')
             ->locale('en')
-            ->collection($collection)
             ->blueprint('test');
 
         $return = $entry->save();
