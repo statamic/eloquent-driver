@@ -16,6 +16,6 @@ class FormModel extends BaseModel
 
     public function submissions()
     {
-        return $this->hasMany(SubmissionModel::class, 'form_id');
+        return $this->hasMany(app('statamic.eloquent.forms.submission_model'), 'form_id');
     }
 }
