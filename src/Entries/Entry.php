@@ -13,7 +13,7 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = isset($model->data['localized_fields']) ? collect($model->data)->only($model->data['localized_fields']) : $model->data;
+        $data = isset($model->data['__localized_fields']) ? collect($model->data)->only($model->data['__localized_fields']) : $model->data;
 
         $entry = (new static())
             ->origin($model->origin_id)
@@ -69,7 +69,7 @@ class Entry extends FileEntry
 
                 $data = $origin->data()->merge($data);
 
-                $data->put('localized_fields', $localizedFields);
+                $data->put('__localized_fields', $localizedFields);
 
                 if (! in_array('date', $localizedFields)) {
                     $date = $origin->hasDate() ? $origin->date() : null;
