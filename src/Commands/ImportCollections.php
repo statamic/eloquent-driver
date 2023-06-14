@@ -10,7 +10,6 @@ use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Eloquent\Collections\Collection as EloquentCollection;
-use Statamic\Eloquent\Structures\CollectionTree as EloquentCollectionTree;
 use Statamic\Entries\Collection as StacheCollection;
 use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Stache\Repositories\CollectionRepository;
@@ -85,7 +84,7 @@ class ImportCollections extends Command
             if ($structure = $collection->structure()) {
                 $structure->trees()->each(function ($tree) {
                     $lastModified = $tree->fileLastModified();
-                    EloquentCollectionTree::makeModelFromContract($tree)
+                    app('statamic.eloquent.collections.tree')::makeModelFromContract($tree)
                         ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                         ->save();
                 });

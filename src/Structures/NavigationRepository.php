@@ -25,13 +25,13 @@ class NavigationRepository extends StacheRepository
 
     public function all(): Collection
     {
-        return $this->transform(NavModel::all());
+        return $this->transform(app('statamic.eloquent.navigations.model')::all());
     }
 
     public function findByHandle($handle): ?NavContract
     {
         return Blink::once("eloquent-nav-{$handle}", function () use ($handle) {
-            $model = NavModel::whereHandle($handle)->first();
+            $model = app('statamic.eloquent.navigations.model')::whereHandle($handle)->first();
 
             return $model ? app(NavContract::class)->fromModel($model) : null;
         });

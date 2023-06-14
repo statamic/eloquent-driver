@@ -13,10 +13,10 @@ class AssetContainerRepository extends StacheRepository
 
     public function all(): Collection
     {
-        return Blink::once('eloquent-assetcontainers-all', function () {
+        return Blink::once('eloquent-assetcontainers', function () {
             return app('statamic.eloquent.assets.container_model')::all()
                 ->map(function ($model) {
-                    return Blink::once("eloquent-assetcontainers-{$model->handle}", function () use ($model) {
+                    return Blink::once("eloquent-assetcontainer-{$model->handle}", function () use ($model) {
                         return app(AssetContainerContract::class)->fromModel($model);
                     });
                 });
@@ -25,7 +25,7 @@ class AssetContainerRepository extends StacheRepository
 
     public function findByHandle(string $handle): ?AssetContainerContract
     {
-        return Blink::once("eloquent-assetcontainers-{$handle}", function () use ($handle) {
+        return Blink::once("eloquent-assetcontainer-{$handle}", function () use ($handle) {
             $model = app('statamic.eloquent.assets.container_model')::whereHandle($handle)->first();
 
             if (! $model) {
@@ -45,15 +45,15 @@ class AssetContainerRepository extends StacheRepository
     {
         $container->save();
 
-        Blink::forget("eloquent-assetcontainers-{$container->handle()}");
+        Blink::forget("eloquent-assetcontainer-{$container->handle()}");
     }
 
     public function delete($container)
     {
         $container->delete();
 
-        Blink::forget("eloquent-assetcontainers-{$container->handle()}");
-        Blink::forget('eloquent-assetcontainers-all');
+        Blink::forget("eloquent-assetcontainer-{$container->handle()}");
+        Blink::forget('eloquent-assetcontainers');
     }
 
     public static function bindings(): array

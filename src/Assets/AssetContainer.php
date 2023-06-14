@@ -48,6 +48,8 @@ class AssetContainer extends FileEntry
             ->allowRenaming($model->settings['allow_renaming'] ?? null)
             ->createFolders($model->settings['create_folders'] ?? null)
             ->searchIndex($model->settings['search_index'] ?? null)
+            ->sourcePreset($model->settings['source_preset'] ?? null)
+            ->warmPresets($model->settings['warm_presets'] ?? null)
             ->model($model);
 
         return $this;
@@ -67,6 +69,8 @@ class AssetContainer extends FileEntry
                 'allow_renaming'    => $this->allowRenaming(),
                 'create_folders'    => $this->createFolders(),
                 'search_index'      => $this->searchIndex(),
+                'source_preset'     => $this->sourcePreset,
+                'warm_presets'      => $this->warmPresets,
             ],
         ]);
     }
