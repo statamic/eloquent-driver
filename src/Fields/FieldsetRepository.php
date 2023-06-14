@@ -11,8 +11,8 @@ class FieldsetRepository extends StacheRepository
 {
     public function all(): Collection
     {
-        return Blink::once('eloquent-fieldsets-all', function () {
-            if (count(($models = app('statamic.eloquent.blueprints.fieldset_model')::get() ?? collect())) === 0) {
+        return Blink::once('eloquent-fieldsets', function () {
+            if (count($models = app('statamic.eloquent.blueprints.fieldset_model')::get() ?? collect()) === 0) {
                 return collect();
             }
 
@@ -66,6 +66,6 @@ class FieldsetRepository extends StacheRepository
         }
 
         Blink::forget("eloquent-fieldset-{$model->handle}");
-        Blink::forget('eloquent-fieldsets-all');
+        Blink::forget('eloquent-fieldsets');
     }
 }

@@ -21,7 +21,7 @@ class FormRepository extends StacheRepository
 
     public function all()
     {
-        return FormModel::all()
+        return app('statamic.eloquent.forms.model')::all()
             ->map(function ($form) {
                 return app(FormContract::class)::fromModel($form);
             });

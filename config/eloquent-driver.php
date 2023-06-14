@@ -20,6 +20,7 @@ return [
     'collections' => [
         'driver' => 'eloquent',
         'model'  => \Statamic\Eloquent\Collections\CollectionModel::class,
+        'update_entry_order_queue' => 'default',
     ],
 
     'collection_trees' => [

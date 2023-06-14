@@ -20,6 +20,5 @@ class CollectionModel extends BaseModel
         'settings.revisions'             => 'boolean',
         'settings.dated'                 => 'boolean',
         'settings.default_publish_state' => 'boolean',
-        'settings.ampable'               => 'boolean',
     ];
 }

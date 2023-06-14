@@ -137,6 +137,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $column = 'slug';
             $values = collect($values)
                 ->map(function ($value) {
+                    $taxonomy = Str::before($value.'', '::');
+                    if ($taxonomy) {
+                        $this->taxonomies[] = $taxonomy;
+                    }
+
                     return Str::after($value, '::');
                 })
                 ->all();
