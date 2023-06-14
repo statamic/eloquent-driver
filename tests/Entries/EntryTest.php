@@ -41,6 +41,7 @@ class EntryTest extends TestCase
             'uri'        => '/blog/the-slug',
             'date'       => null,
             'collection' => 'blog',
+            'blueprint'  => 'blog',
             'published'  => false,
             'status'     => 'draft',
             'origin_id'  => null,
