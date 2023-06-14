@@ -98,7 +98,6 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportNavs::class,
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
-            Commands\MigrateEntriesBlueprint::class,
         ]);
     }
 

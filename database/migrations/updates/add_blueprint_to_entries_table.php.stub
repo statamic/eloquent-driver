@@ -3,6 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
+use Statamic\Facades\Entry;
 
 return new class extends Migration {
     public function up()
@@ -10,6 +11,8 @@ return new class extends Migration {
         Schema::table($this->prefix('entries'), function (Blueprint $table) {
             $table->string('blueprint', 30)->nullable()->index()->after('collection');
         });
+
+        Entry::all()->each->saveQuietly();
     }
 
     public function down()
