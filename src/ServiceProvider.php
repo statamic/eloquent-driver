@@ -102,6 +102,7 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
+        $this->registerAssetContainers();
         $this->registerAssets();
         $this->registerBlueprints();
         $this->registerCollections();
@@ -116,18 +117,32 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerTerms();
     }
 
+    private function registerAssetContainers()
+    {
+        // if we have this config key then we started on 2.1.0 or earlier when
+        // assets and containers were driven from the same config key
+        // so we use this config instead of the new ones
+        // lets remove this when we hit 3.0.0
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.assets.container_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.driver' : 'statamic.eloquent-driver.asset_containers.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+
+        $this->app->bind('statamic.eloquent.assets.container_model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.container_model' : 'statamic.eloquent-driver.asset_containers.model');
+        });
+    }
+
     private function registerAssets()
     {
         if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
             return;
         }
 
-        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
-
-        $this->app->bind('statamic.eloquent.assets.container_model', function () {
-            return config('statamic.eloquent-driver.assets.container_model');
-        });
 
         $this->app->bind('statamic.eloquent.assets.model', function () {
             return config('statamic.eloquent-driver.assets.model');
