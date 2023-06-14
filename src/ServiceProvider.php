@@ -103,6 +103,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerGlobals();
         $this->registerRevisions();
         $this->registerStructures();
+        $this->registerStructureTrees();
         $this->registerTaxonomies();
         $this->registerTerms();
     }
@@ -165,27 +166,24 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerCollectionTrees()
     {
-        // Use the collections' driver as a fallback to ensure backwards compatibility.
-        $collectionsDriver = config('statamic.eloquent-driver.collections.driver', 'file');
+        // if we have this config key then we started on 2.1.0 or earlier when
+        // navigations and trees were driven from the same config key
+        // so we use this config instead of the new ones
+        // lets remove this when we hit 3.0.0
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.collections.tree_model');
 
-        if (config('statamic.eloquent-driver.collection_trees.driver', $collectionsDriver) != 'eloquent') {
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.driver' : 'statamic.eloquent-driver.collection_trees.driver', 'file') != 'eloquent') {
             return;
         }
 
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
 
-        $this->app->bind('statamic.eloquent.collections.tree', function () {
-            return config(
-                'statamic.eloquent-driver.collection_trees.tree',
-                config('statamic.eloquent-driver.collections.tree')
-            );
+        $this->app->bind('statamic.eloquent.collections.tree', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.tree' : 'statamic.eloquent-driver.collection_trees.tree');
         });
 
-        $this->app->bind('statamic.eloquent.collections.tree_model', function () {
-            return config(
-                'statamic.eloquent-driver.collection_trees.model',
-                config('statamic.eloquent-driver.collections.tree_model')
-            );
+        $this->app->bind('statamic.eloquent.collections.tree_model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.tree_model' : 'statamic.eloquent-driver.collection_trees.model');
         });
     }
 
@@ -270,15 +268,28 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.navigations.model', function () {
             return config('statamic.eloquent-driver.navigations.model');
         });
+    }
+
+    private function registerStructureTrees()
+    {
+        // if we have this config key then we started on 2.1.0 or earlier when
+        // navigations and trees were driven from the same config key
+        // so we use this config instead of the new ones
+        // lets remove this when we hit 3.0.0
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.navigations.tree_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.driver' : 'statamic.eloquent-driver.navigation_trees.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
-        $this->app->bind('statamic.eloquent.navigations.tree', function () {
-            return config('statamic.eloquent-driver.navigations.tree');
+        $this->app->bind('statamic.eloquent.navigations.tree', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.tree' : 'statamic.eloquent-driver.navigation_trees.tree');
         });
 
-        $this->app->bind('statamic.eloquent.navigations.tree_model', function () {
-            return config('statamic.eloquent-driver.navigations.tree_model');
+        $this->app->bind('statamic.eloquent.navigations.tree_model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.tree_model' : 'statamic.eloquent-driver.navigation_trees.model');
         });
     }
 

@@ -49,8 +49,12 @@ return [
     'navigations' => [
         'driver'     => 'eloquent',
         'model'      => \Statamic\Eloquent\Structures\NavModel::class,
-        'tree'       => \Statamic\Eloquent\Structures\NavTree::class,
-        'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
+    ],
+
+    'navigation_trees' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree'   => \Statamic\Eloquent\Structures\NavTree::class,
     ],
 
     'revisions' => [
