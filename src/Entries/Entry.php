@@ -43,7 +43,6 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         $data = $this->data();
-        $data->put('parent', $this->parent());
 
         $origin = $this->origin();
         $date = $this->hasDate() ? $this->date() : null;
@@ -86,7 +85,7 @@ class Entry extends FileEntry
             'date'       => $date,
             'collection' => $this->collectionHandle(),
             'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
-            'data'       => $data->except(EntryQueryBuilder::COLUMNS),
+            'data'       => $data->except(EntryQueryBuilder::COLUMNS)->except(['parent']),
             'published'  => $this->published(),
             'status'     => $this->status(),
             'updated_at' => $this->lastModified(),
