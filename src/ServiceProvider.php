@@ -121,9 +121,6 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
-        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
-
         $this->app->bind('statamic.eloquent.assets.container_model', function () {
             return config('statamic.eloquent-driver.assets.container_model');
         });
@@ -131,6 +128,13 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.assets.model', function () {
             return config('statamic.eloquent-driver.assets.model');
         });
+
+        $this->app->bind('statamic.eloquent.assets.asset', function () {
+            return config('statamic.eloquent-driver.assets.asset');
+        });
+
+        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
     }
 
     private function registerBlueprints()

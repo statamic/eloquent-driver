@@ -23,7 +23,7 @@ class AssetRepository extends BaseRepository
     public static function bindings(): array
     {
         return [
-            AssetContract::class        => Asset::class,
+            AssetContract::class        => app('statamic.eloquent.assets.asset'),
             QueryBuilderContract::class => QueryBuilder::class,
         ];
     }
