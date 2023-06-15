@@ -49,7 +49,7 @@ class GlobalRepository extends StacheRepository
         $model->save();
 
         $entry->localizations()->each(function ($locale) {
-            $locale->toModel()->save();
+            $locale->save();
         });
 
         $entry->model($model->fresh());

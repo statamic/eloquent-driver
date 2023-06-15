@@ -45,4 +45,11 @@ class Variables extends FileEntry
     {
         return $this->globalSet()->in($origin);
     }
+
+    public function save()
+    {
+        $this->toModel()->save();
+
+        return $this;
+    }
 }
