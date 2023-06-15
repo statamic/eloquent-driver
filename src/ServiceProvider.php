@@ -130,7 +130,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind('statamic.eloquent.assets.asset', function () {
-            return config('statamic.eloquent-driver.assets.asset');
+            return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
         });
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
