@@ -37,7 +37,7 @@ class GlobalSet extends FileEntry
         $class = app('statamic.eloquent.global_sets.model');
 
         $source->localizations()->each(function ($value) {
-            Variables::makeModelFromContract($value)->save();
+            Variables::makeModelFromContract($value);
         });
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([

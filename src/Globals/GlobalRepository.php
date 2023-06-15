@@ -48,6 +48,10 @@ class GlobalRepository extends StacheRepository
         $model = $entry->toModel();
         $model->save();
 
+        $entry->localizations()->each(function ($locale) {
+            $locale->toModel()->save();
+        });
+
         $entry->model($model->fresh());
 
         Blink::forget("eloquent-globalsets-{$model->handle}");

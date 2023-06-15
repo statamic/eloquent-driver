@@ -7,6 +7,7 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Eloquent\Globals\GlobalSet;
+use Statamic\Eloquent\Globals\Variables;
 use Statamic\Facades\GlobalSet as GlobalSetFacade;
 use Statamic\Stache\Repositories\GlobalRepository;
 use Statamic\Statamic;
@@ -57,8 +58,12 @@ class ImportGlobals extends Command
         $this->withProgressBar($sets, function ($set) {
             $lastModified = $set->fileLastModified();
 
-            $set = GlobalSet::makeModelFromContract($set)->fill(['created_at' => $lastModified, 'updated_at' => $lastModified]);
-            $set->save();
+            $setModel = GlobalSet::makeModelFromContract($set)->fill(['created_at' => $lastModified, 'updated_at' => $lastModified]);
+            $setModel->save();
+
+            $set->localizations()->each(function ($locale) {
+                Variables::makeModelFromContract($locale)->save();
+            });
         });
 
         $this->newLine();
