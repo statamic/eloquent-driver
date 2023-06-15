@@ -41,7 +41,8 @@ class Entry extends FileEntry
     {
         $class = app('statamic.eloquent.entries.model');
 
-        $data = $this->data();
+        $data = $this->data()
+            ->merge(method_exists($this, 'computedData') ? $this->computedData() : []);
 
         $attributes = [
             'origin_id'  => $this->origin()?->id(),
