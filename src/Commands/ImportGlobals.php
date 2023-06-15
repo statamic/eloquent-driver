@@ -56,7 +56,9 @@ class ImportGlobals extends Command
 
         $this->withProgressBar($sets, function ($set) {
             $lastModified = $set->fileLastModified();
-            $set->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+
+            $set = GlobalSet::makeModelFromContract($set)->fill(['created_at' => $lastModified, 'updated_at' => $lastModified]);
+            $set->save();
         });
 
         $this->newLine();

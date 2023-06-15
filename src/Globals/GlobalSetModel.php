@@ -12,11 +12,16 @@ class GlobalSetModel extends BaseModel
     protected $table = 'global_sets';
 
     protected $casts = [
-        'localizations' => 'json',
+        'settings' => 'json',
     ];
 
     public function getAttribute($key)
     {
         return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
+    }
+
+    public function localizations()
+    {
+        return $this->hasMany(VariablesModel::class, 'handle', 'handle');
     }
 }

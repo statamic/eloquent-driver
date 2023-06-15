@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Globals;
 
+use Statamic\Contracts\Globals\Variables as Contract;
 use Statamic\Eloquent\Globals\VariablesModel as Model;
 use Statamic\Globals\Variables as FileEntry;
 
@@ -10,6 +11,7 @@ class Variables extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static())
+            ->globalSet($model->handle)
             ->locale($model->locale)
             ->data($model->data)
             ->origin($model->origin ?? null);
@@ -17,14 +19,25 @@ class Variables extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.global_sets.variables_model');
 
-        $data = $this->data();
+        $data = $source->data();
 
-        return $class::make([
-            'locale' => $this->locale,
+        if ($source->hasOrigin()) {
+            $data = $source->origin()->data()->merge($data);
+        }
+
+        return $class::firstOrNew([
+            'handle' => $source->globalSet()->handle(),
+            'locale' => $source->locale,
+        ])->fill([
             'data'   => $data,
-            'origin' => $this->origin ?? null,
+            'origin' => $source->hasOrigin() ? $source->origin()->locale() : null,
         ]);
     }
 
