@@ -55,8 +55,6 @@ class TermRepository extends StacheRepository
 
         [$taxonomy, $slug] = array_pad(explode('/', $uri), 2, null);
 
-        $taxonomy = str_replace('-', '_', $taxonomy);
-
         if (! $slug) {
             return null;
         }
@@ -79,7 +77,9 @@ class TermRepository extends StacheRepository
 
     private function findTaxonomyHandleByUri($uri)
     {
-        return Taxonomy::findByHandle($uri)?->handle();
+        return Taxonomy::all()->first(function($taxonomy) use ($uri) {
+            return $taxonomy->uri() == $uri;
+        })?->handle();
     }
 
     public function save($entry)
