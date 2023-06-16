@@ -21,6 +21,7 @@ use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
+use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -28,6 +29,7 @@ use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
+use Statamic\Events\CollectionTreeSaved;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -39,6 +41,13 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
+    ];
+
+    protected $listen = [
+        CollectionTreeSaved::class => [
+            UpdateStructuredEntryOrder::class,
+        ],
     ];
 
     public function boot()

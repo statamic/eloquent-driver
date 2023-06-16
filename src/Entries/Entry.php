@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
+use Statamic\Facades\Entry as EntryFacade;
 
 class Entry extends FileEntry
 {
@@ -19,7 +20,7 @@ class Entry extends FileEntry
             ->slug($model->slug)
             ->collection($model->collection)
             ->data($model->data)
-            ->blueprint($model->data['blueprint'] ?? null)
+            ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
             ->published($model->published)
             ->model($model);
 
@@ -28,7 +29,9 @@ class Entry extends FileEntry
         }
 
         if (config('statamic.system.track_last_update')) {
-            $entry->set('updated_at', $model->updated_at ?? $model->created_at);
+            if ($updatedAt = $model->updated_at ?? $model->created_at) {
+                $entry->set('updated_at', $updatedAt->timestamp);
+            }
         }
 
         return $entry;
@@ -40,10 +43,6 @@ class Entry extends FileEntry
 
         $data = $this->data();
 
-        if ($this->blueprint && $this->collection()->entryBlueprints()->count() > 1) {
-            $data['blueprint'] = $this->blueprint;
-        }
-
         $attributes = [
             'origin_id'  => $this->origin()?->id(),
             'site'       => $this->locale(),
@@ -51,6 +50,7 @@ class Entry extends FileEntry
             'uri'        => $this->uri(),
             'date'       => $this->hasDate() ? $this->date() : null,
             'collection' => $this->collectionHandle(),
+            'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $this->published(),
             'status'     => $this->status(),
@@ -102,9 +102,7 @@ class Entry extends FileEntry
 
         if ($this->origin) {
             if (! $this->origin instanceof EntryContract) {
-                if ($model = $class::find($this->origin)) {
-                    $this->origin = self::fromModel($model);
-                }
+                $this->origin = EntryFacade::find($this->origin);
             }
 
             return $this->origin;
@@ -114,10 +112,6 @@ class Entry extends FileEntry
             return;
         }
 
-        if ($model = $class::find($this->model->origin_id)) {
-            $this->origin = self::fromModel($model);
-        }
-
-        return $this->origin ?? null;
+        return EntryFacade::find($this->model->origin_id);
     }
 }

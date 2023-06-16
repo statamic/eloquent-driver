@@ -15,7 +15,7 @@ class AssetRepository extends BaseRepository
         $asset->container()->contents()->forget($asset->path())->save();
 
         $handle = $asset->containerHandle().'::'.$asset->metaPath();
-        app('statamic.eloquent.assets.model')::where('handle', $handle)->first()->delete();
+        app('statamic.eloquent.assets.model')::where('handle', $handle)->first()?->delete();
 
         Stache::store('assets::'.$asset->containerHandle())->delete($asset);
     }
