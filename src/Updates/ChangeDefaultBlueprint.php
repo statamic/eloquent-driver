@@ -33,7 +33,6 @@ class ChangeDefaultBlueprint extends UpdateScript
             $model->save();
 
             $this->console()->info('Successfully updated the default blueprint');
-
         }
     }
 }
