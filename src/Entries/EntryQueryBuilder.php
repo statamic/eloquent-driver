@@ -28,8 +28,17 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
             if ($wheres->where('column', 'collection')->count() == 1) {
                 if ($collection = Collection::find($wheres->firstWhere('column', 'collection')['value'])) {
-                    // could limit by types here (float, integer, date)
-                    $blueprintField = $collection->entryBlueprint()->fields()->get($column); // this assumes 1 blue print per collection... dont like it, maybe get all blueprints and merge any fields
+                    $blueprintField = $collection->entryBlueprints()
+                        ->flatMap(function ($blueprint) {
+                            return $blueprint->fields()
+                                ->all()
+                                ->filter(function ($field) {
+                                    return in_array($field->type(), ['float', 'integer', 'date']);
+                                });
+                        })
+                        ->filter()
+                        ->get($column);
+
                     if ($blueprintField) {
                         $castType = '';
                         $fieldType = $blueprintField->type();
