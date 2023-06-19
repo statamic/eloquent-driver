@@ -21,24 +21,48 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function orderBy($column, $direction = 'asc')
     {
-        $wheres = collect($this->builder->getQuery()->wheres);
+        $actualColumn = $this->column($column);
 
-        if (
-            ($collection =
-                $wheres->firstWhere('column', 'collection')['value'] ??
-                null) and
-            ($field = Collection::find($collection)
-                ->entryBlueprint()
-                ->fields()
-                ->get($column)) and
-            in_array($field->config()['type'], ['integer', 'float'])
-        ) {
-            $this->builder->orderByRaw("data->'{$column}' {$direction}");
+        if (Str::contains($actualColumn, 'data->')) {
+            $wheres = collect($this->builder->getQuery()->wheres);
 
-            return $this;
+            if ($wheres->where('column', 'collection')->count() == 1) {
+                if ($collection = Collection::find($wheres->firstWhere('column', 'collection')['value'])) {
+
+                    // could limit by types here (float, integer, date)
+                    $blueprintField = $collection->entryBlueprint()->fields()->get($column); // this assumes 1 blue print per collection... dont like it, maybe get all blueprints and merge any fields
+                    if ($blueprintField) {
+                        $castType = '';
+                        $fieldType = $blueprintField->type();
+
+                        $grammar = $this->builder->getConnection()->getQueryGrammar();
+                        $actualColumn = $grammar->wrap($actualColumn);
+
+                        if (in_array($fieldType, ['float'])) {
+                            $castType = 'float';
+                        } else if (in_array($fieldType, ['integer'])) {
+                            $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
+                        } else if (in_array($fieldType, ['date'])) {
+                            $castType = 'date';
+
+                            // sqlite casts dates to year, which is pretty unhelpful
+                            if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+                                return $this;
+                            }
+                        }
+
+                        if ($castType) {
+                            $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
+                            return $this;
+                        }
+                    }
+                }
+            }
         }
 
-        return parent::orderBy($column, $direction);
+        parent::orderBy($column, $direction);
+        return $this;
     }
 
     protected function transform($items, $columns = [])
