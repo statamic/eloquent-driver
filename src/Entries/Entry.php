@@ -81,6 +81,10 @@ class Entry extends FileEntry
             }
         }
 
+        if ($parent = $this->parent()) {
+            $data->put('parent', (string) $parent->id);
+        }
+
         $attributes = [
             'origin_id'  => $origin?->id(),
             'site'       => $this->locale(),
