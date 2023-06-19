@@ -59,13 +59,15 @@ class Entry extends FileEntry
 
                 $originData = $origin->data();
 
-                // remove any fields in entry data that are marked as localized but value is blank
+                // remove any fields in entry data that are marked as localized but value is present, and does not match origin
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
-                    if ($data->get($blueprintField) === $originData->get($blueprintField)) {
-                        $data->forget($blueprintField);
-                    } else {
-                        $localizedFields[] = $blueprintField;
+                    if ($data->has($blueprintField)) {
+                        if ($data->get($blueprintField) === $originData->get($blueprintField)) {
+                            $data->forget($blueprintField);
+                        } else {
+                            $localizedFields[] = $blueprintField;
+                        }
                     }
                 }
 
