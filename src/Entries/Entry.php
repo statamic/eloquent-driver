@@ -43,12 +43,12 @@ class Entry extends FileEntry
         $class = app('statamic.eloquent.entries.model');
 
         $data = $this->data();
-
-        $origin = $this->origin();
         $date = $this->hasDate() ? $this->date() : null;
 
-        if ($blueprint = $this->blueprint()) {
-            if ($origin) {
+        $origin = $this->origin();
+
+        if ($this->hasOrigin()) {
+            if ($blueprint = $this->blueprint()) {
                 $localizedBlueprintFields = $blueprint
                     ->fields()
                     ->localizable()
@@ -57,17 +57,19 @@ class Entry extends FileEntry
                     ->handle()
                     ->all();
 
+                $originData = $origin->data();
+
                 // remove any fields in entry data that are marked as localized but value is blank
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
-                    if ($data->get($blueprintField) == '') {
+                    if ($data->get($blueprintField) === $originData->get($blueprintField)) {
                         $data->forget($blueprintField);
                     } else {
                         $localizedFields[] = $blueprintField;
                     }
                 }
 
-                $data = $origin->data()->merge($data);
+                $data = $originData->merge($data);
 
                 $data->put('__localized_fields', $localizedFields);
 
@@ -78,7 +80,7 @@ class Entry extends FileEntry
         }
 
         $attributes = [
-            'origin_id'  => $this->origin()?->id(),
+            'origin_id'  => $origin?->id(),
             'site'       => $this->locale(),
             'slug'       => $this->slug(),
             'uri'        => $this->uri(),
