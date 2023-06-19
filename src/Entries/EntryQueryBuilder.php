@@ -28,7 +28,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
             if ($wheres->where('column', 'collection')->count() == 1) {
                 if ($collection = Collection::find($wheres->firstWhere('column', 'collection')['value'])) {
-
                     // could limit by types here (float, integer, date)
                     $blueprintField = $collection->entryBlueprint()->fields()->get($column); // this assumes 1 blue print per collection... dont like it, maybe get all blueprints and merge any fields
                     if ($blueprintField) {
@@ -40,20 +39,22 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
                         if (in_array($fieldType, ['float'])) {
                             $castType = 'float';
-                        } else if (in_array($fieldType, ['integer'])) {
+                        } elseif (in_array($fieldType, ['integer'])) {
                             $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
-                        } else if (in_array($fieldType, ['date'])) {
+                        } elseif (in_array($fieldType, ['date'])) {
                             $castType = 'date';
 
                             // sqlite casts dates to year, which is pretty unhelpful
                             if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
                                 $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+
                                 return $this;
                             }
                         }
 
                         if ($castType) {
                             $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
+
                             return $this;
                         }
                     }
@@ -62,6 +63,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         }
 
         parent::orderBy($column, $direction);
+
         return $this;
     }
 

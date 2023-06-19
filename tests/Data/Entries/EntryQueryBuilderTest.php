@@ -730,7 +730,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test */
     public function entries_can_be_ordered_by_an_integer_json_field()
     {
-        $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer',]]);
+        $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 
         Collection::make('posts')->save();
@@ -747,7 +747,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test */
     public function entries_can_be_ordered_by_an_float_json_field()
     {
-        $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float',]]);
+        $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 
         Collection::make('posts')->save();
