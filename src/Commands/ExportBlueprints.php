@@ -38,7 +38,7 @@ class ExportBlueprints extends Command
     {
         $this->usingDefaultRepositories(function () {
             $this->exportBlueprints();
-            $this->importFieldsets();
+            $this->exportFieldsets();
         });
 
         return 0;
@@ -51,10 +51,10 @@ class ExportBlueprints extends Command
                 ->setDirectory(resource_path('blueprints'));
         });
 
-        app()->singleton(
-            'Statamic\Fields\FieldsetRepository',
-            'Statamic\Fields\FieldsetRepository'
-        );
+        app()->singleton(\Statamic\Fields\FieldsetRepository::class, function () {
+            return (new \Statamic\Fields\FieldsetRepository)
+                ->setDirectory(resource_path('fieldsets'));
+        });
 
         $callback();
     }
@@ -79,11 +79,14 @@ class ExportBlueprints extends Command
         $this->info('Blueprints exported');
     }
 
-    private function importFieldsets()
+    private function exportFieldsets()
     {
         $this->withProgressBar(FieldsetModel::all(), function ($model) {
-            Fieldset::make()
-                ->setHandle($model->handle)
+            if (! $model->handle) {
+                return;
+            }
+
+            Fieldset::make($model->handle)
                 ->setContents($model->data)
                 ->save();
         });
