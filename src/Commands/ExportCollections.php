@@ -69,7 +69,7 @@ class ExportCollections extends Command
             $newCollection = (new StacheCollection)
                 ->handle($source->handle())
                 ->title($source->title())
-                ->routes($source->routes)
+                ->routes($source->routes())
                 ->requiresSlugs($source->requiresSlugs())
                 ->titleFormats($source->titleFormats())
                 ->mount($source->mount)
