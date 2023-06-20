@@ -14,7 +14,6 @@ use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Entries\Collection as StacheCollection;
 use Statamic\Facades\Blink;
-use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Stache;
 use Statamic\Statamic;
 
