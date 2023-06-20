@@ -9,6 +9,7 @@ use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Eloquent\Collections\Collection as EloquentCollection;
+use Statamic\Eloquent\Collections\CollectionModel;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Entries\Collection as StacheCollection;
@@ -63,37 +64,40 @@ class ExportCollections extends Command
 
     private function exportCollections()
     {
-        $collections = CollectionFacade::all();
+        $collections = CollectionModel::all();
 
-        $this->withProgressBar($collections, function ($source) {
+        $this->withProgressBar($collections, function ($model) {
+            $source = (object) $model->settings;
             $newCollection = (new StacheCollection)
-                ->handle($source->handle())
-                ->title($source->title())
-                ->routes($source->routes())
-                ->requiresSlugs($source->requiresSlugs())
-                ->titleFormats($source->titleFormats())
+                ->handle($model->handle)
+                ->title($model->title)
+                ->routes($source->routes)
+                ->requiresSlugs($source->slugs)
+                ->titleFormats($source->title_formats)
                 ->mount($source->mount)
                 ->dated($source->dated)
                 ->sites($source->sites)
                 ->template($source->template)
                 ->layout($source->layout)
-                ->searchIndex($source->searchIndex)
-                ->revisionsEnabled($source->revisionsEnabled())
-                ->defaultPublishState($source->defaultPublishState)
-                ->structureContents($source->structureContents())
-                ->sortDirection($source->sortDirection())
-                ->sortField($source->sortField())
+                ->searchIndex($source->search_index)
+                ->revisionsEnabled($source->revisions)
+                ->defaultPublishState($source->default_status)
+                ->structureContents($source->structure)
+                ->sortDirection($source->sort_dir)
+                ->sortField($source->sort_field)
                 ->taxonomies($source->taxonomies)
-                ->propagate($source->propagate())
-                ->pastDateBehavior($source->pastDateBehavior())
-                ->futureDateBehavior($source->futureDateBehavior())
-                ->previewTargets($source->previewTargets())
-                ->originBehavior($source->originBehavior());
+                ->propagate($source->propagate)
+                ->pastDateBehavior($source->past_date_behavior)
+                ->futureDateBehavior($source->future_date_behavior)
+                ->previewTargets($source->preview_targets)
+                ->originBehavior($source->origin_behavior);
 
             Stache::store('collections')->save($newCollection);
 
-            if ($structure = $source->structure()) {
-                $structure->trees()->each(function ($tree) use ($newCollection) {
+            if ($source->structure) {
+                $collection = EloquentCollection::fromModel($model);
+
+                $collection->structure()->trees()->each(function ($tree) use ($newCollection) {
                     Blink::forget("collection-{$newCollection->id()}-structure");
                     Stache::store('collection-trees')->save($newCollection->structure()->makeTree($tree->site(), $tree->tree()));
                 });
