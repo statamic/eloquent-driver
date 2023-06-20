@@ -7,8 +7,11 @@ use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
-use Statamic\Facades\Blueprint;
-use Statamic\Facades\Fieldset;
+use Statamic\Facades\Stache;
+use Statamic\Fields\Blueprint as StacheBlueprint;
+use Statamic\Fields\BlueprintRepository;
+use Statamic\Fields\Fieldset as StacheFieldset;
+use Statamic\Fields\FieldsetRepository;
 use Statamic\Support\Arr;
 
 class ExportBlueprints extends Command
@@ -36,7 +39,7 @@ class ExportBlueprints extends Command
      */
     public function handle()
     {
-        $this->usingDefaultRepositories(function () {
+        $this->usingDefaultRepositories(function() {
             $this->exportBlueprints();
             $this->exportFieldsets();
         });
@@ -66,10 +69,10 @@ class ExportBlueprints extends Command
                 return;
             }
 
-            Blueprint::make()
+            (new StacheBlueprint())
+                ->setHandle($model->handle)
                 ->setHidden(Arr::get($model->data, 'hide'))
                 ->setOrder(Arr::get($model->data, 'order'))
-                ->setHandle($model->handle)
                 ->setNamespace($model->namespace)
                 ->setContents($this->updateOrderFromBlueprintSections($model->data))
                 ->save();
@@ -86,7 +89,7 @@ class ExportBlueprints extends Command
                 return;
             }
 
-            Fieldset::make($model->handle)
+            (new StacheFieldset($model->handle))
                 ->setContents($model->data)
                 ->save();
         });
