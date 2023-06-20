@@ -7,11 +7,8 @@ use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
-use Statamic\Facades\Stache;
 use Statamic\Fields\Blueprint as StacheBlueprint;
-use Statamic\Fields\BlueprintRepository;
 use Statamic\Fields\Fieldset as StacheFieldset;
-use Statamic\Fields\FieldsetRepository;
 use Statamic\Support\Arr;
 
 class ExportBlueprints extends Command
