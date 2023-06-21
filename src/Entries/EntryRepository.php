@@ -58,10 +58,15 @@ class EntryRepository extends StacheRepository
 
         Blink::put("eloquent-entry-{$entry->id()}", $entry);
         Blink::put("eloquent-entry-{$entry->uri()}", $entry);
+
+        $entry->descendants()->each->save();
     }
 
     public function delete($entry)
     {
+        Blink::forget("eloquent-entry-{$entry->id()}");
+        Blink::forget("eloquent-entry-{$entry->uri()}");
+
         $entry->model()->delete();
     }
 }

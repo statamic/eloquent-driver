@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
@@ -47,6 +48,9 @@ class ImportBlueprints extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
+        Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
+
         app()->singleton(
             'Statamic\Fields\BlueprintRepository',
             'Statamic\Fields\BlueprintRepository'
