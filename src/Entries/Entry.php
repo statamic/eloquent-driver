@@ -39,26 +39,31 @@ class Entry extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(EntryContract $source)
+    {
         $class = app('statamic.eloquent.entries.model');
 
-        $data = $this->data();
+        $data = $source->data();
 
         $attributes = [
-            'origin_id'  => $this->origin()?->id(),
-            'site'       => $this->locale(),
-            'slug'       => $this->slug(),
-            'uri'        => $this->uri(),
-            'date'       => $this->hasDate() ? $this->date() : null,
-            'collection' => $this->collectionHandle(),
-            'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
+            'origin_id'  => $source->origin()?->id(),
+            'site'       => $source->locale(),
+            'slug'       => $source->slug(),
+            'uri'        => $source->uri(),
+            'date'       => $source->hasDate() ? $source->date() : null,
+            'collection' => $source->collectionHandle(),
+            'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
-            'published'  => $this->published(),
-            'status'     => $this->status(),
-            'updated_at' => $this->lastModified(),
-            'order'      => $this->order(),
+            'published'  => $source->published(),
+            'status'     => $source->status(),
+            'updated_at' => $source->lastModified(),
+            'order'      => $source->order(),
         ];
 
-        if ($id = $this->id()) {
+        if ($id = $source->id()) {
             $attributes['id'] = $id;
         }
 
