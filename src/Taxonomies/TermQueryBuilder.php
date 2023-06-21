@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Taxonomies;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
@@ -137,6 +138,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $column = 'slug';
             $values = collect($values)
                 ->map(function ($value) {
+                    $taxonomy = Str::before($value.'', '::');
+                    if ($taxonomy) {
+                        $this->taxonomies[] = $taxonomy;
+                    }
+
                     return Str::after($value, '::');
                 })
                 ->all();
@@ -213,7 +219,14 @@ class TermQueryBuilder extends EloquentQueryBuilder
                 // or the ones associated with the collection
                 // what we ultimately want is a subquery for terms in the form:
                 // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
-                Entry::whereInCollection($this->collections)
+                $collectionTaxonomyHash = md5(collect($this->collections)->merge(collect($taxonomies))->sort()->join('-'));
+
+                Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomies) {
+                    return Entry::query()
+                        ->whereIn('collection', $this->collections)
+                        ->select($taxonomies)
+                        ->get();
+                })
                     ->flatMap(function ($entry) use ($taxonomies) {
                         $slugs = [];
                         foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
