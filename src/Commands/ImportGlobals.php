@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
@@ -45,6 +46,8 @@ class ImportGlobals extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
+
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
 
         app()->bind(GlobalSetContract::class, GlobalSet::class);
