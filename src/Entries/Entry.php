@@ -48,13 +48,13 @@ class Entry extends FileEntry
     {
         $class = app('statamic.eloquent.entries.model');
 
-        $data = $this->data();
-        $date = $this->hasDate() ? $this->date() : null;
+        $data = $source->data();
+        $date = $source->hasDate() ? $source->date() : null;
 
-        $origin = $this->origin();
+        $origin = $source->origin();
 
-        if ($this->hasOrigin()) {
-            if ($blueprint = $this->blueprint()) {
+        if ($source->hasOrigin()) {
+            if ($blueprint = $source->blueprint()) {
                 $localizedBlueprintFields = $blueprint
                     ->fields()
                     ->localizable()
@@ -87,23 +87,23 @@ class Entry extends FileEntry
             }
         }
 
-        if ($parent = $this->parent()) {
+        if ($parent = $source->parent()) {
             $data->put('parent', (string) $parent->id);
         }
 
         $attributes = [
             'origin_id'  => $origin?->id(),
-            'site'       => $this->locale(),
-            'slug'       => $this->slug(),
-            'uri'        => $this->uri(),
+            'site'       => $source->locale(),
+            'slug'       => $source->slug(),
+            'uri'        => $source->uri(),
             'date'       => $date,
-            'collection' => $this->collectionHandle(),
-            'blueprint'  => $this->blueprint ?? $this->blueprint()->handle(),
+            'collection' => $source->collectionHandle(),
+            'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS)->except(['parent']),
-            'published'  => $this->published(),
-            'status'     => $this->status(),
-            'updated_at' => $this->lastModified(),
-            'order'      => $this->order(),
+            'published'  => $source->published(),
+            'status'     => $source->status(),
+            'updated_at' => $source->lastModified(),
+            'order'      => $source->order(),
         ];
 
         if ($id = $source->id()) {
