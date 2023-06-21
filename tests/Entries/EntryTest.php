@@ -7,10 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
+use Statamic\Facades;
 use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
-use Statamic\Facades;
-
 use Tests\TestCase;
 
 class EntryTest extends TestCase
@@ -125,7 +124,7 @@ class EntryTest extends TestCase
 
         $this->assertEquals(100, $freshEntry->shares);
     }
-  
+
     /** @test */
     public function it_propagates_entry_if_configured()
     {
