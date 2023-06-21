@@ -100,6 +100,10 @@ class Entry extends FileEntry
         if (func_num_args() > 0) {
             $this->origin = $origin;
 
+            if ($this->model) {
+                $this->model->origin_id = $origin instanceof EntryContract ? $origin->id() : $origin;
+            }
+
             return $this;
         }
 
