@@ -39,6 +39,7 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+        \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
     ];
 
     public function boot()
