@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
+use Statamic\Facades\Entry as EntryFacade;
 
 class Entry extends FileEntry
 {
@@ -39,6 +40,11 @@ class Entry extends FileEntry
     }
 
     public function toModel()
+    {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(EntryContract $source)
     {
         $class = app('statamic.eloquent.entries.model');
 
@@ -100,7 +106,7 @@ class Entry extends FileEntry
             'order'      => $this->order(),
         ];
 
-        if ($id = $this->id()) {
+        if ($id = $source->id()) {
             $attributes['id'] = $id;
         }
 
@@ -137,6 +143,10 @@ class Entry extends FileEntry
         if (func_num_args() > 0) {
             $this->origin = $origin;
 
+            if ($this->model) {
+                $this->model->origin_id = $origin instanceof EntryContract ? $origin->id() : $origin;
+            }
+
             return $this;
         }
 
@@ -144,9 +154,7 @@ class Entry extends FileEntry
 
         if ($this->origin) {
             if (! $this->origin instanceof EntryContract) {
-                if ($model = $class::find($this->origin)) {
-                    $this->origin = self::fromModel($model);
-                }
+                $this->origin = EntryFacade::find($this->origin);
             }
 
             return $this->origin;
@@ -156,11 +164,7 @@ class Entry extends FileEntry
             return;
         }
 
-        if ($model = $class::find($this->model->origin_id)) {
-            $this->origin = self::fromModel($model);
-        }
-
-        return $this->origin ?? null;
+        return EntryFacade::find($this->model->origin_id);
     }
 
     public function makeLocalization($site)
