@@ -73,8 +73,8 @@ class ImportCollections extends Command
 
     private function importCollections()
     {
-        $importCollections = $this->confirm('Do you want to import collections?'));
-        $importCollectionTrees = $this->confirm('Do you want to import collections trees?'));
+        $importCollections = $this->confirm('Do you want to import collections?');
+        $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
 
         $collections = CollectionFacade::all();
 

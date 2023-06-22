@@ -59,8 +59,8 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
-        $importNavigations = $this->confirm('Do you want to import navs?'));
-        $importNavigationTrees = $this->confirm('Do you want to import nav trees?'));
+        $importNavigations = $this->confirm('Do you want to import navs?');
+        $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
 
         $navs = NavFacade::all();
 
