@@ -73,15 +73,21 @@ class ImportCollections extends Command
 
     private function importCollections()
     {
+        $importCollections = $this->confirm('Do you want to import collections?'));
+        $importCollectionTrees = $this->confirm('Do you want to import collections trees?'));
+
         $collections = CollectionFacade::all();
 
-        $this->withProgressBar($collections, function ($collection) {
-            $lastModified = $collection->fileLastModified();
-            EloquentCollection::makeModelFromContract($collection)
-                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
-                ->save();
+        $this->withProgressBar($collections, function ($collection) use ($importCollections, $importCollectionTrees) {
+            if ($importCollections) {
+                $lastModified = $collection->fileLastModified();
 
-            if ($structure = $collection->structure()) {
+                EloquentCollection::makeModelFromContract($collection)
+                    ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                    ->save();
+            }
+
+            if ($importCollectionTrees && ($structure = $collection->structure())) {
                 $structure->trees()->each(function ($tree) {
                     $lastModified = $tree->fileLastModified();
                     app('statamic.eloquent.collections.tree')::makeModelFromContract($tree)
