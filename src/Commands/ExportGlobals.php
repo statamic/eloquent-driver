@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
@@ -47,6 +48,8 @@ class ExportGlobals extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
+
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
 
         app()->bind(GlobalSetContract::class, GlobalSet::class);

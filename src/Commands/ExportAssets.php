@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Str;
 use Statamic\Assets\Asset;
 use Statamic\Assets\AssetContainer;
@@ -55,6 +56,9 @@ class ExportAssets extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(AssetContainerRepositoryContract::class);
+        Facade::clearResolvedInstance(AssetRepositoryContract::class);
+
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 
@@ -66,6 +70,10 @@ class ExportAssets extends Command
 
     private function exportAssetContainers()
     {
+        if (! $this->confirm('Do you want to export asset containers?')) {
+            return;
+        }
+
         $containers = AssetContainerModel::all();
 
         $this->withProgressBar($containers, function ($model) {
@@ -82,12 +90,16 @@ class ExportAssets extends Command
                 ->save();
         });
 
-        $this->line('');
+        $this->newLine();
         $this->info('Asset containers imported');
     }
 
     private function exportAssets()
     {
+        if (! $this->confirm('Do you want to export assets?')) {
+            return;
+        }
+
         $assets = AssetModel::all();
 
         $this->withProgressBar($assets, function ($model) {

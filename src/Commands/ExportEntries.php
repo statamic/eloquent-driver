@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\Entry as EntryContract;
@@ -49,6 +50,9 @@ class ExportEntries extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(EntryRepositoryContract::class);
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
+
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 

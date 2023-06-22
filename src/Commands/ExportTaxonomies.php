@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
@@ -54,6 +55,9 @@ class ExportTaxonomies extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
+        Facade::clearResolvedInstance(TermRepositoryContract::class);
+
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 

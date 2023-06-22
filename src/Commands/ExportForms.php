@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
@@ -53,6 +54,9 @@ class ExportForms extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(FormContract::class);
+        Facade::clearResolvedInstance(SubmissionContract::class);
+
         app()->bind(FormContract::class, Form::class);
         app()->bind(SubmissionContract::class, Submission::class);
 

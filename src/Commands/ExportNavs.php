@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Structures\Nav as NavContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
@@ -45,6 +46,7 @@ class ExportNavs extends Command
     {
         $this->usingDefaultRepositories(function () {
             $this->exportNavs();
+            $this->exportNavTrees();
         });
 
         return 0;
@@ -52,6 +54,9 @@ class ExportNavs extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        Facade::clearResolvedInstance(NavigationRepositoryContract::class);
+        Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
+
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
@@ -63,6 +68,10 @@ class ExportNavs extends Command
 
     private function exportNavs()
     {
+        if (! $this->confirm('Do you want to export navs?')) {
+            return;
+        }
+
         $navs = NavModel::all();
 
         $this->withProgressBar($navs, function ($model) {
@@ -74,8 +83,23 @@ class ExportNavs extends Command
                 ->expectsRoot($model->settings['expects_root'] ?? false)
                 ->initialPath($model->settings['initial_path'] ?? null)
                 ->save();
+        });
 
-            TreeModel::where('handle', $model->handle)
+        $this->newLine();
+        $this->info('Navs exported');
+    }
+
+    private function exportNavTrees()
+    {
+        if (! $this->confirm('Do you want to export navs?')) {
+            return;
+        }
+
+        $navs = NavFacade::all();
+
+        $this->withProgressBar($navs, function ($nav) {
+            TreeModel::where('handle', $nav->handle())
+                ->where('type', 'navigation')
                 ->get()
                 ->each(function ($treeModel) use ($nav) {
                     $nav->newTreeInstance()
@@ -89,6 +113,6 @@ class ExportNavs extends Command
         });
 
         $this->newLine();
-        $this->info('Navs exported');
+        $this->info('Nav trees exported');
     }
 }
