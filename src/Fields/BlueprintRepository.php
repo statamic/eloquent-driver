@@ -114,6 +114,13 @@ class BlueprintRepository extends StacheRepository
         return [$namespace, $handle];
     }
 
+    public function getModel($blueprint)
+    {
+        return app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
+            ->where('handle', $blueprint->handle())
+            ->first();
+    }
+
     public function updateModel($blueprint)
     {
         $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
@@ -121,15 +128,20 @@ class BlueprintRepository extends StacheRepository
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
-        $model->data = $this->addOrderToBlueprintSections($blueprint->contents());
+        $data = $this->addOrderToBlueprintSections($blueprint->contents());
+
+        if (! $blueprint->hidden()) {
+            unset($data['hide']);
+        }
+
+        $model->data = $data;
+
         $model->save();
     }
 
     public function deleteModel($blueprint)
     {
-        $model = app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
-            ->where('handle', $blueprint->handle())
-            ->first();
+        $model = $this->getModel($blueprint);
 
         if ($model) {
             $model->delete();
