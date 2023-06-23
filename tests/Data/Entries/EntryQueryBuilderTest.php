@@ -690,6 +690,21 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     /** @test */
+    public function entries_are_found_using_offset_but_no_limit()
+    {
+        $this->createDummyCollectionAndEntries();
+
+        $entries = Entry::query()->get();
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 1', 'Post 2', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->offset(1)->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
     public function entries_can_be_retrieved_on_join_table_conditions()
     {
         Collection::make('posts')->save();
