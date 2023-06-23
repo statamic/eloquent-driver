@@ -43,6 +43,10 @@ The configuration file (`statamic.eloquent-driver`) allows you to choose which r
 
 You may also specify your own models for each repository, should you wish to use something different from the one provided.
 
+## Upgrading
+
+After upgrading please ensure to run `php artisan migrate` to update your database to the latest schema.
+
 ## Importing existing file based content
 
 We have provided imports from file based content for each repository, which can be run as follows:
