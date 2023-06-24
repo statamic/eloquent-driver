@@ -20,7 +20,7 @@ class GlobalSet extends FileEntry
 
         $variablesModel = app('statamic.eloquent.global_sets.variables_model');
 
-        $localizations = $variablesModel::query()->where('handle', $model->handle)->all();
+        $localizations = $variablesModel::query()->where('handle', $model->handle)->get();
         foreach ($localizations as $localization) {
             $global->addLocalization(app(VariablesContract::class)::fromModel($localization));
         }
