@@ -70,25 +70,4 @@ class Form extends FileEntry
 
         FormDeleted::dispatch($this);
     }
-
-    public function submissions()
-    {
-        return $this->model()->submissions()->get()->map(function ($model) {
-            $submission = $this->makeSubmission()
-                ->id($model->id)
-                ->data($model->data);
-
-            $submission
-                ->date($model->created_at);
-
-            return $submission;
-        });
-    }
-
-    public function submission($id)
-    {
-        return $this->submissions()->filter(function ($submission) use ($id) {
-            return $submission->id() == $id;
-        })->first();
-    }
 }
