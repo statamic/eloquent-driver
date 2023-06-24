@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Globals;
 use Statamic\Contracts\Globals\GlobalSet as Contract;
 use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel as Model;
+use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Globals\GlobalSet as FileEntry;
 
 class GlobalSet extends FileEntry
@@ -20,7 +21,8 @@ class GlobalSet extends FileEntry
 
         $variablesModel = app('statamic.eloquent.global_sets.variables_model');
 
-        foreach ($model->localizations as $localization) {
+        $localizations = $variablesModel::query()->where('handle', $model->handle)->all()
+        foreach ($localizations as $localization) {
             $global->addLocalization(app(VariablesContract::class)::fromModel($localization));
         }
 

@@ -19,9 +19,4 @@ class GlobalSetModel extends BaseModel
     {
         return Arr::get($this->getAttributeValue('data'), $key, parent::getAttribute($key));
     }
-
-    public function localizations()
-    {
-        return $this->hasMany(VariablesModel::class, 'handle', 'handle');
-    }
 }
