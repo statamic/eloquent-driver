@@ -36,7 +36,7 @@ class Submission extends FileEntry
             'data' => $this->data,
         ]) : $model->fill([
             'data' => $this->data,
-            'form_id' => $this->form->model()->id,
+            'form' => $this->form->handle(),
             'created_at' => $timestamp,
         ]);
     }
