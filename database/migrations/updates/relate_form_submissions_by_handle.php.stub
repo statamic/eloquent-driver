@@ -17,8 +17,8 @@ return new class extends Migration {
 
         SubmissionModel::all()
             ->each(function ($submission) use ($forms) {
-                if ($form = $forms->firstWhere('id', $submission->form_id)) {
-                    $submission->form = $form->handle;
+                if ($form = $forms->get($submission->form_id)) {
+                    $submission->form = $form;
                     $submission->save();
                 }
             });
@@ -38,8 +38,8 @@ return new class extends Migration {
 
         SubmissionModel::all()
             ->each(function ($submission) use ($forms) {
-                if ($form = $forms->firstWhere('handle', $submission->form)) {
-                    $submission->form_id = $form->id;
+                if ($form = $forms->get($submission->form)) {
+                    $submission->form_id = $form;
                     $submission->save();
                 }
             });
