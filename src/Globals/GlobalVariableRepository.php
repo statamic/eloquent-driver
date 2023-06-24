@@ -44,7 +44,7 @@ class GlobalVariableRepository extends StacheRepository
         return VariableCollection::make(
             VariablesModel::query()
                 ->where('handle', $handle)
-                ->get();
+                ->get()
                 ->each(function ($model) {
                     return app(Variables::class)::fromModel($model);
                 })
