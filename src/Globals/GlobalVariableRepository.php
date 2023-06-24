@@ -2,9 +2,7 @@
 
 namespace Statamic\Eloquent\Globals;
 
-use Statamic\Contracts\Globals\GlobalVariableRepository as RepositoryContract;
 use Statamic\Contracts\Globals\Variables;
-use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Globals\VariableCollection;
 use Statamic\Stache\Repositories\GlobalVariableRepository as StacheRepository;
 use Statamic\Support\Str;
