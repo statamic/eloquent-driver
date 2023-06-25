@@ -20,15 +20,15 @@ return new class extends Migration {
                 foreach ($localizations as $localization) {
                     VariablesModel::create([
                         'handle' => $model->handle,
-                        'locale' => $localization['locale'],
-                        'data' => $localization['data'],
-                        'origin' => $localization['origin'],
+                        'locale' => $localization->locale,
+                        'data' => $localization->data,
+                        'origin' => $localization->origin,
                     ]);
                 }
             });
 
         Schema::table($this->prefix('global_sets'), function (Blueprint $table) {
-            $table->dropColumn('localizations'));
+            $table->dropColumn('localizations');
         });
     }
 
@@ -40,17 +40,17 @@ return new class extends Migration {
         });
 
         GlobalSetModel::all()
-            ->each(function ($model)) {
-                $model->localizations = VariablesModel::where('handle' => $model->handle)
+            ->each(function ($model) {
+                $model->localizations = VariablesModel::where('handle', $model->handle)
                     ->get()
                     ->mapWithKeys(function ($variable, $key) {
                         return [
-                            $variable->locale => [
+                            $variable->locale = [
                                 'locale' => $variable->locale,
                                 'data' => $variable->data,
                                 'origin' => $variable->origin,
-                            ];
-                        ]
+                            ],
+                        ];
                     });
 
                 $model->save();
