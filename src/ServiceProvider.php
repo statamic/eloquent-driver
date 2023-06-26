@@ -42,6 +42,7 @@ class ServiceProvider extends AddonServiceProvider
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
         \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
+        \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
     ];
 
