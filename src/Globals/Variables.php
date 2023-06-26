@@ -2,7 +2,7 @@
 
 namespace Statamic\Eloquent\Globals;
 
-use Statamic\Eloquent\Globals\VariablesModel as Model;
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Globals\Variables as FileEntry;
 
 class Variables extends FileEntry
@@ -17,7 +17,7 @@ class Variables extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.global_sets.variables_model');
+        $class = app('statamic.eloquent.global_set_variables.model');
 
         $data = $this->data();
 
