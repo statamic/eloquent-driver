@@ -9,7 +9,7 @@ class ChangeDefaultBlueprint extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return $this->isUpdatingTo('2.2.0');
+        return $this->isUpdatingTo('2.3.0');
     }
 
     public function update()
