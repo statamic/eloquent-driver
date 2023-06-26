@@ -61,6 +61,20 @@ We have provided imports from file based content for each repository, which can 
 - Revisions: `php please eloquent:import-revisions`
 - Taxonomies: `php please eloquent:import-taxonomies`
 
+## Exporting back to file based content
+
+We have provided exports from eloquent to file based content for each repository, which can be run as follows:
+
+- Assets: `php please eloquent:export-assets`
+- Blueprints and Fieldsets: `php please eloquent:export-blueprints`
+- Collections: `php please eloquent:export-collections`
+- Entries: `php please eloquent:export-entries`
+- Forms: `php please eloquent:export-forms`
+- Globals: `php please eloquent:export-globals`
+- Navs: `php please eloquent:export-navs`
+- Revisions: `php please eloquent:export-revisions`
+- Taxonomies: `php please eloquent:export-taxonomies`
+
 ## Storing Users in a Database
 
 Statamic has a [built-in users eloquent driver](https://statamic.dev/tips/storing-users-in-a-database) if you'd like to cross that bridge too.

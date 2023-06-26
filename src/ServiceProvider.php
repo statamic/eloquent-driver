@@ -42,6 +42,7 @@ class ServiceProvider extends AddonServiceProvider
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
         \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
+        \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
     ];
 
@@ -91,6 +92,15 @@ class ServiceProvider extends AddonServiceProvider
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
+            Commands\ExportAssets::class,
+            Commands\ExportBlueprints::class,
+            Commands\ExportCollections::class,
+            Commands\ExportEntries::class,
+            Commands\ExportForms::class,
+            Commands\ExportGlobals::class,
+            Commands\ExportNavs::class,
+            Commands\ExportRevisions::class,
+            Commands\ExportTaxonomies::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
