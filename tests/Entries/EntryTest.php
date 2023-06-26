@@ -8,6 +8,8 @@ use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades;
+use Statamic\Facades\Collection as CollectionFacade;
+use Statamic\Facades\Entry as EntryFacade;
 use Tests\TestCase;
 
 class EntryTest extends TestCase
@@ -57,6 +59,70 @@ class EntryTest extends TestCase
         $entry = (new Entry())->fromModel($model)->collection($collection);
 
         $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
+    }
+
+    /** @test */
+    public function it_stores_computed_values()
+    {
+        $collection = Collection::make('blog')->title('blog')->routes([
+            'en' => '/blog/{slug}',
+        ])->save();
+
+        CollectionFacade::computed('blog', 'shares', function ($entry, $value) {
+            return 150;
+        });
+
+        $model = new EntryModel([
+            'slug' => 'the-slug',
+            'data' => [
+                'foo' => 'bar',
+            ],
+        ]);
+
+        $entry = (new Entry())
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data([
+                'foo' => 'bar',
+            ]);
+
+        $entry->save();
+
+        $this->assertEquals(150, $entry->model()->data['shares']);
+    }
+
+    /** @test */
+    public function it_defers_to_the_live_computed_value_instead_of_the_stored_value()
+    {
+        $collection = Collection::make('blog')->title('blog')->routes([
+            'en' => '/blog/{slug}',
+        ])->save();
+
+        CollectionFacade::computed('blog', 'shares', function ($entry, $value) {
+            return ! isset($value) ? 150 : 100;
+        });
+
+        $model = new EntryModel([
+            'slug' => 'the-slug',
+            'data' => [
+                'foo' => 'bar',
+            ],
+        ]);
+
+        $entry = (new Entry())
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data([
+                'foo' => 'bar',
+            ]);
+
+        $entry->save();
+
+        $this->assertEquals(150, $entry->model()->data['shares']);
+
+        $freshEntry = EntryFacade::query()->where('slug', 'the-slug')->first();
+
+        $this->assertEquals(100, $freshEntry->shares);
     }
 
     /** @test */
