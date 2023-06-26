@@ -62,6 +62,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function get($columns = ['*'])
     {
+        $query = $this->builder->getQuery();
+        if ($query->offset && ! $query->limit) {
+            $query->limit = PHP_INT_MAX;
+        }
+
         $this->addTaxonomyWheres();
 
         return parent::get($columns);
