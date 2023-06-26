@@ -12,7 +12,7 @@ class GlobalSetModel extends BaseModel
     protected $table = 'global_sets';
 
     protected $casts = [
-        'localizations' => 'json',
+        'settings' => 'json',
     ];
 
     public function getAttribute($key)
