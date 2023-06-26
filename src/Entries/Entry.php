@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
-use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Entry as EntryFacade;
 

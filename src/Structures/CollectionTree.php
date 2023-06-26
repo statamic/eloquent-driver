@@ -2,7 +2,7 @@
 
 namespace Statamic\Eloquent\Structures;
 
-use Statamic\Eloquent\Structures\TreeModel as Model;
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Structures\CollectionTree as FileEntry;
 
 class CollectionTree extends FileEntry

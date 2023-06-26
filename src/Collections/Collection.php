@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Collections;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Entries\Collection as Contract;
-use Statamic\Eloquent\Collections\CollectionModel as Model;
 use Statamic\Eloquent\Structures\CollectionStructure;
 use Statamic\Entries\Collection as FileEntry;
 

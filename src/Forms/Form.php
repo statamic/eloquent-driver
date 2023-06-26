@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Forms;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Forms\Form as Contract;
-use Statamic\Eloquent\Forms\FormModel as Model;
 use Statamic\Events\FormDeleted;
 use Statamic\Events\FormSaved;
 use Statamic\Forms\Form as FileEntry;
