@@ -69,7 +69,7 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        if (! $taxonomy = $this->findTaxonomyHandleByUri($taxonomy)) {
+        if (! $taxonomy = $this->findTaxonomyHandleByUri(Str::ensureLeft($taxonomy, '/'))) {
             return null;
         }
 
@@ -92,7 +92,9 @@ class TermRepository extends StacheRepository
 
     private function findTaxonomyHandleByUri($uri)
     {
-        return Taxonomy::findByHandle($uri)?->handle();
+        return Taxonomy::all()->first(function ($taxonomy) use ($uri) {
+            return $taxonomy->uri() == $uri;
+        })?->handle();
     }
 
     public function save($entry)

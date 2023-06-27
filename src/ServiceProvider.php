@@ -44,7 +44,9 @@ class ServiceProvider extends AddonServiceProvider
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
         \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
+        \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
+        \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
     ];
 
     protected $listen = [
@@ -71,6 +73,7 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_taxonomies_table.php.stub'       => $this->migrationsPath('create_taxonomies_table.php'),
             __DIR__.'/../database/migrations/create_terms_table.php.stub'            => $this->migrationsPath('create_terms_table.php'),
             __DIR__.'/../database/migrations/create_globals_table.php.stub'          => $this->migrationsPath('create_globals_table.php'),
+            __DIR__.'/../database/migrations/create_global_varaibles_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
             __DIR__.'/../database/migrations/create_navigations_table.php.stub'      => $this->migrationsPath('create_navigations_table.php'),
             __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
             __DIR__.'/../database/migrations/create_collections_table.php.stub'      => $this->migrationsPath('create_collections_table.php'),
@@ -92,6 +95,15 @@ class ServiceProvider extends AddonServiceProvider
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
+            Commands\ExportAssets::class,
+            Commands\ExportBlueprints::class,
+            Commands\ExportCollections::class,
+            Commands\ExportEntries::class,
+            Commands\ExportForms::class,
+            Commands\ExportGlobals::class,
+            Commands\ExportNavs::class,
+            Commands\ExportRevisions::class,
+            Commands\ExportTaxonomies::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,

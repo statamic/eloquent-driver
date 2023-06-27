@@ -39,24 +39,6 @@ return new class extends Migration {
                         ],
                         'handle' => 'content',
                     ],
-                    [
-                        'field' => [
-                            'type' => 'users',
-                            'display' => 'Author',
-                            'default' => 'current',
-                            'localizable' => true,
-                            'max_items' => 1,
-                        ],
-                        'handle' => 'author',
-                    ],
-                    [
-                        'field' => [
-                            'type' => 'template',
-                            'display' => 'Template',
-                            'localizable' => true,
-                        ],
-                        'handle' => 'template',
-                    ],
                 ],
             ]);
         } catch (\JsonException $e) {
