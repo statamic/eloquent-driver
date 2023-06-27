@@ -19,7 +19,7 @@ class SplitGlobalsFromVariables extends UpdateScript
 
         $this->files->copy($source, $dest);
 
-        $source = __DIR__.'/../../database/migrations/updates/update_globals_table.stub';
+        $source = __DIR__.'/../../database/migrations/updates/update_globals_table.php.stub';
         $dest = database_path('migrations/'.date('Y_m_d_His').'_update_globals_table.php');
 
         $this->files->copy($source, $dest);
