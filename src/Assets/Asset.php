@@ -67,11 +67,7 @@ class Asset extends FileAsset
             return $value;
         }
 
-        Cache::forget($this->metaCacheKey());
-
-        $this->writeMeta($meta = $this->generateMeta());
-
-        return Arr::get($meta, $key);
+        return Arr::get($this->generateMeta(), $key);
     }
 
     public function writeMeta($meta)
