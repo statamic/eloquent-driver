@@ -9,6 +9,7 @@ return [
         'driver'          => 'eloquent',
         'container_model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
         'model'           => \Statamic\Eloquent\Assets\AssetModel::class,
+        'asset'           => \Statamic\Eloquent\Assets\Asset::class,
     ],
 
     'blueprints' => [
