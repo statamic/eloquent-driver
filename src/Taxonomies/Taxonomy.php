@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Taxonomies\Taxonomy as Contract;
-use Statamic\Eloquent\Taxonomies\TaxonomyModel as Model;
 use Statamic\Taxonomies\Taxonomy as FileEntry;
 
 class Taxonomy extends FileEntry

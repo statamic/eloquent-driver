@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Assets;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Assets\AssetContainer as FileEntry;
-use Statamic\Eloquent\Assets\AssetContainerModel as Model;
 use Statamic\Events\AssetContainerDeleted;
 use Statamic\Events\AssetContainerSaved;
 
