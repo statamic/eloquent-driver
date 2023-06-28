@@ -100,14 +100,4 @@ class Collection extends FileEntry
             ->showSlugs($this->structureContents['slugs'] ?? false)
             ->maxDepth($this->structureContents['max_depth'] ?? null);
     }
-
-    public function customSortField()
-    {
-        return $this->sortField;
-    }
-
-    public function customSortDirection()
-    {
-        return $this->sortDirection;
-    }
 }
