@@ -41,6 +41,10 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
+        \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
+        \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
+        \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
     ];
 
     protected $listen = [
@@ -67,6 +71,7 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/create_taxonomies_table.php.stub'       => $this->migrationsPath('create_taxonomies_table.php'),
             __DIR__.'/../database/migrations/create_terms_table.php.stub'            => $this->migrationsPath('create_terms_table.php'),
             __DIR__.'/../database/migrations/create_globals_table.php.stub'          => $this->migrationsPath('create_globals_table.php'),
+            __DIR__.'/../database/migrations/create_global_varaibles_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
             __DIR__.'/../database/migrations/create_navigations_table.php.stub'      => $this->migrationsPath('create_navigations_table.php'),
             __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
             __DIR__.'/../database/migrations/create_collections_table.php.stub'      => $this->migrationsPath('create_collections_table.php'),
@@ -88,6 +93,15 @@ class ServiceProvider extends AddonServiceProvider
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
+            Commands\ExportAssets::class,
+            Commands\ExportBlueprints::class,
+            Commands\ExportCollections::class,
+            Commands\ExportEntries::class,
+            Commands\ExportForms::class,
+            Commands\ExportGlobals::class,
+            Commands\ExportNavs::class,
+            Commands\ExportRevisions::class,
+            Commands\ExportTaxonomies::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
@@ -128,12 +142,12 @@ class ServiceProvider extends AddonServiceProvider
         if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.driver' : 'statamic.eloquent-driver.asset_containers.driver', 'file') != 'eloquent') {
             return;
         }
-
-        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
-
+      
         $this->app->bind('statamic.eloquent.assets.container_model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.container_model' : 'statamic.eloquent-driver.asset_containers.model');
         });
+      
+        Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
     }
 
     private function registerAssets()
@@ -142,11 +156,15 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
-
         $this->app->bind('statamic.eloquent.assets.model', function () {
             return config('statamic.eloquent-driver.assets.model');
         });
+
+        $this->app->bind('statamic.eloquent.assets.asset', function () {
+            return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
+        });
+
+        Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
     }
 
     private function registerBlueprints()

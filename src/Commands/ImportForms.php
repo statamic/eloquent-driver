@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
@@ -47,6 +48,9 @@ class ImportForms extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(FormContract::class);
+        Facade::clearResolvedInstance(SubmissionContract::class);
+
         app()->bind(FormContract::class, StacheForm::class);
         app()->bind(SubmissionContract::class, StacheSubmission::class);
     }

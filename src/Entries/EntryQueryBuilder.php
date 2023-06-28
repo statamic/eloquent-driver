@@ -15,7 +15,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at', 'order',
+        'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
     protected function transform($items, $columns = [])
@@ -62,6 +62,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function get($columns = ['*'])
     {
+        $query = $this->builder->getQuery();
+        if ($query->offset && ! $query->limit) {
+            $query->limit = PHP_INT_MAX;
+        }
+
         $this->addTaxonomyWheres();
 
         return parent::get($columns);

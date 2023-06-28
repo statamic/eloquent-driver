@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Assets\AssetRepository;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Assets\Asset as AssetContract;
@@ -52,6 +53,9 @@ class ImportAssets extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(AssetContainerRepositoryContract::class);
+        Facade::clearResolvedInstance(AssetRepositoryContract::class);
+
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 

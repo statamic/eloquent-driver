@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Structures\Nav as NavContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
@@ -50,6 +51,9 @@ class ImportNavs extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(NavigationRepositoryContract::class);
+        Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
+
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 

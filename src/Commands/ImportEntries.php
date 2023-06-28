@@ -3,10 +3,12 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Entry;
 use Statamic\Stache\Repositories\CollectionRepository;
 use Statamic\Stache\Repositories\EntryRepository;
@@ -46,6 +48,9 @@ class ImportEntries extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(EntryRepositoryContract::class);
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
+
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
 
@@ -67,7 +72,9 @@ class ImportEntries extends Command
 
         $this->withProgressBar($entriesWithoutOrigin, function ($entry) {
             $lastModified = $entry->fileLastModified();
-            $entry->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+            $entry = EloquentEntry::makeModelFromContract($entry)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
         });
 
         if ($entriesWithOrigin->count() > 0) {
@@ -76,7 +83,9 @@ class ImportEntries extends Command
 
             $this->withProgressBar($entriesWithOrigin, function ($entry) {
                 $lastModified = $entry->fileLastModified();
-                $entry->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+                EloquentEntry::makeModelFromContract($entry)
+                    ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                    ->save();
             });
         }
 

@@ -59,6 +59,9 @@ class ImportCollections extends Command
         $originalTreeRepo = get_class(app()->make(CollectionTreeRepositoryContract::class));
         $originalCollection = get_class(app()->make(CollectionContract::class));
 
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
+
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
         app()->bind(CollectionContract::class, StacheCollection::class);
@@ -68,7 +71,9 @@ class ImportCollections extends Command
         Statamic::repository(CollectionRepositoryContract::class, $originalRepo);
         Statamic::repository(CollectionTreeRepositoryContract::class, $originalTreeRepo);
         app()->bind(CollectionContract::class, $originalCollection);
+
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
     }
 
     private function importCollections()
