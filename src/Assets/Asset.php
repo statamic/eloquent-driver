@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
+use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
@@ -96,7 +97,7 @@ class Asset extends FileAsset
      */
     public function move($folder, $filename = null)
     {
-        $filename = $this->getSafeFilename($filename ?: $this->filename());
+        $filename = Uploader::getSafeFilename($filename ?: $this->filename());
         $oldPath = $this->path();
         $oldMetaPath = $this->metaPath();
         $newPath = Str::removeLeft(Path::tidy($folder.'/'.$filename.'.'.pathinfo($oldPath, PATHINFO_EXTENSION)), '/');
@@ -107,33 +108,15 @@ class Asset extends FileAsset
         $this->save();
 
         if ($oldMetaPath != $this->metaPath()) {
-            if ($oldMetaPath = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMetaPath)->first()) {
-                $oldMetaPath->delete();
+            $oldMetaModel = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMetaPath)->first();
+
+            if ($oldMetaModel) {
+                $oldMetaModel->delete();
             }
 
-            $this->writeMeta($this->meta());
+            $this->writeMeta($oldMetaModel->data);
         }
 
         return $this;
-    }
-
-    private function getSafeFilename($string)
-    {
-        $replacements = [
-            ' ' => '-',
-            '#' => '-',
-        ];
-
-        $str = Stringy::create(urldecode($string))->toAscii();
-
-        foreach ($replacements as $from => $to) {
-            $str = $str->replace($from, $to);
-        }
-
-        if (config('statamic.assets.lowercase')) {
-            $str = strtolower($str);
-        }
-
-        return (string) $str;
     }
 }
