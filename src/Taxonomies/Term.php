@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Taxonomies\Term as Contract;
-use Statamic\Eloquent\Taxonomies\TermModel as Model;
 use Statamic\Taxonomies\Term as FileEntry;
 
 class Term extends FileEntry
