@@ -18,6 +18,6 @@ class SubmissionModel extends BaseModel
 
     public function form()
     {
-        return $this->belongsTo(FormModel::class, 'id');
+        return $this->belongsTo(app('statamic.eloquent.forms.model'), 'id');
     }
 }

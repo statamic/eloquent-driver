@@ -38,7 +38,7 @@ class GlobalRepository extends StacheRepository
 
     public function all(): GlobalCollection
     {
-        return Blink::once('eloquent-globalsets-all', function () {
+        return Blink::once('eloquent-globalsets', function () {
             return $this->transform(app('statamic.eloquent.global_sets.model')::all());
         });
     }
@@ -47,6 +47,10 @@ class GlobalRepository extends StacheRepository
     {
         $model = $entry->toModel();
         $model->save();
+
+        $entry->localizations()->each(function ($locale) {
+            $locale->save();
+        });
 
         $entry->model($model->fresh());
 
@@ -58,7 +62,7 @@ class GlobalRepository extends StacheRepository
         $entry->model()->delete();
 
         Blink::forget("eloquent-globalsets-{$entry->handle()}");
-        Blink::forget('eloquent-globalsets-all');
+        Blink::forget('eloquent-globalsets');
     }
 
     public static function bindings(): array

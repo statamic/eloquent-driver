@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
@@ -53,6 +54,9 @@ class ImportTaxonomies extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
+        Facade::clearResolvedInstance(TermRepositoryContract::class);
+
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 
@@ -62,6 +66,10 @@ class ImportTaxonomies extends Command
 
     private function importTaxonomies()
     {
+        if (! $this->confirm('Do you want to import taxonomies?')) {
+            return;
+        }
+
         $taxonomies = TaxonomyFacade::all();
 
         $this->withProgressBar($taxonomies, function ($taxonomy) {
@@ -78,6 +86,10 @@ class ImportTaxonomies extends Command
 
     private function importTerms()
     {
+        if (! $this->confirm('Do you want to import terms?')) {
+            return;
+        }
+
         $terms = TermFacade::all();
         // Grab unique parent terms.
         $terms = $terms->map->term()->unique();

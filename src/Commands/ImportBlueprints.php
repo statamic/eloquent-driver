@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
@@ -47,6 +48,9 @@ class ImportBlueprints extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
+        Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
+
         app()->singleton(
             'Statamic\Fields\BlueprintRepository',
             'Statamic\Fields\BlueprintRepository'
@@ -72,13 +76,23 @@ class ImportBlueprints extends Command
 
             $contents = YAML::file($path)->parse();
             // Ensure sections are ordered correctly.
-            if (isset($contents['sections']) && is_array($contents['sections'])) {
+            if (isset($contents['tabs']) && is_array($contents['tabs'])) {
                 $count = 0;
-                $contents['sections'] = collect($contents['sections'])
-                    ->map(function ($section) use (&$count) {
-                        $section['__count'] = $count++;
+                $contents['tabs'] = collect($contents['tabs'])
+                    ->map(function ($tab) use (&$count) {
+                        $tab['__count'] = $count++;
 
-                        return $section;
+                        if (isset($tab['sections']) && is_array($tab['sections'])) {
+                            $sectionCount = 0;
+                            $tab['sections'] = collect($tab['sections'])
+                                ->map(function ($section) use (&$sectionCount) {
+                                    $section['__count'] = $sectionCount++;
+
+                                    return $section;
+                                });
+                        }
+
+                        return $tab;
                     })
                     ->toArray();
             }

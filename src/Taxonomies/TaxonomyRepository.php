@@ -27,7 +27,7 @@ class TaxonomyRepository extends StacheRepository
 
     public function all(): Collection
     {
-        $models = Blink::once('eloquent-taxonomies-all', function () {
+        $models = Blink::once('eloquent-taxonomies', function () {
             return app('statamic.eloquent.taxonomies.model')::all();
         })
             ->each(function ($model) {
@@ -92,6 +92,6 @@ class TaxonomyRepository extends StacheRepository
         $model->delete();
 
         Blink::forget("eloquent-taxonomies-{$model->handle}");
-        Blink::forget('eloquent-taxonomies-all');
+        Blink::forget('eloquent-taxonomies');
     }
 }

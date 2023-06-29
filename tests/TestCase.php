@@ -2,8 +2,6 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\Assert;
-
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $shouldFakeVersion = true;
@@ -16,6 +14,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         __DIR__.'/../database/migrations/create_taxonomies_table.php.stub',
         __DIR__.'/../database/migrations/create_terms_table.php.stub',
         __DIR__.'/../database/migrations/create_globals_table.php.stub',
+        __DIR__.'/../database/migrations/create_global_variables_table.php.stub',
         __DIR__.'/../database/migrations/create_navigations_table.php.stub',
         __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub',
         __DIR__.'/../database/migrations/create_collections_table.php.stub',
@@ -37,7 +36,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $uses = array_flip(class_uses_recursive(static::class));
 
         if ($this->shouldFakeVersion) {
-            \Facades\Statamic\Version::shouldReceive('get')->andReturn('3.0.0-testing');
+            \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
         }
 
@@ -210,5 +209,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $migration = require __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub';
         $migration->up();
+    }
+
+    protected function isUsingSqlite()
+    {
+        $connection = config('database.default');
+
+        return config("database.connections.{$connection}.driver") === 'sqlite';
     }
 }

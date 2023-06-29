@@ -23,7 +23,7 @@ Since Statamic uses UUIDs within content files by default, we provide two soluti
 If you're starting from scratch, we can use traditional incrementing integers for IDs.
 
 - Delete `content/collections/pages/home.md`
-- Change the structure `tree` in `content/collections/pages.yaml` to `{}`.
+- Change the structure `tree` in `content/trees/collections/pages.yaml` to `{}`.
 - Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table"`.
 - Run `php artisan migrate`.
@@ -32,7 +32,7 @@ If you're starting from scratch, we can use traditional incrementing integers fo
 
 If you're planning to use existing content, we can use the existing UUIDs. This will prevent you from needing to update any data or relationships.
 
-- In the `config/statamic/eloquent-driver.php` file, change `model` to `\Statamic\Eloquent\Entries\UuidEntryModel`.
+- In the `config/statamic/eloquent-driver.php` file, change `entries.model` to `\Statamic\Eloquent\Entries\UuidEntryModel::class`.
 - Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations`.
 - Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"`.
 - Run `php artisan migrate`.
@@ -42,6 +42,10 @@ If you're planning to use existing content, we can use the existing UUIDs. This 
 The configuration file (`statamic.eloquent-driver`) allows you to choose which repositories you want to be driven by eloquent. By default, all are selected, but if you want to opt out simply change `driver` from `eloquent` to `file` for that repository.
 
 You may also specify your own models for each repository, should you wish to use something different from the one provided.
+
+## Upgrading
+
+After upgrading please ensure to run `php artisan migrate` to update your database to the latest schema.
 
 ## Importing existing file based content
 
@@ -56,6 +60,20 @@ We have provided imports from file based content for each repository, which can 
 - Navs: `php please eloquent:import-navs`
 - Revisions: `php please eloquent:import-revisions`
 - Taxonomies: `php please eloquent:import-taxonomies`
+
+## Exporting back to file based content
+
+We have provided exports from eloquent to file based content for each repository, which can be run as follows:
+
+- Assets: `php please eloquent:export-assets`
+- Blueprints and Fieldsets: `php please eloquent:export-blueprints`
+- Collections: `php please eloquent:export-collections`
+- Entries: `php please eloquent:export-entries`
+- Forms: `php please eloquent:export-forms`
+- Globals: `php please eloquent:export-globals`
+- Navs: `php please eloquent:export-navs`
+- Revisions: `php please eloquent:export-revisions`
+- Taxonomies: `php please eloquent:export-taxonomies`
 
 ## Storing Users in a Database
 

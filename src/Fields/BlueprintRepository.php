@@ -9,11 +9,9 @@ use Statamic\Support\Arr;
 
 class BlueprintRepository extends StacheRepository
 {
-    private const BLINK_FOUND = 'blueprints.found';
-
-    private const BLINK_FROM_FILE = 'blueprints.from-file';
-
-    private const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
+    protected const BLINK_FOUND = 'blueprints.found';
+    protected const BLINK_FROM_FILE = 'blueprints.from-file';
+    protected const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
 
     public function find($blueprint): ?Blueprint
     {
@@ -23,7 +21,7 @@ class BlueprintRepository extends StacheRepository
                 return null;
             }
 
-            $blueprintModel = ($namespace ? $this->filesIn($namespace) : BlueprintModel::whereNull('namespace'))
+            $blueprintModel = ($namespace ? $this->filesIn($namespace) : app('statamic.eloquent.blueprints.blueprint_model')::whereNull('namespace'))
                 ->where('handle', $handle)
                 ->first();
 
@@ -80,12 +78,12 @@ class BlueprintRepository extends StacheRepository
             ->keyBy->handle();
     }
 
-    private function filesIn($namespace)
+    protected function filesIn($namespace)
     {
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
-            if (count(($blueprintModels = BlueprintModel::where('namespace', $namespace)->get())) == 0) {
+            if (count($blueprintModels = app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $namespace)->get()) == 0) {
                 return collect();
             }
 
@@ -105,7 +103,7 @@ class BlueprintRepository extends StacheRepository
         });
     }
 
-    private function getNamespaceAndHandle($blueprint)
+    protected function getNamespaceAndHandle($blueprint)
     {
         $blueprint = str_replace('/', '.', $blueprint);
         $parts = explode('.', $blueprint);
@@ -116,6 +114,13 @@ class BlueprintRepository extends StacheRepository
         return [$namespace, $handle];
     }
 
+    public function getModel($blueprint)
+    {
+        return app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
+            ->where('handle', $blueprint->handle())
+            ->first();
+    }
+
     public function updateModel($blueprint)
     {
         $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
@@ -123,15 +128,20 @@ class BlueprintRepository extends StacheRepository
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
-        $model->data = $this->addOrderToBlueprintSections($blueprint->contents());
+        $data = $this->addOrderToBlueprintSections($blueprint->contents());
+
+        if (! $blueprint->hidden()) {
+            unset($data['hide']);
+        }
+
+        $model->data = $data;
+
         $model->save();
     }
 
     public function deleteModel($blueprint)
     {
-        $model = app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
-            ->where('handle', $blueprint->handle())
-            ->first();
+        $model = $this->getModel($blueprint);
 
         if ($model) {
             $model->delete();
@@ -141,11 +151,21 @@ class BlueprintRepository extends StacheRepository
     private function addOrderToBlueprintSections($contents)
     {
         $count = 0;
-        $contents['sections'] = collect($contents['sections'] ?? [])
-            ->map(function ($section) use (&$count) {
-                $section['__count'] = $count++;
+        $contents['tabs'] = collect($contents['tabs'] ?? [])
+            ->map(function ($tab) use (&$count) {
+                $tab['__count'] = $count++;
 
-                return $section;
+                if (isset($tab['sections']) && is_array($tab['sections'])) {
+                    $sectionCount = 0;
+                    $tab['sections'] = collect($tab['sections'])
+                        ->map(function ($section) use (&$sectionCount) {
+                            $section['__count'] = $sectionCount++;
+
+                            return $section;
+                        });
+                }
+
+                return $tab;
             })
             ->toArray();
 
@@ -154,12 +174,23 @@ class BlueprintRepository extends StacheRepository
 
     private function updateOrderFromBlueprintSections($contents)
     {
-        $contents['sections'] = collect($contents['sections'] ?? [])
+        $contents['tabs'] = collect($contents['tabs'] ?? [])
             ->sortBy('__count')
-            ->map(function ($section) {
-                unset($section['__count']);
+            ->map(function ($tab) {
+                unset($tab['__count']);
 
-                return $section;
+                if (isset($tab['sections']) && is_array($tab['sections'])) {
+                    $tab['sections'] = collect($tab['sections'])
+                        ->sortBy('__count')
+                        ->map(function ($section) use (&$sectionCount) {
+                            unset($section['__count']);
+
+                            return $section;
+                        })
+                        ->toArray();
+                }
+
+                return $tab;
             })
             ->toArray();
 

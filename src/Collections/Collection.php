@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Collections;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Entries\Collection as Contract;
-use Statamic\Eloquent\Collections\CollectionModel as Model;
 use Statamic\Eloquent\Structures\CollectionStructure;
 use Statamic\Entries\Collection as FileEntry;
 
@@ -20,7 +20,6 @@ class Collection extends FileEntry
             ->titleFormats($model->settings['title_formats'] ?? null)
             ->mount($model->settings['mount'] ?? null)
             ->dated($model->settings['dated'] ?? null)
-            ->ampable($model->settings['ampable'] ?? null)
             ->sites($model->settings['sites'] ?? null)
             ->template($model->settings['template'] ?? null)
             ->layout($model->settings['layout'] ?? null)
@@ -28,6 +27,7 @@ class Collection extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? null)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->defaultPublishState($model->settings['default_status'] ?? true)
+            ->originBehavior($model->settings['origin_behavior'] ?? 'select')
             ->structureContents($model->settings['structure'] ?? null)
             ->sortField($model->settings['sort_field'] ?? null)
             ->sortDirection($model->settings['sort_dir'] ?? null)
@@ -57,7 +57,6 @@ class Collection extends FileEntry
                 'title_formats'        => collect($source->titleFormats())->filter(),
                 'mount'                => $source->mount,
                 'dated'                => $source->dated,
-                'ampable'              => $source->ampable,
                 'sites'                => $source->sites,
                 'template'             => $source->template,
                 'layout'               => $source->layout,
@@ -66,13 +65,14 @@ class Collection extends FileEntry
                 'revisions'            => $source->revisionsEnabled(),
                 'default_status'       => $source->defaultPublishState,
                 'structure'            => $source->structureContents(),
-                'sort_dir'             => $source->sortDirection(),
-                'sort_field'           => $source->sortField(),
+                'sort_dir'             => $source->customSortDirection(),
+                'sort_field'           => $source->customSortField(),
                 'taxonomies'           => $source->taxonomies,
                 'propagate'            => $source->propagate(),
                 'past_date_behavior'   => $source->pastDateBehavior(),
                 'future_date_behavior' => $source->futureDateBehavior(),
                 'preview_targets'      => $source->previewTargets(),
+                'origin_behavior'      => $source->originBehavior(),
             ],
         ]);
     }

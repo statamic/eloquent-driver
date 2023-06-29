@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->id();
             $table->string('namespace')->nullable()->default(null)->index();
             $table->string('handle');
-            $table->json('data');
+            $table->jsonb('data');
             $table->timestamps();
 
             $table->unique(['handle', 'namespace']);
@@ -38,24 +38,6 @@ return new class extends Migration {
                             'localizable' => true,
                         ],
                         'handle' => 'content',
-                    ],
-                    [
-                        'field' => [
-                            'type' => 'users',
-                            'display' => 'Author',
-                            'default' => 'current',
-                            'localizable' => true,
-                            'max_items' => 1,
-                        ],
-                        'handle' => 'author',
-                    ],
-                    [
-                        'field' => [
-                            'type' => 'template',
-                            'display' => 'Template',
-                            'localizable' => true,
-                        ],
-                        'handle' => 'template',
                     ],
                 ],
             ]);

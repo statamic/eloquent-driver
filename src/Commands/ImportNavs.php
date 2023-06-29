@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Structures\Nav as NavContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
@@ -50,6 +51,9 @@ class ImportNavs extends Command
 
     private function useDefaultRepositories()
     {
+        Facade::clearResolvedInstance(NavigationRepositoryContract::class);
+        Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
+
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
@@ -59,20 +63,27 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
+        $importNavigations = $this->confirm('Do you want to import navs?');
+        $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
+
         $navs = NavFacade::all();
 
-        $this->withProgressBar($navs, function ($nav) {
-            $lastModified = $nav->fileLastModified();
-            EloquentNav::makeModelFromContract($nav)
-                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
-                ->save();
-
-            $nav->trees()->each(function ($tree) {
-                $lastModified = $tree->fileLastModified();
-                EloquentNavTree::makeModelFromContract($tree)
+        $this->withProgressBar($navs, function ($nav) use ($importNavigations, $importNavigationTrees) {
+            if ($importNavigations) {
+                $lastModified = $nav->fileLastModified();
+                EloquentNav::makeModelFromContract($nav)
                     ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                     ->save();
-            });
+            }
+
+            if ($importNavigationTrees) {
+                $nav->trees()->each(function ($tree) {
+                    $lastModified = $tree->fileLastModified();
+                    EloquentNavTree::makeModelFromContract($tree)
+                        ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                        ->save();
+                });
+            }
         });
 
         $this->newLine();

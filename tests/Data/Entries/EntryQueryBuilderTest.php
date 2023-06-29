@@ -380,7 +380,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_contains()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -404,7 +404,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_doesnt_contain()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -428,7 +428,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_contains()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -447,7 +447,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_or_where_json_doesnt_contain()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -687,5 +687,109 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_are_found_using_offset_but_no_limit()
+    {
+        $this->createDummyCollectionAndEntries();
+
+        $entries = Entry::query()->get();
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 1', 'Post 2', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->offset(1)->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_retrieved_on_join_table_conditions()
+    {
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'author' => 'John Doe', 'location' => 4])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'author' => 'John Doe'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'author' => 'John Doe', 'location' => 4])->create();
+        Collection::make('locations')->save();
+
+        $locations = [
+            4 => ['slug' => 'shaldon', 'title' => 'Shaldon'],
+            5 => ['slug' => 'cambridge', 'title' => 'Cambridge'],
+            6 => ['slug' => 'london', 'title' => 'London'],
+        ];
+
+        foreach (range(4, 6) as $index) {
+            EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
+            ->data(['title' => $locations[$index]['title']])->create();
+        }
+
+        $query = Entry::query()
+            ->join('entries as e', fn ($join) => $join
+                ->whereColumn('e.id', 'entries.id')
+                ->where('e.collection', 'posts')
+            )->leftJoin('entries as locations', function ($join) {
+                $join
+                    ->where('locations.collection', 'locations')
+                    ->on('locations.id', 'e.data->location');
+            })
+            ->where('e.data->title', 'like', '%post%')
+            ->where('locations.slug', 'shaldon');
+
+        $entries = $query->get();
+
+        // successfully retrieved 2 results
+        $this->assertCount(2, $entries);
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_integer_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'integer' => 3])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'integer' => 5])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'integer' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('integer', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_float_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => 3.3])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => 5.5])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => 1.1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('float', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_date_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => '2021-06-15 20:31:04'])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => '2021-01-13 20:31:04'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => '2021-11-17 20:31:04'])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
     }
 }

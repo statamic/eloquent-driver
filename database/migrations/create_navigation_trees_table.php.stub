@@ -12,8 +12,8 @@ return new class extends Migration {
             $table->string('handle');
             $table->string('type')->index();
             $table->string('locale')->nullable()->index();
-            $table->json('tree')->nullable();
-            $table->json('settings')->nullable();
+            $table->jsonb('tree')->nullable();
+            $table->jsonb('settings')->nullable();
             $table->timestamps();
 
             $table->unique(['handle', 'type', 'locale']);

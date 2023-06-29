@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Entries;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Entries\EntryCollection;
+use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -15,13 +16,71 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
-        'date', 'collection', 'created_at', 'updated_at',
+        'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
+
+    public function orderBy($column, $direction = 'asc')
+    {
+        $actualColumn = $this->column($column);
+
+        if (Str::contains($actualColumn, 'data->')) {
+            $wheres = collect($this->builder->getQuery()->wheres);
+
+            if ($wheres->where('column', 'collection')->count() == 1) {
+                if ($collection = Collection::find($wheres->firstWhere('column', 'collection')['value'])) {
+                    $blueprintField = $collection->entryBlueprints()
+                        ->flatMap(function ($blueprint) {
+                            return $blueprint->fields()
+                                ->all()
+                                ->filter(function ($field) {
+                                    return in_array($field->type(), ['float', 'integer', 'date']);
+                                });
+                        })
+                        ->filter()
+                        ->get($column);
+
+                    if ($blueprintField) {
+                        $castType = '';
+                        $fieldType = $blueprintField->type();
+
+                        $grammar = $this->builder->getConnection()->getQueryGrammar();
+                        $actualColumn = $grammar->wrap($actualColumn);
+
+                        if (in_array($fieldType, ['float'])) {
+                            $castType = 'float';
+                        } elseif (in_array($fieldType, ['integer'])) {
+                            $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
+                        } elseif (in_array($fieldType, ['date'])) {
+                            $castType = 'date';
+
+                            // sqlite casts dates to year, which is pretty unhelpful
+                            if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+
+                                return $this;
+                            }
+                        }
+
+                        if ($castType) {
+                            $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
+
+                            return $this;
+                        }
+                    }
+                }
+            }
+        }
+
+        parent::orderBy($column, $direction);
+
+        return $this;
+    }
 
     protected function transform($items, $columns = [])
     {
-        $items = EntryCollection::make($items)->map(function ($model) {
-            return app('statamic.eloquent.entries.entry')::fromModel($model);
+        $items = EntryCollection::make($items)->map(function ($model) use ($columns) {
+            return app('statamic.eloquent.entries.entry')::fromModel($model)
+                ->selectedQueryColumns($columns);
         });
 
         return Entry::applySubstitutions($items);
@@ -33,6 +92,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return $column;
         }
 
+        $table = Str::contains($column, '.') ? Str::before($column, '.') : '';
+        $column = Str::after($column, '.');
+
         if ($column == 'origin') {
             $column = 'origin_id';
         }
@@ -43,7 +105,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             }
         }
 
-        return $column;
+        return ($table ? $table.'.' : '').$column;
     }
 
     public function find($id, $columns = ['*'])
@@ -58,6 +120,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function get($columns = ['*'])
     {
+        $query = $this->builder->getQuery();
+        if ($query->offset && ! $query->limit) {
+            $query->limit = PHP_INT_MAX;
+        }
+
         $this->addTaxonomyWheres();
 
         return parent::get($columns);
@@ -67,7 +134,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         $this->addTaxonomyWheres();
 
-        return parent::paginate($perPage, $columns, $pageName = 'page', $page = null);
+        return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
     public function count()
