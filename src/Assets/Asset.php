@@ -112,9 +112,8 @@ class Asset extends FileAsset
 
             if ($oldMetaModel) {
                 $oldMetaModel->delete();
+                $this->writeMeta($oldMetaModel->data);
             }
-
-            $this->writeMeta($oldMetaModel->data);
         }
 
         return $this;
