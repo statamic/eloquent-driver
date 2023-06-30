@@ -17,6 +17,7 @@ class Taxonomy extends FileEntry
             ->title($model->title)
             ->sites($model->sites)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
+            ->previewTargets($model->settings['preview_targets'] ?? [])
             ->model($model);
     }
 
@@ -34,6 +35,7 @@ class Taxonomy extends FileEntry
             'sites'    => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
+                 'preview_targets' => $source->previewTargets(),
             ],
         ]);
     }
