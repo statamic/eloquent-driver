@@ -35,7 +35,7 @@ class Taxonomy extends FileEntry
             'sites'    => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
-                 'preview_targets' => $source->previewTargets(),
+                'preview_targets' => $source->previewTargets(),
             ],
         ]);
     }
