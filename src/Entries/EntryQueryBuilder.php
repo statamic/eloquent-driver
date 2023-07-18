@@ -27,44 +27,51 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $wheres = collect($this->builder->getQuery()->wheres);
 
             if ($wheres->where('column', 'collection')->count() == 1) {
-                if ($collection = Collection::find($wheres->firstWhere('column', 'collection')['value'])) {
-                    $blueprintField = $collection->entryBlueprints()
-                        ->flatMap(function ($blueprint) {
-                            return $blueprint->fields()
-                                ->all()
-                                ->filter(function ($field) {
-                                    return in_array($field->type(), ['float', 'integer', 'date']);
-                                });
-                        })
-                        ->filter()
-                        ->get($column);
+                $collectionWhere = $wheres->firstWhere('column', 'collection');
+                if (isset($collectionWhere['values']) && count($collectionWhere['values']) == 1) {
+                    $collectionWhere['value'] = $collectionWhere['values'][0];
+                }
 
-                    if ($blueprintField) {
-                        $castType = '';
-                        $fieldType = $blueprintField->type();
+                if (isset($collectionWhere['value'])) {
+                    if ($collection = Collection::find($collectionWhere['value'])) {
+                        $blueprintField = $collection->entryBlueprints()
+                            ->flatMap(function ($blueprint) {
+                                return $blueprint->fields()
+                                    ->all()
+                                    ->filter(function ($field) {
+                                        return in_array($field->type(), ['float', 'integer', 'date']);
+                                    });
+                            })
+                            ->filter()
+                            ->get($column);
 
-                        $grammar = $this->builder->getConnection()->getQueryGrammar();
-                        $actualColumn = $grammar->wrap($actualColumn);
+                        if ($blueprintField) {
+                            $castType = '';
+                            $fieldType = $blueprintField->type();
 
-                        if (in_array($fieldType, ['float'])) {
-                            $castType = 'float';
-                        } elseif (in_array($fieldType, ['integer'])) {
-                            $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
-                        } elseif (in_array($fieldType, ['date'])) {
-                            $castType = 'date';
+                            $grammar = $this->builder->getConnection()->getQueryGrammar();
+                            $actualColumn = $grammar->wrap($actualColumn);
 
-                            // sqlite casts dates to year, which is pretty unhelpful
-                            if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                                $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+                            if (in_array($fieldType, ['float'])) {
+                                $castType = 'float';
+                            } elseif (in_array($fieldType, ['integer'])) {
+                                $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
+                            } elseif (in_array($fieldType, ['date'])) {
+                                $castType = 'date';
+
+                                // sqlite casts dates to year, which is pretty unhelpful
+                                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                    $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+
+                                    return $this;
+                                }
+                            }
+
+                            if ($castType) {
+                                $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
 
                                 return $this;
                             }
-                        }
-
-                        if ($castType) {
-                            $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
-
-                            return $this;
                         }
                     }
                 }
