@@ -57,6 +57,7 @@ class Submission extends FileEntry
     {
         if (! is_null($date)) {
             $this->date = $date;
+
             return $this;
         }
 
