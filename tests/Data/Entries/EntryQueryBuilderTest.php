@@ -741,4 +741,55 @@ class EntryQueryBuilderTest extends TestCase
         // successfully retrieved 2 results
         $this->assertCount(2, $entries);
     }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_integer_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'integer' => 3])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'integer' => 5])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'integer' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('integer', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_float_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => 3.3])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => 5.5])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => 1.1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('float', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_an_date_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => '2021-06-15 20:31:04'])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => '2021-01-13 20:31:04'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => '2021-11-17 20:31:04'])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
 }

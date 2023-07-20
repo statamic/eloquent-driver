@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Structures;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Structures\Nav as Contract;
-use Statamic\Eloquent\Structures\NavModel as Model;
 use Statamic\Structures\Nav as FileEntry;
 
 class Nav extends FileEntry

@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Globals;
 
+use Statamic\Contracts\Globals\GlobalSet as Contract;
 use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel as Model;
 use Statamic\Globals\GlobalSet as FileEntry;
@@ -19,8 +20,9 @@ class GlobalSet extends FileEntry
 
         $variablesModel = app('statamic.eloquent.global_sets.variables_model');
 
-        foreach ($model->localizations as $localization) {
-            $global->addLocalization(app(VariablesContract::class)::fromModel($variablesModel::make($localization)));
+        $localizations = $variablesModel::query()->where('handle', $model->handle)->get();
+        foreach ($localizations as $localization) {
+            $global->addLocalization(app(VariablesContract::class)::fromModel($localization));
         }
 
         return $global;
@@ -28,13 +30,20 @@ class GlobalSet extends FileEntry
 
     public function toModel()
     {
+        return self::makeModelFromContract($this);
+    }
+
+    public static function makeModelFromContract(Contract $source)
+    {
         $class = app('statamic.eloquent.global_sets.model');
 
-        $localizations = $this->localizations()->map(fn ($value) => $value->toModel()->toArray());
+        $source->localizations()->each(function ($value) {
+            Variables::makeModelFromContract($value);
+        });
 
-        return $class::firstOrNew(['handle' => $this->handle()])->fill([
-            'title'         => $this->title(),
-            'localizations' => $localizations,
+        return $class::firstOrNew(['handle' => $source->handle()])->fill([
+            'title' => $source->title(),
+            'settings'  => [], // future proofing
         ]);
     }
 

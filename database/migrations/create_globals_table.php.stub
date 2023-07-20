@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('handle')->unique();
             $table->string('title');
-            $table->jsonb('localizations');
+            $table->jsonb('settings');
             $table->timestamps();
         });
     }
