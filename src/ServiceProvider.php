@@ -2,6 +2,8 @@
 
 namespace Statamic\Eloquent;
 
+use Illuminate\Console\Command;
+use Illuminate\Foundation\Console\AboutCommand;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -112,6 +114,8 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
         ]);
+
+        $this->addAboutCommandInfo();
     }
 
     public function register()
@@ -369,5 +373,37 @@ class ServiceProvider extends AddonServiceProvider
     protected function migrationsPath($filename)
     {
         return database_path('migrations/'.date('Y_m_d_His', time() + (++$this->migrationCount + 60))."_{$filename}.php");
+    }
+
+    protected function addAboutCommandInfo()
+    {
+        if (! class_exists(AboutCommand::class)) {
+            return;
+        }
+
+        AboutCommand::add('Statamic Eloquent Driver', [
+            'Asset Containers' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.asset_containers.driver', 'file')),
+            'Assets' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.assets.driver', 'file')),
+            'Blueprints' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.blueprints.driver', 'file')),
+            'Collections' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.collections.driver', 'file')),
+            'Collection Trees' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.collection_trees.driver', 'file')),
+            'Entries' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.entries.driver', 'file')),
+            'Forms' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.forms.driver', 'file')),
+            'Global Sets' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.global_sets.driver', 'file')),
+            'Navigations' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.navigations.driver', 'file')),
+            'Navigation Trees' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.navigation_trees.driver', 'file')),
+            'Revisions' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.revisions.driver', 'file')),
+            'Taxonomies' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.taxonomies.driver', 'file')),
+            'Terms' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.terms.driver', 'file')),
+        ]);
+    }
+
+    private function applyAboutCommandFormatting($config)
+    {
+        if ($config == 'eloquent') {
+            return ' <fg=yellow;options=bold>'.$config.'</>';
+        }
+
+        return $config;
     }
 }
