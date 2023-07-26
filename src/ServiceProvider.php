@@ -380,21 +380,21 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        AboutCommand::add('Statamic Eloquent Driver', [
-            'Asset Containers' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.asset_containers.driver', 'file')),
-            'Assets' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.assets.driver', 'file')),
-            'Blueprints' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.blueprints.driver', 'file')),
-            'Collections' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.collections.driver', 'file')),
-            'Collection Trees' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.collection_trees.driver', 'file')),
-            'Entries' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.entries.driver', 'file')),
-            'Forms' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.forms.driver', 'file')),
-            'Global Sets' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.global_sets.driver', 'file')),
-            'Navigations' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.navigations.driver', 'file')),
-            'Navigation Trees' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.navigation_trees.driver', 'file')),
-            'Revisions' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.revisions.driver', 'file')),
-            'Taxonomies' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.taxonomies.driver', 'file')),
-            'Terms' => $this->applyAboutCommandFormatting(config('statamic.eloquent-driver.terms.driver', 'file')),
-        ]);
+        AboutCommand::add('Statamic Eloquent Driver', collect([
+            'Asset Containers' => config('statamic.eloquent-driver.asset_containers.driver', 'file'),
+            'Assets' => config('statamic.eloquent-driver.assets.driver', 'file'),
+            'Blueprints' => config('statamic.eloquent-driver.blueprints.driver', 'file'),
+            'Collections' => config('statamic.eloquent-driver.collections.driver', 'file'),
+            'Collection Trees' => config('statamic.eloquent-driver.collection_trees.driver', 'file'),
+            'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
+            'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
+            'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
+            'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
+            'Navigation Trees' => config('statamic.eloquent-driver.navigation_trees.driver', 'file'),
+            'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
+            'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
+            'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
+        ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 
     private function applyAboutCommandFormatting($config)
