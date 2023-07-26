@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent;
 
-use Illuminate\Console\Command;
 use Illuminate\Foundation\Console\AboutCommand;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
