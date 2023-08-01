@@ -3,15 +3,15 @@
 namespace Statamic\Eloquent\Globals;
 
 use Statamic\Contracts\Globals\Variables;
-use Statamic\Globals\VariableCollection;
-use Statamic\Stache\Repositories\GlobalVariableRepository as StacheRepository;
+use Statamic\Globals\VariablesCollection;
+use Statamic\Stache\Repositories\GlobalVariablesRepository as StacheRepository;
 use Statamic\Support\Str;
 
-class GlobalVariableRepository extends StacheRepository
+class GlobalVariablesRepository extends StacheRepository
 {
-    public function all(): VariableCollection
+    public function all(): VariablesCollection
     {
-        return VariableCollection::make(
+        return VariablesCollection::make(
             VariablesModel::all()
             ->each(function ($model) {
                 return app(Variables::class)::fromModel($model);
@@ -37,9 +37,9 @@ class GlobalVariableRepository extends StacheRepository
         return app(Variables::class)::fromModel($model);
     }
 
-    public function findBySet($handle): ?VariableCollection
+    public function findBySet($handle): ?VariablesCollection
     {
-        return VariableCollection::make(
+        return VariablesCollection::make(
             VariablesModel::query()
                 ->where('handle', $handle)
                 ->get()

@@ -8,7 +8,7 @@ use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContr
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
-use Statamic\Contracts\Globals\GlobalVariableRepository as GlobalVariableRepositoryContract;
+use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
@@ -22,7 +22,7 @@ use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
-use Statamic\Eloquent\Globals\GlobalVariableRepository;
+use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
@@ -258,7 +258,7 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        Statamic::repository(GlobalVariableRepositoryContract::class, GlobalVariableRepository::class);
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
 
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
