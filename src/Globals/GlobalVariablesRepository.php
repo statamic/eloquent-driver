@@ -37,7 +37,7 @@ class GlobalVariablesRepository extends StacheRepository
         return app(Variables::class)::fromModel($model);
     }
 
-    public function findBySet($handle): ?VariablesCollection
+    public function whereSet($handle): VariablesCollection
     {
         return VariablesCollection::make(
             VariablesModel::query()
