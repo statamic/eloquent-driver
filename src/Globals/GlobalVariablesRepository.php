@@ -31,7 +31,7 @@ class GlobalVariablesRepository extends StacheRepository
             ->first();
 
         if (! $model) {
-            return;
+            return null;
         }
 
         return app(Variables::class)::fromModel($model);
@@ -43,7 +43,7 @@ class GlobalVariablesRepository extends StacheRepository
             VariablesModel::query()
                 ->where('handle', $handle)
                 ->get()
-                ->each(function ($model) {
+                ->map(function ($model) {
                     return app(Variables::class)::fromModel($model);
                 })
         );

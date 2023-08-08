@@ -250,7 +250,7 @@ class ServiceProvider extends AddonServiceProvider
         });
     }
 
-    private function registerGlobalVariable()
+    private function registerGlobalVariables()
     {
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.global_sets.variables_model');
 
