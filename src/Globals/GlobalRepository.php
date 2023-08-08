@@ -69,7 +69,6 @@ class GlobalRepository extends StacheRepository
     {
         return [
             GlobalSetContract::class => GlobalSet::class,
-            VariablesContract::class => Variables::class,
         ];
     }
 }
