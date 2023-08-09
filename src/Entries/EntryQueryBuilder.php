@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Entries;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Entries\EntryCollection;
+use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -18,11 +19,75 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
+    public function orderBy($column, $direction = 'asc')
+    {
+        $actualColumn = $this->column($column);
+
+        if (Str::contains($actualColumn, 'data->')) {
+            $wheres = collect($this->builder->getQuery()->wheres);
+
+            if ($wheres->where('column', 'collection')->count() == 1) {
+                $collectionWhere = $wheres->firstWhere('column', 'collection');
+                if (isset($collectionWhere['values']) && count($collectionWhere['values']) == 1) {
+                    $collectionWhere['value'] = $collectionWhere['values'][0];
+                }
+
+                if (isset($collectionWhere['value'])) {
+                    if ($collection = Collection::find($collectionWhere['value'])) {
+                        $blueprintField = $collection->entryBlueprints()
+                            ->flatMap(function ($blueprint) {
+                                return $blueprint->fields()
+                                    ->all()
+                                    ->filter(function ($field) {
+                                        return in_array($field->type(), ['float', 'integer', 'date']);
+                                    });
+                            })
+                            ->filter()
+                            ->get($column);
+
+                        if ($blueprintField) {
+                            $castType = '';
+                            $fieldType = $blueprintField->type();
+
+                            $grammar = $this->builder->getConnection()->getQueryGrammar();
+                            $actualColumn = $grammar->wrap($actualColumn);
+
+                            if (in_array($fieldType, ['float'])) {
+                                $castType = 'float';
+                            } elseif (in_array($fieldType, ['integer'])) {
+                                $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
+                            } elseif (in_array($fieldType, ['date'])) {
+                                $castType = 'date';
+
+                                // sqlite casts dates to year, which is pretty unhelpful
+                                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                    $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+
+                                    return $this;
+                                }
+                            }
+
+                            if ($castType) {
+                                $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
+
+                                return $this;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        parent::orderBy($column, $direction);
+
+        return $this;
+    }
+
     protected function transform($items, $columns = [])
     {
         $items = EntryCollection::make($items)->map(function ($model) use ($columns) {
             return app('statamic.eloquent.entries.entry')::fromModel($model)
-                ->selectedQueryColumns($columns);
+                ->selectedQueryColumns($this->selectedQueryColumns ?? $columns);
         });
 
         return Entry::applySubstitutions($items);
@@ -67,16 +132,20 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $query->limit = PHP_INT_MAX;
         }
 
+        $this->selectedQueryColumns = $columns;
+
         $this->addTaxonomyWheres();
 
-        return parent::get($columns);
+        return parent::get();
     }
 
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
         $this->addTaxonomyWheres();
 
-        return parent::paginate($perPage, $columns, $pageName, $page);
+        $this->selectedQueryColumns = $columns;
+
+        return parent::paginate($perPage, ['*'], $pageName, $page);
     }
 
     public function count()

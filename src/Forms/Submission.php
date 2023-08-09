@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Forms;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Statamic\Eloquent\Forms\SubmissionModel as Model;
 use Statamic\Events\SubmissionCreated;
 use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;

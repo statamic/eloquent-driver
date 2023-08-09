@@ -5,10 +5,15 @@ return [
     'connection'   => env('STATAMIC_ELOQUENT_CONNECTION', ''),
     'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
 
+    'asset_containers' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Assets\AssetContainerModel::class,
+    ],
+
     'assets' => [
-        'driver'          => 'eloquent',
-        'container_model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
-        'model'           => \Statamic\Eloquent\Assets\AssetModel::class,
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Assets\AssetModel::class,
+        'asset'  => \Statamic\Eloquent\Assets\Asset::class,
     ],
 
     'blueprints' => [
@@ -18,11 +23,15 @@ return [
     ],
 
     'collections' => [
-        'driver'     => 'eloquent',
-        'model'      => \Statamic\Eloquent\Collections\CollectionModel::class,
-        'tree'       => \Statamic\Eloquent\Structures\CollectionTree::class,
-        'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Collections\CollectionModel::class,
         'update_entry_order_queue' => 'default',
+    ],
+
+    'collection_trees' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree'   => \Statamic\Eloquent\Structures\CollectionTree::class,
     ],
 
     'entries' => [
@@ -50,8 +59,12 @@ return [
     'navigations' => [
         'driver'     => 'eloquent',
         'model'      => \Statamic\Eloquent\Structures\NavModel::class,
-        'tree'       => \Statamic\Eloquent\Structures\NavTree::class,
-        'tree_model' => \Statamic\Eloquent\Structures\TreeModel::class,
+    ],
+
+    'navigation_trees' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree'   => \Statamic\Eloquent\Structures\NavTree::class,
     ],
 
     'revisions' => [

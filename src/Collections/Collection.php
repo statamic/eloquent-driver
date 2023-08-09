@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Collections;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Entries\Collection as Contract;
-use Statamic\Eloquent\Collections\CollectionModel as Model;
 use Statamic\Eloquent\Structures\CollectionStructure;
 use Statamic\Entries\Collection as FileEntry;
 
@@ -99,15 +99,5 @@ class Collection extends FileEntry
             ->expectsRoot($this->structureContents['root'] ?? false)
             ->showSlugs($this->structureContents['slugs'] ?? false)
             ->maxDepth($this->structureContents['max_depth'] ?? null);
-    }
-
-    public function customSortField()
-    {
-        return $this->sortField;
-    }
-
-    public function customSortDirection()
-    {
-        return $this->sortDirection;
     }
 }

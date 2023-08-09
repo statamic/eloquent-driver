@@ -90,7 +90,8 @@ class ExportBlueprints extends Command
                 return;
             }
 
-            (new StacheFieldset($model->handle))
+            (new StacheFieldset)
+                ->setHandle($model->handle)
                 ->setContents($model->data)
                 ->save();
         });
