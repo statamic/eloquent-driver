@@ -22,6 +22,11 @@ class NavTreeRepository extends StacheRepository
 
     public function save($entry)
     {
+        // if we are using flat files for the config, but eloquent for the data
+        if (! $entry instanceof NavTree) {
+            return parent::save($entry);
+        }
+
         $model = $entry->toModel();
         $model->save();
 
@@ -32,6 +37,11 @@ class NavTreeRepository extends StacheRepository
 
     public function delete($entry)
     {
+        // if we are using flat files for the config, but eloquent for the data
+        if (! $entry instanceof NavTree) {
+            return parent::save($entry);
+        }
+
         $entry->model()->delete();
     }
 }

@@ -65,6 +65,10 @@ class ImportAssets extends Command
 
     private function importAssetContainers()
     {
+        if (! $this->confirm('Do you want to import asset containers?')) {
+            return;
+        }
+
         $containers = AssetContainerFacade::all();
 
         $this->withProgressBar($containers, function ($container) {
@@ -78,6 +82,10 @@ class ImportAssets extends Command
 
     private function importAssets()
     {
+        if (! $this->confirm('Do you want to import assets?')) {
+            return;
+        }
+
         $assets = AssetFacade::all();
 
         $this->withProgressBar($assets, function ($asset) {

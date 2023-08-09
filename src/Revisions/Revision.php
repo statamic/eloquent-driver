@@ -2,7 +2,7 @@
 
 namespace Statamic\Eloquent\Revisions;
 
-use Statamic\Eloquent\Revisions\RevisionModel as Model;
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Events\RevisionDeleted;
 use Statamic\Events\RevisionSaved;
 use Statamic\Revisions\Revision as FileEntry;

@@ -2,9 +2,9 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
-use Statamic\Eloquent\Entries\EntryModel as Model;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Entry as EntryFacade;
 
@@ -101,7 +101,7 @@ class Entry extends FileEntry
             'date'       => $date,
             'collection' => $source->collectionHandle(),
             'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
-            'data'       => $data->except(EntryQueryBuilder::COLUMNS)->except(['parent']),
+            'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $source->published(),
             'status'     => $source->status(),
             'updated_at' => $source->lastModified(),

@@ -2,7 +2,7 @@
 
 namespace Statamic\Eloquent\Structures;
 
-use Statamic\Eloquent\Structures\TreeModel as Model;
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Structures\NavTree as FileEntry;
 
 class NavTree extends FileEntry

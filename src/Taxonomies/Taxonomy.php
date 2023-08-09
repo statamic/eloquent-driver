@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Taxonomies\Taxonomy as Contract;
-use Statamic\Eloquent\Taxonomies\TaxonomyModel as Model;
 use Statamic\Taxonomies\Taxonomy as FileEntry;
 
 class Taxonomy extends FileEntry
@@ -17,6 +17,7 @@ class Taxonomy extends FileEntry
             ->title($model->title)
             ->sites($model->sites)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
+            ->previewTargets($model->settings['preview_targets'] ?? [])
             ->model($model);
     }
 
@@ -34,6 +35,7 @@ class Taxonomy extends FileEntry
             'sites'    => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
+                'preview_targets' => $source->previewTargets(),
             ],
         ]);
     }
