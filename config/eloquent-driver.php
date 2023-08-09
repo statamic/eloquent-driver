@@ -47,9 +47,13 @@ return [
     ],
 
     'global_sets' => [
-        'driver'          => 'eloquent',
-        'model'           => \Statamic\Eloquent\Globals\GlobalSetModel::class,
-        'variables_model' => \Statamic\Eloquent\Globals\VariablesModel::class,
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Globals\GlobalSetModel::class,
+    ],
+
+    'global_set_variables' => [
+        'driver' => 'eloquent',
+        'model'  => \Statamic\Eloquent\Globals\VariablesModel::class,
     ],
 
     'navigations' => [
