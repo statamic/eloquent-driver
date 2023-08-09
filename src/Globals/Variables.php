@@ -2,19 +2,22 @@
 
 namespace Statamic\Eloquent\Globals;
 
+use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Globals\Variables as Contract;
-use Statamic\Eloquent\Globals\VariablesModel as Model;
 use Statamic\Globals\Variables as FileEntry;
 
 class Variables extends FileEntry
 {
+    protected $model;
+
     public static function fromModel(Model $model)
     {
         return (new static())
             ->globalSet($model->handle)
             ->locale($model->locale)
             ->data($model->data)
-            ->origin($model->origin ?? null);
+            ->origin($model->origin ?? null)
+            ->model($model);
     }
 
     public function toModel()
@@ -24,7 +27,7 @@ class Variables extends FileEntry
 
     public static function makeModelFromContract(Contract $source)
     {
-        $class = app('statamic.eloquent.global_sets.variables_model');
+        $class = app('statamic.eloquent.global_set_variables.model');
 
         $data = $source->data();
 
@@ -49,6 +52,17 @@ class Variables extends FileEntry
     public function save()
     {
         $this->toModel()->save();
+
+        return $this;
+    }
+
+    public function model($model = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->model;
+        }
+
+        $this->model = $model;
 
         return $this;
     }
