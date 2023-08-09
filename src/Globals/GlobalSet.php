@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Globals;
 
 use Statamic\Contracts\Globals\GlobalSet as Contract;
-use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel as Model;
 use Statamic\Globals\GlobalSet as FileEntry;
 
