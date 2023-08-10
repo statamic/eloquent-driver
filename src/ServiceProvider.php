@@ -2,12 +2,14 @@
 
 namespace Statamic\Eloquent;
 
+use Illuminate\Foundation\Console\AboutCommand;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
@@ -21,6 +23,7 @@ use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
+use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
@@ -112,6 +115,8 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
         ]);
+
+        $this->addAboutCommandInfo();
     }
 
     public function register()
@@ -124,6 +129,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerEntries();
         $this->registerForms();
         $this->registerGlobals();
+        $this->registerGlobalVariables();
         $this->registerRevisions();
         $this->registerStructures();
         $this->registerStructureTrees();
@@ -277,9 +283,20 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_sets.model', function () {
             return config('statamic.eloquent-driver.global_sets.model');
         });
+    }
 
-        $this->app->bind('statamic.eloquent.global_sets.variables_model', function () {
-            return config('statamic.eloquent-driver.global_sets.variables_model');
+    private function registerGlobalVariables()
+    {
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.global_sets.variables_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.driver' : 'statamic.eloquent-driver.global_set_variables.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
+
+        $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
@@ -369,5 +386,37 @@ class ServiceProvider extends AddonServiceProvider
     protected function migrationsPath($filename)
     {
         return database_path('migrations/'.date('Y_m_d_His', time() + (++$this->migrationCount + 60))."_{$filename}.php");
+    }
+
+    protected function addAboutCommandInfo()
+    {
+        if (! class_exists(AboutCommand::class)) {
+            return;
+        }
+
+        AboutCommand::add('Statamic Eloquent Driver', collect([
+            'Asset Containers' => config('statamic.eloquent-driver.asset_containers.driver', 'file'),
+            'Assets' => config('statamic.eloquent-driver.assets.driver', 'file'),
+            'Blueprints' => config('statamic.eloquent-driver.blueprints.driver', 'file'),
+            'Collections' => config('statamic.eloquent-driver.collections.driver', 'file'),
+            'Collection Trees' => config('statamic.eloquent-driver.collection_trees.driver', 'file'),
+            'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
+            'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
+            'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
+            'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
+            'Navigation Trees' => config('statamic.eloquent-driver.navigation_trees.driver', 'file'),
+            'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
+            'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
+            'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
+        ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
+    }
+
+    private function applyAboutCommandFormatting($config)
+    {
+        if ($config == 'eloquent') {
+            return ' <fg=yellow;options=bold>'.$config.'</>';
+        }
+
+        return $config;
     }
 }

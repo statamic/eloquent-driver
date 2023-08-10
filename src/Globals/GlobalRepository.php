@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Globals;
 
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
-use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Facades\Blink;
 use Statamic\Globals\GlobalCollection;
 use Statamic\Stache\Repositories\GlobalRepository as StacheRepository;
@@ -69,7 +68,6 @@ class GlobalRepository extends StacheRepository
     {
         return [
             GlobalSetContract::class => GlobalSet::class,
-            VariablesContract::class => Variables::class,
         ];
     }
 }

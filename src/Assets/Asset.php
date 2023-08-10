@@ -4,11 +4,16 @@ namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
+use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Path;
 use Statamic\Support\Arr;
+use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
+    protected $removedData = [];
+
     public function meta($key = null)
     {
         if (func_num_args() === 1) {
@@ -20,7 +25,14 @@ class Asset extends FileAsset
         }
 
         if ($this->meta) {
-            return array_merge($this->meta, ['data' => $this->data->all()]);
+            $meta = $this->meta;
+
+            $meta['data'] = collect(Arr::get($meta, 'data', []))
+                ->merge($this->data->all())
+                ->except($this->removedData)
+                ->all();
+
+            return $meta;
         }
 
         return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
@@ -56,11 +68,7 @@ class Asset extends FileAsset
             return $value;
         }
 
-        Cache::forget($this->metaCacheKey());
-
-        $this->writeMeta($meta = $this->generateMeta());
-
-        return Arr::get($meta, $key);
+        return Arr::get($this->generateMeta(), $key);
     }
 
     public function writeMeta($meta)
@@ -78,5 +86,36 @@ class Asset extends FileAsset
         }
 
         $model->save();
+    }
+
+    /**
+     * Move the asset to a different location.
+     *
+     * @param  string  $folder  The folder relative to the container.
+     * @param  string|null  $filename  The new filename, if renaming.
+     * @return $this
+     */
+    public function move($folder, $filename = null)
+    {
+        $filename = Uploader::getSafeFilename($filename ?: $this->filename());
+        $oldPath = $this->path();
+        $oldMetaPath = $this->metaPath();
+        $newPath = Str::removeLeft(Path::tidy($folder.'/'.$filename.'.'.pathinfo($oldPath, PATHINFO_EXTENSION)), '/');
+
+        $this->hydrate();
+        $this->disk()->rename($oldPath, $newPath);
+        $this->path($newPath);
+        $this->save();
+
+        if ($oldMetaPath != $this->metaPath()) {
+            $oldMetaModel = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMetaPath)->first();
+
+            if ($oldMetaModel) {
+                $oldMetaModel->delete();
+                $this->writeMeta($oldMetaModel->data);
+            }
+        }
+
+        return $this;
     }
 }
