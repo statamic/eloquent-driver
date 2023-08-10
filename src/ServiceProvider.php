@@ -403,6 +403,7 @@ class ServiceProvider extends AddonServiceProvider
             'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
             'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
             'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
+            'Global Variables' => config('statamic.eloquent-driver.global_set_variables.driver', 'file'),
             'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
             'Navigation Trees' => config('statamic.eloquent-driver.navigation_trees.driver', 'file'),
             'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
