@@ -7,11 +7,16 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
+use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel;
+use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Facades\GlobalSet as GlobalSetFacade;
 use Statamic\Globals\GlobalSet;
+use Statamic\Globals\Variables;
 use Statamic\Stache\Repositories\GlobalRepository;
+use Statamic\Stache\Repositories\GlobalVariablesRepository;
 use Statamic\Statamic;
 
 class ExportGlobals extends Command
@@ -49,10 +54,13 @@ class ExportGlobals extends Command
     private function usingDefaultRepositories(Closure $callback)
     {
         Facade::clearResolvedInstance(GlobalRepositoryContract::class);
+        Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
 
         app()->bind(GlobalSetContract::class, GlobalSet::class);
+        app()->bind(VariablesContract::class, Variables::class);
 
         $callback();
     }
@@ -60,14 +68,15 @@ class ExportGlobals extends Command
     private function exportGlobals()
     {
         $sets = GlobalSetModel::all();
+        $variables = VariablesModel::all();
 
-        $this->withProgressBar($sets, function ($model) {
+        $this->withProgressBar($sets, function ($model) use ($variables) {
             $global = GlobalSetFacade::make()
                 ->handle($model->handle)
                 ->title($model->title)
                 ->save();
 
-            foreach ($model->localizations as $localization) {
+            foreach ($variables->where('handle', $model->handle) as $localization) {
                 $global->makeLocalization($localization->locale)
                     ->data($localization->data)
                     ->origin($localization->origin ?? null)
