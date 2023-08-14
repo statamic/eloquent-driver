@@ -283,6 +283,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_sets.model', function () {
             return config('statamic.eloquent-driver.global_sets.model');
         });
+
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
     }
 
     private function registerGlobalVariables()
@@ -298,8 +300,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
-
-        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
     }
 
     private function registerRevisions()
