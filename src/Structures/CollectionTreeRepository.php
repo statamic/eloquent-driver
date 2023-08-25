@@ -20,13 +20,15 @@ class CollectionTreeRepository extends StacheRepository
         });
     }
 
-    public function save($entry)
+    public function save($tree)
     {
-        $model = $entry->toModel();
+        $model = app('statamic.eloquent.collections.tree')::makeModelFromContract($tree);
         $model->save();
 
         Blink::forget("eloquent-collection-tree-{$model->handle}-{$model->locale}");
 
-        $entry->model($model->fresh());
+        if ($tree instanceof CollectionTree) {
+            $tree->model($model->fresh());
+        }
     }
 }
