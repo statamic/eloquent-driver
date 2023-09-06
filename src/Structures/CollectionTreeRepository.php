@@ -4,7 +4,6 @@ namespace Statamic\Eloquent\Structures;
 
 use Statamic\Contracts\Structures\CollectionTree as CollectionTreeContract;
 use Statamic\Contracts\Structures\Tree as TreeContract;
-use Statamic\Eloquent\Structures\CollectionTree;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionTreeRepository as StacheRepository;
 
