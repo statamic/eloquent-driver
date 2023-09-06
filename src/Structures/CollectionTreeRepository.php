@@ -2,7 +2,9 @@
 
 namespace Statamic\Eloquent\Structures;
 
+use Statamic\Contracts\Structures\CollectionTree as CollectionTreeContract;
 use Statamic\Contracts\Structures\Tree as TreeContract;
+use Statamic\Eloquent\Structures\CollectionTree;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionTreeRepository as StacheRepository;
 
@@ -28,5 +30,12 @@ class CollectionTreeRepository extends StacheRepository
         Blink::forget("eloquent-collection-tree-{$model->handle}-{$model->locale}");
 
         $entry->model($model->fresh());
+    }
+
+    public static function bindings()
+    {
+        return [
+            CollectionTreeContract::class => CollectionTree::class,
+        ];
     }
 }
