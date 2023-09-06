@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
+use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Eloquent\Globals\GlobalSet;
 use Statamic\Eloquent\Globals\Variables;
 use Statamic\Facades\GlobalSet as GlobalSetFacade;
 use Statamic\Stache\Repositories\GlobalRepository;
+use Statamic\Stache\Repositories\GlobalVariablesRepository;
 use Statamic\Statamic;
 
 class ImportGlobals extends Command
@@ -50,6 +52,7 @@ class ImportGlobals extends Command
         Facade::clearResolvedInstance(GlobalRepositoryContract::class);
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
 
         app()->bind(GlobalSetContract::class, GlobalSet::class);
     }
