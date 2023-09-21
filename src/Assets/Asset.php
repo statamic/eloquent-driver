@@ -49,15 +49,11 @@ class Asset extends FileAsset
 
     public function exists()
     {
-        $files = Blink::once($this->container()->handle().'::files', function () {
-            return $this->container()->files();
-        });
-
         if (! $path = $this->path()) {
             return false;
         }
 
-        return $files->contains($path);
+        return $this->container()->files()->contains($path);
     }
 
     private function metaValue($key)
