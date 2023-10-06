@@ -73,7 +73,7 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        $blinkKey = "eloquent-term-{$uri}".($site ? '-'.$site : '');
+        $blinkKey = 'eloquent-term-'.urlencode($uri).($site ? '-'.$site : '');
         $term = Blink::once($blinkKey, function () use ($slug, $taxonomy) {
             return $this->query()
                 ->where('slug', $slug)
