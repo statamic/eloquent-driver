@@ -35,7 +35,7 @@ class EntryRepository extends StacheRepository
 
     public function findByUri(string $uri, string $site = null): ?EntryContract
     {
-        $blinkKey = 'eloquent-entry-'.urlencode($uri).($site ? '-'.$site : '');
+        $blinkKey = 'eloquent-entry-'.md5(urlencode($uri)).($site ? '-'.$site : '');
         $item = Blink::once($blinkKey, function () use ($uri, $site) {
             return parent::findByUri($uri, $site);
         });
