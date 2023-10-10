@@ -26,6 +26,7 @@ return [
         'driver' => 'eloquent',
         'model'  => \Statamic\Eloquent\Collections\CollectionModel::class,
         'update_entry_order_queue' => 'default',
+        'update_entry_order_connection' => 'default',
     ],
 
     'collection_trees' => [
