@@ -89,10 +89,10 @@ class CollectionRepository extends StacheRepository
 
                 $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
 
-                if($connection != 'default') {
+                if ($connection != 'default') {
                     $dispatch->onConnection($connection);
                 }
-                
+
                 $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
             });
     }
