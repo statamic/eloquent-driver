@@ -85,8 +85,15 @@ class CollectionRepository extends StacheRepository
         $collection->queryEntries()
             ->get(['id'])
             ->each(function ($entry) {
-                UpdateCollectionEntryOrder::dispatch($entry->id())
-                    ->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
+                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
+
+                $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
+
+                if($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+                
+                $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
             });
     }
 }
