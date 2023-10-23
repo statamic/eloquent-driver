@@ -91,7 +91,7 @@ class ExportNavs extends Command
 
     private function exportNavTrees()
     {
-        if (! $this->confirm('Do you want to export navs?')) {
+        if (! $this->confirm('Do you want to export nav trees?')) {
             return;
         }
 

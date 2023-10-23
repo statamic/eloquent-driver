@@ -283,6 +283,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_sets.model', function () {
             return config('statamic.eloquent-driver.global_sets.model');
         });
+
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
     }
 
     private function registerGlobalVariables()
@@ -298,8 +300,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
-
-        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
     }
 
     private function registerRevisions()
@@ -403,6 +403,7 @@ class ServiceProvider extends AddonServiceProvider
             'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
             'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
             'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
+            'Global Variables' => config('statamic.eloquent-driver.global_set_variables.driver', 'file'),
             'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
             'Navigation Trees' => config('statamic.eloquent-driver.navigation_trees.driver', 'file'),
             'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
