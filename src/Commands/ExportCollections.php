@@ -29,7 +29,7 @@ class ExportCollections extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-collections';
+    protected $signature = 'statamic:eloquent:export-collections {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -70,7 +70,7 @@ class ExportCollections extends Command
 
     private function exportCollections()
     {
-        if (! $this->confirm('Do you want to export collections?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export collections?')) {
             return;
         }
 
@@ -111,7 +111,7 @@ class ExportCollections extends Command
 
     private function exportCollectionTrees()
     {
-        if (! $this->confirm('Do you want to export collection trees?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export collection trees?')) {
             return;
         }
 

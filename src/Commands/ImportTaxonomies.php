@@ -28,7 +28,7 @@ class ImportTaxonomies extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-taxonomies';
+    protected $signature = 'statamic:eloquent:import-taxonomies {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -66,7 +66,7 @@ class ImportTaxonomies extends Command
 
     private function importTaxonomies()
     {
-        if (! $this->confirm('Do you want to import taxonomies?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to import taxonomies?')) {
             return;
         }
 
@@ -86,7 +86,7 @@ class ImportTaxonomies extends Command
 
     private function importTerms()
     {
-        if (! $this->confirm('Do you want to import terms?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to import terms?')) {
             return;
         }
 
