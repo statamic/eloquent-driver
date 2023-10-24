@@ -78,7 +78,7 @@ class ImportCollections extends Command
 
     private function importCollections()
     {
-        if(! $this->option('force')) {
+        if (! $this->option('force')) {
             $importCollections = $this->confirm('Do you want to import collections?');
             $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
         } else {

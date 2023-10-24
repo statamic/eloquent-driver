@@ -63,7 +63,7 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
-        if(! $this->option('force')) {
+        if (! $this->option('force')) {
             $importNavigations = $this->confirm('Do you want to import navs?');
             $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
         } else {
