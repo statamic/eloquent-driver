@@ -26,7 +26,7 @@ class ImportNavs extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-navs';
+    protected $signature = 'statamic:eloquent:import-navs {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -63,8 +63,13 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
-        $importNavigations = $this->confirm('Do you want to import navs?');
-        $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
+        if(! $this->option('force')) {
+            $importNavigations = $this->confirm('Do you want to import navs?');
+            $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
+        } else {
+            $importNavigations = true;
+            $importNavigationTrees = true;
+        }
 
         $navs = NavFacade::all();
 

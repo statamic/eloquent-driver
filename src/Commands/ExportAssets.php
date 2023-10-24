@@ -30,7 +30,7 @@ class ExportAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-assets';
+    protected $signature = 'statamic:eloquent:export-assets {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -70,7 +70,7 @@ class ExportAssets extends Command
 
     private function exportAssetContainers()
     {
-        if (! $this->confirm('Do you want to export asset containers?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export asset containers?')) {
             return;
         }
 
@@ -96,7 +96,7 @@ class ExportAssets extends Command
 
     private function exportAssets()
     {
-        if (! $this->confirm('Do you want to export assets?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export assets?')) {
             return;
         }
 

@@ -25,7 +25,7 @@ class ImportCollections extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-collections';
+    protected $signature = 'statamic:eloquent:import-collections {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -78,8 +78,13 @@ class ImportCollections extends Command
 
     private function importCollections()
     {
-        $importCollections = $this->confirm('Do you want to import collections?');
-        $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
+        if(! $this->option('force')) {
+            $importCollections = $this->confirm('Do you want to import collections?');
+            $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
+        } else {
+            $importCollections = true;
+            $importCollectionTrees = true;
+        }
 
         $collections = CollectionFacade::all();
 
