@@ -1,0 +1,54 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Statamic\Eloquent\Assets\AssetModel;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->string('container')->after('handle')->index();
+            $table->string('folder')->after('container')->index();
+            $table->string('filename')->after('path')->index();
+            $table->jsonb('meta')->after('meta')->nullable();
+        });
+
+        AssetModel::all()
+            ->each(function ($model) {
+                $model->container = Str::before($model->handle, '::');
+                $model->folder = Str::of($model->handle)->after('::')->replace('/.meta/', '')->beforeLast('/');
+                $model->filename = Str::of($model->handle)->after('::')->afterLast('/');
+                $model->meta = Arr::except($model->data, ['data']);
+                $model->data = $model->data['data'] ?? [];
+                $model->saveQuietly();
+            });
+
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->dropColumn('handle');
+        });
+    }
+
+    public function down()
+    {
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->string('handle')->index();
+        });
+
+        AssetModel::all()
+            ->each(function ($model) {
+                $model->handle = $model->container.'::'.$model->folder.'/.meta/'.$model->filename;
+                $model->data = array_merge(['data' => $model->data['data'] ?? []], $model->meta);
+                $model->saveQuietly();
+            });
+
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->dropColumn('meta');
+            $table->dropColumn('filename');
+            $table->dropColumn('folder');
+            $table->dropColumn('container');
+        });
+    }
+};

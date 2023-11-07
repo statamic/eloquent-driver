@@ -12,5 +12,6 @@ class AssetModel extends BaseModel
 
     protected $casts = [
         'data' => 'json',
+        'meta' => 'json',
     ];
 }

@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Assets;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
@@ -13,6 +14,15 @@ use Statamic\Support\Str;
 class Asset extends FileAsset
 {
     protected $removedData = [];
+
+    public static function fromModel(Model $model)
+    {
+        return (new static())
+            ->container($model->container)
+            ->path($model->folder.'/'.$model->filename)
+            ->hydrateMeta($model->meta)
+            ->data($model->data);
+    }
 
     public function meta($key = null)
     {
@@ -49,15 +59,17 @@ class Asset extends FileAsset
 
     public function exists()
     {
-        $files = Blink::once($this->container()->handle().'::files', function () {
-            return $this->container()->files();
-        });
+        return $this->metaExists(); // not ideal
+    }
 
-        if (! $path = $this->path()) {
-            return false;
-        }
-
-        return $files->contains($path);
+    public function metaExists()
+    {
+        return app('statamic.eloquent.assets.model')::query()
+            ->where([
+                'container' => $this->containerHandle(),
+                'folder' => $this->folder(),
+                'filename' => $this->filename(),
+            ])->count() > 0;
     }
 
     private function metaValue($key)
@@ -71,13 +83,34 @@ class Asset extends FileAsset
         return Arr::get($this->generateMeta(), $key);
     }
 
+    public function generateMeta()
+    {
+        if (! $this->disk()->exists($this->path())) {
+            return ['data' => $this->data->all()];
+        }
+
+        return parent::generateMeta();
+    }
+
+    public function hydrateMeta($meta)
+    {
+        $this->meta = $meta;
+
+        return $this;
+    }
+
     public function writeMeta($meta)
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'handle' => $this->container()->handle().'::'.$this->metaPath(),
-        ])->fill(['data' => $meta]);
+            'container' => $this->containerHandle(),
+            'folder' => $this->folder(),
+            'filename' => $this->filename(),
+        ])->fill([
+            'data' => $meta['data'] ?? [],
+            'meta' => Arr::except($meta, ['data']),
+        ]);
 
         // Set initial timestamps.
         if (empty($model->created_at) && isset($meta['last_modified'])) {
@@ -86,6 +119,11 @@ class Asset extends FileAsset
         }
 
         $model->save();
+    }
+
+    public function metaPath()
+    {
+        return $this->path();
     }
 
     /**

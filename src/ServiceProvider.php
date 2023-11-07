@@ -17,6 +17,7 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
+use Statamic\Eloquent\Assets\AssetQueryBuilder;
 use Statamic\Eloquent\Assets\AssetRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -168,6 +169,12 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.assets.asset', function () {
             return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
+        });
+
+        $this->app->bind(AssetQueryBuilder::class, function ($app) {
+            return new AssetQueryBuilder(
+                $app['statamic.eloquent.assets.model']::query()
+            );
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
