@@ -44,6 +44,7 @@ class ServiceProvider extends AddonServiceProvider
     protected $migrationCount = 0;
 
     protected $updateScripts = [
+        \Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable::class,
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
         \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
         \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
