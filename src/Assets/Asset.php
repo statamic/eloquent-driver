@@ -19,7 +19,7 @@ class Asset extends FileAsset
     {
         return (new static())
             ->container($model->container)
-            ->path($model->folder.'/'.$model->filename)
+            ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
             ->hydrateMeta($model->meta)
             ->data($model->data);
     }
@@ -68,7 +68,7 @@ class Asset extends FileAsset
             ->where([
                 'container' => $this->containerHandle(),
                 'folder' => $this->folder(),
-                'filename' => $this->filename(),
+                'basename' => $this->basename(),
             ])->count() > 0;
     }
 
@@ -106,7 +106,7 @@ class Asset extends FileAsset
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
             'container' => $this->containerHandle(),
             'folder' => $this->folder(),
-            'filename' => $this->filename(),
+            'basename' => $this->basename(),
         ])->fill([
             'data' => $meta['data'] ?? [],
             'meta' => Arr::except($meta, ['data']),

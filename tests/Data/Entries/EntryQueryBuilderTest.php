@@ -466,7 +466,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_length()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 

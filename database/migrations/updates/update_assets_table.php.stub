@@ -12,18 +12,20 @@ return new class extends Migration {
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->string('container')->after('handle')->index();
             $table->string('folder')->after('container')->index();
-            $table->string('filename')->after('folder')->index();
-            $table->jsonb('meta')->nullable();
+            $table->string('basename')->after('folder')->index();
+            $table->string('filename')->after('basename')->index();
+            $table->char('extension', 10)->after('filename')->index();
+            $table->jsonb('meta')->after('extension')->nullable();
         });
 
         AssetModel::all()
             ->each(function ($model) {
                 $model->container = Str::before($model->handle, '::');
                 $model->folder = Str::of($model->handle)->after('::')->replace('/.meta/', '')->beforeLast('/');
-                $model->filename = Str::of($model->handle)->after('::')->afterLast('/')->beforeLast('.yaml');
+                $model->basename = Str::of($model->handle)->after('::')->afterLast('/')->beforeLast('.yaml');
                 $model->meta = Arr::except($model->data, ['data']);
                 $model->data = $model->data['data'] ?? [];
-                $model->saveQuietly();
+                $model->save();
             });
 
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
@@ -39,14 +41,16 @@ return new class extends Migration {
 
         AssetModel::all()
             ->each(function ($model) {
-                $model->handle = $model->container.'::'.$model->folder.'/.meta/'.$model->filename.'.yaml';
+                $model->handle = $model->container.'::'.$model->folder.'/.meta/'.$model->basename.'.yaml';
                 $model->data = array_merge(['data' => $model->data['data'] ?? []], $model->meta);
                 $model->saveQuietly();
             });
 
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->dropColumn('meta');
+            $table->dropColumn('basename');
             $table->dropColumn('filename');
+            $table->dropColumn('extension');
             $table->dropColumn('folder');
             $table->dropColumn('container');
         });

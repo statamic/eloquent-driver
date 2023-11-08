@@ -11,13 +11,14 @@ return new class extends Migration {
             $table->id();
             $table->string('container')->index();
             $table->string('folder')->index();
+            $table->string('basename')->index();
             $table->string('filename')->index();
+            $table->char('extension', 10)->index();
             $table->jsonb('meta')->nullable();
             $table->jsonb('data')->nullable();
             $table->timestamps();
         });
     }
-
 
     public function down()
     {

@@ -16,14 +16,14 @@ class AssetRepository extends BaseRepository
         [$container, $path] = explode('::', $id);
 
         $filename = Str::afterLast($path, '/');
-        $folder = Str::beforeLast($path, '/');
+        $folder = str_contains($path, '/') ? Str::beforeLast($path, '/') : '/';
 
         $blinkKey = "eloquent-asset-{$id}";
         $item = Blink::once($blinkKey, function () use ($container, $filename, $folder) {
             return $this->query()
                 ->where('container', $container)
                 ->where('folder', $folder)
-                ->where('filename', $filename)
+                ->where('basename', $filename)
                 ->first();
         });
 
@@ -66,7 +66,7 @@ class AssetRepository extends BaseRepository
             ->where([
                 'container' => $asset->container(),
                 'folder' => $asset->folder(),
-                'filename' => $asset->filename(),
+                'basename' => $asset->basename(),
             ])
             ->first();
 
