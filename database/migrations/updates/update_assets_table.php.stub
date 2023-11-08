@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->string('filename')->after('basename')->index();
             $table->char('extension', 10)->after('filename')->index();
             $table->jsonb('meta')->after('extension')->nullable();
+
+            $table->index(['container', 'folder', 'basename']);
         });
 
         AssetModel::all()
@@ -47,6 +49,8 @@ return new class extends Migration {
             });
 
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->dropIndex(['container', 'folder', 'basename']);
+
             $table->dropColumn('meta');
             $table->dropColumn('basename');
             $table->dropColumn('filename');
