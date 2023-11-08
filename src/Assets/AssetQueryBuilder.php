@@ -9,7 +9,7 @@ use Statamic\Query\EloquentQueryBuilder;
 class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     const COLUMNS = [
-        'id', 'container', 'folder', 'basename', 'filename', 'extension', 'created_at', 'updated_at',
+        'id', 'container', 'folder', 'basename', 'filename', 'extension', 'path', 'created_at', 'updated_at',
     ];
 
     const META_COLUMNS = [

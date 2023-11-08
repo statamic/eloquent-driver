@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->string('basename')->after('folder')->index();
             $table->string('filename')->after('basename')->index();
             $table->char('extension', 10)->after('filename')->index();
-            $table->jsonb('meta')->after('extension')->nullable();
+            $table->string('path')->after('extension')->index();
+            $table->jsonb('meta')->after('path')->nullable();
 
             $table->index(['container', 'folder', 'basename']);
         });
@@ -25,6 +26,9 @@ return new class extends Migration {
                 $model->container = Str::before($model->handle, '::');
                 $model->folder = Str::of($model->handle)->after('::')->replace('/.meta/', '')->beforeLast('/');
                 $model->basename = Str::of($model->handle)->after('::')->afterLast('/')->beforeLast('.yaml');
+                $model->path = Str::of($model->handle)->after('::')->replace('/.meta/', '');
+                $model->extension = Str::of($model->basename)->afterLast('.');
+                $model->filename = Str::of($model->basename)->beforeLast('.');
                 $model->meta = Arr::except($model->data, ['data']);
                 $model->data = $model->data['data'] ?? [];
                 $model->save();
@@ -52,6 +56,7 @@ return new class extends Migration {
             $table->dropIndex(['container', 'folder', 'basename']);
 
             $table->dropColumn('meta');
+            $table->dropColumn('path');
             $table->dropColumn('basename');
             $table->dropColumn('filename');
             $table->dropColumn('extension');

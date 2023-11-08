@@ -16,12 +16,4 @@ class AssetModel extends BaseModel
         'data' => 'json',
         'meta' => 'json',
     ];
-
-    public static function booted(): void
-    {
-        static::saving(function (Model $model) {
-            $model->extension = Str::afterLast($model->basename, '.');
-            $model->filename = Str::beforeLast($model->basename, '.');
-        });
-    }
 }

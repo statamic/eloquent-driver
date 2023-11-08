@@ -110,6 +110,9 @@ class Asset extends FileAsset
         ])->fill([
             'data' => $meta['data'] ?? [],
             'meta' => Arr::except($meta, ['data']),
+            'filename' => $this->filename(),
+            'extension' => $this->extension(),
+            'path' => $this->path(),
         ]);
 
         // Set initial timestamps.
