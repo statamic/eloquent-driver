@@ -58,7 +58,7 @@ class Asset extends FileAsset
 
     public function exists()
     {
-        return $this->metaExists(); // not ideal
+        return $this->metaExists();
     }
 
     public function metaExists()

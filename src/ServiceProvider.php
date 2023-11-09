@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
+use Statamic\Assets\AssetContainerContents;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -16,6 +17,7 @@ use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryCo
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetQueryBuilder;
 use Statamic\Eloquent\Assets\AssetRepository;
@@ -176,6 +178,10 @@ class ServiceProvider extends AddonServiceProvider
             return new AssetQueryBuilder(
                 $app['statamic.eloquent.assets.model']::query()
             );
+        });
+
+        $this->app->bind(AssetContainerContents::class, function ($app) {
+            return new EloquentAssetContainerContents();
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
