@@ -2,9 +2,7 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use League\Flysystem\DirectoryListing;
 use Statamic\Assets\AssetContainerContents as CoreAssetContainerContents;
 use Statamic\Statamic;
 use Statamic\Support\Str;

@@ -6,7 +6,6 @@ use Statamic\Assets\AssetRepository as BaseRepository;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\QueryBuilder as QueryBuilderContract;
 use Statamic\Facades\Blink;
-use Statamic\Facades\Stache;
 use Statamic\Support\Str;
 
 class AssetRepository extends BaseRepository

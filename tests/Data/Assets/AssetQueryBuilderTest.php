@@ -241,7 +241,7 @@ class AssetQueryBuilderTest extends TestCase
         $assets = Asset::query()->whereNotNull('content')->orWhereNotNull('text')->get();
 
         $this->assertCount(4, $assets);
-        $this->assertEquals(['a', 'b', 'c','d'], $assets->map->filename()->all());
+        $this->assertEquals(['a', 'b', 'c', 'd'], $assets->map->filename()->all());
     }
 
     /** @test **/

@@ -13,14 +13,15 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     ];
 
     const META_COLUMNS = [
-        'size', 'width', 'height', 'duration', 'mime_type', 'last_modified'
+        'size', 'width', 'height', 'duration', 'mime_type', 'last_modified',
     ];
 
-    protected function column($column) {
+    protected function column($column)
+    {
         if (in_array($column, self::META_COLUMNS)) {
-            $column = 'meta->'. $column;
+            $column = 'meta->'.$column;
         } elseif (!in_array($column, self::COLUMNS)) {
-            $column = 'data->'. $column;
+            $column = 'data->'.$column;
         }
 
         return $column;
