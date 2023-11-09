@@ -60,19 +60,18 @@ class AssetRepository extends BaseRepository
 
     public function delete($asset)
     {
-        $asset->container()->contents()->forget($asset->path())->save();
-
-        $model = $this->query()
+        $this->query()
             ->where([
                 'container' => $asset->container(),
                 'folder' => $asset->folder(),
                 'basename' => $asset->basename(),
             ])
-            ->first();
+            ->delete();
+    }
 
-        if ($model) {
-            $model->delete();
-        }
+    public function save($asset)
+    {
+        $asset->writeMeta($asset->generateMeta());
     }
 
     public static function bindings(): array
