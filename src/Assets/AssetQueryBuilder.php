@@ -20,7 +20,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         if (in_array($column, self::META_COLUMNS)) {
             $column = 'meta->'.$column;
-        } elseif (!in_array($column, self::COLUMNS)) {
+        } elseif (! in_array($column, self::COLUMNS)) {
             $column = 'data->'.$column;
         }
 
