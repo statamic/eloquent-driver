@@ -15,7 +15,7 @@ class AddMetaAndIndexesToAssetsTable extends UpdateScript
     public function update()
     {
         $source = __DIR__.'/../../database/migrations/updates/update_assets_table.php.stub';
-        $dest = database_path('migrations/'.date('Y_m_d_His').'update_assets_table.php');
+        $dest = database_path('migrations/'.date('Y_m_d_His').'_update_assets_table.php');
 
         $this->files->copy($source, $dest);
 

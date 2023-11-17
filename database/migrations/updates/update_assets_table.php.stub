@@ -25,9 +25,13 @@ return new class extends Migration {
             ->each(function ($model) {
                 $path = Str::of($model->handle)->after('::')->replace('/.meta/', '');
 
+                if ($path->startsWith('.')) {
+                    $path = $path->replaceFirst('.', '');
+                }
+
                 $model->container = Str::before($model->handle, '::');
                 $model->path = $path;
-                $model->folder = $path->contains('/') ? $path->beforeLast('/') : '';
+                $model->folder = $path->contains('/') ? $path->beforeLast('/') : '/';
                 $model->basename = $path->afterLast('/')->beforeLast('.yaml');
                 $model->extension = Str::of($model->basename)->afterLast('.');
                 $model->filename = Str::of($model->basename)->beforeLast('.');
