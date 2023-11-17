@@ -23,10 +23,12 @@ return new class extends Migration {
 
         AssetModel::all()
             ->each(function ($model) {
+                $path = Str::of($model->handle)->after('::')->replace('/.meta/', '');
+
                 $model->container = Str::before($model->handle, '::');
-                $model->folder = Str::of($model->handle)->after('::')->replace('/.meta/', '')->beforeLast('/');
-                $model->basename = Str::of($model->handle)->after('::')->afterLast('/')->beforeLast('.yaml');
-                $model->path = Str::of($model->handle)->after('::')->replace('/.meta/', '');
+                $model->path = $path;
+                $model->folder = $path->contains('/') ? $path->beforeLast('/') : '';
+                $model->basename = $path->afterLast('/')->beforeLast('.yaml');
                 $model->extension = Str::of($model->basename)->afterLast('.');
                 $model->filename = Str::of($model->basename)->beforeLast('.');
                 $model->meta = Arr::except($model->data, ['data']);
