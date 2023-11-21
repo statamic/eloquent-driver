@@ -12,6 +12,7 @@ use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
+    protected $existsOnDisk = false;
     protected $removedData = [];
 
     public static function fromModel(Model $model)
@@ -65,7 +66,7 @@ class Asset extends FileAsset
 
     public function exists()
     {
-        return $this->metaExists();
+        return $this->existsOnDisk || $this->metaExists();
     }
 
     public function metaExists()
@@ -94,6 +95,8 @@ class Asset extends FileAsset
         if (! $this->disk()->exists($this->path())) {
             return ['data' => $this->data->all()];
         }
+
+        $this->existsOnDisk = true;
 
         return parent::generateMeta();
     }
