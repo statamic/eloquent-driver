@@ -166,8 +166,10 @@ class Asset extends FileAsset
             ])->first();
 
             if ($oldMetaModel) {
+                $meta = $oldMetaModel->meta;
                 $oldMetaModel->delete();
-                $this->writeMeta($oldMetaModel->data);
+
+                $this->writeMeta($meta);
             }
         }
 
