@@ -61,6 +61,11 @@ We have provided imports from file based content for each repository, which can 
 - Revisions: `php please eloquent:import-revisions`
 - Taxonomies: `php please eloquent:import-taxonomies`
 
+If your assets are eloquent driver and you are managing your assets outside of Statamic, we have provided a sync assets command which will check your container for updates and add database entries for any missing files, while removing any that no longer exist.
+
+`php please eloquent:sync-assets`
+
+
 ## Exporting back to file based content
 
 We have provided exports from eloquent to file based content for each repository, which can be run as follows:
