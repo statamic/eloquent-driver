@@ -19,8 +19,7 @@ class Asset extends FileAsset
         return (new static())
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->hydrateMeta($model->meta)
-            ->data($model->data);
+            ->hydrateMeta($model->meta);
     }
 
     public function meta($key = null)
@@ -46,11 +45,19 @@ class Asset extends FileAsset
 
         return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
             $handle = $this->container()->handle().'::'.$this->metaPath();
-            if ($model = app('statamic.eloquent.assets.model')::where('handle', $handle)->first()) {
-                return $model->data;
+            if ($model = app('statamic.eloquent.assets.model')::where([
+                    'container' => $this->containerHandle(),
+                    'folder' => $this->folder(),
+                    'basename' => $this->basename(),
+                ])->first()) {
+                return $model->meta;
             }
 
             $this->writeMeta($meta = $this->generateMeta());
+
+            if (! $meta['data']) {
+                $meta['data'] = [];
+            }
 
             return $meta;
         });
@@ -107,8 +114,7 @@ class Asset extends FileAsset
             'folder' => $this->folder(),
             'basename' => $this->basename(),
         ])->fill([
-            'data' => $meta['data'] ?? [],
-            'meta' => Arr::except($meta, ['data']),
+            'meta' => $meta,
             'filename' => $this->filename(),
             'extension' => $this->extension(),
             'path' => $this->path(),
@@ -140,6 +146,8 @@ class Asset extends FileAsset
         $filename = Uploader::getSafeFilename($filename ?: $this->filename());
         $oldPath = $this->path();
         $oldMetaPath = $this->metaPath();
+        $oldFolder = $this->folder();
+        $oldBasename = $this->basename();
         $newPath = Str::removeLeft(Path::tidy($folder.'/'.$filename.'.'.pathinfo($oldPath, PATHINFO_EXTENSION)), '/');
 
         $this->hydrate();
@@ -148,7 +156,11 @@ class Asset extends FileAsset
         $this->save();
 
         if ($oldMetaPath != $this->metaPath()) {
-            $oldMetaModel = app('statamic.eloquent.assets.model')::whereHandle($this->container()->handle().'::'.$oldMetaPath)->first();
+            $oldMetaModel = app('statamic.eloquent.assets.model')::where([
+                'container' => $this->containerHandle(),
+                'folder' => $oldFolder,
+                'basename' => $oldBasename,
+            ])->first();
 
             if ($oldMetaModel) {
                 $oldMetaModel->delete();

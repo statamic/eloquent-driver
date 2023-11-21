@@ -35,8 +35,7 @@ return new class extends Migration {
                 $model->basename = $path->afterLast('/');
                 $model->extension = Str::of($model->basename)->afterLast('.');
                 $model->filename = Str::of($model->basename)->beforeLast('.');
-                $model->meta = Arr::except($model->data, ['data']);
-                $model->data = $model->data['data'] ?? [];
+                $model->meta = $model->data;
                 $model->save();
             });
 
@@ -54,7 +53,7 @@ return new class extends Migration {
         AssetModel::all()
             ->each(function ($model) {
                 $model->handle = $model->container.'::'.$model->folder.'/.meta/'.$model->basename.'.yaml';
-                $model->data = array_merge(['data' => $model->data['data'] ?? []], $model->meta);
+                $model->data = $model->meta;
                 $model->saveQuietly();
             });
 
