@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
+use Statamic\Assets\AssetContainerContents;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -16,7 +17,9 @@ use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryCo
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
+use Statamic\Eloquent\Assets\AssetQueryBuilder;
 use Statamic\Eloquent\Assets\AssetRepository;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
@@ -43,6 +46,7 @@ class ServiceProvider extends AddonServiceProvider
     protected $migrationCount = 0;
 
     protected $updateScripts = [
+        \Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable::class,
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
         \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
         \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
@@ -114,6 +118,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportNavs::class,
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
+            Commands\SyncAssets::class,
         ]);
 
         $this->addAboutCommandInfo();
@@ -168,6 +173,16 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.assets.asset', function () {
             return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
+        });
+
+        $this->app->bind(AssetQueryBuilder::class, function ($app) {
+            return new AssetQueryBuilder(
+                $app['statamic.eloquent.assets.model']::query()
+            );
+        });
+
+        $this->app->bind(AssetContainerContents::class, function ($app) {
+            return new EloquentAssetContainerContents();
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
