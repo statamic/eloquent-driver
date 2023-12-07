@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Revisions;
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Events\RevisionDeleted;
 use Statamic\Events\RevisionSaved;
+use Statamic\Events\RevisionSaving;
 use Statamic\Revisions\Revision as FileEntry;
 use Statamic\Revisions\WorkingCopy;
 
@@ -78,6 +79,10 @@ class Revision extends FileEntry
 
     public function save()
     {
+        if (RevisionSaving::dispatch($this) === false) {
+            return false;
+        }
+
         $this->model->save();
 
         RevisionSaved::dispatch($this);

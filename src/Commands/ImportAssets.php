@@ -27,7 +27,7 @@ class ImportAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-assets';
+    protected $signature = 'statamic:eloquent:import-assets {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -65,7 +65,7 @@ class ImportAssets extends Command
 
     private function importAssetContainers()
     {
-        if (! $this->confirm('Do you want to import asset containers?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to import asset containers?')) {
             return;
         }
 
@@ -82,7 +82,7 @@ class ImportAssets extends Command
 
     private function importAssets()
     {
-        if (! $this->confirm('Do you want to import assets?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to import assets?')) {
             return;
         }
 

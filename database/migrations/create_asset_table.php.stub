@@ -9,12 +9,18 @@ return new class extends Migration {
     {
         Schema::create($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->id();
-            $table->string('handle')->index();
-            $table->jsonb('data')->nullable();
+            $table->string('container')->index();
+            $table->string('folder')->index();
+            $table->string('basename')->index();
+            $table->string('filename')->index();
+            $table->char('extension', 10)->index();
+            $table->string('path')->index();
+            $table->jsonb('meta')->nullable();
             $table->timestamps();
+
+            $table->index(['container', 'folder', 'basename']);
         });
     }
-
 
     public function down()
     {
