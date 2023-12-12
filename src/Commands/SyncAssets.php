@@ -57,11 +57,11 @@ class SyncAssets extends Command
 
         // ensure we have an asset for any paths
         $files->each(function ($file) use ($container) {
-            $this->info($file);
-
             if (Str::of($file)->afterLast('/')->startsWith('.')) {
                 return;
             }
+
+            $this->info($file);
 
             $asset = Facades\Asset::make()
                 ->container($container->handle())
