@@ -86,6 +86,10 @@ class SyncAssets extends Command
         // process any sub-folders of this folder
         $container->folders($folder)
             ->each(function ($subfolder) use ($container, $folder) {
+                if (str_contains($subfolder.'/', '.meta/')) {
+                    return;
+                }
+
                 if ($folder != $subfolder && (strlen($subfolder) > strlen($folder))) {
                     $this->processFolder($container, $subfolder);
                 }
