@@ -67,13 +67,47 @@ class AssetContainerContents extends CoreAssetContainerContents
     {
         $folder = $folder == '/' ? '' : $folder;
 
-        return $this->directories()->filter(function ($dir) use ($folder, $recursive) {
-            if ($folder && ! Str::startsWith($dir, $folder)) {
-                return false;
-            }
+        return $this->directories()
+            ->filter(function ($dir) use ($folder, $recursive) {
+                if ($folder && ! Str::startsWith($dir['path'], $folder)) {
+                    return false;
+                }
 
-            return ! $recursive ? Str::of($dir)->after($folder.'/')->contains('/') == false : true;
-        })->flip();
+                if ($folder == $dir['path']) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->map(function ($dir) {
+                $dirs = [];
+                $tmp = '';
+                foreach (explode('/', $dir['path']) as $dir) {
+                    $tmp .= '/'.$dir;
+                    $dirs[] = substr($tmp, 1);
+                }
+                return $dirs;
+            })
+            ->flatten()
+            ->unique()
+            ->filter(function ($dir) use ($folder, $recursive) {
+                if ($folder == $dir) {
+                    return false;
+                }
+
+                if ($recursive) {
+                    return true;
+                }
+
+                $dir = Str::of($dir);
+                if ($folder) {
+                    $dir = $dir->after($folder.'/');
+                }
+
+                return ! $dir->contains('/');
+            })
+            ->sort()
+            ->flip();
     }
 
     public function save()
