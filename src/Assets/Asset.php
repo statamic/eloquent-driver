@@ -133,6 +133,8 @@ class Asset extends FileAsset
         }
 
         $model->save();
+
+        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
 
     public function metaPath()
