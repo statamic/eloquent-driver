@@ -59,7 +59,7 @@ class SyncAssets extends Command
         $files->each(function ($file) use ($container) {
             $this->info($file);
 
-            if (Str::startsWith($file, '.')) {
+            if (Str::of($file)->afterLast('/')->startsWith('.')) {
                 return;
             }
 
