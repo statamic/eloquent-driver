@@ -107,7 +107,7 @@ class AssetContainerContents extends CoreAssetContainerContents
             ->flatten()
             ->unique()
             ->filter(function ($dir) use ($folder, $recursive) {
-                if ($folder == $dir) {
+                if ($folder == $dir || strlen($folder) > strlen($dir)) {
                     return false;
                 }
 
