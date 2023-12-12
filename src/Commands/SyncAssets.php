@@ -85,8 +85,10 @@ class SyncAssets extends Command
 
         // process any sub-folders of this folder
         $container->folders($folder)
-            ->each(function ($folder) use ($container) {
-                $this->processFolder($container, $folder);
+            ->each(function ($subfolder) use ($container) {
+                if ($folder != $subfolder) {
+                    $this->processFolder($container, $subfolder);
+                }
             });
     }
 }
