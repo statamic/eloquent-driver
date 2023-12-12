@@ -68,7 +68,7 @@ class AssetContainerContents extends CoreAssetContainerContents
         $folder = $folder == '/' ? '' : $folder;
 
         return $this->directories()
-            ->filter(function ($dir) use ($folder, $recursive) {
+            ->filter(function ($dir) use ($folder) {
                 if ($folder && ! Str::startsWith($dir['path'], $folder)) {
                     return false;
                 }
@@ -86,6 +86,7 @@ class AssetContainerContents extends CoreAssetContainerContents
                     $tmp .= '/'.$dir;
                     $dirs[] = substr($tmp, 1);
                 }
+
                 return $dirs;
             })
             ->flatten()
