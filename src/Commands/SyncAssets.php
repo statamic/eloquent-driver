@@ -57,11 +57,11 @@ class SyncAssets extends Command
 
         // ensure we have an asset for any paths
         $files->each(function ($file) use ($container) {
-            $this->info($file);
-
-            if (Str::startsWith($file, '.')) {
+            if (Str::of($file)->afterLast('/')->startsWith('.')) {
                 return;
             }
+
+            $this->info($file);
 
             $asset = Facades\Asset::make()
                 ->container($container->handle())
@@ -85,8 +85,14 @@ class SyncAssets extends Command
 
         // process any sub-folders of this folder
         $container->folders($folder)
-            ->each(function ($folder) use ($container) {
-                $this->processFolder($container, $folder);
+            ->each(function ($subfolder) use ($container, $folder) {
+                if (str_contains($subfolder.'/', '.meta/')) {
+                    return;
+                }
+
+                if ($folder != $subfolder && (strlen($subfolder) > strlen($folder))) {
+                    $this->processFolder($container, $subfolder);
+                }
             });
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
@@ -71,12 +72,14 @@ class Asset extends FileAsset
 
     public function metaExists()
     {
-        return app('statamic.eloquent.assets.model')::query()
+        return Blink::once('eloquent-asset-meta-exists-'.$this->id(), function () {
+            return app('statamic.eloquent.assets.model')::query()
             ->where([
                 'container' => $this->containerHandle(),
                 'folder' => $this->folder(),
                 'basename' => $this->basename(),
             ])->count() > 0;
+        });
     }
 
     private function metaValue($key)
@@ -130,6 +133,8 @@ class Asset extends FileAsset
         }
 
         $model->save();
+
+        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
 
     public function metaPath()
