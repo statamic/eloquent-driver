@@ -47,7 +47,6 @@ class EntryTest extends TestCase
             'collection' => 'blog',
             'blueprint'  => 'blog',
             'published'  => false,
-            'status'     => 'draft',
             'origin_id'  => null,
             'order'      => null,
         ]);
