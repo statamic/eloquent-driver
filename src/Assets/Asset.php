@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
-use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
@@ -116,26 +115,15 @@ class Asset extends FileAsset
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
-        self::makeModelFromContract($this, $meta);
-
-        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
-    }
-
-    public static function makeModelFromContract(AssetContract $source, $meta = [])
-    {
-        if (! $meta) {
-            $meta = $source->meta();
-        }
-
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'container' => $source->containerHandle(),
-            'folder' => $source->folder(),
-            'basename' => $source->basename(),
+            'container' => $this->containerHandle(),
+            'folder' => $this->folder(),
+            'basename' => $this->basename(),
         ])->fill([
             'meta' => $meta,
-            'filename' => $source->filename(),
-            'extension' => $source->extension(),
-            'path' => $source->path(),
+            'filename' => $this->filename(),
+            'extension' => $this->extension(),
+            'path' => $this->path(),
         ]);
 
         // Set initial timestamps.
@@ -146,7 +134,7 @@ class Asset extends FileAsset
 
         $model->save();
 
-        return $model;
+        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
 
     public function metaPath()
