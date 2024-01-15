@@ -52,6 +52,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
+        \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
     ];
 
     protected $listen = [

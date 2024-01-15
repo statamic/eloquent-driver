@@ -17,7 +17,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     private $selectedQueryColumns;
 
     const COLUMNS = [
-        'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
+        'id', 'site', 'origin_id', 'published', 'slug', 'uri',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 

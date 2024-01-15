@@ -103,7 +103,6 @@ class Entry extends FileEntry
             'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
             'data'       => $data->except(EntryQueryBuilder::COLUMNS),
             'published'  => $source->published(),
-            'status'     => $source->status(),
             'updated_at' => $source->lastModified(),
             'order'      => $source->order(),
         ];
