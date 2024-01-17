@@ -9,7 +9,7 @@ return new class extends Migration {
         // Extract the id from the key and add it to the attributes of the revision
         RevisionModel::query()
             ->whereJsonDoesntContainKey('attributes->id')
-            ->chunk(200, function ($revisions) {
+            ->chunkById(200, function ($revisions) {
                 foreach ($revisions as $revision) {
                     $id = str($revision->key)
                         ->afterLast('/')
@@ -29,7 +29,7 @@ return new class extends Migration {
         // Reverse the above
         RevisionModel::query()
             ->whereJsonContainsKey('attributes->id')
-            ->chunk(200, function ($revisions) {
+            ->chunkById(200, function ($revisions) {
                 foreach ($revisions as $revision) {
                     $attributes = $revision->attributes;
                     unset($attributes['id']);
