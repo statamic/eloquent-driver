@@ -13,8 +13,8 @@ class AddIdToAttributesInRevisionsTable extends UpdateScript
 
     public function update()
     {
-        $source = __DIR__ . '/../../database/migrations/updates/add_id_to_attributes_in_revisions_table.php.stub';
-        $dest = database_path('migrations/' . date('Y_m_d_His') . '_add_id_to_attributes_in_revisions_table.php');
+        $source = __DIR__.'/../../database/migrations/updates/add_id_to_attributes_in_revisions_table.php.stub';
+        $dest = database_path('migrations/'.date('Y_m_d_His').'_add_id_to_attributes_in_revisions_table.php');
 
         $this->files->copy($source, $dest);
 
