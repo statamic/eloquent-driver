@@ -47,10 +47,10 @@ class Revision extends FileEntry
         $class = app('statamic.eloquent.revisions.model');
 
         return $class::firstOrNew(['key' => $this->key(), 'created_at' => $this->date()])->fill([
-            'action'     => $this->action(),
-            'user'       => $this->user()?->id(),
-            'message'    => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
-            'attributes' => collect($this->attributes())->except('id'),
+            'action' => $this->action(),
+            'user' => $this->user()?->id(),
+            'message' => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
+            'attributes' => $this->attributes(),
             'updated_at' => $this->date(),
         ]);
     }
