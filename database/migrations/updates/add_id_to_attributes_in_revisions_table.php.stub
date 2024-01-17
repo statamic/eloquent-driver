@@ -13,7 +13,7 @@ return new class extends Migration {
                 foreach ($revisions as $revision) {
                     $id = str($revision->key)
                         ->afterLast('/')
-                        ->toInteger();
+                        ->toString();
 
                     $attributes = $revision->attributes;
                     $attributes['id'] = $id;
