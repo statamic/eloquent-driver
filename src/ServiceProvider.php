@@ -52,6 +52,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
+        \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
     ];
 
     protected $listen = [
@@ -64,39 +65,39 @@ class ServiceProvider extends AddonServiceProvider
     {
         parent::boot();
 
-        $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
+        $this->mergeConfigFrom($config = __DIR__ . '/../config/eloquent-driver.php', 'statamic-eloquent-driver');
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        if (! $this->app->runningInConsole()) {
+        if (!$this->app->runningInConsole()) {
             return;
         }
 
         $this->publishes([$config => config_path('statamic/eloquent-driver.php')], 'statamic-eloquent-config');
 
         $this->publishes([
-            __DIR__.'/../database/migrations/create_taxonomies_table.php.stub'       => $this->migrationsPath('create_taxonomies_table.php'),
-            __DIR__.'/../database/migrations/create_terms_table.php.stub'            => $this->migrationsPath('create_terms_table.php'),
-            __DIR__.'/../database/migrations/create_globals_table.php.stub'          => $this->migrationsPath('create_globals_table.php'),
-            __DIR__.'/../database/migrations/create_global_variables_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
-            __DIR__.'/../database/migrations/create_navigations_table.php.stub'      => $this->migrationsPath('create_navigations_table.php'),
-            __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
-            __DIR__.'/../database/migrations/create_collections_table.php.stub'      => $this->migrationsPath('create_collections_table.php'),
-            __DIR__.'/../database/migrations/create_blueprints_table.php.stub'       => $this->migrationsPath('create_blueprints_table.php'),
-            __DIR__.'/../database/migrations/create_fieldsets_table.php.stub'        => $this->migrationsPath('create_fieldsets_table.php'),
-            __DIR__.'/../database/migrations/create_forms_table.php.stub'            => $this->migrationsPath('create_forms_table.php'),
-            __DIR__.'/../database/migrations/create_form_submissions_table.php.stub' => $this->migrationsPath('create_form_submissions_table.php'),
-            __DIR__.'/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
-            __DIR__.'/../database/migrations/create_asset_table.php.stub'            => $this->migrationsPath('create_asset_table.php'),
-            __DIR__.'/../database/migrations/create_revisions_table.php.stub'        => $this->migrationsPath('create_revisions_table.php'),
+            __DIR__ . '/../database/migrations/create_taxonomies_table.php.stub'       => $this->migrationsPath('create_taxonomies_table.php'),
+            __DIR__ . '/../database/migrations/create_terms_table.php.stub'            => $this->migrationsPath('create_terms_table.php'),
+            __DIR__ . '/../database/migrations/create_globals_table.php.stub'          => $this->migrationsPath('create_globals_table.php'),
+            __DIR__ . '/../database/migrations/create_global_variables_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
+            __DIR__ . '/../database/migrations/create_navigations_table.php.stub'      => $this->migrationsPath('create_navigations_table.php'),
+            __DIR__ . '/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
+            __DIR__ . '/../database/migrations/create_collections_table.php.stub'      => $this->migrationsPath('create_collections_table.php'),
+            __DIR__ . '/../database/migrations/create_blueprints_table.php.stub'       => $this->migrationsPath('create_blueprints_table.php'),
+            __DIR__ . '/../database/migrations/create_fieldsets_table.php.stub'        => $this->migrationsPath('create_fieldsets_table.php'),
+            __DIR__ . '/../database/migrations/create_forms_table.php.stub'            => $this->migrationsPath('create_forms_table.php'),
+            __DIR__ . '/../database/migrations/create_form_submissions_table.php.stub' => $this->migrationsPath('create_form_submissions_table.php'),
+            __DIR__ . '/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
+            __DIR__ . '/../database/migrations/create_asset_table.php.stub'            => $this->migrationsPath('create_asset_table.php'),
+            __DIR__ . '/../database/migrations/create_revisions_table.php.stub'        => $this->migrationsPath('create_revisions_table.php'),
         ], 'migrations');
 
         $this->publishes([
-            __DIR__.'/../database/migrations/create_entries_table.php.stub' => $this->migrationsPath('create_entries_table'),
+            __DIR__ . '/../database/migrations/create_entries_table.php.stub' => $this->migrationsPath('create_entries_table'),
         ], 'statamic-eloquent-entries-table');
 
         $this->publishes([
-            __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
+            __DIR__ . '/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
 
         $this->commands([
@@ -400,37 +401,37 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function migrationsPath($filename)
     {
-        return database_path('migrations/'.date('Y_m_d_His', time() + (++$this->migrationCount + 60))."_{$filename}.php");
+        return database_path('migrations/' . date('Y_m_d_His', time() + (++$this->migrationCount + 60)) . "_{$filename}.php");
     }
 
     protected function addAboutCommandInfo()
     {
-        if (! class_exists(AboutCommand::class)) {
+        if (!class_exists(AboutCommand::class)) {
             return;
         }
 
         AboutCommand::add('Statamic Eloquent Driver', collect([
             'Asset Containers' => config('statamic.eloquent-driver.asset_containers.driver', 'file'),
-            'Assets' => config('statamic.eloquent-driver.assets.driver', 'file'),
-            'Blueprints' => config('statamic.eloquent-driver.blueprints.driver', 'file'),
-            'Collections' => config('statamic.eloquent-driver.collections.driver', 'file'),
+            'Assets'           => config('statamic.eloquent-driver.assets.driver', 'file'),
+            'Blueprints'       => config('statamic.eloquent-driver.blueprints.driver', 'file'),
+            'Collections'      => config('statamic.eloquent-driver.collections.driver', 'file'),
             'Collection Trees' => config('statamic.eloquent-driver.collection_trees.driver', 'file'),
-            'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
-            'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
-            'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
+            'Entries'          => config('statamic.eloquent-driver.entries.driver', 'file'),
+            'Forms'            => config('statamic.eloquent-driver.forms.driver', 'file'),
+            'Global Sets'      => config('statamic.eloquent-driver.global_sets.driver', 'file'),
             'Global Variables' => config('statamic.eloquent-driver.global_set_variables.driver', 'file'),
-            'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
+            'Navigations'      => config('statamic.eloquent-driver.navigations.driver', 'file'),
             'Navigation Trees' => config('statamic.eloquent-driver.navigation_trees.driver', 'file'),
-            'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
-            'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
-            'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
-        ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
+            'Revisions'        => config('statamic.eloquent-driver.revisions.driver', 'file'),
+            'Taxonomies'       => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
+            'Terms'            => config('statamic.eloquent-driver.terms.driver', 'file'),
+        ])->map(fn($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 
     private function applyAboutCommandFormatting($config)
     {
         if ($config == 'eloquent') {
-            return ' <fg=yellow;options=bold>'.$config.'</>';
+            return ' <fg=yellow;options=bold>' . $config . '</>';
         }
 
         return $config;
