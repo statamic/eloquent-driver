@@ -41,14 +41,14 @@ class EntryTest extends TestCase
             'data' => [
                 'foo' => 'bar',
             ],
-            'site'       => 'en',
-            'uri'        => '/blog/the-slug',
-            'date'       => null,
+            'site' => 'en',
+            'uri' => '/blog/the-slug',
+            'date' => null,
             'collection' => 'blog',
-            'blueprint'  => 'blog',
-            'published'  => false,
-            'origin_id'  => null,
-            'order'      => null,
+            'blueprint' => 'blog',
+            'published' => false,
+            'origin_id' => null,
+            'order' => null,
         ]);
 
         $collection = Collection::make('blog')->title('blog')->routes([
