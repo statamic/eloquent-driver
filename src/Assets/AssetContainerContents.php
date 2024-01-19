@@ -41,7 +41,7 @@ class AssetContainerContents extends CoreAssetContainerContents
 
         $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
             return collect($this->directoryRecurse(''))
-                ->map(fn ($dir) => ['path' => $dir]);
+                ->map(fn ($dir) => ['path' => $dir, 'type' => 'dir']);
         });
 
         return $this->folders;
