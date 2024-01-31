@@ -127,6 +127,11 @@ class Asset extends FileAsset
             $meta = $source->meta();
         }
 
+        // Make shure that a extension could be found, as the extension field is required.
+        if (! $extension = $source->extension()) {
+            return null;
+        }
+
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
             'container' => $source->containerHandle(),
             'folder' => $source->folder(),
@@ -134,7 +139,7 @@ class Asset extends FileAsset
         ])->fill([
             'meta' => $meta,
             'filename' => $source->filename(),
-            'extension' => $source->extension(),
+            'extension' => $extension,
             'path' => $source->path(),
         ]);
 
