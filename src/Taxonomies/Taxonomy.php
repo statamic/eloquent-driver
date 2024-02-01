@@ -40,8 +40,8 @@ class Taxonomy extends FileEntry
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
                 'preview_targets' => $source->previewTargets(),
-                'term_template' => $source->termTemplate,
-                'template' => $source->template,
+                'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
+                'template' => $source->hasCustomTemplate() ? $source->template() : null,
                 'layout' => $source->layout,
             ],
         ]);
