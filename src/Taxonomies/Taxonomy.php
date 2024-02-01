@@ -21,7 +21,7 @@ class Taxonomy extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? '')
             ->termTemplate($model->settings['term_template'] ?? null)
             ->template($model->settings['template'] ?? null)
-            ->layout($model->settings['layout'] ?? null);
+            ->layout($model->settings['layout'] ?? null)
             ->model($model);
     }
 
