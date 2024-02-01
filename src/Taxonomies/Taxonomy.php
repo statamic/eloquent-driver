@@ -35,8 +35,8 @@ class Taxonomy extends FileEntry
         $class = app('statamic.eloquent.taxonomies.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title'    => $source->title(),
-            'sites'    => $source->sites(),
+            'title' => $source->title(),
+            'sites' => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
                 'preview_targets' => $source->previewTargets(),
