@@ -105,6 +105,12 @@ class BlueprintRepository extends StacheRepository
 
     protected function getNamespaceAndHandle($blueprint)
     {
+        if (str_contains($blueprint, '::')) {
+            $blueprint = explode('::', $blueprint);
+
+            return [$blueprint[0], $blueprint[1]];
+        }
+
         $blueprint = str_replace('/', '.', $blueprint);
         $parts = explode('.', $blueprint);
         $handle = array_pop($parts);
@@ -124,7 +130,7 @@ class BlueprintRepository extends StacheRepository
     public function updateModel($blueprint)
     {
         $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
-            'handle'    => $blueprint->handle(),
+            'handle' => $blueprint->handle(),
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
