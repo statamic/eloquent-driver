@@ -107,7 +107,8 @@ class BlueprintRepository extends StacheRepository
     {
         if (str_contains($blueprint, '::')) {
             $blueprint = explode('::', $blueprint);
-            return [$blueprint[0], $blueprint[1]);
+
+            return [$blueprint[0], $blueprint[1]];
         }
 
         $blueprint = str_replace('/', '.', $blueprint);
