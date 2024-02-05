@@ -105,6 +105,11 @@ class BlueprintRepository extends StacheRepository
 
     protected function getNamespaceAndHandle($blueprint)
     {
+        if (str_contains($blueprint, '::')) {
+            $blueprint = explode('::', $blueprint);
+            return [$blueprint[0], $blueprint[1]);
+        }
+
         $blueprint = str_replace('/', '.', $blueprint);
         $parts = explode('.', $blueprint);
         $handle = array_pop($parts);
