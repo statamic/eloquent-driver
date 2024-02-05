@@ -130,7 +130,7 @@ class BlueprintRepository extends StacheRepository
     public function updateModel($blueprint)
     {
         $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
-            'handle'    => $blueprint->handle(),
+            'handle' => $blueprint->handle(),
             'namespace' => $blueprint->namespace() ?? null,
         ]);
 
