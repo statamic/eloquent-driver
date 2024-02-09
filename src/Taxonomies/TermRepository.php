@@ -40,7 +40,7 @@ class TermRepository extends StacheRepository
         return $term;
     }
 
-    public function findByUri(string $uri, string $site = null): ?TermContract
+    public function findByUri(string $uri, ?string $site = null): ?TermContract
     {
         $site = $site ?? $this->stache->sites()->first();
 

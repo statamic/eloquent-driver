@@ -13,7 +13,7 @@ class EntryRepository extends StacheRepository
     {
         return [
             EntryContract::class => app('statamic.eloquent.entries.entry'),
-            QueryBuilder::class  => EntryQueryBuilder::class,
+            QueryBuilder::class => EntryQueryBuilder::class,
         ];
     }
 
@@ -33,7 +33,7 @@ class EntryRepository extends StacheRepository
         return $this->substitutionsById[$item->id()] ?? $item;
     }
 
-    public function findByUri(string $uri, string $site = null): ?EntryContract
+    public function findByUri(string $uri, ?string $site = null): ?EntryContract
     {
         $blinkKey = 'eloquent-entry-'.md5(urlencode($uri)).($site ? '-'.$site : '');
         $item = Blink::once($blinkKey, function () use ($uri, $site) {

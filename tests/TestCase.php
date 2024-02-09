@@ -75,7 +75,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ];
 
         foreach ($configs as $config) {
-            $app['config']->set("statamic.$config", require(__DIR__."/../config/{$config}.php"));
+            $app['config']->set("statamic.$config", require (__DIR__."/../config/{$config}.php"));
         }
     }
 
@@ -84,7 +84,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         // We changed the default sites setup but the tests assume defaults like the following.
         $app['config']->set('statamic.sites', [
             'default' => 'en',
-            'sites'   => [
+            'sites' => [
                 'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
             ],
         ]);
@@ -92,7 +92,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.users.repository', 'file');
         $app['config']->set('statamic.stache.stores.users', [
-            'class'     => \Statamic\Stache\Stores\UsersStore::class,
+            'class' => \Statamic\Stache\Stores\UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
@@ -100,7 +100,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
-            'path'   => storage_path('framework/cache/outpost-data'),
+            'path' => storage_path('framework/cache/outpost-data'),
         ]);
     }
 
@@ -152,7 +152,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     }
 
     // This method is unavailable on earlier versions of Laravel.
-    public function partialMock($abstract, \Closure $mock = null)
+    public function partialMock($abstract, ?\Closure $mock = null)
     {
         $mock = \Mockery::mock(...array_filter(func_get_args()))->makePartial();
         $this->app->instance($abstract, $mock);

@@ -721,7 +721,7 @@ class EntryQueryBuilderTest extends TestCase
 
         foreach (range(4, 6) as $index) {
             EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
-            ->data(['title' => $locations[$index]['title']])->create();
+                ->data(['title' => $locations[$index]['title']])->create();
         }
 
         $query = Entry::query()
