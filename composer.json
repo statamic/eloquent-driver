@@ -1,6 +1,7 @@
 {
     "name": "statamic/eloquent-driver",
     "description": "Allows you to store Statamic data in a database.",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Statamic\\Eloquent\\": "src"
