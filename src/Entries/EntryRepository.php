@@ -13,7 +13,7 @@ class EntryRepository extends StacheRepository
     {
         return [
             EntryContract::class => app('statamic.eloquent.entries.entry'),
-            QueryBuilder::class  => EntryQueryBuilder::class,
+            QueryBuilder::class => EntryQueryBuilder::class,
         ];
     }
 

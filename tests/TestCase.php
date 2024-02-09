@@ -84,7 +84,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         // We changed the default sites setup but the tests assume defaults like the following.
         $app['config']->set('statamic.sites', [
             'default' => 'en',
-            'sites'   => [
+            'sites' => [
                 'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
             ],
         ]);
@@ -92,7 +92,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.users.repository', 'file');
         $app['config']->set('statamic.stache.stores.users', [
-            'class'     => \Statamic\Stache\Stores\UsersStore::class,
+            'class' => \Statamic\Stache\Stores\UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
@@ -100,7 +100,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
-            'path'   => storage_path('framework/cache/outpost-data'),
+            'path' => storage_path('framework/cache/outpost-data'),
         ]);
     }
 
