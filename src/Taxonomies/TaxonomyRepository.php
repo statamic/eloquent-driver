@@ -46,7 +46,7 @@ class TaxonomyRepository extends StacheRepository
         return $taxonomyModel ? app(TaxonomyContract::class)->fromModel($taxonomyModel) : null;
     }
 
-    public function findByUri(string $uri, string $site = null): ?Taxonomy
+    public function findByUri(string $uri, ?string $site = null): ?Taxonomy
     {
         $collection = Facades\Collection::all()
             ->first(function ($collection) use ($uri, $site) {

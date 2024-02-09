@@ -75,11 +75,11 @@ class Asset extends FileAsset
     {
         return Blink::once('eloquent-asset-meta-exists-'.$this->id(), function () {
             return app('statamic.eloquent.assets.model')::query()
-            ->where([
-                'container' => $this->containerHandle(),
-                'folder' => $this->folder(),
-                'basename' => $this->basename(),
-            ])->count() > 0;
+                ->where([
+                    'container' => $this->containerHandle(),
+                    'folder' => $this->folder(),
+                    'basename' => $this->basename(),
+                ])->count() > 0;
         });
     }
 
