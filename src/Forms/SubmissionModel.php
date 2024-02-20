@@ -15,9 +15,4 @@ class SubmissionModel extends BaseModel
     ];
 
     protected $dateFormat = 'Y-m-d H:i:s.u';
-
-    public function form()
-    {
-        return $this->belongsTo(app('statamic.eloquent.forms.model'), 'id');
-    }
 }

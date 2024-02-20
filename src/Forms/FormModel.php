@@ -13,9 +13,4 @@ class FormModel extends BaseModel
     protected $casts = [
         'settings' => 'json',
     ];
-
-    public function submissions()
-    {
-        return $this->hasMany(app('statamic.eloquent.forms.submission_model'), 'form_id');
-    }
 }

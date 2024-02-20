@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Forms;
 
 use Statamic\Contracts\Forms\Form as FormContract;
-use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Forms\FormRepository as StacheRepository;
 
 class FormRepository extends StacheRepository
@@ -41,8 +40,7 @@ class FormRepository extends StacheRepository
     public static function bindings(): array
     {
         return [
-            FormContract::class       => Form::class,
-            SubmissionContract::class => Submission::class,
+            FormContract::class => Form::class,
         ];
     }
 }
