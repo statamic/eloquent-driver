@@ -60,13 +60,7 @@ return new class extends Migration {
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
             $table->dropIndex(['container', 'folder', 'basename']);
 
-            $table->dropColumn('meta');
-            $table->dropColumn('path');
-            $table->dropColumn('basename');
-            $table->dropColumn('filename');
-            $table->dropColumn('extension');
-            $table->dropColumn('folder');
-            $table->dropColumn('container');
+            $table->dropColumn(['meta', 'path', 'basename', 'filename', 'extension', 'folder', 'container']);
         });
     }
 };

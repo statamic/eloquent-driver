@@ -1,6 +1,7 @@
 {
     "name": "statamic/eloquent-driver",
     "description": "Allows you to store Statamic data in a database.",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Statamic\\Eloquent\\": "src"
@@ -24,10 +25,11 @@
     },
     "require": {
         "php": "^8.0",
-        "statamic/cms": "^4.21"
+        "statamic/cms": "^4.48"
     },
     "require-dev": {
         "doctrine/dbal": "^3.3",
+        "laravel/pint": "^1.0",
         "orchestra/testbench": "^7.0 || ^8.0",
         "phpunit/phpunit": "^9.4"
     },

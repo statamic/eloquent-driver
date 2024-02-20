@@ -55,6 +55,10 @@ class AssetRepository extends BaseRepository
 
         $path = str_after($url, $containerUrl);
 
+        if (starts_with($path, '/')) {
+            $path = substr($path, 1);
+        }
+
         return $this->findById("{$container}::{$path}");
     }
 

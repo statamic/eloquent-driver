@@ -52,6 +52,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
+        \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
     ];
 
     protected $listen = [
@@ -75,20 +76,20 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([$config => config_path('statamic/eloquent-driver.php')], 'statamic-eloquent-config');
 
         $this->publishes([
-            __DIR__.'/../database/migrations/create_taxonomies_table.php.stub'       => $this->migrationsPath('create_taxonomies_table.php'),
-            __DIR__.'/../database/migrations/create_terms_table.php.stub'            => $this->migrationsPath('create_terms_table.php'),
-            __DIR__.'/../database/migrations/create_globals_table.php.stub'          => $this->migrationsPath('create_globals_table.php'),
+            __DIR__.'/../database/migrations/create_taxonomies_table.php.stub' => $this->migrationsPath('create_taxonomies_table.php'),
+            __DIR__.'/../database/migrations/create_terms_table.php.stub' => $this->migrationsPath('create_terms_table.php'),
+            __DIR__.'/../database/migrations/create_globals_table.php.stub' => $this->migrationsPath('create_globals_table.php'),
             __DIR__.'/../database/migrations/create_global_variables_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
-            __DIR__.'/../database/migrations/create_navigations_table.php.stub'      => $this->migrationsPath('create_navigations_table.php'),
+            __DIR__.'/../database/migrations/create_navigations_table.php.stub' => $this->migrationsPath('create_navigations_table.php'),
             __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
-            __DIR__.'/../database/migrations/create_collections_table.php.stub'      => $this->migrationsPath('create_collections_table.php'),
-            __DIR__.'/../database/migrations/create_blueprints_table.php.stub'       => $this->migrationsPath('create_blueprints_table.php'),
-            __DIR__.'/../database/migrations/create_fieldsets_table.php.stub'        => $this->migrationsPath('create_fieldsets_table.php'),
-            __DIR__.'/../database/migrations/create_forms_table.php.stub'            => $this->migrationsPath('create_forms_table.php'),
+            __DIR__.'/../database/migrations/create_collections_table.php.stub' => $this->migrationsPath('create_collections_table.php'),
+            __DIR__.'/../database/migrations/create_blueprints_table.php.stub' => $this->migrationsPath('create_blueprints_table.php'),
+            __DIR__.'/../database/migrations/create_fieldsets_table.php.stub' => $this->migrationsPath('create_fieldsets_table.php'),
+            __DIR__.'/../database/migrations/create_forms_table.php.stub' => $this->migrationsPath('create_forms_table.php'),
             __DIR__.'/../database/migrations/create_form_submissions_table.php.stub' => $this->migrationsPath('create_form_submissions_table.php'),
             __DIR__.'/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
-            __DIR__.'/../database/migrations/create_asset_table.php.stub'            => $this->migrationsPath('create_asset_table.php'),
-            __DIR__.'/../database/migrations/create_revisions_table.php.stub'        => $this->migrationsPath('create_revisions_table.php'),
+            __DIR__.'/../database/migrations/create_asset_table.php.stub' => $this->migrationsPath('create_asset_table.php'),
+            __DIR__.'/../database/migrations/create_revisions_table.php.stub' => $this->migrationsPath('create_revisions_table.php'),
         ], 'migrations');
 
         $this->publishes([

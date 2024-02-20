@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
+use Statamic\Contracts\Assets\Asset as AssetContract;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
@@ -71,12 +73,14 @@ class Asset extends FileAsset
 
     public function metaExists()
     {
-        return app('statamic.eloquent.assets.model')::query()
-            ->where([
-                'container' => $this->containerHandle(),
-                'folder' => $this->folder(),
-                'basename' => $this->basename(),
-            ])->count() > 0;
+        return Blink::once('eloquent-asset-meta-exists-'.$this->id(), function () {
+            return app('statamic.eloquent.assets.model')::query()
+                ->where([
+                    'container' => $this->containerHandle(),
+                    'folder' => $this->folder(),
+                    'basename' => $this->basename(),
+                ])->count() > 0;
+        });
     }
 
     private function metaValue($key)
@@ -112,15 +116,31 @@ class Asset extends FileAsset
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
+        self::makeModelFromContract($this, $meta);
+
+        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
+    }
+
+    public static function makeModelFromContract(AssetContract $source, $meta = [])
+    {
+        if (! $meta) {
+            $meta = $source->meta();
+        }
+
+        // Make shure that a extension could be found, as the extension field is required.
+        if (! $extension = $source->extension()) {
+            return null;
+        }
+
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'container' => $this->containerHandle(),
-            'folder' => $this->folder(),
-            'basename' => $this->basename(),
+            'container' => $source->containerHandle(),
+            'folder' => $source->folder(),
+            'basename' => $source->basename(),
         ])->fill([
             'meta' => $meta,
-            'filename' => $this->filename(),
-            'extension' => $this->extension(),
-            'path' => $this->path(),
+            'filename' => $source->filename(),
+            'extension' => $extension,
+            'path' => $source->path(),
         ]);
 
         // Set initial timestamps.
@@ -130,6 +150,8 @@ class Asset extends FileAsset
         }
 
         $model->save();
+
+        return $model;
     }
 
     public function metaPath()

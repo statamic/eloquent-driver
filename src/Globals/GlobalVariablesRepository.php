@@ -13,9 +13,9 @@ class GlobalVariablesRepository extends StacheRepository
     {
         return VariablesCollection::make(
             VariablesModel::all()
-            ->each(function ($model) {
-                return app(Variables::class)::fromModel($model);
-            })
+                ->each(function ($model) {
+                    return app(Variables::class)::fromModel($model);
+                })
         );
     }
 

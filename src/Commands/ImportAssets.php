@@ -4,17 +4,17 @@ namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
+use Statamic\Assets\AssetContainerContents;
 use Statamic\Assets\AssetRepository;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Assets\Asset as AssetContract;
+use Statamic\Contracts\Assets\Asset;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
-use Statamic\Eloquent\Assets\Asset;
+use Statamic\Eloquent\Assets\Asset as EloquentAsset;
 use Statamic\Eloquent\Assets\AssetContainer;
 use Statamic\Facades\Asset as AssetFacade;
 use Statamic\Facades\AssetContainer as AssetContainerFacade;
-use Statamic\Facades\YAML;
 use Statamic\Stache\Repositories\AssetContainerRepository;
 use Statamic\Statamic;
 
@@ -61,6 +61,10 @@ class ImportAssets extends Command
 
         app()->bind(AssetContainerContract::class, AssetContainer::class);
         app()->bind(AssetContract::class, Asset::class);
+
+        app()->bind(AssetContainerContents::class, function ($app) {
+            return new AssetContainerContents();
+        });
     }
 
     private function importAssetContainers()
@@ -89,10 +93,7 @@ class ImportAssets extends Command
         $assets = AssetFacade::all();
 
         $this->withProgressBar($assets, function ($asset) {
-            if ($contents = $asset->disk()->get($path = $asset->metaPath())) {
-                $metadata = YAML::file($path)->parse($contents);
-                $asset->writeMeta($metadata);
-            }
+            EloquentAsset::makeModelFromContract($asset);
         });
 
         $this->newLine();
