@@ -25,7 +25,7 @@
     },
     "require": {
         "php": "^8.0",
-        "statamic/cms": "dev-feature/is-dirty-is-clean"
+        "statamic/cms": "^4.51"
     },
     "require-dev": {
         "doctrine/dbal": "^3.3",
