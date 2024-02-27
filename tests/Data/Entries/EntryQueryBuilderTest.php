@@ -39,7 +39,7 @@ class EntryQueryBuilderTest extends TestCase
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
         $searchedEntry = $this->createDummyCollectionAndEntries();
-        $columns = ['title'];
+        $columns = ['foo', 'collection'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
 
         $retrievedEntry->model(null);
