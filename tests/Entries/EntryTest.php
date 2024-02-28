@@ -19,7 +19,10 @@ class EntryTest extends TestCase
     /** @test */
     public function it_loads_from_entry_model()
     {
+        Collection::make('blog')->title('blog')->save();
+
         $model = new EntryModel([
+            'collection' => 'blog',
             'slug' => 'the-slug',
             'data' => [
                 'foo' => 'bar',
