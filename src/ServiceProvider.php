@@ -122,7 +122,7 @@ class ServiceProvider extends AddonServiceProvider
                 $blueprintMigrations,
                 $formMigrations,
                 $assetMigrations,
-                $revisionMigrations,
+                $revisionMigrations
             ),
             'migrations'
         );
