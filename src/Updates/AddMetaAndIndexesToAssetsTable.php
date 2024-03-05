@@ -9,7 +9,9 @@ class AddMetaAndIndexesToAssetsTable extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'assets_meta', 'meta');
+        $assetsTable = config('statamic.eloquent-driver.table_prefix', '').'assets_meta';
+
+        return Schema::hasTable($assetsTable) && ! Schema::hasColumn($assetsTable, 'meta');
     }
 
     public function update()
