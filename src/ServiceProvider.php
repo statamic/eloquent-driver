@@ -87,8 +87,11 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($navigationMigrations = [
             __DIR__.'/../database/migrations/create_navigations_table.php.stub' => $this->migrationsPath('create_navigations_table.php'),
-            __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
         ], 'statamic-eloquent-navigation-migrations');
+
+        $this->publishes($treeMigrations = [
+            __DIR__.'/../database/migrations/create_trees_table.php.stub' => $this->migrationsPath('create_trees_table.php'),
+        ], 'statamic-eloquent-tree-migrations');
 
         $this->publishes($collectionMigrations = [
             __DIR__.'/../database/migrations/create_collections_table.php.stub' => $this->migrationsPath('create_collections_table.php'),
@@ -118,6 +121,7 @@ class ServiceProvider extends AddonServiceProvider
                 $taxonomyMigrations,
                 $globalMigrations,
                 $navigationMigrations,
+                $treeMigrations,
                 $collectionMigrations,
                 $blueprintMigrations,
                 $formMigrations,

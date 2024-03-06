@@ -16,7 +16,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         __DIR__.'/../database/migrations/create_globals_table.php.stub',
         __DIR__.'/../database/migrations/create_global_variables_table.php.stub',
         __DIR__.'/../database/migrations/create_navigations_table.php.stub',
-        __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub',
+        __DIR__.'/../database/migrations/create_trees_table.php.stub',
         __DIR__.'/../database/migrations/create_collections_table.php.stub',
         __DIR__.'/../database/migrations/create_blueprints_table.php.stub',
         __DIR__.'/../database/migrations/create_fieldsets_table.php.stub',

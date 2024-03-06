@@ -53,6 +53,8 @@ Alternatively, you can publish each repository's migrations individually:
 
 `php artisan vendor:publish --tag="statamic-eloquent-navigation-migrations"`
 
+`php artisan vendor:publish --tag="statamic-eloquent-tree-migrations"`
+
 `php artisan vendor:publish --tag="statamic-eloquent-revision-migrations"`
 
 `php artisan vendor:publish --tag="statamic-eloquent-taxonomy-migrations"`
