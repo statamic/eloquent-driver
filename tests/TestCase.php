@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use Statamic\Eloquent\ServiceProvider;
+
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $shouldFakeVersion = true;
@@ -9,23 +11,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected $shouldPreventNavBeingBuilt = true;
 
     protected $shouldUseStringEntryIds = false;
-
-    protected $baseMigrations = [
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_taxonomies_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_globals_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_collections_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_blueprints_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_containers_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_table.php',
-        __DIR__.'/../database/migrations/2024_03_07_100000_create_revisions_table.php',
-    ];
 
     protected function setUp(): void
     {
@@ -40,11 +25,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             $this->addToAssertionCount(-1); // Dont want to assert this
         }
 
-        if ($this->shouldUseStringEntryIds) {
-            $this->runMigrationsForUUIDEntries();
-        } else {
-            $this->runMigrationsForIncrementingEntries();
-        }
+        $this->shouldUseStringEntryIds
+            ? $this->runMigrationsForUUIDEntries()
+            : $this->runMigrationsForIncrementingEntries();
     }
 
     public function tearDown(): void
@@ -187,28 +170,17 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             : parent::assertRegExp($pattern, $string, $message);
     }
 
-    public function runBaseMigrations()
-    {
-        foreach ($this->baseMigrations as $migration) {
-            $migration = require $migration;
-            $migration->up();
-        }
-    }
-
     public function runMigrationsForIncrementingEntries()
     {
-        $this->runBaseMigrations();
-
-        $migration = require __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table.php';
-        $migration->up();
+        $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
+        $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table', '--force' => true]);
     }
 
     public function runMigrationsForUUIDEntries()
     {
-        $this->runBaseMigrations();
-
-        $migration = require __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table_with_string_ids.php';
-        $migration->up();
+        $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
+        $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table-with-string-ids', '--force' => true]);
+        $this->runLaravelMigrations();
     }
 
     protected function isUsingSqlite()
