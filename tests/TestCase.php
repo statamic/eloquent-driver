@@ -174,12 +174,15 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
         $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table', '--force' => true]);
+
+        $this->runLaravelMigrations();
     }
 
     public function runMigrationsForUUIDEntries()
     {
         $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
         $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table-with-string-ids', '--force' => true]);
+
         $this->runLaravelMigrations();
     }
 
