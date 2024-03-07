@@ -11,20 +11,20 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected $shouldUseStringEntryIds = false;
 
     protected $baseMigrations = [
-        __DIR__.'/../database/migrations/create_taxonomies_table.php.stub',
-        __DIR__.'/../database/migrations/create_terms_table.php.stub',
-        __DIR__.'/../database/migrations/create_globals_table.php.stub',
-        __DIR__.'/../database/migrations/create_global_variables_table.php.stub',
-        __DIR__.'/../database/migrations/create_navigations_table.php.stub',
-        __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub',
-        __DIR__.'/../database/migrations/create_collections_table.php.stub',
-        __DIR__.'/../database/migrations/create_blueprints_table.php.stub',
-        __DIR__.'/../database/migrations/create_fieldsets_table.php.stub',
-        __DIR__.'/../database/migrations/create_forms_table.php.stub',
-        __DIR__.'/../database/migrations/create_form_submissions_table.php.stub',
-        __DIR__.'/../database/migrations/create_asset_containers_table.php.stub',
-        __DIR__.'/../database/migrations/create_asset_table.php.stub',
-        __DIR__.'/../database/migrations/create_revisions_table.php.stub',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_taxonomies_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_globals_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_collections_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_blueprints_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_containers_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_table.php',
+        __DIR__.'/../database/migrations/2024_03_07_100000_create_revisions_table.php',
     ];
 
     protected function setUp(): void
@@ -199,7 +199,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         $this->runBaseMigrations();
 
-        $migration = require __DIR__.'/../database/migrations/create_entries_table.php.stub';
+        $migration = require __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table.php';
         $migration->up();
     }
 
@@ -207,7 +207,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         $this->runBaseMigrations();
 
-        $migration = require __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub';
+        $migration = require __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table_with_string_ids.php';
         $migration->up();
     }
 
