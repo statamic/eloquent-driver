@@ -43,8 +43,6 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $config = false;
 
-    protected $migrationCount = 0;
-
     protected $updateScripts = [
         \Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable::class,
         \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
@@ -75,65 +73,7 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes([$config => config_path('statamic/eloquent-driver.php')], 'statamic-eloquent-config');
 
-        $this->publishes($taxonomyMigrations = [
-            __DIR__.'/../database/migrations/create_taxonomies_table.php.stub' => $this->migrationsPath('create_taxonomies_table.php'),
-            __DIR__.'/../database/migrations/create_terms_table.php.stub' => $this->migrationsPath('create_terms_table.php'),
-        ], 'statamic-eloquent-taxonomy-migrations');
-
-        $this->publishes($globalMigrations = [
-            __DIR__.'/../database/migrations/create_globals_table.php.stub' => $this->migrationsPath('create_globals_table.php'),
-            __DIR__.'/../database/migrations/create_global_variables_table.php.stub' => $this->migrationsPath('create_global_variables_table.php'),
-        ], 'statamic-eloquent-global-migrations');
-
-        $this->publishes($navigationMigrations = [
-            __DIR__.'/../database/migrations/create_navigations_table.php.stub' => $this->migrationsPath('create_navigations_table.php'),
-            __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub' => $this->migrationsPath('create_navigation_trees_table.php'),
-        ], 'statamic-eloquent-navigation-migrations');
-
-        $this->publishes($collectionMigrations = [
-            __DIR__.'/../database/migrations/create_collections_table.php.stub' => $this->migrationsPath('create_collections_table.php'),
-        ], 'statamic-eloquent-collection-migrations');
-
-        $this->publishes($blueprintMigrations = [
-            __DIR__.'/../database/migrations/create_blueprints_table.php.stub' => $this->migrationsPath('create_blueprints_table.php'),
-            __DIR__.'/../database/migrations/create_fieldsets_table.php.stub' => $this->migrationsPath('create_fieldsets_table.php'),
-        ], 'statamic-eloquent-blueprint-migrations');
-
-        $this->publishes($formMigrations = [
-            __DIR__.'/../database/migrations/create_forms_table.php.stub' => $this->migrationsPath('create_forms_table.php'),
-            __DIR__.'/../database/migrations/create_form_submissions_table.php.stub' => $this->migrationsPath('create_form_submissions_table.php'),
-        ], 'statamic-eloquent-form-migrations');
-
-        $this->publishes($assetMigrations = [
-            __DIR__.'/../database/migrations/create_asset_containers_table.php.stub' => $this->migrationsPath('create_asset_containers_table.php'),
-            __DIR__.'/../database/migrations/create_asset_table.php.stub' => $this->migrationsPath('create_asset_table.php'),
-        ], 'statamic-eloquent-asset-migrations');
-
-        $this->publishes($revisionMigrations = [
-            __DIR__.'/../database/migrations/create_revisions_table.php.stub' => $this->migrationsPath('create_revisions_table.php'),
-        ], 'statamic-eloquent-revision-migrations');
-
-        $this->publishes(
-            array_merge(
-                $taxonomyMigrations,
-                $globalMigrations,
-                $navigationMigrations,
-                $collectionMigrations,
-                $blueprintMigrations,
-                $formMigrations,
-                $assetMigrations,
-                $revisionMigrations
-            ),
-            'migrations'
-        );
-
-        $this->publishes([
-            __DIR__.'/../database/migrations/create_entries_table.php.stub' => $this->migrationsPath('create_entries_table'),
-        ], 'statamic-eloquent-entries-table');
-
-        $this->publishes([
-            __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub' => $this->migrationsPath('create_entries_table_with_string_ids'),
-        ], 'statamic-eloquent-entries-table-with-string-ids');
+        $this->publishMigrations();
 
         $this->commands([
             Commands\ExportAssets::class,
@@ -158,6 +98,69 @@ class ServiceProvider extends AddonServiceProvider
         ]);
 
         $this->addAboutCommandInfo();
+    }
+
+    private function publishMigrations(): void
+    {
+        $this->publishes($taxonomyMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_taxonomies_table.php' => database_path('migrations/2024_03_07_100000_create_taxonomies_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php' => database_path('migrations/2024_03_07_100000_create_terms_table.php'),
+        ], 'statamic-eloquent-taxonomy-migrations');
+
+        $this->publishes($globalMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_globals_table.php' => database_path('migrations/2024_03_07_100000_create_globals_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php' => database_path('migrations/2024_03_07_100000_create_global_variables_table.php'),
+        ], 'statamic-eloquent-global-migrations');
+
+        $this->publishes($navigationMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php' => database_path('migrations/2024_03_07_100000_create_navigations_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
+        ], 'statamic-eloquent-navigation-migrations');
+
+        $this->publishes($collectionMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_collections_table.php' => database_path('migrations/2024_03_07_100000_create_collections_table.php'),
+        ], 'statamic-eloquent-collection-migrations');
+
+        $this->publishes($blueprintMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_blueprints_table.php' => database_path('migrations/2024_03_07_100000_create_blueprints_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php' => database_path('migrations/2024_03_07_100000_create_fieldsets_table.php'),
+        ], 'statamic-eloquent-blueprint-migrations');
+
+        $this->publishes($formMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php' => database_path('migrations/2024_03_07_100000_create_forms_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
+        ], 'statamic-eloquent-form-migrations');
+
+        $this->publishes($assetMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_containers_table.php' => database_path('migrations/2024_03_07_100000_create_asset_containers_table.php'),
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_table.php' => database_path('migrations/2024_03_07_100000_create_asset_table.php'),
+        ], 'statamic-eloquent-asset-migrations');
+
+        $this->publishes($revisionMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_revisions_table.php' => database_path('migrations/2024_03_07_100000_create_revisions_table.php'),
+        ], 'statamic-eloquent-revision-migrations');
+
+        $this->publishes(
+            array_merge(
+                $taxonomyMigrations,
+                $globalMigrations,
+                $navigationMigrations,
+                $collectionMigrations,
+                $blueprintMigrations,
+                $formMigrations,
+                $assetMigrations,
+                $revisionMigrations
+            ),
+            'migrations'
+        );
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table.php' => database_path('migrations/2024_03_07_100000_create_entries_table.php'),
+        ], 'statamic-eloquent-entries-table');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_entries_table_with_string_ids.php' => database_path('migrations/2024_03_07_100000_create_entries_table_with_string_ids.php'),
+        ], 'statamic-eloquent-entries-table-with-string-ids');
     }
 
     public function register()
@@ -432,11 +435,6 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
-    }
-
-    protected function migrationsPath($filename)
-    {
-        return database_path('migrations/'.date('Y_m_d_His', time() + (++$this->migrationCount + 60))."_{$filename}.php");
     }
 
     protected function addAboutCommandInfo()
