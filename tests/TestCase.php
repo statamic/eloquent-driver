@@ -2,10 +2,12 @@
 
 namespace Tests;
 
-use Statamic\Eloquent\ServiceProvider;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
+    use RefreshDatabase;
+
     protected $shouldFakeVersion = true;
 
     protected $shouldPreventNavBeingBuilt = true;
@@ -24,10 +26,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
         }
-
-        $this->shouldUseStringEntryIds
-            ? $this->runMigrationsForUUIDEntries()
-            : $this->runMigrationsForIncrementingEntries();
     }
 
     public function tearDown(): void
@@ -170,26 +168,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             : parent::assertRegExp($pattern, $string, $message);
     }
 
-    public function runMigrationsForIncrementingEntries()
-    {
-        $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
-        $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table', '--force' => true]);
-
-        $this->runLaravelMigrations();
-    }
-
-    public function runMigrationsForUUIDEntries()
-    {
-        $this->artisan('vendor:publish', ['--provider' => ServiceProvider::class, '--tag' => 'migrations', '--force' => true]);
-        $this->artisan('vendor:publish', ['--tag' => 'statamic-eloquent-entries-table-with-string-ids', '--force' => true]);
-
-        $this->runLaravelMigrations();
-    }
-
     protected function isUsingSqlite()
     {
         $connection = config('database.default');
 
         return config("database.connections.{$connection}.driver") === 'sqlite';
+    }
+
+    /**
+     * Define database migrations.
+     *
+     * @return void
+     */
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        $this->shouldUseStringEntryIds
+            ? $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php')
+            : $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php');
     }
 }
