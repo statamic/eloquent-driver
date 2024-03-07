@@ -37,8 +37,8 @@ class Asset extends FileAsset
         return (new static())
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->syncOriginal()
-            ->hydrateMeta($model->meta);
+            ->hydrateMeta($model->meta)
+            ->syncOriginal();
     }
 
     public function meta($key = null)
