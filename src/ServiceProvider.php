@@ -65,8 +65,6 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->mergeConfigFrom($config = __DIR__.'/../config/eloquent-driver.php', 'statamic-eloquent-driver');
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
         if (! $this->app->runningInConsole()) {
             return;
         }
