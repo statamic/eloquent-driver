@@ -9,7 +9,9 @@ class SplitGlobalsFromVariables extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'global_sets', 'settings');
+        $globalsTable = config('statamic.eloquent-driver.table_prefix', '').'global_sets';
+
+        return Schema::hasTable($globalsTable) && ! Schema::hasColumn($globalsTable, 'settings');
     }
 
     public function update()

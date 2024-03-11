@@ -4,13 +4,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up()
     {
         Schema::create($this->prefix('entries'), function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id');
             $table->string('site')->index();
-            $table->unsignedBigInteger('origin_id')->nullable()->index();
+            $table->uuid('origin_id')->nullable()->index();
             $table->boolean('published')->default(true);
             $table->string('status');
             $table->string('slug')->nullable();
@@ -21,6 +22,8 @@ return new class extends Migration {
             $table->string('blueprint', 30)->nullable()->index();
             $table->jsonb('data');
             $table->timestamps();
+
+            $table->primary('id');
         });
     }
 

@@ -7,13 +7,28 @@ use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Contracts\Assets\Asset as AssetContract;
+use Statamic\Data\HasDirtyState;
+use Statamic\Events\AssetUploaded;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Asset extends FileAsset
 {
+    use HasDirtyState {
+        syncOriginal as traitSyncOriginal;
+    }
+
+    public function syncOriginal()
+    {
+        // FileAsset overrides the trait method in order to add the "pending
+        // data" logic. We don't need it here since everything comes from
+        // the model so we'll just use the original trait method again.
+        return $this->traitSyncOriginal();
+    }
+
     protected $existsOnDisk = false;
     protected $removedData = [];
 
@@ -22,7 +37,8 @@ class Asset extends FileAsset
         return (new static())
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->hydrateMeta($model->meta);
+            ->hydrateMeta($model->meta)
+            ->syncOriginal();
     }
 
     public function meta($key = null)
@@ -132,15 +148,19 @@ class Asset extends FileAsset
             return null;
         }
 
+        $original = $source->getOriginal();
+
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
             'container' => $source->containerHandle(),
-            'folder' => $source->folder(),
-            'basename' => $source->basename(),
+            'folder' => Arr::get($original, 'folder', $source->folder()),
+            'basename' => Arr::get($original, 'basename', $source->basename()),
         ])->fill([
             'meta' => $meta,
             'filename' => $source->filename(),
             'extension' => $extension,
             'path' => $source->path(),
+            'folder' => $source->folder(),
+            'basename' => $source->basename(),
         ]);
 
         // Set initial timestamps.
@@ -196,5 +216,33 @@ class Asset extends FileAsset
         }
 
         return $this;
+    }
+
+    /**
+     * Upload a file.
+     *
+     * @return $this
+     */
+    public function upload(UploadedFile $file)
+    {
+        $path = Uploader::asset($this)->upload($file);
+
+        $this
+            ->path($path)
+            ->save();
+
+        AssetUploaded::dispatch($this);
+
+        return $this;
+    }
+
+    public function getCurrentDirtyStateAttributes(): array
+    {
+        return array_merge([
+            'path' => $this->path(),
+            'folder' => $this->folder(),
+            'basename' => $this->basename(),
+            'data' => $this->data()->toArray(),
+        ]);
     }
 }
