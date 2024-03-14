@@ -19,7 +19,7 @@ return new class extends Migration
             $table->jsonb('meta')->nullable();
             $table->timestamps();
 
-            $table->index(['container', 'folder', 'basename']);
+            $table->unique(['container', 'folder', 'basename']);
         });
     }
 
