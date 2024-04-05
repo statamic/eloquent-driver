@@ -19,7 +19,7 @@ The command will also give you the opportunity to inidicate whether you'd like e
 If you originally opt-out of importing existing content, then later change your mind, you can import existing content by running the relevant commands:
 
 - Assets: `php please eloquent:import-assets`
-- Blueprints and Fieldsets:`php please eloquent:import-blueprints`
+- Blueprints and Fieldsets: `php please eloquent:import-blueprints`
 - Collections: `php please eloquent:import-collections`
 - Entries: `php please eloquent:import-entries`
 - Forms: `php please eloquent:import-forms`
