@@ -54,6 +54,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
         \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
+        \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
     ];
 
     protected $listen = [
