@@ -30,8 +30,8 @@
     "require-dev": {
         "doctrine/dbal": "^3.3",
         "laravel/pint": "^1.0",
-        "orchestra/testbench": "^7.0 || ^8.0",
-        "phpunit/phpunit": "^9.4"
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^10.0"
     },
     "scripts": {
         "test": "phpunit"
