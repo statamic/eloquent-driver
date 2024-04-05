@@ -45,17 +45,17 @@ class AssetRepository extends BaseRepository
         $siteUrl = rtrim(Site::current()->absoluteUrl(), '/');
         $containerUrl = $container->url();
 
-        if (starts_with($containerUrl, '/')) {
+        if (Str::startsWith($containerUrl, '/')) {
             $containerUrl = $siteUrl.$containerUrl;
         }
 
-        if (starts_with($containerUrl, $siteUrl)) {
+        if (Str::startsWith($containerUrl, $siteUrl)) {
             $url = $siteUrl.$url;
         }
 
-        $path = str_after($url, $containerUrl);
+        $path = Str::after($url, $containerUrl);
 
-        if (starts_with($path, '/')) {
+        if (Str::startsWith($path, '/')) {
             $path = substr($path, 1);
         }
 
