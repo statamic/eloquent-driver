@@ -28,7 +28,7 @@ class ExportNavs extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-navs';
+    protected $signature = 'statamic:eloquent:export-navs {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -68,7 +68,7 @@ class ExportNavs extends Command
 
     private function exportNavs()
     {
-        if (! $this->confirm('Do you want to export navs?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export navs?')) {
             return;
         }
 
@@ -91,7 +91,7 @@ class ExportNavs extends Command
 
     private function exportNavTrees()
     {
-        if (! $this->confirm('Do you want to export navs?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export nav trees?')) {
             return;
         }
 

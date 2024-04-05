@@ -14,6 +14,8 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     use QueriesTaxonomizedEntries;
 
+    private $selectedQueryColumns;
+
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
@@ -87,7 +89,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         $items = EntryCollection::make($items)->map(function ($model) use ($columns) {
             return app('statamic.eloquent.entries.entry')::fromModel($model)
-                ->selectedQueryColumns($columns);
+                ->selectedQueryColumns($this->selectedQueryColumns ?? $columns);
         });
 
         return Entry::applySubstitutions($items);
@@ -132,16 +134,20 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $query->limit = PHP_INT_MAX;
         }
 
+        $this->selectedQueryColumns = $columns;
+
         $this->addTaxonomyWheres();
 
-        return parent::get($columns);
+        return parent::get();
     }
 
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
         $this->addTaxonomyWheres();
 
-        return parent::paginate($perPage, $columns, $pageName, $page);
+        $this->selectedQueryColumns = $columns;
+
+        return parent::paginate($perPage, ['*'], $pageName, $page);
     }
 
     public function count()

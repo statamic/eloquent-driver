@@ -2,30 +2,17 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
+    use RefreshDatabase;
+
     protected $shouldFakeVersion = true;
 
     protected $shouldPreventNavBeingBuilt = true;
 
     protected $shouldUseStringEntryIds = false;
-
-    protected $baseMigrations = [
-        __DIR__.'/../database/migrations/create_taxonomies_table.php.stub',
-        __DIR__.'/../database/migrations/create_terms_table.php.stub',
-        __DIR__.'/../database/migrations/create_globals_table.php.stub',
-        __DIR__.'/../database/migrations/create_global_variables_table.php.stub',
-        __DIR__.'/../database/migrations/create_navigations_table.php.stub',
-        __DIR__.'/../database/migrations/create_navigation_trees_table.php.stub',
-        __DIR__.'/../database/migrations/create_collections_table.php.stub',
-        __DIR__.'/../database/migrations/create_blueprints_table.php.stub',
-        __DIR__.'/../database/migrations/create_fieldsets_table.php.stub',
-        __DIR__.'/../database/migrations/create_forms_table.php.stub',
-        __DIR__.'/../database/migrations/create_form_submissions_table.php.stub',
-        __DIR__.'/../database/migrations/create_asset_containers_table.php.stub',
-        __DIR__.'/../database/migrations/create_asset_table.php.stub',
-        __DIR__.'/../database/migrations/create_revisions_table.php.stub',
-    ];
 
     protected function setUp(): void
     {
@@ -38,12 +25,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         if ($this->shouldFakeVersion) {
             \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
             $this->addToAssertionCount(-1); // Dont want to assert this
-        }
-
-        if ($this->shouldUseStringEntryIds) {
-            $this->runMigrationsForUUIDEntries();
-        } else {
-            $this->runMigrationsForIncrementingEntries();
         }
     }
 
@@ -75,7 +56,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ];
 
         foreach ($configs as $config) {
-            $app['config']->set("statamic.$config", require(__DIR__."/../config/{$config}.php"));
+            $app['config']->set("statamic.$config", require (__DIR__."/../config/{$config}.php"));
         }
     }
 
@@ -84,7 +65,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         // We changed the default sites setup but the tests assume defaults like the following.
         $app['config']->set('statamic.sites', [
             'default' => 'en',
-            'sites'   => [
+            'sites' => [
                 'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
             ],
         ]);
@@ -92,7 +73,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.users.repository', 'file');
         $app['config']->set('statamic.stache.stores.users', [
-            'class'     => \Statamic\Stache\Stores\UsersStore::class,
+            'class' => \Statamic\Stache\Stores\UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
@@ -100,7 +81,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
-            'path'   => storage_path('framework/cache/outpost-data'),
+            'path' => storage_path('framework/cache/outpost-data'),
         ]);
     }
 
@@ -152,7 +133,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     }
 
     // This method is unavailable on earlier versions of Laravel.
-    public function partialMock($abstract, \Closure $mock = null)
+    public function partialMock($abstract, ?\Closure $mock = null)
     {
         $mock = \Mockery::mock(...array_filter(func_get_args()))->makePartial();
         $this->app->instance($abstract, $mock);
@@ -187,34 +168,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             : parent::assertRegExp($pattern, $string, $message);
     }
 
-    public function runBaseMigrations()
-    {
-        foreach ($this->baseMigrations as $migration) {
-            $migration = require $migration;
-            $migration->up();
-        }
-    }
-
-    public function runMigrationsForIncrementingEntries()
-    {
-        $this->runBaseMigrations();
-
-        $migration = require __DIR__.'/../database/migrations/create_entries_table.php.stub';
-        $migration->up();
-    }
-
-    public function runMigrationsForUUIDEntries()
-    {
-        $this->runBaseMigrations();
-
-        $migration = require __DIR__.'/../database/migrations/create_entries_table_with_string_ids.php.stub';
-        $migration->up();
-    }
-
     protected function isUsingSqlite()
     {
         $connection = config('database.default');
 
         return config("database.connections.{$connection}.driver") === 'sqlite';
+    }
+
+    /**
+     * Define database migrations.
+     *
+     * @return void
+     */
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        $this->shouldUseStringEntryIds
+            ? $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php')
+            : $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php');
     }
 }

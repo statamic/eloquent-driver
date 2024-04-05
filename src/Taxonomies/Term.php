@@ -35,14 +35,13 @@ class Term extends FileEntry
             unset($data['collection']);
         }
 
-        $term->syncOriginal();
         $term->data($data);
 
         if (config('statamic.system.track_last_update')) {
             $term->set('updated_at', $model->updated_at ?? $model->created_at);
         }
 
-        return $term;
+        return $term->syncOriginal();
     }
 
     public function toModel()

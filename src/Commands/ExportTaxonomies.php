@@ -29,7 +29,7 @@ class ExportTaxonomies extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-taxonomies';
+    protected $signature = 'statamic:eloquent:export-taxonomies {--force : Force the operation to run, with all questions yes}';
 
     /**
      * The console command description.
@@ -69,7 +69,7 @@ class ExportTaxonomies extends Command
 
     private function exportTaxonomies()
     {
-        if (! $this->confirm('Do you want to export taxonomies?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export taxonomies?')) {
             return;
         }
 
@@ -90,7 +90,7 @@ class ExportTaxonomies extends Command
 
     private function exportTerms()
     {
-        if (! $this->confirm('Do you want to export terms?')) {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export terms?')) {
             return;
         }
 

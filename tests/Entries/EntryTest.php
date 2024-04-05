@@ -19,7 +19,10 @@ class EntryTest extends TestCase
     /** @test */
     public function it_loads_from_entry_model()
     {
+        Collection::make('blog')->title('blog')->save();
+
         $model = new EntryModel([
+            'collection' => 'blog',
             'slug' => 'the-slug',
             'data' => [
                 'foo' => 'bar',
@@ -198,7 +201,7 @@ class EntryTest extends TestCase
         $blueprint->ensureField('too', ['type' => 'test', 'localizable' => true]);
         $entry->merge(['too' => 'tar']);
 
-        Facades\Entry::save($entry);
+        $entry->save();
 
         $this->assertNotNull($entry->descendants()->get('fr')->model()->data['too'] ?? null);
         $this->assertNotNull($entry->descendants()->get('de')->model()->data['too'] ?? null);
@@ -243,7 +246,7 @@ class EntryTest extends TestCase
         $blueprint->ensureField('too', ['type' => 'test', 'localizable' => true]);
         $entry->date('2024-01-01');
 
-        Facades\Entry::save($entry);
+        $entry->save();
 
         $this->assertEquals($entry->descendants()->get('fr')->model()->date, '2024-01-01 00:00:00');
     }

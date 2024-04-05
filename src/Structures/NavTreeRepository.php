@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Structures;
 
+use Statamic\Contracts\Structures\NavTree as NavTreeContract;
 use Statamic\Contracts\Structures\Tree as TreeContract;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\NavTreeRepository as StacheRepository;
@@ -43,5 +44,12 @@ class NavTreeRepository extends StacheRepository
         }
 
         $entry->model()->delete();
+    }
+
+    public static function bindings()
+    {
+        return [
+            NavTreeContract::class => NavTree::class,
+        ];
     }
 }

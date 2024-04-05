@@ -39,7 +39,7 @@ class EntryQueryBuilderTest extends TestCase
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
         $searchedEntry = $this->createDummyCollectionAndEntries();
-        $columns = ['title'];
+        $columns = ['foo', 'collection'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
 
         $retrievedEntry->model(null);
@@ -466,7 +466,7 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entries_are_found_using_where_json_length()
     {
-        if (config('database.default') === 'sqlite') {
+        if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
@@ -721,7 +721,7 @@ class EntryQueryBuilderTest extends TestCase
 
         foreach (range(4, 6) as $index) {
             EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
-            ->data(['title' => $locations[$index]['title']])->create();
+                ->data(['title' => $locations[$index]['title']])->create();
         }
 
         $query = Entry::query()

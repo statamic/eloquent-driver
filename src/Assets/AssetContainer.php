@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Statamic\Assets\AssetContainer as FileEntry;
 use Statamic\Events\AssetContainerDeleted;
 use Statamic\Events\AssetContainerSaved;
+use Statamic\Support\Str;
 
 class AssetContainer extends FileEntry
 {
@@ -105,5 +106,23 @@ class AssetContainer extends FileEntry
         AssetContainerDeleted::dispatch($this);
 
         return true;
+    }
+
+    public function folders($folder = '/', $recursive = false)
+    {
+        return $this->disk()->getFolders($folder, $recursive);
+    }
+
+    public function metaFiles($folder = '/', $recursive = false)
+    {
+        // When requesting files() as-is, we want all of them.
+        if (func_num_args() === 0) {
+            $recursive = true;
+        }
+
+        return $this->queryAssets()
+            ->when($recursive, fn ($query) => $query->where('folder', $folder), fn ($query) => $query->where('folder', 'like', Str::replaceEnd('/', '', $folder).'/%'))
+            ->get()
+            ->pluck('path');
     }
 }

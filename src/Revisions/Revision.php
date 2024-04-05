@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Revisions;
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Events\RevisionDeleted;
 use Statamic\Events\RevisionSaved;
+use Statamic\Events\RevisionSaving;
 use Statamic\Revisions\Revision as FileEntry;
 use Statamic\Revisions\WorkingCopy;
 
@@ -46,10 +47,10 @@ class Revision extends FileEntry
         $class = app('statamic.eloquent.revisions.model');
 
         return $class::firstOrNew(['key' => $this->key(), 'created_at' => $this->date()])->fill([
-            'action'     => $this->action(),
-            'user'       => $this->user()?->id(),
-            'message'    => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
-            'attributes' => collect($this->attributes())->except('id'),
+            'action' => $this->action(),
+            'user' => $this->user()?->id(),
+            'message' => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
+            'attributes' => $this->attributes(),
             'updated_at' => $this->date(),
         ]);
     }
@@ -78,6 +79,10 @@ class Revision extends FileEntry
 
     public function save()
     {
+        if (RevisionSaving::dispatch($this) === false) {
+            return false;
+        }
+
         $this->model->save();
 
         RevisionSaved::dispatch($this);

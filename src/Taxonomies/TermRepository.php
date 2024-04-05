@@ -40,7 +40,7 @@ class TermRepository extends StacheRepository
         return $term;
     }
 
-    public function findByUri(string $uri, string $site = null): ?TermContract
+    public function findByUri(string $uri, ?string $site = null): ?TermContract
     {
         $site = $site ?? $this->stache->sites()->first();
 
@@ -73,7 +73,7 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        $blinkKey = "eloquent-term-{$uri}".($site ? '-'.$site : '');
+        $blinkKey = 'eloquent-term-'.md5(urlencode($uri)).($site ? '-'.$site : '');
         $term = Blink::once($blinkKey, function () use ($slug, $taxonomy) {
             return $this->query()
                 ->where('slug', $slug)

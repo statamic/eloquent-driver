@@ -5,19 +5,19 @@ namespace Statamic\Eloquent\Updates;
 use Illuminate\Support\Facades\Schema;
 use Statamic\UpdateScripts\UpdateScript;
 
-class AddBlueprintToEntriesTable extends UpdateScript
+class AddMetaAndIndexesToAssetsTable extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        $entriesTable = config('statamic.eloquent-driver.table_prefix', '').'entries';
+        $assetsTable = config('statamic.eloquent-driver.table_prefix', '').'assets_meta';
 
-        return Schema::hasTable($entriesTable) && ! Schema::hasColumn($entriesTable, 'blueprint');
+        return Schema::hasTable($assetsTable) && ! Schema::hasColumn($assetsTable, 'meta');
     }
 
     public function update()
     {
-        $source = __DIR__.'/../../database/migrations/updates/add_blueprint_to_entries_table.php.stub';
-        $dest = database_path('migrations/'.date('Y_m_d_His').'_add_blueprint_to_entries_table.php');
+        $source = __DIR__.'/../../database/migrations/updates/update_assets_table.php.stub';
+        $dest = database_path('migrations/'.date('Y_m_d_His').'_update_assets_table.php');
 
         $this->files->copy($source, $dest);
 

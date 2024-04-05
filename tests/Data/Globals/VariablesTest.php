@@ -63,6 +63,10 @@ EOT;
             'empty'  => [],  // and this should get stripped out because there's no origin to fall back to.
         ]);
 
+        $global->addLocalization($a);
+        $global->addLocalization($b);
+        $global->addLocalization($c);
+
         $expected = <<<'EOT'
 array:
   - 'first one'
@@ -129,6 +133,12 @@ EOT;
             'one' => 'juliett',
             'two' => null,
         ]);
+
+        $global->addLocalization($a);
+        $global->addLocalization($b);
+        $global->addLocalization($c);
+        $global->addLocalization($d);
+        $global->addLocalization($e);
 
         $this->assertEquals([
             'one'   => 'alfa',

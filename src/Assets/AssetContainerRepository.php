@@ -36,7 +36,7 @@ class AssetContainerRepository extends StacheRepository
         });
     }
 
-    public function make(string $handle = null): AssetContainerContract
+    public function make(?string $handle = null): AssetContainerContract
     {
         return app(AssetContainerContract::class)->handle($handle);
     }
