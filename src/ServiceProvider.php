@@ -9,6 +9,7 @@ use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
+use Statamic\Contracts\Forms\SubmissionRepository as FormSubmissionRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
@@ -25,6 +26,8 @@ use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
+use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
+use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
@@ -51,6 +54,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
         \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
+        \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
     ];
 
     protected $listen = [
@@ -170,6 +174,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerCollectionTrees();
         $this->registerEntries();
         $this->registerForms();
+        $this->registerFormSubmissions();
         $this->registerGlobals();
         $this->registerGlobalVariables();
         $this->registerRevisions();
@@ -319,11 +324,28 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.forms.model');
         });
 
-        $this->app->bind('statamic.eloquent.forms.submission_model', function () {
-            return config('statamic.eloquent-driver.forms.submission_model');
+        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+    }
+
+    private function registerFormSubmissions()
+    {
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.forms.submission_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.driver' : 'statamic.eloquent-driver.form_submissions.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(FormSubmissionRepositoryContract::class, SubmissionRepository::class);
+
+        $this->app->bind('statamic.eloquent.form_submissions.model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.submission_model' : 'statamic.eloquent-driver.form_submissions.model');
         });
 
-        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+        $this->app->bind(SubmissionQueryBuilder::class, function ($app) {
+            return new SubmissionQueryBuilder(
+                $app['statamic.eloquent.form_submissions.model']::query()
+            );
+        });
     }
 
     private function registerGlobals()
