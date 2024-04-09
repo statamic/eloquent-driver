@@ -323,6 +323,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.forms.model', function () {
             return config('statamic.eloquent-driver.forms.model');
         });
+
+        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
     }
 
     private function registerFormSubmissions()
@@ -344,8 +346,6 @@ class ServiceProvider extends AddonServiceProvider
                 $app['statamic.eloquent.form_submissions.model']::query()
             );
         });
-
-        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
     }
 
     private function registerGlobals()
