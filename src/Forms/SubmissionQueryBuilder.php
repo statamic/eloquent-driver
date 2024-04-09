@@ -20,7 +20,7 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
         }
 
         if ($column == 'datestamp') {
-            return 'created_at';
+            $column = 'date';
         }
 
         if (! in_array($column, self::COLUMNS)) {

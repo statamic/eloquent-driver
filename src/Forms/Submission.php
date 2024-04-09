@@ -15,13 +15,14 @@ class Submission extends FileEntry
 {
     protected $model;
 
+    private $date;
     private $id;
 
     public static function fromModel(Model $model)
     {
         return (new static())
             ->id($model->id)
-            ->date($model->created_at)
+            ->date($model->data['date'] ?? Carbon::now())
             ->data(Arr::except($model->data, 'date'))
             ->model($model);
     }
@@ -56,6 +57,10 @@ class Submission extends FileEntry
     public function date($date = null)
     {
         if (! is_null($date)) {
+            if (is_string($date)) {
+                $date = Carbon::parse($date);
+            }
+
             $this->date = $date;
 
             return $this;
