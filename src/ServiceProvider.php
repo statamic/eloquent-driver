@@ -124,7 +124,7 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php' => database_path('migrations/2024_03_07_100000_create_navigations_table.php'),
         ], 'statamic-eloquent-navigation-migrations');
 
-        $this->publishMigrations($navigationTreeMigrations = [
+        $this->publishes($navigationTreeMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
         ], 'statamic-eloquent-navigation-tree-migrations');
 
