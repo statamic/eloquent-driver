@@ -92,15 +92,6 @@ abstract class TestCase extends AddonTestCase
         $this->assertNotEmpty($matches, 'Failed asserting that string contains HTML.');
     }
 
-    // This method is unavailable on earlier versions of Laravel.
-    public function partialMock($abstract, ?\Closure $mock = null)
-    {
-        $mock = \Mockery::mock(...array_filter(func_get_args()))->makePartial();
-        $this->app->instance($abstract, $mock);
-
-        return $mock;
-    }
-
     protected function isUsingSqlite()
     {
         $connection = config('database.default');
