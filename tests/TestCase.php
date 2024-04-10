@@ -63,12 +63,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function getEnvironmentSetUp($app)
     {
         // We changed the default sites setup but the tests assume defaults like the following.
-        $app['config']->set('statamic.sites', [
-            'default' => 'en',
-            'sites' => [
-                'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
-            ],
+        \Statamic\Facades\Site::setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
         ]);
+
         $app['config']->set('auth.providers.users.driver', 'statamic');
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.users.repository', 'file');
@@ -78,6 +76,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ]);
 
         $app['config']->set('statamic.editions.pro', true);
+        $app['config']->set('statamic.system.multisite', true);
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
