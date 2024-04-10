@@ -32,7 +32,7 @@ class ImportFormsTest extends TestCase
     }
 
     /** @test */
-    public function it_imports_form()
+    public function it_imports_forms_and_submissions()
     {
         $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
         $submissionA = tap($form->makeSubmission())->data(['name' => 'Jack'])->save();
@@ -47,6 +47,44 @@ class ImportFormsTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertCount(1, FormModel::all());
+        $this->assertCount(3, SubmissionModel::all());
+    }
+
+    /** @test */
+    public function it_imports_only_forms()
+    {
+        $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
+        $submissionA = tap($form->makeSubmission())->data(['name' => 'Jack'])->save();
+        $submissionB = tap($form->makeSubmission())->data(['name' => 'Jason'])->save();
+        $submissionC = tap($form->makeSubmission())->data(['name' => 'Jesse'])->save();
+
+        $this->assertCount(0, FormModel::all());
+        $this->assertCount(0, SubmissionModel::all());
+
+        $this->artisan('statamic:eloquent:import-forms', ['--only-forms' => true])
+            ->expectsOutput('Forms imported')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, FormModel::all());
+        $this->assertCount(0, SubmissionModel::all());
+    }
+
+    /** @test */
+    public function it_imports_only_submissions()
+    {
+        $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
+        $submissionA = tap($form->makeSubmission())->data(['name' => 'Jack'])->save();
+        $submissionB = tap($form->makeSubmission())->data(['name' => 'Jason'])->save();
+        $submissionC = tap($form->makeSubmission())->data(['name' => 'Jesse'])->save();
+
+        $this->assertCount(0, FormModel::all());
+        $this->assertCount(0, SubmissionModel::all());
+
+        $this->artisan('statamic:eloquent:import-forms', ['--only-form-submissions' => true])
+            ->expectsOutput('Forms imported')
+            ->assertExitCode(0);
+
+        $this->assertCount(0, FormModel::all());
         $this->assertCount(3, SubmissionModel::all());
     }
 }

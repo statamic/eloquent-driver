@@ -23,7 +23,9 @@ class ImportForms extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-forms';
+    protected $signature = 'statamic:eloquent:import-forms
+        {--only-forms : Only import forms}
+        {--only-form-submissions : Only import submissions}';
 
     /**
      * The console command description.
@@ -57,28 +59,34 @@ class ImportForms extends Command
 
     private function importForms()
     {
+        $importForms = $this->option('only-form-submissions') ? false : true;
+        $importSubmissions = $this->option('only-forms') ? false : true;
+
         $forms = (new FormRepository())->all();
 
-        $this->withProgressBar($forms, function ($form) {
-            $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
-            $model = Form::makeModelFromContract($form)->fill([
-                'created_at' => $lastModified,
-                'updated_at' => $lastModified,
-            ]);
-            $model->save();
+        $this->withProgressBar($forms, function ($form) use ($importForms, $importSubmissions) {
+            if ($importForms) {
+                $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
 
-            $form->submissions()->each(function ($submission) use ($model) {
-                $timestamp = app('statamic.eloquent.forms.submission_model')::make()->fromDateTime($submission->date());
-
-                app('statamic.eloquent.forms.submission_model')
-                    ->where('form', $model->handle)
-                    ->firstOrNew(['created_at' => $timestamp])
-                    ->fill([
-                        'data' => $submission->data(),
-                        'updated_at' => $timestamp,
-                    ])
+                Form::makeModelFromContract($form)
+                    ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                     ->save();
-            });
+            }
+
+            if ($importSubmissions) {
+                $form->submissions()->each(function ($submission) use ($form) {
+                    $timestamp = app('statamic.eloquent.forms.submission_model')::make()->fromDateTime($submission->date());
+
+                    app('statamic.eloquent.forms.submission_model')
+                        ->where('form', $form->handle())
+                        ->firstOrNew(['created_at' => $timestamp])
+                        ->fill([
+                            'data' => $submission->data(),
+                            'updated_at' => $timestamp,
+                        ])
+                        ->save();
+                });
+            }
         });
 
         $this->newLine();
