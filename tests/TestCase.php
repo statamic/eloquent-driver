@@ -85,13 +85,6 @@ abstract class TestCase extends AddonTestCase
         $this->assertEquals(count($items), $matches, 'Failed asserting that every item is an instance of '.$class);
     }
 
-    protected function assertContainsHtml($string)
-    {
-        preg_match('/<[^<]+>/', $string, $matches);
-
-        $this->assertNotEmpty($matches, 'Failed asserting that string contains HTML.');
-    }
-
     protected function isUsingSqlite()
     {
         $connection = config('database.default');
