@@ -106,18 +106,27 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->publishes($taxonomyMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_taxonomies_table.php' => database_path('migrations/2024_03_07_100000_create_taxonomies_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php' => database_path('migrations/2024_03_07_100000_create_terms_table.php'),
         ], 'statamic-eloquent-taxonomy-migrations');
+
+        $this->publishes($termMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php' => database_path('migrations/2024_03_07_100000_create_terms_table.php'),
+        ], 'statamic-eloquent-term-migrations');
 
         $this->publishes($globalMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_globals_table.php' => database_path('migrations/2024_03_07_100000_create_globals_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php' => database_path('migrations/2024_03_07_100000_create_global_variables_table.php'),
         ], 'statamic-eloquent-global-migrations');
+
+        $this->publishes($globalVariablesMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php' => database_path('migrations/2024_03_07_100000_create_global_variables_table.php'),
+        ], 'statamic-eloquent-global-variables-migrations');
 
         $this->publishes($navigationMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php' => database_path('migrations/2024_03_07_100000_create_navigations_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
         ], 'statamic-eloquent-navigation-migrations');
+
+        $this->publishMigrations($navigationTreeMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
+        ], 'statamic-eloquent-navigation-tree-migrations');
 
         $this->publishes($collectionMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_collections_table.php' => database_path('migrations/2024_03_07_100000_create_collections_table.php'),
@@ -130,11 +139,17 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($formMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php' => database_path('migrations/2024_03_07_100000_create_forms_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
         ], 'statamic-eloquent-form-migrations');
 
-        $this->publishes($assetMigrations = [
+        $this->publishes($formSubmissionMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
+        ], 'statamic-eloquent-form-submission-migrations');
+
+        $this->publishes($assetContainerMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_containers_table.php' => database_path('migrations/2024_03_07_100000_create_asset_containers_table.php'),
+        ], 'statamic-eloquent-asset-container-migrations');
+
+        $this->publishes($assetMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_table.php' => database_path('migrations/2024_03_07_100000_create_asset_table.php'),
         ], 'statamic-eloquent-asset-migrations');
 
@@ -145,11 +160,16 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
+                $termMigrations,
                 $globalMigrations,
+                $globalVariablesMigrations,
                 $navigationMigrations,
+                $navigationTreeMigrations,
                 $collectionMigrations,
                 $blueprintMigrations,
                 $formMigrations,
+                $formSubmissionMigrations,
+                $assetContainerMigrations,
                 $assetMigrations,
                 $revisionMigrations
             ),
