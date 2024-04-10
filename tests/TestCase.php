@@ -3,10 +3,15 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Statamic\Eloquent\ServiceProvider;
+use Statamic\Extend\AddonTestCase;
+use Statamic\Facades\Site;
 
-abstract class TestCase extends \Orchestra\Testbench\TestCase
+abstract class TestCase extends AddonTestCase
 {
     use RefreshDatabase;
+
+    protected string $addonServiceProvider = ServiceProvider::class;
 
     protected $shouldFakeVersion = true;
 
@@ -14,62 +19,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected $shouldUseStringEntryIds = false;
 
-    protected function setUp(): void
-    {
-        require_once __DIR__.'/ConsoleKernel.php';
-
-        parent::setUp();
-
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        if ($this->shouldFakeVersion) {
-            \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
-            $this->addToAssertionCount(-1); // Dont want to assert this
-        }
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-    }
-
-    protected function getPackageProviders($app)
-    {
-        return [
-            \Statamic\Providers\StatamicServiceProvider::class,
-            \Statamic\Eloquent\ServiceProvider::class,
-            \Wilderborn\Partyline\ServiceProvider::class,
-        ];
-    }
-
-    protected function getPackageAliases($app)
-    {
-        return ['Statamic' => 'Statamic\Statamic'];
-    }
-
     protected function resolveApplicationConfiguration($app)
     {
         parent::resolveApplicationConfiguration($app);
 
-        $configs = [
-            'eloquent-driver',
-        ];
-
-        foreach ($configs as $config) {
-            $app['config']->set("statamic.$config", require (__DIR__."/../config/{$config}.php"));
-        }
+        $app['config']->set('statamic.eloquent-driver', require (__DIR__.'/../config/eloquent-driver.php'));
     }
 
     protected function getEnvironmentSetUp($app)
     {
+        parent::getEnvironmentSetUp($app);
+
         // We changed the default sites setup but the tests assume defaults like the following.
-        \Statamic\Facades\Site::setSites([
+        Site::setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
         ]);
 
         $app['config']->set('auth.providers.users.driver', 'statamic');
         $app['config']->set('statamic.stache.watcher', false);
-        $app['config']->set('statamic.users.repository', 'file');
         $app['config']->set('statamic.stache.stores.users', [
             'class' => \Statamic\Stache\Stores\UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
@@ -116,22 +83,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }
 
         $this->assertEquals(count($items), $matches, 'Failed asserting that every item is an instance of '.$class);
-    }
-
-    protected function assertContainsHtml($string)
-    {
-        preg_match('/<[^<]+>/', $string, $matches);
-
-        $this->assertNotEmpty($matches, 'Failed asserting that string contains HTML.');
-    }
-
-    // This method is unavailable on earlier versions of Laravel.
-    public function partialMock($abstract, ?\Closure $mock = null)
-    {
-        $mock = \Mockery::mock(...array_filter(func_get_args()))->makePartial();
-        $this->app->instance($abstract, $mock);
-
-        return $mock;
     }
 
     protected function isUsingSqlite()
