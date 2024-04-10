@@ -24,6 +24,10 @@ abstract class TestCase extends AddonTestCase
         parent::resolveApplicationConfiguration($app);
 
         $app['config']->set('statamic.eloquent-driver', require (__DIR__.'/../config/eloquent-driver.php'));
+
+        collect(config('statamic.eloquent-driver'))
+            ->filter(fn ($config) => isset($config['driver']))
+            ->each(fn ($config, $key) => $app['config']->set("statamic.eloquent-driver.{$key}.driver", 'eloquent'));
     }
 
     protected function getEnvironmentSetUp($app)
