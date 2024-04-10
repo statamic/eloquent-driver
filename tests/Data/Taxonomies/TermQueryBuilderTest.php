@@ -326,10 +326,10 @@ class TermQueryBuilderTest extends TestCase
     /** @test */
     public function it_substitutes_terms_by_uri_and_site()
     {
-        Site::setConfig(['sites' => [
+        Site::setSites([
             'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
-        ]]);
+        ]);
 
         Taxonomy::make('tags')->sites(['en', 'fr'])->save();
         Term::make('tag-1')->slug('tag-1')->taxonomy('tags')
