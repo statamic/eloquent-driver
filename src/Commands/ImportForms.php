@@ -10,8 +10,8 @@ use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Facades\File;
-use Statamic\Facades\Form as FormFacade;
 use Statamic\Forms\Form as StacheForm;
+use Statamic\Forms\FormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
 
 class ImportForms extends Command
@@ -63,7 +63,7 @@ class ImportForms extends Command
         $importForms = $this->option('only-form-submissions') ? false : true;
         $importSubmissions = $this->option('only-forms') ? false : true;
 
-        $forms = FormFacade::all();
+        $forms = (new FormRepository)->all();
 
         $this->withProgressBar($forms, function ($form) use ($importForms, $importSubmissions) {
             if ($importForms) {
