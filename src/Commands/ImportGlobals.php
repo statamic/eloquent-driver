@@ -24,7 +24,9 @@ class ImportGlobals extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-globals';
+    protected $signature = 'statamic:eloquent:import-globals
+        {--only-global-sets : Only import global sets}
+        {--only-global-variables : Only import global variables}';
 
     /**
      * The console command description.
@@ -59,17 +61,25 @@ class ImportGlobals extends Command
 
     private function importGlobals()
     {
+        $importGlobalSets = $this->option('only-global-variables') ? false : true;
+        $importGlobalVariables = $this->option('only-global-sets') ? false : true;
+
         $sets = GlobalSetFacade::all();
 
-        $this->withProgressBar($sets, function ($set) {
-            $lastModified = $set->fileLastModified();
+        $this->withProgressBar($sets, function ($set) use ($importGlobalSets, $importGlobalVariables) {
+            if ($importGlobalSets) {
+                $lastModified = $set->fileLastModified();
 
-            $setModel = GlobalSet::makeModelFromContract($set)->fill(['created_at' => $lastModified, 'updated_at' => $lastModified]);
-            $setModel->save();
+                GlobalSet::makeModelFromContract($set)
+                    ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                    ->save();
+            }
 
-            $set->localizations()->each(function ($locale) {
-                Variables::makeModelFromContract($locale)->save();
-            });
+            if ($importGlobalVariables) {
+                $set->localizations()->each(function ($locale) {
+                    Variables::makeModelFromContract($locale)->save();
+                });
+            }
         });
 
         $this->newLine();
