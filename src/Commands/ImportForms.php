@@ -10,8 +10,8 @@ use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Facades\File;
+use Statamic\Facades\Form as FormFacade;
 use Statamic\Forms\Form as StacheForm;
-use Statamic\Forms\FormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
 
 class ImportForms extends Command
@@ -55,6 +55,7 @@ class ImportForms extends Command
 
         app()->bind(FormContract::class, StacheForm::class);
         app()->bind(SubmissionContract::class, StacheSubmission::class);
+        app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
     private function importForms()
@@ -62,7 +63,7 @@ class ImportForms extends Command
         $importForms = $this->option('only-form-submissions') ? false : true;
         $importSubmissions = $this->option('only-forms') ? false : true;
 
-        $forms = (new FormRepository())->all();
+        $forms = FormFacade::all();
 
         $this->withProgressBar($forms, function ($form) use ($importForms, $importSubmissions) {
             if ($importForms) {
@@ -75,10 +76,9 @@ class ImportForms extends Command
 
             if ($importSubmissions) {
                 $form->submissions()->each(function ($submission) use ($form) {
-                    $timestamp = app('statamic.eloquent.forms.submission_model')::make()->fromDateTime($submission->date());
+                    $timestamp = app('statamic.eloquent.form_submissions.model')::make()->fromDateTime($submission->date());
 
-                    app('statamic.eloquent.forms.submission_model')
-                        ->where('form', $form->handle())
+                    app('statamic.eloquent.form_submissions.model')::where('form', $form->handle())
                         ->firstOrNew(['created_at' => $timestamp])
                         ->fill([
                             'data' => $submission->data(),

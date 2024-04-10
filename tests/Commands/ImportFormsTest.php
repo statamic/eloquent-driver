@@ -28,7 +28,6 @@ class ImportFormsTest extends TestCase
         app()->bind(FormRepositoryContract::class, \Statamic\Forms\FormRepository::class);
         app()->bind(SubmissionRepositoryContract::class, \Statamic\Stache\Repositories\SubmissionRepository::class);
         app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
-        app()->bind('statamic.eloquent.forms.submission_model', \Statamic\Eloquent\Forms\SubmissionModel::class);
     }
 
     /** @test */
