@@ -70,10 +70,14 @@ class ImportForms extends Command
             $form->submissions()->each(function ($submission) use ($model) {
                 $timestamp = app('statamic.eloquent.forms.submission_model')::make()->fromDateTime($submission->date());
 
-                $model->submissions()->firstOrNew(['created_at' => $timestamp])->fill([
-                    'data'       => $submission->data(),
-                    'updated_at' => $timestamp,
-                ])->save();
+                app('statamic.eloquent.forms.submission_model')
+                    ->where('form', $model->handle)
+                    ->firstOrNew(['created_at' => $timestamp])
+                    ->fill([
+                        'data' => $submission->data(),
+                        'updated_at' => $timestamp,
+                    ])
+                    ->save();
             });
         });
 
