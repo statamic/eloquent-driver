@@ -39,7 +39,7 @@ class EntryQueryBuilderTest extends TestCase
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
         $searchedEntry = $this->createDummyCollectionAndEntries();
-        $columns = ['title'];
+        $columns = ['foo', 'collection'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
 
         $retrievedEntry->model(null);
@@ -626,10 +626,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test */
     public function it_substitutes_entries_by_uri_and_site()
     {
-        Site::setConfig(['sites' => [
+        Site::setSites([
             'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
-        ]]);
+        ]);
 
         Collection::make('posts')->routes('/posts/{slug}')->sites(['en', 'fr'])->save();
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->locale('en')->create();
@@ -721,7 +721,7 @@ class EntryQueryBuilderTest extends TestCase
 
         foreach (range(4, 6) as $index) {
             EntryFactory::id($index)->slug($locations[$index]['slug'])->collection('locations')
-            ->data(['title' => $locations[$index]['title']])->create();
+                ->data(['title' => $locations[$index]['title']])->create();
         }
 
         $query = Entry::query()

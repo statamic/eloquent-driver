@@ -5,7 +5,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up()
     {
         Schema::create($this->prefix('blueprints'), function (Blueprint $table) {

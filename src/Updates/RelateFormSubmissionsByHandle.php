@@ -5,19 +5,17 @@ namespace Statamic\Eloquent\Updates;
 use Illuminate\Support\Facades\Schema;
 use Statamic\UpdateScripts\UpdateScript;
 
-class AddMetaAndIndexesToAssetsTable extends UpdateScript
+class RelateFormSubmissionsByHandle extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        $assetsTable = config('statamic.eloquent-driver.table_prefix', '').'assets_meta';
-
-        return Schema::hasTable($assetsTable) && ! Schema::hasColumn($assetsTable, 'meta');
+        return ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'form_submissions', 'form');
     }
 
     public function update()
     {
-        $source = __DIR__.'/../../database/migrations/updates/update_assets_table.php.stub';
-        $dest = database_path('migrations/'.date('Y_m_d_His').'_update_assets_table.php');
+        $source = __DIR__.'/../../database/migrations/updates/relate_form_submissions_by_handle.php.stub';
+        $dest = database_path('migrations/'.date('Y_m_d_His').'_relate_form_submissions_by_handle.php');
 
         $this->files->copy($source, $dest);
 

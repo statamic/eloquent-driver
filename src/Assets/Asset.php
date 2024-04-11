@@ -3,9 +3,10 @@
 namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
+use Statamic\Contracts\Assets\Asset as AssetContract;
+use Statamic\Data\HasDirtyState;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
@@ -13,6 +14,18 @@ use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
+    use HasDirtyState {
+        syncOriginal as traitSyncOriginal;
+    }
+
+    public function syncOriginal()
+    {
+        // FileAsset overrides the trait method in order to add the "pending
+        // data" logic. We don't need it here since everything comes from
+        // the model so we'll just use the original trait method again.
+        return $this->traitSyncOriginal();
+    }
+
     protected $existsOnDisk = false;
     protected $removedData = [];
 
@@ -21,7 +34,8 @@ class Asset extends FileAsset
         return (new static())
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->hydrateMeta($model->meta);
+            ->hydrateMeta($model->meta)
+            ->syncOriginal();
     }
 
     public function meta($key = null)
@@ -45,8 +59,7 @@ class Asset extends FileAsset
             return $meta;
         }
 
-        return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
-            $handle = $this->container()->handle().'::'.$this->metaPath();
+        return Blink::once($this->metaCacheKey(), function () {
             if ($model = app('statamic.eloquent.assets.model')::where([
                 'container' => $this->containerHandle(),
                 'folder' => $this->folder(),
@@ -55,7 +68,7 @@ class Asset extends FileAsset
                 return $model->meta;
             }
 
-            $this->writeMeta($meta = $this->generateMeta());
+            $meta = $this->generateMeta();
 
             if (! $meta['data']) {
                 $meta['data'] = [];
@@ -74,11 +87,11 @@ class Asset extends FileAsset
     {
         return Blink::once('eloquent-asset-meta-exists-'.$this->id(), function () {
             return app('statamic.eloquent.assets.model')::query()
-            ->where([
-                'container' => $this->containerHandle(),
-                'folder' => $this->folder(),
-                'basename' => $this->basename(),
-            ])->count() > 0;
+                ->where([
+                    'container' => $this->containerHandle(),
+                    'folder' => $this->folder(),
+                    'basename' => $this->basename(),
+                ])->count() > 0;
         });
     }
 
@@ -115,15 +128,35 @@ class Asset extends FileAsset
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
+        self::makeModelFromContract($this, $meta);
+
+        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
+    }
+
+    public static function makeModelFromContract(AssetContract $source, $meta = [])
+    {
+        if (! $meta) {
+            $meta = $source->meta();
+        }
+
+        // Make shure that a extension could be found, as the extension field is required.
+        if (! $extension = $source->extension()) {
+            return null;
+        }
+
+        $original = $source->getOriginal();
+
         $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'container' => $this->containerHandle(),
-            'folder' => $this->folder(),
-            'basename' => $this->basename(),
+            'container' => $source->containerHandle(),
+            'folder' => Arr::get($original, 'folder', $source->folder()),
+            'basename' => Arr::get($original, 'basename', $source->basename()),
         ])->fill([
             'meta' => $meta,
-            'filename' => $this->filename(),
-            'extension' => $this->extension(),
-            'path' => $this->path(),
+            'filename' => $source->filename(),
+            'extension' => $extension,
+            'path' => $source->path(),
+            'folder' => $source->folder(),
+            'basename' => $source->basename(),
         ]);
 
         // Set initial timestamps.
@@ -134,7 +167,7 @@ class Asset extends FileAsset
 
         $model->save();
 
-        Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
+        return $model;
     }
 
     public function metaPath()
@@ -179,5 +212,15 @@ class Asset extends FileAsset
         }
 
         return $this;
+    }
+
+    public function getCurrentDirtyStateAttributes(): array
+    {
+        return array_merge([
+            'path' => $this->path(),
+            'folder' => $this->folder(),
+            'basename' => $this->basename(),
+            'data' => $this->data()->toArray(),
+        ]);
     }
 }

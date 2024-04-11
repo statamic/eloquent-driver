@@ -36,7 +36,7 @@ class Entry extends FileEntry
             }
         }
 
-        return $entry;
+        return $entry->syncOriginal();
     }
 
     public function toModel()

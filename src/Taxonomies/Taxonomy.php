@@ -18,6 +18,10 @@ class Taxonomy extends FileEntry
             ->sites($model->sites)
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->previewTargets($model->settings['preview_targets'] ?? [])
+            ->searchIndex($model->settings['search_index'] ?? '')
+            ->termTemplate($model->settings['term_template'] ?? null)
+            ->template($model->settings['template'] ?? null)
+            ->layout($model->settings['layout'] ?? null)
             ->model($model);
     }
 
@@ -31,11 +35,14 @@ class Taxonomy extends FileEntry
         $class = app('statamic.eloquent.taxonomies.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title'    => $source->title(),
-            'sites'    => $source->sites(),
+            'title' => $source->title(),
+            'sites' => $source->sites(),
             'settings' => [
                 'revisions' => $source->revisionsEnabled(),
                 'preview_targets' => $source->previewTargets(),
+                'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
+                'template' => $source->hasCustomTemplate() ? $source->template() : null,
+                'layout' => $source->layout,
             ],
         ]);
     }

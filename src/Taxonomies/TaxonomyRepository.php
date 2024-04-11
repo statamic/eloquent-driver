@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Facades;
@@ -43,10 +44,10 @@ class TaxonomyRepository extends StacheRepository
             return app('statamic.eloquent.taxonomies.model')::whereHandle($handle)->first();
         });
 
-        return $taxonomyModel ? app(TaxonomyContract::class)->fromModel($taxonomyModel) : null;
+        return $taxonomyModel instanceof Model ? app(TaxonomyContract::class)->fromModel($taxonomyModel) : null;
     }
 
-    public function findByUri(string $uri, string $site = null): ?Taxonomy
+    public function findByUri(string $uri, ?string $site = null): ?Taxonomy
     {
         $collection = Facades\Collection::all()
             ->first(function ($collection) use ($uri, $site) {

@@ -9,7 +9,9 @@ class AddBlueprintToEntriesTable extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'entries', 'blueprint');
+        $entriesTable = config('statamic.eloquent-driver.table_prefix', '').'entries';
+
+        return Schema::hasTable($entriesTable) && ! Schema::hasColumn($entriesTable, 'blueprint');
     }
 
     public function update()
