@@ -66,12 +66,15 @@ class ImportNavs extends Command
 
     private function importNavs()
     {
-        if (! $this->option('force')) {
+        if ($this->option('only-navs') || $this->option('only-nav-trees')) {
+            $importNavigations = $this->option('only-navs');
+            $importNavigationTrees = $this->option('only-nav-trees');
+        } elseif (! $this->option('force')) {
             $importNavigations = $this->confirm('Do you want to import navs?');
             $importNavigationTrees = $this->confirm('Do you want to import nav trees?');
         } else {
-            $importNavigations = $this->option('only-navs') ?? true;
-            $importNavigationTrees = $this->option('only-nav-trees') ?? true;
+            $importNavigations = true;
+            $importNavigationTrees = true;
         }
 
         $navs = NavFacade::all();
