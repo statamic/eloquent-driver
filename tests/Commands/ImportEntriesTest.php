@@ -2,7 +2,6 @@
 
 namespace Tests\Commands;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -19,9 +18,7 @@ use Tests\TestCase;
 
 class ImportEntriesTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk, RefreshDatabase;
-
-    protected $shouldUseStringEntryIds = true;
+    use PreventSavingStacheItemsToDisk;
 
     public function setUp(): void
     {
