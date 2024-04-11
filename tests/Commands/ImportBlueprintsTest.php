@@ -2,17 +2,9 @@
 
 namespace Tests\Commands;
 
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Facades\Storage;
-use Statamic\Contracts\Assets\Asset as AssetContract;
-use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
-use Statamic\Eloquent\Assets\AssetContainerModel;
-use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
-use Statamic\Eloquent\Forms\FormModel;
-use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Facades\Fieldset as FieldsetFacade;
 use Statamic\Fields\Blueprint;

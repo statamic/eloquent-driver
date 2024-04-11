@@ -76,7 +76,6 @@ class ImportAssets extends Command
             return;
         }
 
-
         if (! $this->option('only-asset-containers') && ! $this->option('force') && ! $this->confirm('Do you want to import asset containers?')) {
             return;
         }
