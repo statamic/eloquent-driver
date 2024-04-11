@@ -9,9 +9,9 @@ use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepos
 use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel;
 use Statamic\Eloquent\Globals\VariablesModel;
+use Statamic\Facades\GlobalSet;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
-use Statamic\Facades\GlobalSet;
 
 class ImportGlobalsTest extends TestCase
 {

@@ -38,12 +38,10 @@ class ImportTaxonomies extends Command
      *
      * @var string
      */
-    protected $description = "Imports file-based taxonomies & terms into the database.";
+    protected $description = 'Imports file-based taxonomies & terms into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
