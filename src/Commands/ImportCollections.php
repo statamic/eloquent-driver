@@ -81,12 +81,15 @@ class ImportCollections extends Command
 
     private function importCollections()
     {
-        if (! $this->option('force')) {
+        if ($this->option('only-collections') || $this->option('only-collection-trees')) {
+            $importCollections = $this->option('only-collections');
+            $importCollectionTrees = $this->option('only-collection-trees');
+        } elseif (! $this->option('force')) {
             $importCollections = $this->confirm('Do you want to import collections?');
             $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
         } else {
-            $importCollections = $this->option('only-collections') ?? true;
-            $importCollectionTrees = $this->option('only-collection-trees') ?? true;
+            $importCollections = true;
+            $importCollectionTrees = true;
         }
 
         $collections = CollectionFacade::all();
