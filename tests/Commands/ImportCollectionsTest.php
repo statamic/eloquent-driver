@@ -34,22 +34,28 @@ class ImportCollectionsTest extends TestCase
         app()->bind(CollectionTreeRepositoryContract::class, \Statamic\Stache\Repositories\CollectionTreeRepository::class);
 
         // TODO: Can we try running these tests with both Stache & Eloquent entries?
-        app()->bind(EntryRepositoryContract::class, \Statamic\Stache\Repositories\EntryRepository::class);
-        app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
+        // app()->bind(EntryRepositoryContract::class, \Statamic\Stache\Repositories\EntryRepository::class);
+        // app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
     }
 
-    /** @test */
-    public function it_imports_collections_and_collection_trees()
+    /**
+     * @test
+     * @dataProvider entriesDriverProvider
+     */
+    public function it_imports_collections_and_collection_trees(string $repository, string $entry)
     {
+        app()->bind(EntryRepositoryContract::class, $repository);
+        app()->bind(EntryContract::class, $entry);
+
         $collection = tap(\Statamic\Facades\Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        $entryA = tap(Entry::make()->collection($collection)->slug('foo'))->save();
+        $entryB = tap(Entry::make()->collection($collection)->slug('foo'))->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => $entryA->id()],
+            ['entry' => $entryB->id()],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());
@@ -63,6 +69,24 @@ class ImportCollectionsTest extends TestCase
 
         $this->assertCount(1, CollectionModel::all());
         $this->assertCount(1, TreeModel::all());
+    }
+
+    /**
+     * This data provider allows us to run the tests against both the Stache & Eloquent
+     * entries drivers, so we can ensure it works with both.
+     */
+    public static function entriesDriverProvider(): array
+    {
+        return [
+            'stache-entries' => [
+                'repository' => \Statamic\Stache\Repositories\EntryRepository::class,
+                'entry' => \Statamic\Entries\Entry::class
+            ],
+            'eloquent-entries' => [
+                'repository' => \Statamic\Eloquent\Entries\EntryRepository::class,
+                'entry' => \Statamic\Eloquent\Entries\Entry::class,
+            ],
+        ];
     }
 
     /** @test */
