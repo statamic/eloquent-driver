@@ -31,6 +31,9 @@ class ImportCollectionsTest extends TestCase
         app()->bind(CollectionTreeContract::class, \Statamic\Structures\CollectionTree::class);
         app()->bind(CollectionRepositoryContract::class, \Statamic\Stache\Repositories\CollectionRepository::class);
         app()->bind(CollectionTreeRepositoryContract::class, \Statamic\Stache\Repositories\CollectionTreeRepository::class);
+
+        app()->bind(EntryRepositoryContract::class, \Statamic\Stache\Repositories\EntryRepository::class);
+        app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
     }
 
     /**
