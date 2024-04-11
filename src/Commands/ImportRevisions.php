@@ -34,9 +34,11 @@ class ImportRevisions extends Command
      */
     public function handle()
     {
-        if (config('statamic.revisions.enabled')) {
-            $this->importRevisions();
+        if (! config('statamic.revisions.enabled')) {
+            return $this->components->error("Revisions are not enabled.");
         }
+
+        $this->importRevisions();
 
         return 0;
     }
