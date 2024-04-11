@@ -4,23 +4,10 @@ namespace Tests\Commands;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
-use Statamic\Contracts\Entries\Collection as CollectionContract;
-use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
-use Statamic\Contracts\Entries\Entry as EntryContract;
-use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Contracts\Structures\CollectionTree as CollectionTreeContract;
-use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
-use Statamic\Eloquent\Collections\CollectionModel;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Revisions\RevisionModel;
-use Statamic\Eloquent\Structures\TreeModel;
-use Statamic\Facades\Entry;
-use Statamic\Facades\Revision as FacadesRevision;
-use Statamic\Facades\Site;
-use Statamic\Revisions\Revision;
-use Statamic\Structures\CollectionStructure;
+use Statamic\Facades\Revision;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -58,13 +45,13 @@ class ImportRevisionsTest extends TestCase
         config(['statamic.revisions.enabled' => false]);
 
         $this->artisan('statamic:eloquent:import-revisions')
-            ->expectsOutputToContain('Revisions are not enabled.');
+            ->expectsOutputToContain('This import can only be run when revisions are enabled.');
     }
 
     /** @test */
     public function it_imports_revisions()
     {
-        \Statamic\Facades\Revision::make()
+        Revision::make()
             ->key('collections/pages/en/foo')
             ->action('revision')
             ->date(Carbon::now())
@@ -75,7 +62,7 @@ class ImportRevisionsTest extends TestCase
         $this->assertCount(0, RevisionModel::all());
 
         $this->artisan('statamic:eloquent:import-revisions')
-            ->expectsOutput('Revisions imported')
+            ->expectsOutputToContain('Revisions imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, RevisionModel::all());

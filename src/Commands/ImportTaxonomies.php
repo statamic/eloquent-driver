@@ -29,7 +29,7 @@ class ImportTaxonomies extends Command
      * @var string
      */
     protected $signature = 'statamic:eloquent:import-taxonomies
-        {--force : Force the operation to run, with all questions yes}
+        {--force : Force the import to run, with all prompts answered "yes"}
         {--only-taxonomies : Only import taxonomies}
         {--only-terms : Only import terms}';
 
@@ -38,14 +38,14 @@ class ImportTaxonomies extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based taxonomies and terms into the database.';
+    protected $description = "Imports file-based taxonomies & terms into the database.";
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -55,7 +55,7 @@ class ImportTaxonomies extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
         Facade::clearResolvedInstance(TermRepositoryContract::class);
@@ -67,19 +67,13 @@ class ImportTaxonomies extends Command
         app()->bind(TermContract::class, StacheTerm::class);
     }
 
-    private function importTaxonomies()
+    private function importTaxonomies(): void
     {
-        if ($this->option('only-terms')) {
+        if (! $this->shouldImportTaxonomies()) {
             return;
         }
 
-        if (! $this->option('only-taxonomies') && ! $this->option('force') && ! $this->confirm('Do you want to import taxonomies?')) {
-            return;
-        }
-
-        $taxonomies = TaxonomyFacade::all();
-
-        $this->withProgressBar($taxonomies, function ($taxonomy) {
+        $this->withProgressBar(TaxonomyFacade::all(), function ($taxonomy) {
             $lastModified = $taxonomy->fileLastModified();
 
             EloquentTaxonomy::makeModelFromContract($taxonomy)
@@ -87,25 +81,16 @@ class ImportTaxonomies extends Command
                 ->save();
         });
 
-        $this->newLine();
-        $this->info('Taxonomies imported');
+        $this->components->info('Taxonomies imported successfully.');
     }
 
-    private function importTerms()
+    private function importTerms(): void
     {
-        if ($this->option('only-taxonomies')) {
+        if (! $this->shouldImportTerms()) {
             return;
         }
 
-        if (! $this->option('only-terms') && ! $this->option('force') && ! $this->confirm('Do you want to import terms?')) {
-            return;
-        }
-
-        $terms = TermFacade::all();
-        // Grab unique parent terms.
-        $terms = $terms->map->term()->unique();
-
-        $this->withProgressBar($terms, function ($term) {
+        $this->withProgressBar(TermFacade::all()->map->term()->unique(), function ($term) {
             $lastModified = $term->fileLastModified();
 
             EloquentTerm::makeModelFromContract($term)
@@ -113,7 +98,20 @@ class ImportTaxonomies extends Command
                 ->save();
         });
 
-        $this->newLine();
-        $this->info('Terms imported');
+        $this->components->info('Terms imported successfully.');
+    }
+
+    private function shouldImportTaxonomies(): bool
+    {
+        return $this->option('only-taxonomies')
+            || ! $this->option('only-terms')
+            && ($this->option('force') || $this->confirm('Do you want to import taxonomies?'));
+    }
+
+    private function shouldImportTerms(): bool
+    {
+        return $this->option('only-terms')
+            || ! $this->option('only-taxonomies')
+            && ($this->option('force') || $this->confirm('Do you want to import terms?'));
     }
 }

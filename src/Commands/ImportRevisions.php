@@ -25,17 +25,18 @@ class ImportRevisions extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based revisions into the database.';
+    protected $description = "Imports file-based revisions into the database.";
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         if (! config('statamic.revisions.enabled')) {
-            return $this->components->error("Revisions are not enabled.");
+            $this->components->error("This import can only be run when revisions are enabled.");
+            return 1;
         }
 
         $this->importRevisions();
@@ -43,19 +44,19 @@ class ImportRevisions extends Command
         return 0;
     }
 
-    private function importRevisions()
+    private function importRevisions(): void
     {
-        $files = File::allFiles(config('statamic.revisions.path'));
+        $this->withProgressBar(File::allFiles(config('statamic.revisions.path')), function ($file) {
+            $yaml = YAML::file($file->getPathname())->parse();
 
-        $this->withProgressBar($files, function ($file) {
-            $yml = YAML::file($file->getPathname())->parse();
             $revision = (new Revision())
                 ->key($file->getRelativePath())
-                ->action($yml['action'] ?? false)
-                ->date(Carbon::parse($yml['date']))
-                ->user($yml['user'] ?? false)
-                ->message($yml['message'] ?? '')
-                ->attributes($yml['attributes'] ?? []);
+                ->action($yaml['action'] ?? false)
+                ->date(Carbon::parse($yaml['date']))
+                ->user($yaml['user'] ?? false)
+                ->message($yaml['message'] ?? '')
+                ->attributes($yaml['attributes'] ?? []);
+
             if ($file->getBasename('.yaml') === 'working') {
                 $revision->action('working');
             }
@@ -63,7 +64,6 @@ class ImportRevisions extends Command
             $revision->toModel()->save();
         });
 
-        $this->newLine();
-        $this->info('Revisions imported');
+        $this->components->info('Revisions imported successfully.');
     }
 }

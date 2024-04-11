@@ -25,6 +25,7 @@ class ImportGlobals extends Command
      * @var string
      */
     protected $signature = 'statamic:eloquent:import-globals
+        {--force : Force the import to run, with all prompts answered "yes"}
         {--only-global-sets : Only import global sets}
         {--only-global-variables : Only import global variables}';
 
@@ -33,14 +34,14 @@ class ImportGlobals extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based globals into the database.';
+    protected $description = "Imports file-based global sets & variables into the database.";
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -49,7 +50,7 @@ class ImportGlobals extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(GlobalRepositoryContract::class);
 
@@ -59,15 +60,10 @@ class ImportGlobals extends Command
         app()->bind(GlobalSetContract::class, GlobalSet::class);
     }
 
-    private function importGlobals()
+    private function importGlobals(): void
     {
-        $importGlobalSets = $this->option('only-global-variables') ? false : true;
-        $importGlobalVariables = $this->option('only-global-sets') ? false : true;
-
-        $sets = GlobalSetFacade::all();
-
-        $this->withProgressBar($sets, function ($set) use ($importGlobalSets, $importGlobalVariables) {
-            if ($importGlobalSets) {
+        $this->withProgressBar(GlobalSetFacade::all(), function ($set) {
+            if ($this->shouldImportGlobalSets()) {
                 $lastModified = $set->fileLastModified();
 
                 GlobalSet::makeModelFromContract($set)
@@ -75,14 +71,27 @@ class ImportGlobals extends Command
                     ->save();
             }
 
-            if ($importGlobalVariables) {
+            if ($this->shouldImportGlobalVariables()) {
                 $set->localizations()->each(function ($locale) {
                     Variables::makeModelFromContract($locale)->save();
                 });
             }
         });
 
-        $this->newLine();
-        $this->info('Globals imported');
+        $this->components->info('Globals imported successfully.');
+    }
+
+    private function shouldImportGlobalSets(): bool
+    {
+        return $this->option('only-global-sets')
+            || ! $this->option('only-global-variables')
+            && ($this->option('force') || $this->confirm('Do you want to import global sets?'));
+    }
+
+    private function shouldImportGlobalVariables(): bool
+    {
+        return $this->option('only-global-variables')
+            || ! $this->option('only-global-sets')
+            && ($this->option('force') || $this->confirm('Do you want to import global variables?'));
     }
 }

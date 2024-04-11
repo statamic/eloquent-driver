@@ -30,14 +30,14 @@ class ImportEntries extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based entries into the database.';
+    protected $description = 'Imports file-based entries into the database.';
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -46,7 +46,7 @@ class ImportEntries extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(EntryRepositoryContract::class);
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
@@ -57,7 +57,7 @@ class ImportEntries extends Command
         app()->bind(EntryContract::class, app('statamic.eloquent.entries.entry'));
     }
 
-    private function importEntries()
+    private function importEntries(): void
     {
         $entries = Entry::all();
 
@@ -67,29 +67,29 @@ class ImportEntries extends Command
         });
 
         if ($entriesWithOrigin->count() > 0) {
-            $this->info('Importing origin entries');
+            $this->components->info('Importing origin entries...');
         }
 
         $this->withProgressBar($entriesWithoutOrigin, function ($entry) {
             $lastModified = $entry->fileLastModified();
+
             $entry = EloquentEntry::makeModelFromContract($entry)
                 ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                 ->save();
         });
 
         if ($entriesWithOrigin->count() > 0) {
-            $this->newLine();
-            $this->info('Importing localized entries');
+            $this->components->info('Importing localized entries...');
 
             $this->withProgressBar($entriesWithOrigin, function ($entry) {
                 $lastModified = $entry->fileLastModified();
+
                 EloquentEntry::makeModelFromContract($entry)
                     ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                     ->save();
             });
         }
 
-        $this->newLine();
-        $this->info('Entries imported');
+        $this->components->info('Entries imported successfully.');
     }
 }

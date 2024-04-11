@@ -53,9 +53,9 @@ class ImportTaxonomiesTest extends TestCase
 
         $this->artisan('statamic:eloquent:import-taxonomies')
             ->expectsQuestion('Do you want to import taxonomies?', true)
-            ->expectsOutput('Taxonomies imported')
+            ->expectsOutputToContain('Taxonomies imported successfully.')
             ->expectsQuestion('Do you want to import terms?', true)
-            ->expectsOutput('Terms imported')
+            ->expectsOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, TaxonomyModel::all());
@@ -79,8 +79,8 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertCount(0, TermModel::all());
 
         $this->artisan('statamic:eloquent:import-taxonomies', ['--force' => true])
-            ->expectsOutput('Taxonomies imported')
-            ->expectsOutput('Terms imported')
+            ->expectsOutputToContain('Taxonomies imported successfully.')
+            ->expectsOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, TaxonomyModel::all());
@@ -105,9 +105,9 @@ class ImportTaxonomiesTest extends TestCase
 
         $this->artisan('statamic:eloquent:import-taxonomies')
             ->expectsQuestion('Do you want to import taxonomies?', true)
-            ->expectsOutput('Taxonomies imported')
+            ->expectsOutputToContain('Taxonomies imported successfully.')
             ->expectsQuestion('Do you want to import terms?', false)
-            ->doesntExpectOutput('Terms imported')
+            ->doesntExpectOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, TaxonomyModel::all());
@@ -131,8 +131,8 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertCount(0, TermModel::all());
 
         $this->artisan('statamic:eloquent:import-taxonomies', ['--only-taxonomies' => true])
-            ->expectsOutput('Taxonomies imported')
-            ->doesntExpectOutput('Terms imported')
+            ->expectsOutputToContain('Taxonomies imported successfully.')
+            ->doesntExpectOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, TaxonomyModel::all());
@@ -157,9 +157,9 @@ class ImportTaxonomiesTest extends TestCase
 
         $this->artisan('statamic:eloquent:import-taxonomies')
             ->expectsQuestion('Do you want to import taxonomies?', false)
-            ->doesntExpectOutput('Taxonomies imported')
+            ->doesntExpectOutputToContain('Taxonomies imported successfully.')
             ->expectsQuestion('Do you want to import terms?', true)
-            ->expectsOutput('Terms imported')
+            ->expectsOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(0, TaxonomyModel::all());
@@ -183,8 +183,8 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertCount(0, TermModel::all());
 
         $this->artisan('statamic:eloquent:import-taxonomies', ['--only-terms' => true])
-            ->doesntExpectOutput('Taxonomies imported')
-            ->expectsOutput('Terms imported')
+            ->doesntExpectOutputToContain('Taxonomies imported successfully.')
+            ->expectsOutputToContain('Terms imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(0, TaxonomyModel::all());

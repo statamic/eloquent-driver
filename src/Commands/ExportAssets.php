@@ -30,7 +30,7 @@ class ExportAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-assets {--force : Force the operation to run, with all questions yes}';
+    protected $signature = 'statamic:eloquent:export-assets {--force : Force the export to run, with all prompts answered "yes"}';
 
     /**
      * The console command description.

@@ -13,6 +13,7 @@ use Statamic\Eloquent\Collections\CollectionModel;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Collection;
 use Statamic\Facades\Site;
 use Statamic\Structures\CollectionStructure;
 use Tests\PreventSavingStacheItemsToDisk;
@@ -43,16 +44,18 @@ class ImportEntriesTest extends TestCase
     /** @test */
     public function it_imports_entries()
     {
-        $collection = tap(\Statamic\Facades\Collection::make('pages')->title('Pages'))->save();
-        tap(Entry::make()->collection($collection)->slug('foo')->data(['foo' => 'bar']))->save();
+        $collection = tap(Collection::make('pages')->title('Pages'))->save();
+        Entry::make()->collection($collection)->slug('foo')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, EntryModel::all());
 
         $this->artisan('statamic:eloquent:import-entries')
-            ->expectsOutput('Entries imported')
+            ->expectsOutputToContain('Entries imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, EntryModel::all());
+
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => '{"foo":"bar"}']);
     }
 
     /** @test */
@@ -63,7 +66,7 @@ class ImportEntriesTest extends TestCase
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
         ]);
 
-        $collection = tap(\Statamic\Facades\Collection::make('pages')->title('Pages'))->save();
+        $collection = tap(Collection::make('pages')->title('Pages'))->save();
 
         $originEntry = tap(Entry::make()->collection($collection)->slug('foo')->data(['foo' => 'bar']))->save();
         $originEntry->makeLocalization('fr')->data(['baz' => 'qux'])->save();
@@ -71,11 +74,14 @@ class ImportEntriesTest extends TestCase
         $this->assertCount(0, EntryModel::all());
 
         $this->artisan('statamic:eloquent:import-entries')
-            ->expectsOutput('Importing origin entries')
-            ->expectsOutput('Importing localized entries')
-            ->expectsOutput('Entries imported')
+            ->expectsOutputToContain('Importing origin entries...')
+            ->expectsOutputToContain('Importing localized entries...')
+            ->expectsOutputToContain('Entries imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(2, EntryModel::all());
+
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => '{"foo":"bar","baz":"qux","__localized_fields":[]}']);
     }
 }

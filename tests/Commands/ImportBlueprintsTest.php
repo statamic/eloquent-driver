@@ -27,6 +27,7 @@ class ImportBlueprintsTest extends TestCase
 
         app()->bind(Blueprint::class, Blueprint::class);
         app()->bind(Fieldset::class, Fieldset::class);
+
         app()->bind(BlueprintRepository::class, function () {
             return (new BlueprintRepository)->setDirectory(resource_path('blueprints'));
         });
@@ -59,8 +60,8 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(0, FieldsetModel::all());
 
         $this->artisan('statamic:eloquent:import-blueprints')
-            ->expectsOutput('Blueprints imported')
-            ->expectsOutput('Fieldsets imported')
+            ->expectsOutputToContain('Blueprints imported successfully.')
+            ->expectsOutputToContain('Fieldsets imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, BlueprintModel::all());

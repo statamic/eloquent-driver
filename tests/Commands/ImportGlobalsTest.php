@@ -11,6 +11,7 @@ use Statamic\Eloquent\Globals\GlobalSetModel;
 use Statamic\Eloquent\Globals\VariablesModel;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
+use Statamic\Facades\GlobalSet;
 
 class ImportGlobalsTest extends TestCase
 {
@@ -32,7 +33,7 @@ class ImportGlobalsTest extends TestCase
     /** @test */
     public function it_imports_global_sets_and_variables()
     {
-        $globalSet = tap(\Statamic\Facades\GlobalSet::make('footer')->title('Footer'))->save();
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
         $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
         $globalSet->addLocalization($variables)->save();
 
@@ -40,17 +41,66 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(0, VariablesModel::all());
 
         $this->artisan('statamic:eloquent:import-globals')
-            ->expectsOutput('Globals imported')
+            ->expectsQuestion('Do you want to import global sets?', true)
+            ->expectsQuestion('Do you want to import global variables?', true)
+            ->expectsOutputToContain('Globals imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, GlobalSetModel::all());
         $this->assertCount(1, VariablesModel::all());
+
+        $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
     /** @test */
-    public function it_imports_only_global_sets()
+    public function it_imports_global_sets_and_variables_with_force_argument()
     {
-        $globalSet = tap(\Statamic\Facades\GlobalSet::make('footer')->title('Footer'))->save();
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
+        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
+        $globalSet->addLocalization($variables)->save();
+
+        $this->assertCount(0, GlobalSetModel::all());
+        $this->assertCount(0, VariablesModel::all());
+
+        $this->artisan('statamic:eloquent:import-globals', ['--force' => true])
+            ->expectsOutputToContain('Globals imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, GlobalSetModel::all());
+        $this->assertCount(1, VariablesModel::all());
+
+        $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+    }
+
+    /** @test */
+    public function it_imports_only_global_sets_with_console_question()
+    {
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
+        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
+        $globalSet->addLocalization($variables)->save();
+
+        $this->assertCount(0, GlobalSetModel::all());
+        $this->assertCount(0, VariablesModel::all());
+
+        $this->artisan('statamic:eloquent:import-globals')
+            ->expectsQuestion('Do you want to import global sets?', true)
+            ->expectsQuestion('Do you want to import global variables?', false)
+            ->expectsOutputToContain('Globals imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, GlobalSetModel::all());
+        $this->assertCount(0, VariablesModel::all());
+
+        $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+    }
+
+    /** @test */
+    public function it_imports_only_global_sets_with_only_global_sets_argument()
+    {
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
         $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
         $globalSet->addLocalization($variables)->save();
 
@@ -58,17 +108,43 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(0, VariablesModel::all());
 
         $this->artisan('statamic:eloquent:import-globals', ['--only-global-sets' => true])
-            ->expectsOutput('Globals imported')
+            ->expectsOutputToContain('Globals imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
+
+        $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
     /** @test */
-    public function it_imports_only_variables()
+    public function it_imports_only_variables_with_console_question()
     {
-        $globalSet = tap(\Statamic\Facades\GlobalSet::make('footer')->title('Footer'))->save();
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
+        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
+        $globalSet->addLocalization($variables)->save();
+
+        $this->assertCount(0, GlobalSetModel::all());
+        $this->assertCount(0, VariablesModel::all());
+
+        $this->artisan('statamic:eloquent:import-globals')
+            ->expectsQuestion('Do you want to import global sets?', false)
+            ->expectsQuestion('Do you want to import global variables?', true)
+            ->expectsOutputToContain('Globals imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(0, GlobalSetModel::all());
+        $this->assertCount(1, VariablesModel::all());
+
+        $this->assertDatabaseMissing('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+    }
+
+    /** @test */
+    public function it_imports_only_variables_with_only_global_variables_argument()
+    {
+        $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
         $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
         $globalSet->addLocalization($variables)->save();
 
@@ -76,10 +152,13 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(0, VariablesModel::all());
 
         $this->artisan('statamic:eloquent:import-globals', ['--only-global-variables' => true])
-            ->expectsOutput('Globals imported')
+            ->expectsOutputToContain('Globals imported successfully.')
             ->assertExitCode(0);
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(1, VariablesModel::all());
+
+        $this->assertDatabaseMissing('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 }

@@ -12,12 +12,12 @@ use Statamic\Eloquent\Assets\AssetContainerModel;
 use Statamic\Eloquent\Assets\AssetModel;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
+use Statamic\Facades\AssetContainer;
 
 class ImportAssetsTest extends TestCase
 {
     use PreventSavingStacheItemsToDisk;
 
-    private $tempDir;
 
     public function setUp(): void
     {
@@ -25,7 +25,7 @@ class ImportAssetsTest extends TestCase
 
         config(['filesystems.disks.test' => [
             'driver' => 'local',
-            'root' => $this->tempDir = __DIR__.'/tmp',
+            'root' => __DIR__.'/tmp',
         ]]);
 
         Facade::clearResolvedInstance(AssetContainerRepositoryContract::class);
@@ -41,7 +41,7 @@ class ImportAssetsTest extends TestCase
 
     public function tearDown(): void
     {
-        app('files')->deleteDirectory($this->tempDir);
+        app('files')->deleteDirectory(__DIR__.'/tmp');
 
         parent::tearDown();
     }
@@ -49,7 +49,7 @@ class ImportAssetsTest extends TestCase
     /** @test */
     public function it_imports_asset_containers_and_assets()
     {
-        $container = tap(\Statamic\Facades\AssetContainer::make('test')->disk('test'))->save();
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
         $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
         $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
         $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
@@ -59,19 +59,49 @@ class ImportAssetsTest extends TestCase
 
         $this->artisan('statamic:eloquent:import-assets')
             ->expectsQuestion('Do you want to import asset containers?', true)
-            ->expectsOutput('Asset containers imported')
+            ->expectsOutputToContain('Assets containers imported sucessfully.')
             ->expectsQuestion('Do you want to import assets?', true)
-            ->expectsOutput('Assets imported')
+            ->expectsOutputToContain('Assets imported sucessfully.')
             ->assertExitCode(0);
 
         $this->assertCount(1, AssetContainerModel::all());
         $this->assertCount(3, AssetModel::all());
+
+        $this->assertDatabaseHas('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
     /** @test */
-    public function it_imports_asset_containers()
+    public function it_imports_asset_containers_and_assets_with_force_argument()
     {
-        $container = tap(\Statamic\Facades\AssetContainer::make('test')->disk('test'))->save();
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
+        $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
+
+        $this->assertCount(0, AssetContainerModel::all());
+        $this->assertCount(0, AssetModel::all());
+
+        $this->artisan('statamic:eloquent:import-assets', ['--force' => true])
+            ->expectsOutputToContain('Assets containers imported sucessfully.')
+            ->expectsOutputToContain('Assets imported sucessfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, AssetContainerModel::all());
+        $this->assertCount(3, AssetModel::all());
+
+        $this->assertDatabaseHas('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
+    }
+
+    /** @test */
+    public function it_imports_asset_containers_with_only_asset_containers_argument()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
         $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
         $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
         $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
@@ -80,18 +110,50 @@ class ImportAssetsTest extends TestCase
         $this->assertCount(0, AssetModel::all());
 
         $this->artisan('statamic:eloquent:import-assets', ['--only-asset-containers' => true])
-            ->expectsOutput('Asset containers imported')
-            ->doesntExpectOutput('Assets imported')
+            ->expectsOutputToContain('Assets containers imported sucessfully.')
+            ->doesntExpectOutputToContain('Assets imported sucessfully.') // doesntExpectOutput
             ->assertExitCode(0);
 
         $this->assertCount(1, AssetContainerModel::all());
         $this->assertCount(0, AssetModel::all());
+
+        $this->assertDatabaseHas('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
     /** @test */
-    public function it_imports_assets()
+    public function it_imports_asset_containers_with_console_question()
     {
-        $container = tap(\Statamic\Facades\AssetContainer::make('test')->disk('test'))->save();
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
+        $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
+
+        $this->assertCount(0, AssetContainerModel::all());
+        $this->assertCount(0, AssetModel::all());
+
+        $this->artisan('statamic:eloquent:import-assets')
+            ->expectsQuestion('Do you want to import asset containers?', true)
+            ->expectsOutputToContain('Assets containers imported sucessfully.')
+            ->expectsQuestion('Do you want to import assets?', false)
+            ->doesntExpectOutputToContain('Assets imported sucessfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, AssetContainerModel::all());
+        $this->assertCount(0, AssetModel::all());
+
+        $this->assertDatabaseHas('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
+    }
+
+    /** @test */
+    public function it_imports_assets_with_only_assets_argument()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
         $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
         $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
         $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
@@ -100,11 +162,43 @@ class ImportAssetsTest extends TestCase
         $this->assertCount(0, AssetModel::all());
 
         $this->artisan('statamic:eloquent:import-assets', ['--only-assets' => true])
-            ->doesntExpectOutput('Asset containers imported')
-            ->expectsOutput('Assets imported')
+            ->doesntExpectOutputToContain('Assets containers imported sucessfully.')
+            ->expectsOutputToContain('Assets imported sucessfully.')
             ->assertExitCode(0);
 
         $this->assertCount(0, AssetContainerModel::all());
         $this->assertCount(3, AssetModel::all());
+
+        $this->assertDatabaseMissing('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
+    }
+
+    /** @test */
+    public function it_imports_assets_with_console_question()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('two.jpg')->upload(UploadedFile::fake()->image('two.jpg'));
+        $container->makeAsset('subdirectory/other.txt')->upload(UploadedFile::fake()->create('other.txt'));
+
+        $this->assertCount(0, AssetContainerModel::all());
+        $this->assertCount(0, AssetModel::all());
+
+        $this->artisan('statamic:eloquent:import-assets')
+            ->expectsQuestion('Do you want to import asset containers?', false)
+            ->doesntExpectOutputToContain('Assets containers imported sucessfully.')
+            ->expectsQuestion('Do you want to import assets?', true)
+            ->expectsOutputToContain('Assets imported sucessfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(0, AssetContainerModel::all());
+        $this->assertCount(3, AssetModel::all());
+
+        $this->assertDatabaseMissing('asset_containers', ['handle' => 'test', 'disk' => 'test']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'one.txt']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'two.jpg']);
+        $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 }

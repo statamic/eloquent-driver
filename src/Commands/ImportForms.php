@@ -24,6 +24,7 @@ class ImportForms extends Command
      * @var string
      */
     protected $signature = 'statamic:eloquent:import-forms
+        {--force : Force the import to run, with all prompts answered "yes"}
         {--only-forms : Only import forms}
         {--only-form-submissions : Only import submissions}';
 
@@ -32,14 +33,14 @@ class ImportForms extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based forms and submissions into the database.';
+    protected $description = 'Imports file-based forms & form submissions into the database.';
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -48,7 +49,7 @@ class ImportForms extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(FormContract::class);
         Facade::clearResolvedInstance(SubmissionContract::class);
@@ -58,15 +59,10 @@ class ImportForms extends Command
         app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
-    private function importForms()
+    private function importForms(): void
     {
-        $importForms = $this->option('only-form-submissions') ? false : true;
-        $importSubmissions = $this->option('only-forms') ? false : true;
-
-        $forms = (new FormRepository)->all();
-
-        $this->withProgressBar($forms, function ($form) use ($importForms, $importSubmissions) {
-            if ($importForms) {
+        $this->withProgressBar((new FormRepository)->all(), function ($form) {
+            if ($this->shouldImportForms()) {
                 $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
 
                 Form::makeModelFromContract($form)
@@ -74,13 +70,13 @@ class ImportForms extends Command
                     ->save();
             }
 
-            if ($importSubmissions) {
+            if ($this->shouldImportFormSubmissions()) {
                 $form->submissions()->each(function ($submission) use ($form) {
                     $timestamp = app('statamic.eloquent.form_submissions.model')::make()->fromDateTime($submission->date());
 
-                    app('statamic.eloquent.form_submissions.model')::where('form', $form->handle())
-                        ->firstOrNew(['created_at' => $timestamp])
+                    app('statamic.eloquent.form_submissions.model')::firstOrNew(['created_at' => $timestamp])
                         ->fill([
+                            'form' => $form->handle(),
                             'data' => $submission->data(),
                             'updated_at' => $timestamp,
                         ])
@@ -89,7 +85,20 @@ class ImportForms extends Command
             }
         });
 
-        $this->newLine();
-        $this->info('Forms imported');
+        $this->components->info('Forms imported successfully.');
+    }
+
+    private function shouldImportForms(): bool
+    {
+        return $this->option('only-forms')
+            || ! $this->option('only-form-submissions')
+            && ($this->option('force') || $this->confirm('Do you want to import forms?'));
+    }
+
+    private function shouldImportFormSubmissions(): bool
+    {
+        return $this->option('only-form-submissions')
+            || ! $this->option('only-forms')
+            && ($this->option('force') || $this->confirm('Do you want to import form submissions?'));
     }
 }
