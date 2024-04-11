@@ -25,8 +25,6 @@ class ImportTaxonomiesTest extends TestCase
 {
     use PreventSavingStacheItemsToDisk;
 
-    protected $shouldUseStringEntryIds = true;
-
     public function setUp(): void
     {
         parent::setUp();
