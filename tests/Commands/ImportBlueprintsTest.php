@@ -63,7 +63,7 @@ class ImportBlueprintsTest extends TestCase
             ->expectsOutput('Fieldsets imported')
             ->assertExitCode(0);
 
-        $this->assertCount(2, BlueprintModel::all()); // It'll be 2, since Statamic will generate a default blueprint.
+        $this->assertCount(1, BlueprintModel::all());
         $this->assertCount(1, FieldsetModel::all());
     }
 }
