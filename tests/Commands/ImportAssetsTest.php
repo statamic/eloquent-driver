@@ -61,9 +61,9 @@ class ImportAssetsTest extends TestCase
         $this->assertCount(0, AssetModel::all());
 
         $this->artisan('statamic:eloquent:import-assets')
-            ->expectsQuestion('Do you want to import asset containers?', 'yes')
+            ->expectsQuestion('Do you want to import asset containers?', true)
             ->expectsOutput('Asset containers imported')
-            ->expectsQuestion('Do you want to import assets?', 'yes')
+            ->expectsQuestion('Do you want to import assets?', true)
             ->expectsOutput('Assets imported')
             ->assertExitCode(0);
 
