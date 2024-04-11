@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Facade;
 use Statamic\Assets\AssetContainerContents;
 use Statamic\Assets\AssetRepository;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Assets\Asset;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
@@ -37,12 +36,10 @@ class ImportAssets extends Command
      *
      * @var string
      */
-    protected $description = "Imports file-based asset containers & asset metadata into the database.";
+    protected $description = 'Imports file-based asset containers & asset metadata into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -76,7 +73,7 @@ class ImportAssets extends Command
             AssetContainer::makeModelFromContract($container);
         });
 
-        $this->components->info("Assets containers imported sucessfully");
+        $this->components->info('Assets containers imported sucessfully');
     }
 
     private function importAssets(): void
@@ -89,7 +86,7 @@ class ImportAssets extends Command
             EloquentAsset::makeModelFromContract($asset);
         });
 
-        $this->components->info("Assets imported sucessfully");
+        $this->components->info('Assets imported sucessfully');
     }
 
     private function shouldImportAssetContainers(): bool

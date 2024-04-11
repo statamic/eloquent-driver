@@ -34,12 +34,10 @@ class ImportNavs extends Command
      *
      * @var string
      */
-    protected $description = "Imports file-based navigations & nav trees into the database.";
+    protected $description = 'Imports file-based navigations & nav trees into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {

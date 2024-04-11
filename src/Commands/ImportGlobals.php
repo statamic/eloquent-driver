@@ -34,12 +34,10 @@ class ImportGlobals extends Command
      *
      * @var string
      */
-    protected $description = "Imports file-based global sets & variables into the database.";
+    protected $description = 'Imports file-based global sets & variables into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {

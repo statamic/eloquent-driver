@@ -25,17 +25,16 @@ class ImportRevisions extends Command
      *
      * @var string
      */
-    protected $description = "Imports file-based revisions into the database.";
+    protected $description = 'Imports file-based revisions into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
         if (! config('statamic.revisions.enabled')) {
-            $this->components->error("This import can only be run when revisions are enabled.");
+            $this->components->error('This import can only be run when revisions are enabled.');
+
             return 1;
         }
 

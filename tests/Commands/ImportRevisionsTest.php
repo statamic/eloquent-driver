@@ -21,7 +21,7 @@ class ImportRevisionsTest extends TestCase
 
         config()->set('statamic.revisions', [
             'enabled' => true,
-            'path' => __DIR__ . '/tmp',
+            'path' => __DIR__.'/tmp',
         ]);
 
         mkdir(__DIR__.'/tmp');

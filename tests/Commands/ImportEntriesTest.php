@@ -10,13 +10,10 @@ use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Structures\CollectionTree as CollectionTreeContract;
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
-use Statamic\Eloquent\Collections\CollectionModel;
 use Statamic\Eloquent\Entries\EntryModel;
-use Statamic\Eloquent\Structures\TreeModel;
-use Statamic\Facades\Entry;
 use Statamic\Facades\Collection;
+use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
-use Statamic\Structures\CollectionStructure;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
 

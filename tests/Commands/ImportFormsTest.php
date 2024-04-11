@@ -9,9 +9,9 @@ use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Facades\Form;
 use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
-use Statamic\Facades\Form;
 
 class ImportFormsTest extends TestCase
 {
