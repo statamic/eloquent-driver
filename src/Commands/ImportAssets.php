@@ -72,15 +72,19 @@ class ImportAssets extends Command
 
     private function importAssetContainers()
     {
-        if ($this->option('only-assets') || (! $this->option('force') && ! $this->confirm('Do you want to import asset containers?'))) {
+        if ($this->option('only-assets')) {
+            return;
+        }
+
+
+        if (! $this->option('only-asset-containers') && ! $this->option('force') && ! $this->confirm('Do you want to import asset containers?')) {
             return;
         }
 
         $containers = AssetContainerFacade::all();
 
         $this->withProgressBar($containers, function ($container) {
-            $lastModified = $container->fileLastModified();
-            $container->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+            AssetContainer::makeModelFromContract($container);
         });
 
         $this->line('');
@@ -89,7 +93,11 @@ class ImportAssets extends Command
 
     private function importAssets()
     {
-        if ($this->option('only-asset-containers') || (! $this->option('force') && ! $this->confirm('Do you want to import assets?'))) {
+        if ($this->option('only-asset-containers')) {
+            return;
+        }
+
+        if (! $this->option('only-assets') && ! $this->option('force') && ! $this->confirm('Do you want to import assets?')) {
             return;
         }
 

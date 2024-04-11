@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Assets\AssetContainer as FileEntry;
+use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Events\AssetContainerDeleted;
 use Statamic\Events\AssetContainerSaved;
 use Statamic\Support\Str;
@@ -74,6 +75,34 @@ class AssetContainer extends FileEntry
                 'warm_presets'      => $this->warmPresets,
             ],
         ]);
+    }
+
+    public static function makeModelFromContract(AssetContainerContract $source)
+    {
+        $model = app('statamic.eloquent.assets.container_model')::firstOrNew(['handle' => $source->handle()])->fill([
+            'title'    => $source->title(),
+            'disk'     => $source->diskHandle() ?? config('filesystems.default'),
+            'settings' => [
+                'allow_uploads'     => $source->allowUploads(),
+                'allow_downloading' => $source->allowDownloading(),
+                'allow_moving'      => $source->allowMoving(),
+                'allow_renaming'    => $source->allowRenaming(),
+                'create_folders'    => $source->createFolders(),
+                'search_index'      => $source->searchIndex(),
+                'source_preset'     => $source->sourcePreset,
+                'warm_presets'      => $source->warmPresets,
+            ],
+        ]);
+
+        // Set initial timestamps.
+        if (empty($model->created_at) && isset($meta['last_modified'])) {
+            $model->created_at = $source->fileLastModified();
+            $model->updated_at = $source->fileLastModified();
+        }
+
+        $model->save();
+
+        return $model;
     }
 
     public function model($model = null)
