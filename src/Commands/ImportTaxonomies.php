@@ -28,7 +28,10 @@ class ImportTaxonomies extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-taxonomies {--force : Force the operation to run, with all questions yes}';
+    protected $signature = 'statamic:eloquent:import-taxonomies
+        {--force : Force the operation to run, with all questions yes}
+        {--only-taxonomies : Only import taxonomies}
+        {--only-terms : Only import terms}';
 
     /**
      * The console command description.
@@ -66,7 +69,11 @@ class ImportTaxonomies extends Command
 
     private function importTaxonomies()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to import taxonomies?')) {
+        if ($this->option('only-terms')) {
+            return;
+        }
+
+        if (! $this->option('only-taxonomies') && ! $this->option('force') && ! $this->confirm('Do you want to import taxonomies?')) {
             return;
         }
 
@@ -74,10 +81,10 @@ class ImportTaxonomies extends Command
 
         $this->withProgressBar($taxonomies, function ($taxonomy) {
             $lastModified = $taxonomy->fileLastModified();
-            EloquentTaxonomy::makeModelFromContract($taxonomy)->fill([
-                'created_at' => $lastModified,
-                'updated_at' => $lastModified,
-            ])->save();
+
+            EloquentTaxonomy::makeModelFromContract($taxonomy)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
         });
 
         $this->newLine();
@@ -86,7 +93,11 @@ class ImportTaxonomies extends Command
 
     private function importTerms()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to import terms?')) {
+        if ($this->option('only-taxonomies')) {
+            return;
+        }
+
+        if (! $this->option('only-terms') && ! $this->option('force') && ! $this->confirm('Do you want to import terms?')) {
             return;
         }
 
@@ -96,10 +107,10 @@ class ImportTaxonomies extends Command
 
         $this->withProgressBar($terms, function ($term) {
             $lastModified = $term->fileLastModified();
-            EloquentTerm::makeModelFromContract($term)->fill([
-                'created_at' => $lastModified,
-                'updated_at' => $lastModified,
-            ])->save();
+
+            EloquentTerm::makeModelFromContract($term)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
         });
 
         $this->newLine();
