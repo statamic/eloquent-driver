@@ -11,12 +11,12 @@ use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerModel;
 use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades\AssetContainer;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportAssetsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

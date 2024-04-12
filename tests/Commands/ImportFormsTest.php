@@ -10,12 +10,12 @@ use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContrac
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Facades\Form;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportFormsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

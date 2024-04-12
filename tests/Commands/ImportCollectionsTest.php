@@ -14,12 +14,12 @@ use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Structures\CollectionStructure;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportCollectionsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

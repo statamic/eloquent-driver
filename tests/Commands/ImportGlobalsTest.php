@@ -10,12 +10,12 @@ use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel;
 use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Facades\GlobalSet;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportGlobalsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

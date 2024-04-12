@@ -13,12 +13,12 @@ use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportEntriesTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

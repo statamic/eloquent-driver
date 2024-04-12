@@ -8,12 +8,12 @@ use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Eloquent\Revisions\RevisionModel;
 use Statamic\Facades\Revision;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportRevisionsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

@@ -4,7 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Eloquent\ServiceProvider;
-use Statamic\Extend\AddonTestCase;
+use Statamic\Testing\AddonTestCase;
 use Statamic\Facades\Site;
 
 abstract class TestCase extends AddonTestCase
@@ -14,28 +14,6 @@ abstract class TestCase extends AddonTestCase
     protected string $addonServiceProvider = ServiceProvider::class;
 
     protected $shouldUseStringEntryIds = false;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        if (isset($uses[PreventSavingStacheItemsToDisk::class])) {
-            $this->preventSavingStacheItemsToDisk();
-        }
-    }
-
-    public function tearDown(): void
-    {
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        if (isset($uses[PreventSavingStacheItemsToDisk::class])) {
-            $this->deleteFakeStacheDirectory();
-        }
-
-        parent::tearDown();
-    }
 
     protected function resolveApplicationConfiguration($app)
     {

@@ -11,12 +11,12 @@ use Statamic\Eloquent\Taxonomies\TaxonomyModel;
 use Statamic\Eloquent\Taxonomies\TermModel;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportTaxonomiesTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {

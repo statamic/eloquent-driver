@@ -10,12 +10,12 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Eloquent\Structures\NavModel;
 use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Facades\Nav;
-use Tests\PreventSavingStacheItemsToDisk;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class ImportNavsTest extends TestCase
 {
-    use PreventSavingStacheItemsToDisk;
+    use PreventsSavingStacheItemsToDisk;
 
     public function setUp(): void
     {
