@@ -15,7 +15,7 @@ return new class extends Migration {
     public function down()
     {
         Schema::table($this->prefix('entries'), function (Blueprint $table) {
-            $table->string('status');
+            $table->string('status')->nullable();
         });
     }
 };
