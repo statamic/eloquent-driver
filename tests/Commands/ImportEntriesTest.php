@@ -24,6 +24,8 @@ class ImportEntriesTest extends TestCase
     {
         parent::setUp();
 
+        $this->shouldUseStringEntryIds = true;
+
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
         Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
 
