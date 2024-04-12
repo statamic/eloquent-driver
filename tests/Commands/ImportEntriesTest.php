@@ -22,9 +22,9 @@ class ImportEntriesTest extends TestCase
 
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->shouldUseStringEntryIds = true;
+
+        parent::setUp();
 
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
         Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
