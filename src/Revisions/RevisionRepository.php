@@ -10,7 +10,7 @@ class RevisionRepository extends StacheRepository
 {
     public function make(): RevisionContract
     {
-        return app('statamic.eloquent.revisions.model');
+        return new (app('statamic.eloquent.revisions.model'));
     }
 
     public function whereKey($key)
