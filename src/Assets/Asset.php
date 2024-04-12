@@ -223,4 +223,11 @@ class Asset extends FileAsset
             'data' => $this->data()->toArray(),
         ]);
     }
+
+    private function clearCaches()
+    {
+        Blink::forget($this->metaCacheKey());
+
+        parent::clearCaches();
+    }
 }
