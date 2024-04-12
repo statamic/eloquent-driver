@@ -55,6 +55,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
         \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
+        \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
     ];
 
     protected $listen = [
