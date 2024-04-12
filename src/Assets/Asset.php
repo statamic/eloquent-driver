@@ -3,17 +3,14 @@
 namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Data\HasDirtyState;
-use Statamic\Events\AssetUploaded;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Asset extends FileAsset
 {
@@ -62,8 +59,7 @@ class Asset extends FileAsset
             return $meta;
         }
 
-        return $this->meta = Cache::rememberForever($this->metaCacheKey(), function () {
-            $handle = $this->container()->handle().'::'.$this->metaPath();
+        return Blink::once($this->metaCacheKey(), function () {
             if ($model = app('statamic.eloquent.assets.model')::where([
                 'container' => $this->containerHandle(),
                 'folder' => $this->folder(),
@@ -72,7 +68,7 @@ class Asset extends FileAsset
                 return $model->meta;
             }
 
-            $this->writeMeta($meta = $this->generateMeta());
+            $meta = $this->generateMeta();
 
             if (! $meta['data']) {
                 $meta['data'] = [];
@@ -214,24 +210,6 @@ class Asset extends FileAsset
                 $this->writeMeta($meta);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * Upload a file.
-     *
-     * @return $this
-     */
-    public function upload(UploadedFile $file)
-    {
-        $path = Uploader::asset($this)->upload($file);
-
-        $this
-            ->path($path)
-            ->save();
-
-        AssetUploaded::dispatch($this);
 
         return $this;
     }

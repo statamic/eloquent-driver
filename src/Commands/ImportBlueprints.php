@@ -130,8 +130,8 @@ class ImportBlueprints extends Command
             ->getFilesByTypeRecursively($directory, 'yaml');
 
         $this->withProgressBar($files, function ($path) use ($directory) {
-            $basename = str_after($path, str_finish($directory, '/'));
-            $handle = str_before($basename, '.yaml');
+            $basename = Str::after($path, Str::finish($directory, '/'));
+            $handle = Str::before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
             $fieldset = Fieldset::make($handle)
