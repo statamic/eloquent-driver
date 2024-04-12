@@ -151,8 +151,6 @@ class Entry extends FileEntry
             return $this;
         }
 
-        $class = app('statamic.eloquent.entries.model');
-
         if ($this->origin) {
             if (! $this->origin instanceof EntryContract) {
                 $this->origin = EntryFacade::find($this->origin);
