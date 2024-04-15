@@ -3,6 +3,8 @@
 namespace Tests\Data\Entries;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Carbon;
+use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -25,6 +27,9 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entry_is_found_within_all_created_entries_using_entry_facade_with_find_method()
     {
+        Carbon::setTestNow(Carbon::now());
+        $this->freezeTime();
+
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $retrievedEntry = Entry::query()->find($searchedEntry->id());
 
@@ -45,7 +50,7 @@ class EntryQueryBuilderTest extends TestCase
         $retrievedEntry->model(null);
         $searchedEntry->model(null);
 
-        $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
+        $this->assertSame(json_encode(['foo' => $searchedEntry->foo, 'collection' => $searchedEntry->collection()]), json_encode($retrievedEntry));
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
     }
 
@@ -791,5 +796,49 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_ordered_by_a_mapped_data_column()
+    {
+        EloquentEntry::hook('data-column-mappings', fn ($payload, $next) => [
+            'foo' => 'foo',
+        ]);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'foo' => 2])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'foo' => 3])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'foo' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('foo', 'desc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function entries_can_be_queried_by_a_mapped_data_column()
+    {
+        EloquentEntry::hook('data-column-mappings', fn ($payload, $next) => [
+            'foo' => 'foo',
+        ]);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'foo' => 2])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'foo' => 3])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'foo' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->where('foo', 3)->get();
+
+        $this->assertCount(1, $entries);
+        $this->assertEquals(['Post 2'], $entries->map->title->all());
     }
 }
