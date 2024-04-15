@@ -243,4 +243,31 @@ class EntryTest extends TestCase
 
         $this->assertEquals($entry->descendants()->get('fr')->model()->date, '2024-01-01 00:00:00');
     }
+
+    /** @test */
+    public function it_stores_mapped_data_values()
+    {
+        $collection = Collection::make('blog')->title('blog')->routes([
+            'en' => '/blog/{slug}',
+        ])->save();
+
+        Entry::hook('data-column-mappings', fn ($payload, $next) => [
+            'foo' => 'foo',
+        ]);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        $entry = (new Entry())
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data([
+                'foo' => 'bar',
+            ]);
+
+        $entry->save();
+
+        $this->assertEquals('bar', $entry->model()->foo);
+    }
 }

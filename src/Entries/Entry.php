@@ -7,14 +7,21 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Support\Traits\Hookable;
 
 class Entry extends FileEntry
 {
+    use Hookable;
+
     protected $model;
 
     public static function fromModel(Model $model)
     {
         $data = isset($model->data['__localized_fields']) ? collect($model->data)->only($model->data['__localized_fields']) : $model->data;
+
+        foreach ((new self)->getDataColumnMappings() as $from => $to) {
+            $data[$from] = $model->$to;
+        }
 
         $entry = (new static())
             ->origin($model->origin_id)
@@ -93,6 +100,8 @@ class Entry extends FileEntry
             $data->put('parent', (string) $parent->id);
         }
 
+        $dataMappings = (new self)->getDataColumnMappings();
+
         $attributes = [
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
@@ -101,11 +110,15 @@ class Entry extends FileEntry
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
-            'data' => $data->except(EntryQueryBuilder::COLUMNS),
+            'data' => $data->except(array_merge(EntryQueryBuilder::COLUMNS, array_keys($dataMappings))),
             'published' => $source->published(),
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
+
+        foreach ($dataMappings as $from => $to) {
+            $attributes[$to] = $data->get($from);
+        }
 
         if ($id = $source->id()) {
             $attributes['id'] = $id;
@@ -174,5 +187,10 @@ class Entry extends FileEntry
 
         return parent::makeLocalization($site)
             ->data($this->data());
+    }
+
+    public function getDataColumnMappings()
+    {
+        return $this->runHooks('data-column-mappings', []);
     }
 }
