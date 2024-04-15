@@ -4,8 +4,8 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Eloquent\ServiceProvider;
-use Statamic\Extend\AddonTestCase;
 use Statamic\Facades\Site;
+use Statamic\Testing\AddonTestCase;
 
 abstract class TestCase extends AddonTestCase
 {
