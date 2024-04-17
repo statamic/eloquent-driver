@@ -1,76 +1,22 @@
 # Statamic Eloquent Driver
 
-This package provides support for storing your Statamic data in a database rather than the filesystem.
+> Provides support for storing your Statamic data in a database, rather than flat files.
 
-## Installation
+## Installation & Usage
 
-Install using Composer:
-```
-composer require statamic/eloquent-driver
-```
-
-Publish the config file:
+You can install and configure the Eloquent Driver using a single command:
 
 ```
-php artisan vendor:publish --tag="statamic-eloquent-config"
+php please install:eloquent-driver
 ```
 
-Since Statamic uses UUIDs within content files by default, we provide two solutions depending on whether you need to use existing content.
+The command will install the `statamic/eloquent-driver` package, publish the config file, then prompt you to select which repositories you wish to move to the database. The command will then publish the relevant migrations and run `php artisan migrate` behind the scenes.
 
+The command will also give you the opportunity to inidicate whether you'd like existing data to be imported.
 
-### Fresh install of [statamic/statamic](https://github.com/statamic/statamic) (using incrementing ids)
+### Importing flat-file content
 
-If you're starting from scratch, we can use traditional incrementing integers for IDs.
-
-- Delete `content/collections/pages/home.md`
-- Change the structure `tree` in `content/trees/collections/pages.yaml` to `{}`.
-- Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations`.
-- Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table"`.
-- Run `php artisan migrate`.
-
-### Starting from an existing site (using UUIDs)
-
-If you're planning to use existing content, we can use the existing UUIDs. This will prevent you from needing to update any data or relationships.
-
-- In the `config/statamic/eloquent-driver.php` file, change `entries.model` to `\Statamic\Eloquent\Entries\UuidEntryModel::class`.
-- Run `php artisan vendor:publish --provider="Statamic\Eloquent\ServiceProvider" --tag=migrations`.
-- Run `php artisan vendor:publish --tag="statamic-eloquent-entries-table-with-string-ids"`.
-- Run `php artisan migrate`.
-
-### Publishing migrations seperately
-
-Alternatively, you can publish each repository's migrations individually:
-
-`php artisan vendor:publish --tag="statamic-eloquent-asset-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-blueprint-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-collection-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-form-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-global-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-navigation-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-revision-migrations"`
-
-`php artisan vendor:publish --tag="statamic-eloquent-taxonomy-migrations"`
-
-
-## Configuration
-
-The configuration file (`statamic.eloquent-driver`) allows you to choose which repositories you want to be driven by eloquent. By default, all are selected, but if you want to opt out simply change `driver` from `eloquent` to `file` for that repository.
-
-You may also specify your own models for each repository, should you wish to use something different from the one provided.
-
-## Upgrading
-
-After upgrading please ensure to run `php artisan migrate` to update your database to the latest schema.
-
-## Importing existing file based content
-
-We have provided imports from file based content for each repository, which can be run as follows:
+If you originally opt-out of importing existing content, then later change your mind, you can import existing content by running the relevant commands:
 
 - Assets: `php please eloquent:import-assets`
 - Blueprints and Fieldsets: `php please eloquent:import-blueprints`
@@ -82,14 +28,13 @@ We have provided imports from file based content for each repository, which can 
 - Revisions: `php please eloquent:import-revisions`
 - Taxonomies: `php please eloquent:import-taxonomies`
 
-If your assets are eloquent driver and you are managing your assets outside of Statamic, we have provided a sync assets command which will check your container for updates and add database entries for any missing files, while removing any that no longer exist.
+### Syncing Assets
 
-`php please eloquent:sync-assets`
+If your assets are being driven by the Eloquent Driver and you're managing your assets outside of Statamic (eg. directly in the filesystem), you should run the `php please eloquent:sync-assets` command to add any missing files to the database, and remove files that no longer exist on the filesystem.
 
+### Exporting to flat files
 
-## Exporting back to file based content
-
-We have provided exports from eloquent to file based content for each repository, which can be run as follows:
+If you wish to move back to flat-files, you may use the following commands to export your content out of the database:
 
 - Assets: `php please eloquent:export-assets`
 - Blueprints and Fieldsets: `php please eloquent:export-blueprints`
@@ -101,10 +46,22 @@ We have provided exports from eloquent to file based content for each repository
 - Revisions: `php please eloquent:export-revisions`
 - Taxonomies: `php please eloquent:export-taxonomies`
 
-## Storing Users in a Database
+## Configuration
 
-Statamic has a [built-in users eloquent driver](https://statamic.dev/tips/storing-users-in-a-database) if you'd like to cross that bridge too.
+The configuration file, found in `config/statamic/eloquent-driver.php` is automatically published when you install the Eloquent Driver. 
 
-## Mixed driver entries and collections
+For each of the repositories, it allows you to determine if they should be driven by flat-files (`file`) or Eloquent (`eloquent`). Some repositories also have additional options, like the ability to override the model used.
 
-This driver **does not** make it possible to have some collections/entries file driven and some eloquent driven. If that is your requirement you may want to look into using [Runway](https://statamic.com/addons/duncanmcclean/runway).
+## Upgrading
+
+After updating to a new version of the Eloquent Driver, please ensure you run `php artisan migrate` to update your database to the latest schema.
+
+## Questions
+
+### Can I store users in the database too?
+
+By default, Statamic users live in the `users` directory of your project. If you wish to move them to the database, please [follow this guide](https://statamic.dev/tips/storing-users-in-a-database). 
+
+### Can I store some collections in the database, while keeping others in flat-files?
+
+This driver **does not** make it possible to have some collections flat-file driven and others Eloquent driven. If you're looking for that, you may want to checkout the [Runway](https://statamic.com/addons/rad-pack/runway) addon, which is part of The Rad Pack.
