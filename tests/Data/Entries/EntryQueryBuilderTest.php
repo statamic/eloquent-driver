@@ -25,6 +25,8 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entry_is_found_within_all_created_entries_using_entry_facade_with_find_method()
     {
+        $this->freezeTime();
+
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $retrievedEntry = Entry::query()->find($searchedEntry->id());
 
@@ -38,6 +40,8 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
+        $this->freezeTime();
+
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $columns = ['foo', 'collection'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
@@ -45,7 +49,7 @@ class EntryQueryBuilderTest extends TestCase
         $retrievedEntry->model(null);
         $searchedEntry->model(null);
 
-        $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
+        $this->assertSame(json_encode(['foo' => $searchedEntry->foo, 'collection' => $searchedEntry->collection()]), json_encode($retrievedEntry));
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
     }
 
