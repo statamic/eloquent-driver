@@ -3,7 +3,6 @@
 namespace Tests\Data\Entries;
 
 use Facades\Tests\Factories\EntryFactory;
-use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
