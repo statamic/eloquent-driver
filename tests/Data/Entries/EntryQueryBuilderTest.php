@@ -27,7 +27,6 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entry_is_found_within_all_created_entries_using_entry_facade_with_find_method()
     {
-        Carbon::setTestNow(Carbon::now());
         $this->freezeTime();
 
         $searchedEntry = $this->createDummyCollectionAndEntries();
