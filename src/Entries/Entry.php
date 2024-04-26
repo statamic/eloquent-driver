@@ -30,8 +30,8 @@ class Entry extends FileEntry
             $entry->date($model->date);
         }
 
-        if ($model->protect) {
-            $entry->protect = $model->protect;
+        if(isset($model->data['protect'])){
+            $entry->protect = $model->data['protect'];
         }
 
         if (config('statamic.system.track_last_update')) {
