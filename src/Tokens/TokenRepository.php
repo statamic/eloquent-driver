@@ -3,9 +3,9 @@
 namespace Statamic\Eloquent\Tokens;
 
 use Statamic\Contracts\Tokens\Token as TokenContract;
-use Statamic\Tokens\TokenRepository as StatamicTokenRepository;
+use Statamic\Tokens\TokenRepository as FileTokenRepository;
 
-class TokenRepository extends StatamicTokenRepository
+class TokenRepository extends FileTokenRepository
 {
     public function make(?string $token, string $handler, array $data = []): Token
     {
