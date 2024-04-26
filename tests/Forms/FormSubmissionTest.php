@@ -18,7 +18,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
-            'form_id' => $form->id,
+            'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
             ],
@@ -37,7 +37,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
-            'form_id' => $form->id,
+            'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
             ],
@@ -45,7 +45,7 @@ class FormSubmissionTest extends TestCase
 
         $this->assertDatabaseHas('form_submissions', [
             'id' => $submission->id,
-            'form_id' => $form->id,
+            'form' => $form->handle,
             'data' => json_encode([
                 'name' => 'John Doe',
             ]),
@@ -61,19 +61,19 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
-            'form_id' => $form->id,
+            'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
             ],
         ]);
 
         $submission = SubmissionModel::create([
-            'form_id' => $form->id,
+            'form' => $form->handle,
             'data' => [
                 'name' => 'Billy Doe',
             ],
         ]);
 
-        $this->assertCount(2, $form->submissions()->get());
+        $this->assertCount(2, SubmissionModel::all());
     }
 }

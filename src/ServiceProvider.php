@@ -9,6 +9,7 @@ use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
+use Statamic\Contracts\Forms\SubmissionRepository as FormSubmissionRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
@@ -25,6 +26,8 @@ use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Eloquent\Forms\FormRepository;
+use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
+use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
@@ -53,6 +56,8 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
         \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
         \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
+        \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
+        \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
     ];
 
     protected $listen = [
@@ -104,18 +109,27 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->publishes($taxonomyMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_taxonomies_table.php' => database_path('migrations/2024_03_07_100000_create_taxonomies_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php' => database_path('migrations/2024_03_07_100000_create_terms_table.php'),
         ], 'statamic-eloquent-taxonomy-migrations');
+
+        $this->publishes($termMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_terms_table.php' => database_path('migrations/2024_03_07_100000_create_terms_table.php'),
+        ], 'statamic-eloquent-term-migrations');
 
         $this->publishes($globalMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_globals_table.php' => database_path('migrations/2024_03_07_100000_create_globals_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php' => database_path('migrations/2024_03_07_100000_create_global_variables_table.php'),
         ], 'statamic-eloquent-global-migrations');
+
+        $this->publishes($globalVariablesMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_global_variables_table.php' => database_path('migrations/2024_03_07_100000_create_global_variables_table.php'),
+        ], 'statamic-eloquent-global-variables-migrations');
 
         $this->publishes($navigationMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_navigations_table.php' => database_path('migrations/2024_03_07_100000_create_navigations_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
         ], 'statamic-eloquent-navigation-migrations');
+
+        $this->publishes($navigationTreeMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_navigation_trees_table.php' => database_path('migrations/2024_03_07_100000_create_navigation_trees_table.php'),
+        ], 'statamic-eloquent-navigation-tree-migrations');
 
         $this->publishes($collectionMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_collections_table.php' => database_path('migrations/2024_03_07_100000_create_collections_table.php'),
@@ -128,11 +142,17 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($formMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php' => database_path('migrations/2024_03_07_100000_create_forms_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
         ], 'statamic-eloquent-form-migrations');
 
-        $this->publishes($assetMigrations = [
+        $this->publishes($formSubmissionMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
+        ], 'statamic-eloquent-form-submission-migrations');
+
+        $this->publishes($assetContainerMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_containers_table.php' => database_path('migrations/2024_03_07_100000_create_asset_containers_table.php'),
+        ], 'statamic-eloquent-asset-container-migrations');
+
+        $this->publishes($assetMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_asset_table.php' => database_path('migrations/2024_03_07_100000_create_asset_table.php'),
         ], 'statamic-eloquent-asset-migrations');
 
@@ -147,11 +167,16 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
+                $termMigrations,
                 $globalMigrations,
+                $globalVariablesMigrations,
                 $navigationMigrations,
+                $navigationTreeMigrations,
                 $collectionMigrations,
                 $blueprintMigrations,
                 $formMigrations,
+                $formSubmissionMigrations,
+                $assetContainerMigrations,
                 $assetMigrations,
                 $revisionMigrations,
                 $tokenMigrations
@@ -177,6 +202,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerCollectionTrees();
         $this->registerEntries();
         $this->registerForms();
+        $this->registerFormSubmissions();
         $this->registerGlobals();
         $this->registerGlobalVariables();
         $this->registerRevisions();
@@ -327,11 +353,28 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.forms.model');
         });
 
-        $this->app->bind('statamic.eloquent.forms.submission_model', function () {
-            return config('statamic.eloquent-driver.forms.submission_model');
+        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+    }
+
+    private function registerFormSubmissions()
+    {
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.forms.submission_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.driver' : 'statamic.eloquent-driver.form_submissions.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(FormSubmissionRepositoryContract::class, SubmissionRepository::class);
+
+        $this->app->bind('statamic.eloquent.form_submissions.model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.submission_model' : 'statamic.eloquent-driver.form_submissions.model');
         });
 
-        Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+        $this->app->bind(SubmissionQueryBuilder::class, function ($app) {
+            return new SubmissionQueryBuilder(
+                $app['statamic.eloquent.form_submissions.model']::query()
+            );
+        });
     }
 
     private function registerGlobals()

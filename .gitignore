@@ -3,3 +3,4 @@ vendor
 .phpunit.result.cache
 .php_cs.cache
 .nova/*
+.phpunit.cache

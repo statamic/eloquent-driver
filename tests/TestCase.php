@@ -3,10 +3,15 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Statamic\Eloquent\ServiceProvider;
+use Statamic\Facades\Site;
+use Statamic\Testing\AddonTestCase;
 
-abstract class TestCase extends \Orchestra\Testbench\TestCase
+abstract class TestCase extends AddonTestCase
 {
     use RefreshDatabase;
+
+    protected string $addonServiceProvider = ServiceProvider::class;
 
     protected $shouldFakeVersion = true;
 
@@ -14,50 +19,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected $shouldUseStringEntryIds = false;
 
-    protected function setUp(): void
-    {
-        require_once __DIR__.'/ConsoleKernel.php';
-
-        parent::setUp();
-
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        if ($this->shouldFakeVersion) {
-            \Facades\Statamic\Version::shouldReceive('get')->zeroOrMoreTimes()->andReturn('3.0.0-testing');
-            $this->addToAssertionCount(-1); // Dont want to assert this
-        }
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-    }
-
-    protected function getPackageProviders($app)
-    {
-        return [
-            \Statamic\Providers\StatamicServiceProvider::class,
-            \Statamic\Eloquent\ServiceProvider::class,
-            \Wilderborn\Partyline\ServiceProvider::class,
-        ];
-    }
-
-    protected function getPackageAliases($app)
-    {
-        return ['Statamic' => 'Statamic\Statamic'];
-    }
-
     protected function resolveApplicationConfiguration($app)
     {
         parent::resolveApplicationConfiguration($app);
 
-        $configs = [
-            'eloquent-driver',
-        ];
-
-        foreach ($configs as $config) {
-            $app['config']->set("statamic.$config", require (__DIR__."/../config/{$config}.php"));
-        }
+        $app['config']->set('statamic.eloquent-driver', require (__DIR__.'/../config/eloquent-driver.php'));
 
         collect(config('statamic.eloquent-driver'))
             ->filter(fn ($config) => isset($config['driver']))
@@ -66,22 +32,22 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function getEnvironmentSetUp($app)
     {
+        parent::getEnvironmentSetUp($app);
+
         // We changed the default sites setup but the tests assume defaults like the following.
-        $app['config']->set('statamic.sites', [
-            'default' => 'en',
-            'sites' => [
-                'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
-            ],
+        Site::setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
         ]);
+
         $app['config']->set('auth.providers.users.driver', 'statamic');
         $app['config']->set('statamic.stache.watcher', false);
-        $app['config']->set('statamic.users.repository', 'file');
         $app['config']->set('statamic.stache.stores.users', [
             'class' => \Statamic\Stache\Stores\UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
         $app['config']->set('statamic.editions.pro', true);
+        $app['config']->set('statamic.system.multisite', true);
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
@@ -121,55 +87,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }
 
         $this->assertEquals(count($items), $matches, 'Failed asserting that every item is an instance of '.$class);
-    }
-
-    protected function assertContainsHtml($string)
-    {
-        preg_match('/<[^<]+>/', $string, $matches);
-
-        $this->assertNotEmpty($matches, 'Failed asserting that string contains HTML.');
-    }
-
-    public static function assertArraySubset($subset, $array, bool $checkForObjectIdentity = false, string $message = ''): void
-    {
-        $class = version_compare(app()->version(), 7, '>=') ? \Illuminate\Testing\Assert::class : \Illuminate\Foundation\Testing\Assert::class;
-        $class::assertArraySubset($subset, $array, $checkForObjectIdentity, $message);
-    }
-
-    // This method is unavailable on earlier versions of Laravel.
-    public function partialMock($abstract, ?\Closure $mock = null)
-    {
-        $mock = \Mockery::mock(...array_filter(func_get_args()))->makePartial();
-        $this->app->instance($abstract, $mock);
-
-        return $mock;
-    }
-
-    /**
-     * @deprecated
-     */
-    public static function assertFileNotExists(string $filename, string $message = ''): void
-    {
-        method_exists(static::class, 'assertFileDoesNotExist')
-            ? static::assertFileDoesNotExist($filename, $message)
-            : parent::assertFileNotExists($filename, $message);
-    }
-
-    /**
-     * @deprecated
-     */
-    public static function assertDirectoryNotExists(string $filename, string $message = ''): void
-    {
-        method_exists(static::class, 'assertDirectoryDoesNotExist')
-            ? static::assertDirectoryDoesNotExist($filename, $message)
-            : parent::assertDirectoryNotExists($filename, $message);
-    }
-
-    public static function assertMatchesRegularExpression(string $pattern, string $string, string $message = ''): void
-    {
-        method_exists(\PHPUnit\Framework\Assert::class, 'assertMatchesRegularExpression')
-            ? parent::assertMatchesRegularExpression($pattern, $string, $message)
-            : parent::assertRegExp($pattern, $string, $message);
     }
 
     protected function isUsingSqlite()

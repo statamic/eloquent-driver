@@ -10,11 +10,11 @@ return new class extends Migration
     {
         Schema::create($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('form_id')->index();
+            $table->string('form', 30)->nullable()->index();
             $table->jsonb('data')->nullable();
             $table->timestamps(6);
 
-            $table->unique(['form_id', 'created_at']);
+            $table->unique(['form', 'created_at']);
         });
     }
 
