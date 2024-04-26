@@ -58,6 +58,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         foreach ($configs as $config) {
             $app['config']->set("statamic.$config", require (__DIR__."/../config/{$config}.php"));
         }
+
+        collect(config('statamic.eloquent-driver'))
+            ->filter(fn ($config) => isset($config['driver']))
+            ->each(fn ($config, $key) => $app['config']->set("statamic.eloquent-driver.{$key}.driver", 'eloquent'));
     }
 
     protected function getEnvironmentSetUp($app)
