@@ -229,6 +229,7 @@ class Asset extends FileAsset
     {
         $this->meta = null;
 
+        Blink::forget("eloquent-asset-{$this->id()}");
         Blink::forget($this->metaCacheKey());
         Cache::forget($this->metaCacheKey());
     }
