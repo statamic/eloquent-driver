@@ -82,4 +82,9 @@ return [
         'driver' => 'eloquent',
         'model' => \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
+
+    'tokens' => [
+        'driver' => 'eloquent',
+        'model' => \Statamic\Eloquent\Tokens\TokenModel::class,
+    ],
 ];

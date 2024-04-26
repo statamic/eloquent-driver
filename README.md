@@ -57,6 +57,8 @@ Alternatively, you can publish each repository's migrations individually:
 
 `php artisan vendor:publish --tag="statamic-eloquent-taxonomy-migrations"`
 
+`php artisan vendor:publish --tag="statamic-eloquent-token-migrations"`
+
 
 ## Configuration
 
