@@ -84,7 +84,7 @@ return [
     ],
 
     'tokens' => [
-        'driver' => 'eloquent',
+        'driver' => 'file',
         'model' => \Statamic\Eloquent\Tokens\TokenModel::class,
     ],
 ];
