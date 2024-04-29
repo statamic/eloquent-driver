@@ -4,9 +4,9 @@ namespace Statamic\Eloquent\Tokens;
 
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Tokens\Token as Contract;
-use Statamic\Tokens\Token as FileToken;
+use Statamic\Tokens\Token as AbstractToken;
 
-class Token extends FileToken
+class Token extends AbstractToken
 {
     protected $model;
 
@@ -42,18 +42,5 @@ class Token extends FileToken
         $this->model = $model;
 
         return $this;
-    }
-
-    public function save()
-    {
-        $model = $this->toModel();
-        $model->save();
-
-        $this->model($model->fresh());
-    }
-
-    public function delete()
-    {
-        $this->model()->delete();
     }
 }

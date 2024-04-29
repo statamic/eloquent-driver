@@ -3,40 +3,32 @@
 namespace Statamic\Eloquent\Tokens;
 
 use Statamic\Contracts\Tokens\Token as TokenContract;
-use Statamic\Tokens\TokenRepository as FileTokenRepository;
+use Statamic\Tokens\TokenRepository as Repository;
 
-class TokenRepository extends FileTokenRepository
+class TokenRepository extends Repository
 {
-    public function make(?string $token, string $handler, array $data = []): Token
-    {
-        return new Token($token, $handler, $data);
-    }
-
-    public function find($token)
+    public function find(string $token): ?Token
     {
         $model = app('statamic.eloquent.tokens.model')::whereToken($token)->first();
 
         if (! $model) {
-            return;
+            return null;
         }
 
         return Token::fromModel($model);
     }
 
-    public function save($entry)
+    public function save(TokenContract $token): bool
     {
-        $model = $entry->toModel();
-        $model->save();
-
-        $entry->model($model->fresh());
+        return $token->toModel()->save();
     }
 
-    public function delete($entry)
+    public function delete(TokenContract $token): bool
     {
-        $entry->model()->delete();
+        return $token->toModel()->delete();
     }
 
-    public function collectGarbage()
+    public function collectGarbage(): void
     {
         app('statamic.eloquent.tokens.model')::where('expire_at', '<', now())->delete();
     }

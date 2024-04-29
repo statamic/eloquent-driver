@@ -17,6 +17,7 @@ use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryCo
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Contracts\Tokens\TokenRepository as TokenRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetQueryBuilder;
@@ -39,7 +40,6 @@ use Statamic\Eloquent\Tokens\TokenRepository;
 use Statamic\Events\CollectionTreeSaved;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
-use Statamic\Tokens\TokenRepository as FileTokenRepository;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -453,7 +453,7 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.tokens.model');
         });
 
-        Statamic::repository(FileTokenRepository::class, TokenRepository::class);
+        Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
     protected function addAboutCommandInfo()
