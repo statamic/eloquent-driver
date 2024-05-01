@@ -16,6 +16,8 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     private $selectedQueryColumns;
 
+    private const STATUSES = ['published', 'draft', 'scheduled', 'expired'];
+
     const COLUMNS = [
         'id', 'site', 'origin_id', 'published', 'slug', 'uri',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
@@ -160,5 +162,67 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function with($relations, $callback = null)
     {
         return $this;
+    }
+
+    public function whereStatus(string $status)
+    {
+        if (! in_array($status, self::STATUSES)) {
+            throw new \Exception("Invalid status [$status]");
+        }
+
+        if ($status === 'draft') {
+            return $this->where('published', false);
+        }
+
+        $this->where('published', true);
+
+        return $this->where(fn ($query) => $this
+            ->getCollectionsForStatus()
+            ->each(fn ($collection) => $query->orWhere(fn ($q) => $this->addCollectionStatusLogicToQuery($q, $status, $collection))));
+    }
+
+    private function getCollectionsForStatus()
+    {
+        // Since we have to add nested queries for each collection, if collections have been provided,
+        // we'll use those to avoid the need for adding unnecessary query clauses.
+
+        $wheres = collect($this->builder->getQuery()->wheres);
+
+        if ($wheres->where('column', 'collection')->isEmpty()) {
+            return Collection::all();
+        }
+
+        return $wheres->where('column', 'collection')->pluck('value')->map(fn ($handle) => Collection::find($handle));
+    }
+
+    private function addCollectionStatusLogicToQuery($query, $status, $collection)
+    {
+        $query->where('collection', $collection->handle());
+
+        if ($collection->futureDateBehavior() === 'public' && $collection->pastDateBehavior() === 'public') {
+            if ($status === 'scheduled' || $status === 'expired') {
+                $query->where('date', 'invalid'); // intentionally trigger no results.
+            }
+        }
+
+        if ($collection->futureDateBehavior() === 'private') {
+            $status === 'scheduled'
+                ? $query->where('date', '>', now())
+                : $query->where('date', '<', now());
+
+            if ($status === 'expired') {
+                $query->where('date', 'invalid'); // intentionally trigger no results.
+            }
+        }
+
+        if ($collection->pastDateBehavior() === 'private') {
+            $status === 'expired'
+                ? $query->where('date', '<', now())
+                : $query->where('date', '>', now());
+
+            if ($status === 'scheduled') {
+                $query->where('date', 'invalid'); // intentionally trigger no results.
+            }
+        }
     }
 }
