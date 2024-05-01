@@ -164,6 +164,24 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return $this;
     }
 
+    public function where($column, $operator = null, $value = null, $boolean = 'and')
+    {
+        if ($column === 'status') {
+            trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
+        }
+
+        return parent::where($column, $operator, $value, $boolean);
+    }
+
+    public function whereIn($column, $values, $boolean = 'and')
+    {
+        if ($column === 'status') {
+            trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
+        }
+
+        return parent::whereIn($column, $values, $boolean);
+    }
+
     public function whereStatus(string $status)
     {
         if (! in_array($status, self::STATUSES)) {
