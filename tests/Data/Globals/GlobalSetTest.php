@@ -3,7 +3,6 @@
 namespace Tests\Data\Globals;
 
 use Statamic\Eloquent\Globals\GlobalSet;
-use Statamic\Facades\Site;
 use Tests\TestCase;
 
 class GlobalSetTest extends TestCase

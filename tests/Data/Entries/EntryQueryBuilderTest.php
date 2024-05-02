@@ -6,7 +6,6 @@ use Facades\Tests\Factories\EntryFactory;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Site;
 use Tests\TestCase;
 
 class EntryQueryBuilderTest extends TestCase
