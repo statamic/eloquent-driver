@@ -43,7 +43,6 @@ abstract class TestCase extends AddonTestCase
         ]);
 
         $app['config']->set('statamic.editions.pro', true);
-        $app['config']->set('statamic.system.multisite', true);
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
@@ -104,5 +103,12 @@ abstract class TestCase extends AddonTestCase
         $this->shouldUseStringEntryIds
             ? $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php')
             : $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php');
+    }
+
+    protected function setSites($sites)
+    {
+        Site::setSites($sites);
+
+        config()->set('statamic.system.multisite', Site::hasMultiple());
     }
 }

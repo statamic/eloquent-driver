@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Contracts\Assets\Asset as AssetContract;
@@ -222,5 +223,14 @@ class Asset extends FileAsset
             'basename' => $this->basename(),
             'data' => $this->data()->toArray(),
         ]);
+    }
+
+    private function clearCaches()
+    {
+        $this->meta = null;
+
+        Blink::forget("eloquent-asset-{$this->id()}");
+        Blink::forget($this->metaCacheKey());
+        Cache::forget($this->metaCacheKey());
     }
 }
