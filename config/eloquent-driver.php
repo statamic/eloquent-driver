@@ -86,4 +86,9 @@ return [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Taxonomies\TermModel::class,
     ],
+
+    'tokens' => [
+        'driver' => 'file',
+        'model' => \Statamic\Eloquent\Tokens\TokenModel::class,
+    ],
 ];
