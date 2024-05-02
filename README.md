@@ -12,7 +12,7 @@ php please install:eloquent-driver
 
 The command will install the `statamic/eloquent-driver` package, publish the config file, then prompt you to select which repositories you wish to move to the database. The command will then publish the relevant migrations and run `php artisan migrate` behind the scenes.
 
-The command will also give you the opportunity to inidicate whether you'd like existing data to be imported.
+The command will also give you the opportunity to indicate whether you'd like existing data to be imported.
 
 ### Importing flat-file content
 

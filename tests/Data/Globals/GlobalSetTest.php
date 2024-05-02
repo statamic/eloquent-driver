@@ -3,7 +3,6 @@
 namespace Tests\Data\Globals;
 
 use Statamic\Eloquent\Globals\GlobalSet;
-use Statamic\Facades\Site;
 use Tests\TestCase;
 
 class GlobalSetTest extends TestCase
@@ -13,7 +12,7 @@ class GlobalSetTest extends TestCase
     {
         config()->set('statamic.system.multisite', false);
 
-        Site::setSites([
+        $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
         ]);
 
@@ -43,7 +42,7 @@ EOT;
     {
         config()->set('statamic.system.multisite', true);
 
-        Site::setSites([
+        $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
             'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
