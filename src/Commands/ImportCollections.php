@@ -25,21 +25,22 @@ class ImportCollections extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-collections {--force : Force the operation to run, with all questions yes}';
+    protected $signature = 'statamic:eloquent:import-collections
+        {--force : Force the import to run, with all prompts answered "yes"}
+        {--only-collections : Only import collections}
+        {--only-collection-trees : Only import collection trees}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Imports file based collections into the database.';
+    protected $description = 'Imports file-based collections & collection trees into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->usingDefaultRepositories(function () {
             $this->importCollections();
@@ -47,13 +48,12 @@ class ImportCollections extends Command
 
         $this->updateEntryOrder();
 
-        $this->newLine();
-        $this->info('Collections imported');
+        $this->components->info('Collections imported successfully.');
 
         return 0;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
+    private function usingDefaultRepositories(Closure $callback): void
     {
         $originalRepo = get_class(app()->make(CollectionRepositoryContract::class));
         $originalTreeRepo = get_class(app()->make(CollectionTreeRepositoryContract::class));
@@ -76,20 +76,10 @@ class ImportCollections extends Command
         Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
     }
 
-    private function importCollections()
+    private function importCollections(): void
     {
-        if (! $this->option('force')) {
-            $importCollections = $this->confirm('Do you want to import collections?');
-            $importCollectionTrees = $this->confirm('Do you want to import collections trees?');
-        } else {
-            $importCollections = true;
-            $importCollectionTrees = true;
-        }
-
-        $collections = CollectionFacade::all();
-
-        $this->withProgressBar($collections, function ($collection) use ($importCollections, $importCollectionTrees) {
-            if ($importCollections) {
+        $this->withProgressBar(CollectionFacade::all(), function ($collection) {
+            if ($this->shouldImportCollections()) {
                 $lastModified = $collection->fileLastModified();
 
                 EloquentCollection::makeModelFromContract($collection)
@@ -97,9 +87,10 @@ class ImportCollections extends Command
                     ->save();
             }
 
-            if ($importCollectionTrees && ($structure = $collection->structure())) {
+            if ($this->shouldImportCollectionTrees() && $structure = $collection->structure()) {
                 $structure->trees()->each(function ($tree) {
                     $lastModified = $tree->fileLastModified();
+
                     app('statamic.eloquent.collections.tree')::makeModelFromContract($tree)
                         ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                         ->save();
@@ -108,10 +99,24 @@ class ImportCollections extends Command
         });
     }
 
-    private function updateEntryOrder()
+    private function updateEntryOrder(): void
     {
         $this->withProgressBar(CollectionFacade::all(), function ($collections) {
             $collections->updateEntryOrder();
         });
+    }
+
+    private function shouldImportCollections(): bool
+    {
+        return $this->option('only-collections')
+            || ! $this->option('only-collection-trees')
+            && ($this->option('force') || $this->confirm('Do you want to import collections?'));
+    }
+
+    private function shouldImportCollectionTrees(): bool
+    {
+        return $this->option('only-collection-trees')
+            || ! $this->option('only-collections')
+            && ($this->option('force') || $this->confirm('Do you want to import collections trees?'));
     }
 }

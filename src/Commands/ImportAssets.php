@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Facade;
 use Statamic\Assets\AssetContainerContents;
 use Statamic\Assets\AssetRepository;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Assets\Asset;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
@@ -27,21 +26,22 @@ class ImportAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-assets {--force : Force the operation to run, with all questions yes}';
+    protected $signature = 'statamic:eloquent:import-assets
+        {--force : Force the import to run, with all prompts answered "yes"}
+        {--only-asset-containers : Only import asset containers}
+        {--only-assets : Only import assets}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Imports file based asset containers into the database.';
+    protected $description = 'Imports file-based asset containers & asset metadata into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -51,7 +51,7 @@ class ImportAssets extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(AssetContainerRepositoryContract::class);
         Facade::clearResolvedInstance(AssetRepositoryContract::class);
@@ -60,43 +60,46 @@ class ImportAssets extends Command
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 
         app()->bind(AssetContainerContract::class, AssetContainer::class);
-        app()->bind(AssetContract::class, Asset::class);
-
-        app()->bind(AssetContainerContents::class, function ($app) {
-            return new AssetContainerContents();
-        });
+        app()->bind(AssetContainerContents::class, fn ($app) => new AssetContainerContents());
     }
 
-    private function importAssetContainers()
+    private function importAssetContainers(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to import asset containers?')) {
+        if (! $this->shouldImportAssetContainers()) {
             return;
         }
 
-        $containers = AssetContainerFacade::all();
-
-        $this->withProgressBar($containers, function ($container) {
-            $lastModified = $container->fileLastModified();
-            $container->toModel()->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])->save();
+        $this->withProgressBar(AssetContainerFacade::all(), function ($container) {
+            AssetContainer::makeModelFromContract($container);
         });
 
-        $this->line('');
-        $this->info('Asset containers imported');
+        $this->components->info('Assets containers imported sucessfully');
     }
 
-    private function importAssets()
+    private function importAssets(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to import assets?')) {
+        if (! $this->shouldImportAssets()) {
             return;
         }
 
-        $assets = AssetFacade::all();
-
-        $this->withProgressBar($assets, function ($asset) {
+        $this->withProgressBar(AssetFacade::all(), function ($asset) {
             EloquentAsset::makeModelFromContract($asset);
         });
 
-        $this->newLine();
-        $this->info('Assets imported');
+        $this->components->info('Assets imported sucessfully');
+    }
+
+    private function shouldImportAssetContainers(): bool
+    {
+        return $this->option('only-asset-containers')
+            || ! $this->option('only-assets')
+            && ($this->option('force') || $this->confirm('Do you want to import asset containers?'));
+    }
+
+    private function shouldImportAssets(): bool
+    {
+        return $this->option('only-assets')
+            || ! $this->option('only-asset-containers')
+            && ($this->option('force') || $this->confirm('Do you want to import assets?'));
     }
 }

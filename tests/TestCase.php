@@ -13,10 +13,6 @@ abstract class TestCase extends AddonTestCase
 
     protected string $addonServiceProvider = ServiceProvider::class;
 
-    protected $shouldFakeVersion = true;
-
-    protected $shouldPreventNavBeingBuilt = true;
-
     protected $shouldUseStringEntryIds = false;
 
     protected function resolveApplicationConfiguration($app)
