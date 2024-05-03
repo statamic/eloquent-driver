@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
+use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
@@ -113,7 +114,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, array_values(Entry::make()->getDataColumnMappings())));
+        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, array_values((new EloquentEntry)->getDataColumnMappings())));
 
         if (! in_array($column, $columns)) {
             if (! Str::startsWith($column, 'data->')) {
