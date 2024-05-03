@@ -8,16 +8,20 @@ use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Query\EloquentQueryBuilder;
+use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
 
 class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
-    use QueriesTaxonomizedEntries;
+    use QueriesEntryStatus,
+        QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
 
+    private const STATUSES = ['published', 'draft', 'scheduled', 'expired'];
+
     const COLUMNS = [
-        'id', 'site', 'origin_id', 'published', 'status', 'slug', 'uri',
+        'id', 'site', 'origin_id', 'published', 'slug', 'uri',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
@@ -160,5 +164,53 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function with($relations, $callback = null)
     {
         return $this;
+    }
+
+    public function where($column, $operator = null, $value = null, $boolean = 'and')
+    {
+        if ($column === 'status') {
+            trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
+        }
+
+        return parent::where($column, $operator, $value, $boolean);
+    }
+
+    public function whereIn($column, $values, $boolean = 'and')
+    {
+        if ($column === 'status') {
+            trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
+        }
+
+        return parent::whereIn($column, $values, $boolean);
+    }
+
+    private function ensureCollectionsAreQueriedForStatusQuery(): void
+    {
+        $wheres = collect($this->builder->getQuery()->wheres);
+
+        // If there are where clauses on the collection column, it means the user has explicitly
+        // queried for them. In that case, we'll use them and skip the auto-detection.
+        if ($wheres->where('column', 'collection')->isNotEmpty()) {
+            return;
+        }
+
+        // Otherwise, we'll detect them by looking at where clauses targeting the "id" column.
+        $ids = $wheres->where('column', 'id')->flatMap(fn ($where) => $where['values'] ?? [$where['value']]);
+
+        // If no IDs were queried, fall back to all collections.
+        $ids->isEmpty()
+            ? $this->whereIn('collection', Collection::handles())
+            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->unique()->values());
+    }
+
+    private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
+    {
+        // Since we have to add nested queries for each collection, we only want to add clauses for the
+        // applicable collections. By this point, there should be where clauses on the collection column.
+
+        return collect($this->builder->getQuery()->wheres)
+            ->where('column', 'collection')
+            ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
+            ->map(fn ($handle) => Collection::find($handle));
     }
 }

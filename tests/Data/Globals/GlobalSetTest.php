@@ -3,7 +3,6 @@
 namespace Tests\Data\Globals;
 
 use Statamic\Eloquent\Globals\GlobalSet;
-use Statamic\Facades\Site;
 use Tests\TestCase;
 
 class GlobalSetTest extends TestCase
@@ -11,11 +10,10 @@ class GlobalSetTest extends TestCase
     /** @test */
     public function it_gets_file_contents_for_saving_with_a_single_site()
     {
-        Site::setConfig([
-            'default' => 'en',
-            'sites'   => [
-                'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
-            ],
+        config()->set('statamic.system.multisite', false);
+
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
         ]);
 
         $set = (new GlobalSet())->title('The title');
@@ -42,13 +40,12 @@ EOT;
     /** @test */
     public function it_gets_file_contents_for_saving_with_multiple_sites()
     {
-        Site::setConfig([
-            'default' => 'en',
-            'sites'   => [
-                'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
-                'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
-                'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
-            ],
+        config()->set('statamic.system.multisite', true);
+
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+            'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
         ]);
 
         $set = (new GlobalSet())->title('The title');

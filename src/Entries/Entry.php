@@ -94,18 +94,17 @@ class Entry extends FileEntry
         }
 
         $attributes = [
-            'origin_id'  => $origin?->id(),
-            'site'       => $source->locale(),
-            'slug'       => $source->slug(),
-            'uri'        => $source->uri(),
-            'date'       => $date,
+            'origin_id' => $origin?->id(),
+            'site' => $source->locale(),
+            'slug' => $source->slug(),
+            'uri' => $source->uri(),
+            'date' => $date,
             'collection' => $source->collectionHandle(),
-            'blueprint'  => $source->blueprint ?? $source->blueprint()->handle(),
-            'data'       => $data->except(EntryQueryBuilder::COLUMNS),
-            'published'  => $source->published(),
-            'status'     => $source->status(),
+            'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
+            'data' => $data->except(EntryQueryBuilder::COLUMNS),
+            'published' => $source->published(),
             'updated_at' => $source->lastModified(),
-            'order'      => $source->order(),
+            'order' => $source->order(),
         ];
 
         if ($id = $source->id()) {
@@ -151,8 +150,6 @@ class Entry extends FileEntry
 
             return $this;
         }
-
-        $class = app('statamic.eloquent.entries.model');
 
         if ($this->origin) {
             if (! $this->origin instanceof EntryContract) {
