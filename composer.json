@@ -25,7 +25,7 @@
     },
     "require": {
         "php": "^8.1",
-        "statamic/cms": "v5.0.0-alpha.6"
+        "statamic/cms": "dev-where-status-trait"
     },
     "require-dev": {
         "doctrine/dbal": "^3.3",
