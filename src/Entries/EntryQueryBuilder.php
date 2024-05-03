@@ -184,7 +184,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return parent::whereIn($column, $values, $boolean);
     }
 
-    private function ensureCollectionsAreQueriedForStatusQuery()
+    private function ensureCollectionsAreQueriedForStatusQuery(): void
     {
         $wheres = collect($this->builder->getQuery()->wheres);
 
@@ -205,7 +205,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->unique()->values());
     }
 
-    private function getCollectionsForStatusQuery()
+    private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
     {
         // Since we have to add nested queries for each collection, we only want to add clauses for the
         // applicable collections. By this point, there should be where clauses on the collection column.
