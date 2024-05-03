@@ -8,11 +8,13 @@ use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Query\EloquentQueryBuilder;
+use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
 
 class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
-    use QueriesTaxonomizedEntries;
+    use QueriesEntryStatus,
+        QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
 
@@ -182,65 +184,35 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return parent::whereIn($column, $values, $boolean);
     }
 
-    public function whereStatus(string $status)
+    private function ensureCollectionsAreQueriedForStatusQuery()
     {
-        if (! in_array($status, self::STATUSES)) {
-            throw new \Exception("Invalid status [$status]");
-        }
-
-        if ($status === 'draft') {
-            return $this->where('published', false);
-        }
-
-        $this->where('published', true);
-
-        return $this->where(fn ($query) => $this
-            ->getCollectionsForStatus()
-            ->each(fn ($collection) => $query->orWhere(fn ($q) => $this->addCollectionStatusLogicToQuery($q, $status, $collection))));
-    }
-
-    private function getCollectionsForStatus()
-    {
-        // Since we have to add nested queries for each collection, if collections have been provided,
-        // we'll use those to avoid the need for adding unnecessary query clauses.
-
         $wheres = collect($this->builder->getQuery()->wheres);
 
-        if ($wheres->where('column', 'collection')->isEmpty()) {
-            return Collection::all();
+        // If there are where clauses on the collection column, it means the user has explicitly
+        // queried for them. In that case, we'll use them and skip the auto-detection.
+        if ($wheres->where('column', 'collection')->isNotEmpty()) {
+            return;
         }
 
-        return $wheres->where('column', 'collection')->pluck('value')->map(fn ($handle) => Collection::find($handle));
+        // Otherwise, we'll detect them by looking at where clauses targeting the "id" column.
+        $ids = $wheres->where('column', 'id')->flatMap(fn ($where) => $where['values'] ?? [$where['value']]);
+
+        // If no IDs were queried, fall back to all collections.
+        if ($ids->isEmpty()) {
+            return $this->whereIn('collection', Collection::handles());
+        }
+
+        $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->unique()->values());
     }
 
-    private function addCollectionStatusLogicToQuery($query, $status, $collection)
+    private function getCollectionsForStatusQuery()
     {
-        $query->where('collection', $collection->handle());
+        // Since we have to add nested queries for each collection, we only want to add clauses for the
+        // applicable collections. By this point, there should be where clauses on the collection column.
 
-        if ($collection->futureDateBehavior() === 'public' && $collection->pastDateBehavior() === 'public') {
-            if ($status === 'scheduled' || $status === 'expired') {
-                $query->where('date', 'invalid'); // intentionally trigger no results.
-            }
-        }
-
-        if ($collection->futureDateBehavior() === 'private') {
-            $status === 'scheduled'
-                ? $query->where('date', '>', now())
-                : $query->where('date', '<', now());
-
-            if ($status === 'expired') {
-                $query->where('date', 'invalid'); // intentionally trigger no results.
-            }
-        }
-
-        if ($collection->pastDateBehavior() === 'private') {
-            $status === 'expired'
-                ? $query->where('date', '<', now())
-                : $query->where('date', '>', now());
-
-            if ($status === 'scheduled') {
-                $query->where('date', 'invalid'); // intentionally trigger no results.
-            }
-        }
+        return collect($this->builder->getQuery()->wheres)
+            ->where('column', 'collection')
+            ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
+            ->map(fn ($handle) => Collection::find($handle));
     }
 }
