@@ -43,7 +43,6 @@ abstract class TestCase extends AddonTestCase
         ]);
 
         $app['config']->set('statamic.editions.pro', true);
-        $app['config']->set('statamic.system.multisite', true);
 
         $app['config']->set('cache.stores.outpost', [
             'driver' => 'file',
