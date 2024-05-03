@@ -838,7 +838,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(1, $entries);
         $this->assertEquals(['Post 2'], $entries->map->title->all());
     }
-          
+
     /** @test */
     public function filtering_using_where_status_column_writes_deprecation_log()
     {
