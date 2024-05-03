@@ -5,7 +5,6 @@ namespace Tests\Data\Taxonomies;
 use Facades\Tests\Factories\EntryFactory;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
-use Statamic\Facades\Site;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
 use Statamic\Taxonomies\LocalizedTerm;
@@ -326,7 +325,7 @@ class TermQueryBuilderTest extends TestCase
     /** @test */
     public function it_substitutes_terms_by_uri_and_site()
     {
-        Site::setSites([
+        $this->setSites([
             'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
         ]);

@@ -18,6 +18,7 @@ use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryCo
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Contracts\Tokens\TokenRepository as TokenRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetQueryBuilder;
@@ -38,6 +39,7 @@ use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
+use Statamic\Eloquent\Tokens\TokenRepository;
 use Statamic\Events\CollectionTreeSaved;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
@@ -158,6 +160,10 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2024_03_07_100000_create_revisions_table.php' => database_path('migrations/2024_03_07_100000_create_revisions_table.php'),
         ], 'statamic-eloquent-revision-migrations');
 
+        $this->publishes($tokenMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_tokens_table.php' => database_path('migrations/2024_03_07_100000_create_tokens_table.php'),
+        ], 'statamic-eloquent-token-migrations');
+
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
@@ -172,7 +178,8 @@ class ServiceProvider extends AddonServiceProvider
                 $formSubmissionMigrations,
                 $assetContainerMigrations,
                 $assetMigrations,
-                $revisionMigrations
+                $revisionMigrations,
+                $tokenMigrations
             ),
             'migrations'
         );
@@ -203,6 +210,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerStructureTrees();
         $this->registerTaxonomies();
         $this->registerTerms();
+        $this->registerTokens();
     }
 
     private function registerAssetContainers()
@@ -476,6 +484,19 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+    }
+
+    public function registerTokens()
+    {
+        if (config('statamic.eloquent-driver.tokens.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        $this->app->bind('statamic.eloquent.tokens.model', function () {
+            return config('statamic.eloquent-driver.tokens.model');
+        });
+
+        Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
     protected function addAboutCommandInfo()

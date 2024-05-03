@@ -13,10 +13,6 @@ abstract class TestCase extends AddonTestCase
 
     protected string $addonServiceProvider = ServiceProvider::class;
 
-    protected $shouldFakeVersion = true;
-
-    protected $shouldPreventNavBeingBuilt = true;
-
     protected $shouldUseStringEntryIds = false;
 
     protected function resolveApplicationConfiguration($app)
@@ -108,5 +104,12 @@ abstract class TestCase extends AddonTestCase
         $this->shouldUseStringEntryIds
             ? $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php')
             : $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php');
+    }
+
+    protected function setSites($sites)
+    {
+        Site::setSites($sites);
+
+        config()->set('statamic.system.multisite', Site::hasMultiple());
     }
 }
