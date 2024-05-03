@@ -856,27 +856,27 @@ class EntryQueryBuilderTest extends TestCase
         EntryFactory::collection('calendar')->slug('calendar-past')->published(true)->date(now()->subDay())->create();
         EntryFactory::collection('calendar')->slug('calendar-past-draft')->published(false)->date(now()->subDay())->create();
 
-        $this->assertEquals($expected, Entry::query()->whereStatus($status)->get()->map->slug()->all());
+        $this->assertEquals($expected, Entry::query()->whereStatus($status)->get()->map->slug()->sort()->all());
     }
 
     public static function filterByStatusProvider()
     {
         return [
             'draft' => ['draft', [
-                'page-draft',
                 'blog-future-draft',
                 'blog-past-draft',
-                'event-future-draft',
-                'event-past-draft',
                 'calendar-future-draft',
                 'calendar-past-draft',
+                'event-future-draft',
+                'event-past-draft',
+                'page-draft',
             ]],
             'published' => ['published', [
-                'page',
                 'blog-past',
-                'event-future',
                 'calendar-future',
                 'calendar-past',
+                'event-future',
+                'page',
             ]],
             'scheduled' => ['scheduled', [
                 'blog-future',
