@@ -89,9 +89,12 @@ class EntryFactory
 
     public function make()
     {
+        $collection = $this->createCollection();
+
         $entry = Entry::make()
             ->locale($this->locale)
-            ->collection($this->createCollection())
+            ->collection($collection)
+            ->blueprint($collection->entryBlueprint())
             ->slug($this->slug)
             ->data($this->data)
             ->origin($this->origin)

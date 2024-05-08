@@ -29,14 +29,12 @@ class ImportBlueprints extends Command
      *
      * @var string
      */
-    protected $description = 'Imports file based blueprints and fieldsets into the database.';
+    protected $description = 'Imports file-based blueprints & fieldsets into the database.';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->useDefaultRepositories();
 
@@ -46,7 +44,7 @@ class ImportBlueprints extends Command
         return 0;
     }
 
-    private function useDefaultRepositories()
+    private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
         Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
@@ -62,7 +60,7 @@ class ImportBlueprints extends Command
         );
     }
 
-    private function importBlueprints()
+    private function importBlueprints(): void
     {
         $directory = resource_path('blueprints');
 
@@ -104,25 +102,21 @@ class ImportBlueprints extends Command
                 ->setHandle($handle)
                 ->setNamespace($namespace ?? null)
                 ->setContents($contents);
+
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
-            $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
-                'handle'    => $blueprint->handle(),
+            app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
+                'handle' => $blueprint->handle(),
                 'namespace' => $blueprint->namespace() ?? null,
-            ])->fill([
-                'data'       => $blueprint->contents(),
-                'created_at' => $lastModified,
-                'updated_at' => $lastModified,
-            ]);
-
-            $model->save();
+            ])
+                ->fill(['data' => $blueprint->contents(), 'created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
         });
 
-        $this->newLine();
-        $this->info('Blueprints imported');
+        $this->components->info('Blueprints imported successfully.');
     }
 
-    private function importFieldsets()
+    private function importFieldsets(): void
     {
         $directory = resource_path('fieldsets');
 
@@ -134,26 +128,21 @@ class ImportBlueprints extends Command
             $handle = Str::before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
-            $fieldset = Fieldset::make($handle)
-                ->setContents(YAML::file($path)->parse());
+            $fieldset = Fieldset::make($handle)->setContents(YAML::file($path)->parse());
+
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
-            $model = app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
+            app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
                 'handle' => $fieldset->handle(),
-            ])->fill([
-                'data'       => $fieldset->contents(),
-                'created_at' => $lastModified,
-                'updated_at' => $lastModified,
-            ]);
-
-            $model->save();
+            ])
+                ->fill(['data' => $fieldset->contents(), 'created_at' => $lastModified, 'updated_at' => $lastModified])
+                ->save();
         });
 
-        $this->newLine();
-        $this->info('Fieldsets imported');
+        $this->components->info('Fieldsets imported successfully.');
     }
 
-    private function getNamespaceAndHandle($blueprint)
+    private function getNamespaceAndHandle(string $blueprint): array
     {
         $blueprint = str_replace('/', '.', $blueprint);
         $parts = explode('.', $blueprint);

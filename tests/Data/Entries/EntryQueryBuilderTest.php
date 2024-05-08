@@ -6,7 +6,6 @@ use Facades\Tests\Factories\EntryFactory;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Site;
 use Tests\TestCase;
 
 class EntryQueryBuilderTest extends TestCase
@@ -25,6 +24,8 @@ class EntryQueryBuilderTest extends TestCase
     /** @test **/
     public function entry_is_found_within_all_created_entries_using_entry_facade_with_find_method()
     {
+        $this->freezeTime();
+
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $retrievedEntry = Entry::query()->find($searchedEntry->id());
 
@@ -45,7 +46,7 @@ class EntryQueryBuilderTest extends TestCase
         $retrievedEntry->model(null);
         $searchedEntry->model(null);
 
-        $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
+        $this->assertSame(json_encode(['foo' => $searchedEntry->foo, 'collection' => $searchedEntry->collection()]), json_encode($retrievedEntry));
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
     }
 
@@ -626,10 +627,10 @@ class EntryQueryBuilderTest extends TestCase
     /** @test */
     public function it_substitutes_entries_by_uri_and_site()
     {
-        Site::setConfig(['sites' => [
+        $this->setSites([
             'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
-        ]]);
+        ]);
 
         Collection::make('posts')->routes('/posts/{slug}')->sites(['en', 'fr'])->save();
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->locale('en')->create();
@@ -791,5 +792,97 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    /** @test */
+    public function filtering_using_where_status_column_writes_deprecation_log()
+    {
+        $this->withoutDeprecationHandling();
+        $this->expectException(\ErrorException::class);
+        $this->expectExceptionMessage('Filtering by status is deprecated. Use whereStatus() instead.');
+
+        $this->createDummyCollectionAndEntries();
+
+        Entry::query()->where('collection', 'posts')->where('status', 'published')->get();
+    }
+
+    /** @test */
+    public function filtering_using_whereIn_status_column_writes_deprecation_log()
+    {
+        $this->withoutDeprecationHandling();
+        $this->expectException(\ErrorException::class);
+        $this->expectExceptionMessage('Filtering by status is deprecated. Use whereStatus() instead.');
+
+        $this->createDummyCollectionAndEntries();
+
+        Entry::query()->where('collection', 'posts')->whereIn('status', ['published'])->get();
+    }
+
+    /** @test */
+    public function filtering_by_unexpected_status_throws_exception()
+    {
+        $this->expectExceptionMessage('Invalid status [foo]');
+
+        Entry::query()->whereStatus('foo')->get();
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider filterByStatusProvider
+     */
+    public function it_filters_by_status($status, $expected)
+    {
+        Collection::make('pages')->dated(false)->save();
+        EntryFactory::collection('pages')->slug('page')->published(true)->create();
+        EntryFactory::collection('pages')->slug('page-draft')->published(false)->create();
+
+        Collection::make('blog')->dated(true)->futureDateBehavior('private')->pastDateBehavior('public')->save();
+        EntryFactory::collection('blog')->slug('blog-future')->published(true)->date(now()->addDay())->create();
+        EntryFactory::collection('blog')->slug('blog-future-draft')->published(false)->date(now()->addDay())->create();
+        EntryFactory::collection('blog')->slug('blog-past')->published(true)->date(now()->subDay())->create();
+        EntryFactory::collection('blog')->slug('blog-past-draft')->published(false)->date(now()->subDay())->create();
+
+        Collection::make('events')->dated(true)->futureDateBehavior('public')->pastDateBehavior('private')->save();
+        EntryFactory::collection('events')->slug('event-future')->published(true)->date(now()->addDay())->create();
+        EntryFactory::collection('events')->slug('event-future-draft')->published(false)->date(now()->addDay())->create();
+        EntryFactory::collection('events')->slug('event-past')->published(true)->date(now()->subDay())->create();
+        EntryFactory::collection('events')->slug('event-past-draft')->published(false)->date(now()->subDay())->create();
+
+        Collection::make('calendar')->dated(true)->futureDateBehavior('public')->pastDateBehavior('public')->save();
+        EntryFactory::collection('calendar')->slug('calendar-future')->published(true)->date(now()->addDay())->create();
+        EntryFactory::collection('calendar')->slug('calendar-future-draft')->published(false)->date(now()->addDay())->create();
+        EntryFactory::collection('calendar')->slug('calendar-past')->published(true)->date(now()->subDay())->create();
+        EntryFactory::collection('calendar')->slug('calendar-past-draft')->published(false)->date(now()->subDay())->create();
+
+        $this->assertEquals($expected, Entry::query()->whereStatus($status)->get()->map->slug()->sort()->all());
+    }
+
+    public static function filterByStatusProvider()
+    {
+        return [
+            'draft' => ['draft', [
+                'blog-future-draft',
+                'blog-past-draft',
+                'calendar-future-draft',
+                'calendar-past-draft',
+                'event-future-draft',
+                'event-past-draft',
+                'page-draft',
+            ]],
+            'published' => ['published', [
+                'blog-past',
+                'calendar-future',
+                'calendar-past',
+                'event-future',
+                'page',
+            ]],
+            'scheduled' => ['scheduled', [
+                'blog-future',
+            ]],
+            'expired' => ['expired', [
+                'event-past',
+            ]],
+        ];
     }
 }
