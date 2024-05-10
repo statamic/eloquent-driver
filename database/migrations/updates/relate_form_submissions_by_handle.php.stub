@@ -24,6 +24,7 @@ return new class extends Migration {
             });
 
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
+            $table->dropForeign(['form_id']);
             $table->dropColumn('form_id');
         });
     }
