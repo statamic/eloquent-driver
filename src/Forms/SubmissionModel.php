@@ -8,6 +8,8 @@ class SubmissionModel extends BaseModel
 {
     protected $guarded = [];
 
+    public $incrementing = false;
+
     protected $table = 'form_submissions';
 
     protected $casts = [
