@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
-            $table->float('id', precision: 4)->index()->unique()->change();
+            $table->float('id', 10, 4)->index()->unique()->change();
         });
     }
 
