@@ -520,6 +520,7 @@ class ServiceProvider extends AddonServiceProvider
             'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
             'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
             'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
+            'Tokens' => config('statamic.eloquent-driver.tokens.driver', 'file'),
         ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 
