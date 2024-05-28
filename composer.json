@@ -28,7 +28,7 @@
         "statamic/cms": "^5.0.1"
     },
     "require-dev": {
-        "doctrine/dbal": "^3.5",
+        "doctrine/dbal": "^3.8",
         "laravel/pint": "^1.0",
         "orchestra/testbench": "^8.0 || ^9.0.2",
         "phpunit/phpunit": "^9.4 || ^10.0 || ^11.0"
