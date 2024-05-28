@@ -16,7 +16,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
-            $table->id('id')->change();
+            $table->dropUnique('form_submissions_id_unique');
+            $table->string('id')->unique()->change();
         });
     }
 };
