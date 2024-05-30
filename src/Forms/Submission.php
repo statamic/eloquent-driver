@@ -37,6 +37,7 @@ class Submission extends FileEntry
         return (! empty($model->id)) ? $model->fill([
             'data' => $this->data,
         ]) : $model->fill([
+            'id' => $this->id(),
             'data' => $this->data,
             'form' => $this->form->handle(),
             'created_at' => $timestamp,
