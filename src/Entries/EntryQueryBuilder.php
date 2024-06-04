@@ -64,8 +64,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                                 $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
                             } elseif (in_array($fieldType, ['date'])) {
                                 // Take time into account when enabled
-                                if ($blueprintField->get('time_enabled'))
-                                {
+                                if ($blueprintField->get('time_enabled')) {
                                     $castType = 'datetime';
                                 } else {
                                     $castType = 'date';
