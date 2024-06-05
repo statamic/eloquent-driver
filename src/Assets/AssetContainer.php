@@ -93,7 +93,7 @@ class AssetContainer extends FileEntry
                 'search_index'      => $source->searchIndex(),
                 'source_preset'     => $source->sourcePreset,
                 'warm_presets'      => $source->warmPresets,
-                'validation_rules'  => $this->validationRules(),
+                'validation_rules'  => $source->validationRules(),
             ],
         ]);
 
