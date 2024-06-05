@@ -58,6 +58,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
+        \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
     ];
 
     protected $listen = [
@@ -146,6 +147,7 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($formSubmissionMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_form_submissions_table.php' => database_path('migrations/2024_03_07_100000_create_form_submissions_table.php'),
+            __DIR__.'/../database/migrations/2024_05_15_100000_modify_form_submissions_id.php' => database_path('migrations/2024_05_15_100000_modify_form_submissions_id.php'),
         ], 'statamic-eloquent-form-submission-migrations');
 
         $this->publishes($assetContainerMigrations = [
@@ -520,6 +522,7 @@ class ServiceProvider extends AddonServiceProvider
             'Revisions' => config('statamic.eloquent-driver.revisions.driver', 'file'),
             'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
             'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
+            'Tokens' => config('statamic.eloquent-driver.tokens.driver', 'file'),
         ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 

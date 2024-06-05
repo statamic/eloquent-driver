@@ -74,6 +74,7 @@ class ImportForms extends Command
 
                     app('statamic.eloquent.form_submissions.model')::firstOrNew(['created_at' => $timestamp])
                         ->fill([
+                            'id' => $submission->id(),
                             'form' => $form->handle(),
                             'data' => $submission->data(),
                             'updated_at' => $timestamp,

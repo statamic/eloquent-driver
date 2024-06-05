@@ -18,6 +18,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
+            'id' => 1111111111.1111,
             'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
@@ -37,6 +38,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
+            'id' => 1111111111.1111,
             'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
@@ -61,6 +63,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
+            'id' => 1111111111.1111,
             'form' => $form->handle,
             'data' => [
                 'name' => 'John Doe',
@@ -68,6 +71,7 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $submission = SubmissionModel::create([
+            'id' => 1111111111.2222,
             'form' => $form->handle,
             'data' => [
                 'name' => 'Billy Doe',
