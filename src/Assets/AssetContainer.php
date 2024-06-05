@@ -52,6 +52,7 @@ class AssetContainer extends FileEntry
             ->searchIndex($model->settings['search_index'] ?? null)
             ->sourcePreset($model->settings['source_preset'] ?? null)
             ->warmPresets($model->settings['warm_presets'] ?? null)
+            ->validationRules($model->settings['validation_rules'] ?? null)
             ->model($model);
 
         return $this;
@@ -73,6 +74,7 @@ class AssetContainer extends FileEntry
                 'search_index'      => $this->searchIndex(),
                 'source_preset'     => $this->sourcePreset,
                 'warm_presets'      => $this->warmPresets,
+                'validation_rules'  => $this->validationRules(),
             ],
         ]);
     }
@@ -91,6 +93,7 @@ class AssetContainer extends FileEntry
                 'search_index'      => $source->searchIndex(),
                 'source_preset'     => $source->sourcePreset,
                 'warm_presets'      => $source->warmPresets,
+                'validation_rules'  => $source->validationRules(),
             ],
         ]);
 
