@@ -21,6 +21,10 @@ class BlueprintRepository extends StacheRepository
                 return null;
             }
 
+            if ($this->isEloquentDrivenNamespace($namespace)) {
+                return parent::find($blueprint);
+            }
+
             $blueprintModel = ($namespace ? $this->filesIn($namespace) : app('statamic.eloquent.blueprints.blueprint_model')::whereNull('namespace'))
                 ->where('handle', $handle)
                 ->first();
@@ -43,12 +47,20 @@ class BlueprintRepository extends StacheRepository
     {
         $this->clearBlinkCaches();
 
+        if ($this->isEloquentDrivenNamespace($blueprint->namespace())) {
+            return parent::save($blueprint);
+        }
+
         $this->updateModel($blueprint);
     }
 
     public function delete(Blueprint $blueprint)
     {
         $this->clearBlinkCaches();
+
+        if ($this->isEloquentDrivenNamespace($blueprint->namespace())) {
+            return parent::delete($blueprint);
+        }
 
         $this->deleteModel($blueprint);
     }
@@ -62,6 +74,10 @@ class BlueprintRepository extends StacheRepository
 
     public function in(string $namespace)
     {
+        if ($this->isEloquentDrivenNamespace($namespace)) {
+            return parent::in($namespace);
+        }
+
         return $this
             ->filesIn($namespace)
             ->map(function ($file) {
@@ -201,5 +217,18 @@ class BlueprintRepository extends StacheRepository
             ->toArray();
 
         return $contents;
+    }
+
+    private function isEloquentDrivenNamespace(string $namespace)
+    {
+        $eloquentNamespaces = config('statamic.eloquent-driver.namespaces', 'all');
+
+        if ($eloquentNamespaces !== 'all') {
+            if (! in_array($namespace, Arr::wrap($eloquentNamespaces))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
