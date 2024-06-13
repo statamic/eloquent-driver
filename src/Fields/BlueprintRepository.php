@@ -225,7 +225,7 @@ class BlueprintRepository extends StacheRepository
             return true;
         }
 
-        $eloquentNamespaces = config('statamic.eloquent-driver.namespaces', 'all');
+        $eloquentNamespaces = config('statamic.eloquent-driver.blueprints.namespaces', 'all');
 
         if ($eloquentNamespaces !== 'all') {
             if (! in_array($namespace, Arr::wrap($eloquentNamespaces))) {
