@@ -12,15 +12,12 @@ class CollectionRepository extends StacheRepository
 {
     public function updateEntryUris($collection, $ids = null)
     {
-        $query = $collection->queryEntries();
-
-        if ($ids) {
-            $query->whereIn('id', $ids);
-        }
-
-        $query->get()->each(function ($entry) {
-            app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
-        });
+        $query = $collection->queryEntries()
+            ->when($ids, fn () => $query->whereIn('id', $ids))
+            ->get()
+            ->each(function ($entry) {
+                app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
+            });
     }
 
     public function all(): IlluminateCollection
@@ -82,11 +79,9 @@ class CollectionRepository extends StacheRepository
 
     public function updateEntryOrder(CollectionContract $collection, $ids = null)
     {
-        $query = $collection->queryEntries();
-        if ($ids) {
-            $query->whereIn('id', $ids);
-        }
-        $query->get(['id'])
+        $query = $collection->queryEntries()
+            ->when($ids, fn () => $query->whereIn('id', $ids))
+            ->get(['id'])
             ->each(function ($entry) {
                 $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
 
