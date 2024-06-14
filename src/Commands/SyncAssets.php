@@ -63,10 +63,12 @@ class SyncAssets extends Command
 
             $this->info($file);
 
-            $asset = Facades\Asset::make()
-                ->container($container->handle())
-                ->path($file)
-                ->saveQuietly();
+            if (! Facades\Asset::find($container->handle().'::'.$file)) {
+                $asset = Facades\Asset::make()
+                    ->container($container->handle())
+                    ->path($file)
+                    ->saveQuietly();
+            }
         });
 
         // delete any assets we have a db entry for that no longer exist
