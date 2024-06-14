@@ -20,6 +20,7 @@ return [
         'driver' => 'file',
         'blueprint_model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
         'fieldset_model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+        'namespaces' => 'all',
     ],
 
     'collections' => [
