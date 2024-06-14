@@ -82,8 +82,11 @@ class CollectionRepository extends StacheRepository
 
     public function updateEntryOrder(CollectionContract $collection, $ids = null)
     {
-        $collection->queryEntries()
-            ->get(['id'])
+        $query = $collection->queryEntries();
+        if ($ids) {
+            $query->whereIn('id', $ids);
+        }
+        $query->get(['id'])
             ->each(function ($entry) {
                 $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
 
