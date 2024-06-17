@@ -203,6 +203,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerCollections();
         $this->registerCollectionTrees();
         $this->registerEntries();
+        $this->registerFieldsets();
         $this->registerForms();
         $this->registerFormSubmissions();
         $this->registerGlobals();
@@ -268,22 +269,13 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
-            return config('statamic.eloquent-driver.blueprints.blueprint_model');
-        });
-
-        $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
-            return config('statamic.eloquent-driver.blueprints.fieldset_model');
+            return config('statamic.eloquent-driver.blueprints.model', config('statamic.eloquent-driver.blueprints.blueprint_model'));
         });
 
         $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
             return (new \Statamic\Eloquent\Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
         });
-
-        $this->app->singleton(
-            'Statamic\Fields\FieldsetRepository',
-            'Statamic\Eloquent\Fields\FieldsetRepository'
-        );
     }
 
     private function registerCollections()
@@ -343,6 +335,24 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
+    }
+
+    private function registerFieldsets()
+    {
+        $usingOldConfigKeys = config()->has('statamic.eloquent-driver.blueprints.fieldset_model');
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.blueprints.driver' : 'statamic.eloquent-driver.fieldsets.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        $this->app->bind('statamic.eloquent.fieldsets.model', function () {
+            return config('statamic.eloquent-driver.fieldsets.model');
+        });
+
+        $this->app->singleton(
+            'Statamic\Fields\FieldsetRepository',
+            'Statamic\Eloquent\Fields\FieldsetRepository'
+        );
     }
 
     private function registerForms()
