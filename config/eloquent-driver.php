@@ -42,7 +42,7 @@ return [
     ],
 
     'fieldsets' => [
-        'driver' => 'eloquent',
+        'driver' => 'file',
         'model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
     ],
 
