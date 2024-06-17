@@ -352,7 +352,12 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         $this->app->bind('statamic.eloquent.fieldsets.model', function () {
-            return config('statamic.eloquent-driver.fieldsets.model');
+            return config('statamic.eloquent-driver.fieldsets.model', config('statamic.eloquent-driver.blueprints.fieldset_model'));
+        });
+
+        // @deprecated
+        $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
+            return config('statamic.eloquent-driver.fieldsets.model', config('statamic.eloquent-driver.blueprints.fieldset_model'));
         });
 
         $this->app->singleton(
