@@ -96,6 +96,10 @@ class BlueprintRepository extends StacheRepository
 
     protected function filesIn($namespace)
     {
+        if (! $this->isEloquentDrivenNamespace($namespace)) {
+            return parent::filesIn($namespace);
+        }
+
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
