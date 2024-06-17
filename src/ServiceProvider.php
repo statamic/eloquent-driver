@@ -275,10 +275,10 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.blueprints.fieldset_model');
         });
 
-        $this->app->singleton(
-            'Statamic\Fields\BlueprintRepository',
-            'Statamic\Eloquent\Fields\BlueprintRepository'
-        );
+        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
+            return (new \Statamic\Eloquent\Fields\BlueprintRepository)
+                ->setDirectory(resource_path('blueprints'));
+        });
 
         $this->app->singleton(
             'Statamic\Fields\FieldsetRepository',

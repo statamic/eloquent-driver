@@ -60,23 +60,7 @@ class AssetContainer extends FileEntry
 
     public function toModel()
     {
-        $class = app('statamic.eloquent.assets.container_model');
-
-        return $class::firstOrNew(['handle' => $this->handle()])->fill([
-            'title'    => $this->title(),
-            'disk'     => $this->diskHandle() ?? config('filesystems.default'),
-            'settings' => [
-                'allow_uploads'     => $this->allowUploads(),
-                'allow_downloading' => $this->allowDownloading(),
-                'allow_moving'      => $this->allowMoving(),
-                'allow_renaming'    => $this->allowRenaming(),
-                'create_folders'    => $this->createFolders(),
-                'search_index'      => $this->searchIndex(),
-                'source_preset'     => $this->sourcePreset,
-                'warm_presets'      => $this->warmPresets,
-                'validation_rules'  => $this->validationRules(),
-            ],
-        ]);
+        return self::makeModelFromContract($this);
     }
 
     public static function makeModelFromContract(AssetContainerContract $source)
@@ -102,8 +86,6 @@ class AssetContainer extends FileEntry
             $model->created_at = $source->fileLastModified();
             $model->updated_at = $source->fileLastModified();
         }
-
-        $model->save();
 
         return $model;
     }

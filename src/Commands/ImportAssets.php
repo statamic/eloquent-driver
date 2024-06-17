@@ -70,7 +70,7 @@ class ImportAssets extends Command
         }
 
         $this->withProgressBar(AssetContainerFacade::all(), function ($container) {
-            AssetContainer::makeModelFromContract($container);
+            AssetContainer::makeModelFromContract($container)?->save();
         });
 
         $this->components->info('Assets containers imported sucessfully');
@@ -83,7 +83,7 @@ class ImportAssets extends Command
         }
 
         $this->withProgressBar(AssetFacade::all(), function ($asset) {
-            EloquentAsset::makeModelFromContract($asset);
+            EloquentAsset::makeModelFromContract($asset)?->save();
         });
 
         $this->components->info('Assets imported sucessfully');
