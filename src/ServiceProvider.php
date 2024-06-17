@@ -139,8 +139,11 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($blueprintMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_blueprints_table.php' => database_path('migrations/2024_03_07_100000_create_blueprints_table.php'),
-            __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php' => database_path('migrations/2024_03_07_100000_create_fieldsets_table.php'),
         ], 'statamic-eloquent-blueprint-migrations');
+
+        $this->publishes($fieldsetMigrations = [
+            __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php' => database_path('migrations/2024_03_07_100000_create_fieldsets_table.php'),
+        ], 'statamic-eloquent-fieldsets-migrations');
 
         $this->publishes($formMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php' => database_path('migrations/2024_03_07_100000_create_forms_table.php'),
@@ -177,6 +180,7 @@ class ServiceProvider extends AddonServiceProvider
                 $navigationTreeMigrations,
                 $collectionMigrations,
                 $blueprintMigrations,
+                $fieldsetMigrations,
                 $formMigrations,
                 $formSubmissionMigrations,
                 $assetContainerMigrations,
