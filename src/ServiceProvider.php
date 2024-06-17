@@ -143,7 +143,7 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->publishes($fieldsetMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_fieldsets_table.php' => database_path('migrations/2024_03_07_100000_create_fieldsets_table.php'),
-        ], 'statamic-eloquent-fieldsets-migrations');
+        ], 'statamic-eloquent-fieldset-migrations');
 
         $this->publishes($formMigrations = [
             __DIR__.'/../database/migrations/2024_03_07_100000_create_forms_table.php' => database_path('migrations/2024_03_07_100000_create_forms_table.php'),
