@@ -4,3 +4,4 @@ vendor
 .php_cs.cache
 .nova/*
 .phpunit.cache
+.idea

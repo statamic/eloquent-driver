@@ -32,7 +32,7 @@ class BlueprintRepository extends StacheRepository
             if (! $blueprintModel) {
                 throw_if(
                     $namespace === null && $handle === 'default',
-                    Exception::class,
+                    \Exception::class,
                     'Default Blueprint is required but not found. '
                 );
 
