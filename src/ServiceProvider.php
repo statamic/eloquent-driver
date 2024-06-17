@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
+use JetBrains\PhpStorm\Deprecated;
 use Statamic\Assets\AssetContainerContents;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
@@ -268,7 +269,12 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
+        $this->app->bind('statamic.eloquent.blueprints.model', function () {
+            return config('statamic.eloquent-driver.blueprints.model', config('statamic.eloquent-driver.blueprints.blueprint_model'));
+        });
+
+        // @deprecated
+        $this->app->bind('statamic.eloquent.blueprints.blueprints_model', function () {
             return config('statamic.eloquent-driver.blueprints.model', config('statamic.eloquent-driver.blueprints.blueprint_model'));
         });
 

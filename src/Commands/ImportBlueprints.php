@@ -22,7 +22,10 @@ class ImportBlueprints extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:import-blueprints';
+    protected $signature = 'statamic:eloquent:import-blueprints
+        {--force : Force the import to run, with all prompts answered "yes"}
+        {--only-blueprints : Only import blueprints}
+        {--only-fieldsets : Only import fieldsets}';
 
     /**
      * The console command description.
@@ -62,6 +65,10 @@ class ImportBlueprints extends Command
 
     private function importBlueprints(): void
     {
+        if (! $this->shouldImportBlueprints()) {
+            return;
+        }
+
         $directory = resource_path('blueprints');
 
         $files = File::withAbsolutePaths()
@@ -105,7 +112,7 @@ class ImportBlueprints extends Command
 
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
-            app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
+            app('statamic.eloquent.blueprints.model')::firstOrNew([
                 'handle' => $blueprint->handle(),
                 'namespace' => $blueprint->namespace() ?? null,
             ])
@@ -118,6 +125,10 @@ class ImportBlueprints extends Command
 
     private function importFieldsets(): void
     {
+        if (! $this->shouldImportFieldsets()) {
+            return;
+        }
+
         $directory = resource_path('fieldsets');
 
         $files = File::withAbsolutePaths()
@@ -132,7 +143,7 @@ class ImportBlueprints extends Command
 
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 
-            app('statamic.eloquent.blueprints.fieldset_model')::firstOrNew([
+            app('statamic.eloquent.fieldsets.model')::firstOrNew([
                 'handle' => $fieldset->handle(),
             ])
                 ->fill(['data' => $fieldset->contents(), 'created_at' => $lastModified, 'updated_at' => $lastModified])
@@ -151,5 +162,19 @@ class ImportBlueprints extends Command
         $namespace = empty($namespace) ? null : $namespace;
 
         return [$namespace, $handle];
+    }
+
+    private function shouldImportBlueprints(): bool
+    {
+        return $this->option('only-blueprints')
+            || ! $this->option('only-fieldsets')
+            && ($this->option('force') || $this->confirm('Do you want to import blueprints?'));
+    }
+
+    private function shouldImportFieldsets(): bool
+    {
+        return $this->option('only-fieldsets')
+            || ! $this->option('only-blueprints')
+            && ($this->option('force') || $this->confirm('Do you want to import fieldsets?'));
     }
 }

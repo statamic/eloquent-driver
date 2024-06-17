@@ -25,7 +25,7 @@ class BlueprintRepository extends StacheRepository
                 return parent::find($blueprint);
             }
 
-            $blueprintModel = ($namespace ? $this->filesIn($namespace) : app('statamic.eloquent.blueprints.blueprint_model')::whereNull('namespace'))
+            $blueprintModel = ($namespace ? $this->filesIn($namespace) : app('statamic.eloquent.blueprints.model')::whereNull('namespace'))
                 ->where('handle', $handle)
                 ->first();
 
@@ -103,7 +103,7 @@ class BlueprintRepository extends StacheRepository
         return Blink::store(self::BLINK_NAMESPACE_PATHS)->once($namespace ?? 'none', function () use ($namespace) {
             $namespace = str_replace('/', '.', $namespace);
 
-            if (count($blueprintModels = app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $namespace)->get()) == 0) {
+            if (count($blueprintModels = app('statamic.eloquent.blueprints.model')::where('namespace', $namespace)->get()) == 0) {
                 return collect();
             }
 
@@ -142,14 +142,14 @@ class BlueprintRepository extends StacheRepository
 
     public function getModel($blueprint)
     {
-        return app('statamic.eloquent.blueprints.blueprint_model')::where('namespace', $blueprint->namespace() ?? null)
+        return app('statamic.eloquent.blueprints.model')::where('namespace', $blueprint->namespace() ?? null)
             ->where('handle', $blueprint->handle())
             ->first();
     }
 
     public function updateModel($blueprint)
     {
-        $model = app('statamic.eloquent.blueprints.blueprint_model')::firstOrNew([
+        $model = app('statamic.eloquent.blueprints.model')::firstOrNew([
             'handle' => $blueprint->handle(),
             'namespace' => $blueprint->namespace() ?? null,
         ]);
