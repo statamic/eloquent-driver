@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
-use JetBrains\PhpStorm\Deprecated;
 use Statamic\Assets\AssetContainerContents;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
