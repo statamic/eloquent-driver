@@ -18,8 +18,8 @@ return [
 
     'blueprints' => [
         'driver' => 'file',
-        'blueprint_model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
-        'fieldset_model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+        'model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+        'namespaces' => 'all',
     ],
 
     'collections' => [
@@ -39,6 +39,11 @@ return [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Entries\EntryModel::class,
         'entry' => \Statamic\Eloquent\Entries\Entry::class,
+    ],
+
+    'fieldsets' => [
+        'driver' => 'file',
+        'model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
     ],
 
     'forms' => [

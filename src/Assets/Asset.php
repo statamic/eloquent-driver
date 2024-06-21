@@ -129,7 +129,7 @@ class Asset extends FileAsset
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
-        self::makeModelFromContract($this, $meta);
+        self::makeModelFromContract($this, $meta)?->save();
 
         Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
@@ -165,8 +165,6 @@ class Asset extends FileAsset
             $model->created_at = $meta['last_modified'];
             $model->updated_at = $meta['last_modified'];
         }
-
-        $model->save();
 
         return $model;
     }

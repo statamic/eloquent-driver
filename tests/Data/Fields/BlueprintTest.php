@@ -3,6 +3,7 @@
 namespace Tests\Data\Fields;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Facades\Blueprint;
 use Tests\TestCase;
 
@@ -14,10 +15,10 @@ class BlueprintTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->singleton(
-            'Statamic\Fields\BlueprintRepository',
-            'Statamic\Eloquent\Fields\BlueprintRepository'
-        );
+        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
+            return (new \Statamic\Eloquent\Fields\BlueprintRepository)
+                ->setDirectory(resource_path('blueprints'));
+        });
 
         $this->app->singleton(
             'Statamic\Fields\FieldsetRepository',
@@ -69,5 +70,21 @@ class BlueprintTest extends TestCase
         $model = Blueprint::getModel($blueprint);
 
         $this->assertNull($model);
+    }
+
+    /** @test */
+    public function it_uses_file_based_namespaces()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['collections']);
+
+        $this->assertCount(1, BlueprintModel::all());
+
+        $blueprint = Blueprint::make()
+            ->setNamespace('forms')
+            ->setHandle('test')
+            ->setHidden(true)
+            ->save();
+
+        $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
     }
 }
