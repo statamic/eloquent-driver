@@ -262,6 +262,7 @@ class EntryTest extends TestCase
         $entry->save();
 
         $this->assertEquals('bar', $entry->model()->foo);
+        $this->assertArrayNotHasKey('foo', $entry->model()->data);
 
         $fresh = Entry::fromModel($entry->model()->fresh());
 
