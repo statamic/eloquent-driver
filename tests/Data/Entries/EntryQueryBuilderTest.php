@@ -930,4 +930,15 @@ class EntryQueryBuilderTest extends TestCase
             ]],
         ];
     }
+
+    /** @test **/
+    public function entries_are_found_using_where_data()
+    {
+        $this->createDummyCollectionAndEntries();
+
+        $entries = Entry::query()->where('data->title', 'Post 1')->orWhere('data->title', 'Post 3')->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+    }
 }
