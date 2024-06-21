@@ -108,7 +108,7 @@ class Entry extends FileEntry
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
-            'data' => $data->except(array_merge(EntryQueryBuilder::COLUMNS, array_keys($dataMappings))),
+            'data' => $data->except(array_merge(EntryQueryBuilder::COLUMNS, $dataMappings)),
             'published' => $source->published(),
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
