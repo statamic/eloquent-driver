@@ -6,21 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
-use Statamic\Support\Traits\Hookable;
 
 class Entry extends FileEntry
 {
-    use Hookable;
-
     protected $model;
 
     public static function fromModel(Model $model)
     {
         $data = isset($model->data['__localized_fields']) ? collect($model->data)->only($model->data['__localized_fields']) : $model->data;
 
-        foreach ((new self)->getDataColumnMappings() as $from => $to) {
-            $data[$from] = $model->$to;
+        foreach ((new self)->getDataColumnMappings($model) as $key) {
+            $data[$key] = $model->$key;
         }
 
         $entry = (new static())
@@ -100,7 +98,7 @@ class Entry extends FileEntry
             $data->put('parent', (string) $parent->id);
         }
 
-        $dataMappings = (new self)->getDataColumnMappings();
+        $dataMappings = (new self)->getDataColumnMappings(new $class);
 
         $attributes = [
             'origin_id' => $origin?->id(),
@@ -116,8 +114,8 @@ class Entry extends FileEntry
             'order' => $source->order(),
         ];
 
-        foreach ($dataMappings as $from => $to) {
-            $attributes[$to] = $data->get($from);
+        foreach ($dataMappings as $key) {
+            $attributes[$key] = $data->get($key);
         }
 
         if ($id = $source->id()) {
@@ -187,8 +185,12 @@ class Entry extends FileEntry
             ->data($this->data());
     }
 
-    public function getDataColumnMappings()
+    public function getDataColumnMappings(Model $model)
     {
-        return $this->runHooks('data-column-mappings', []);
+        return Blink::once("eloquent-schema-{$model->getTable()}", function () use ($model) {
+            $schema = $model->getConnection()->getSchemaBuilder()->getColumnListing($model->getTable());
+
+            return collect($schema)->reject(fn ($value) => in_array($value, EntryQueryBuilder::COLUMNS))->all();
+        });
     }
 }

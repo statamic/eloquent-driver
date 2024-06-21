@@ -242,15 +242,11 @@ class EntryTest extends TestCase
     }
 
     /** @test */
-    public function it_stores_mapped_data_values()
+    public function it_stores_and_retrieves_mapped_data_values()
     {
         $collection = Collection::make('blog')->title('blog')->routes([
             'en' => '/blog/{slug}',
         ])->save();
-
-        Entry::hook('data-column-mappings', fn ($payload, $next) => [
-            'foo' => 'foo',
-        ]);
 
         \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30);
@@ -266,5 +262,9 @@ class EntryTest extends TestCase
         $entry->save();
 
         $this->assertEquals('bar', $entry->model()->foo);
+
+        $fresh = Entry::fromModel($entry->model()->fresh());
+
+        $this->assertSame($entry->foo, $fresh->foo);
     }
 }

@@ -23,7 +23,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     private const STATUSES = ['published', 'draft', 'scheduled', 'expired'];
 
     const COLUMNS = [
-        'id', 'site', 'origin_id', 'published', 'slug', 'uri',
+        'id', 'site', 'origin_id', 'published', 'slug', 'uri', 'data',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
@@ -114,7 +114,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, array_values((new EloquentEntry)->getDataColumnMappings())));
+        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
 
         if (! in_array($column, $columns)) {
             if (! Str::startsWith($column, 'data->')) {
