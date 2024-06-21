@@ -3,6 +3,7 @@
 namespace Tests\Repositories;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Globals\GlobalSet;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\Variables;
@@ -30,7 +31,7 @@ class GlobalRepositoryTest extends TestCase
         (new Variables())->globalSet($globalTwo)->data(['foo' => 'Bar'])->save();
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_all_global_sets()
     {
         $sets = $this->repo->all();
@@ -45,7 +46,7 @@ class GlobalRepositoryTest extends TestCase
         $this->assertEquals(['Contact Details', 'General'], $ordered->map->title()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_global_set_by_id()
     {
         tap($this->repo->find('global'), function ($set) {
@@ -65,7 +66,7 @@ class GlobalRepositoryTest extends TestCase
         $this->assertNull($this->repo->find('unknown'));
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_global_set_by_handle()
     {
         tap($this->repo->findByHandle('global'), function ($set) {
@@ -85,7 +86,7 @@ class GlobalRepositoryTest extends TestCase
         $this->assertNull($this->repo->findByHandle('unknown'));
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_a_global_to_the_database()
     {
         $global = GlobalSetAPI::make('new');

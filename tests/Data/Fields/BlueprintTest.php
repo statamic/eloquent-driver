@@ -3,6 +3,7 @@
 namespace Tests\Data\Fields;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Facades\Blueprint;
 use Tests\TestCase;
@@ -34,7 +35,7 @@ class BlueprintTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_and_removes_hidden_on_model()
     {
         $blueprint = Blueprint::make()
@@ -53,7 +54,7 @@ class BlueprintTest extends TestCase
         $this->assertFalse(isset($model->data['hide']));
     }
 
-    /** @test */
+    #[Test]
     public function it_deletes_the_model_when_the_blueprint_is_deleted()
     {
         $blueprint = Blueprint::make()
@@ -72,7 +73,7 @@ class BlueprintTest extends TestCase
         $this->assertNull($model);
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_file_based_namespaces()
     {
         config()->set('statamic.eloquent-driver.blueprints.namespaces', ['collections']);

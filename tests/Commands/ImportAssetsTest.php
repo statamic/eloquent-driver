@@ -4,6 +4,7 @@ namespace Tests\Commands;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
@@ -45,7 +46,7 @@ class ImportAssetsTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_asset_containers_and_assets()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
@@ -72,7 +73,7 @@ class ImportAssetsTest extends TestCase
         $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_asset_containers_and_assets_with_force_argument()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
@@ -97,7 +98,7 @@ class ImportAssetsTest extends TestCase
         $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_asset_containers_with_only_asset_containers_argument()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
@@ -122,7 +123,7 @@ class ImportAssetsTest extends TestCase
         $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_asset_containers_with_console_question()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
@@ -149,7 +150,7 @@ class ImportAssetsTest extends TestCase
         $this->assertDatabaseMissing('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_assets_with_only_assets_argument()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
@@ -174,7 +175,7 @@ class ImportAssetsTest extends TestCase
         $this->assertDatabaseHas('assets_meta', ['container' => 'test', 'path' => 'subdirectory/other.txt']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_assets_with_console_question()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();

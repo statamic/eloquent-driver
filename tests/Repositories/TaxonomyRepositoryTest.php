@@ -4,6 +4,7 @@ namespace Tests\Stache\Repositories;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as IlluminateCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
@@ -35,7 +36,7 @@ class TaxonomyRepositoryTest extends TestCase
         $this->repo->make('tags')->title('Tags')->save();
     }
 
-    /** @test */
+    //     #[Test]
     //     public function it_gets_all_taxonomies()
     //     {
     //         $taxonomies = $this->repo->all();
@@ -49,7 +50,7 @@ class TaxonomyRepositoryTest extends TestCase
     //         $this->assertEquals(['Categories', 'Tags'], $ordered->map->title()->all());
     //     }
     //
-    //     /** @test */
+    //     #[Test]
     //     public function it_gets_a_taxonomy_by_handle()
     //     {
     //         tap($this->repo->findByHandle('categories'), function ($taxonomy) {
@@ -67,7 +68,7 @@ class TaxonomyRepositoryTest extends TestCase
     //         $this->assertNull($this->repo->findByHandle('unknown'));
     //     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_taxonomy_by_uri()
     {
         tap($this->repo->findByUri('/categories'), function ($taxonomy) {
@@ -78,7 +79,7 @@ class TaxonomyRepositoryTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_taxonomy_by_uri_with_collection()
     {
         tap($this->repo->findByUri('/blog/categories'), function ($taxonomy) {
@@ -89,7 +90,7 @@ class TaxonomyRepositoryTest extends TestCase
         });
     }
 
-    /** @test */
+    //     #[Test]
     //     public function it_saves_a_taxonomy_to_the_stache_and_to_a_file()
     //     {
     //         $taxonomy = TaxonomyAPI::make('new');

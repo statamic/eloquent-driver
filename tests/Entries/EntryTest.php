@@ -4,6 +4,7 @@ namespace Tests\Entries;
 
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
@@ -16,7 +17,7 @@ class EntryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_loads_from_entry_model()
     {
         Collection::make('blog')->title('blog')->save();
@@ -36,7 +37,7 @@ class EntryTest extends TestCase
         $this->assertEquals(['foo' => 'bar'], $entry->data()->except(['updated_at'])->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_to_entry_model()
     {
         $model = new EntryModel([
@@ -63,7 +64,7 @@ class EntryTest extends TestCase
         $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_stores_computed_values()
     {
         $collection = Collection::make('blog')->title('blog')->routes([
@@ -93,7 +94,7 @@ class EntryTest extends TestCase
         $this->assertEquals(150, $entry->model()->data['shares']);
     }
 
-    /** @test */
+    #[Test]
     public function it_defers_to_the_live_computed_value_instead_of_the_stored_value()
     {
         $collection = Collection::make('blog')->title('blog')->routes([
@@ -127,7 +128,7 @@ class EntryTest extends TestCase
         $this->assertEquals(100, $freshEntry->shares);
     }
 
-    /** @test */
+    #[Test]
     public function it_propagates_entry_if_configured()
     {
         $this->setSites([
@@ -155,7 +156,7 @@ class EntryTest extends TestCase
         $this->assertNull($entry->descendants()->get('es')); // collection not configured for this site
     }
 
-    /** @test */
+    #[Test]
     public function it_propagates_updating_origin_data_to_descendent_models()
     {
         $this->setSites([
@@ -200,7 +201,7 @@ class EntryTest extends TestCase
         $this->assertNotNull($entry->descendants()->get('de')->model()->data['too'] ?? null);
     }
 
-    /** @test */
+    #[Test]
     public function it_propagates_origin_date_to_descendent_models()
     {
         $this->setSites([
