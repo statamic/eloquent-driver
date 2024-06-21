@@ -89,7 +89,7 @@ class FormSubmissionTest extends TestCase
             ->save();
 
         $submission = tap($form->makeSubmission([
-            'name' => 'John Doe'
+            'name' => 'John Doe',
         ]))->save();
 
         $this->assertInstanceOf(Carbon::class, $submission->date());
