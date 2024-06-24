@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Blueprint as BlueprintFacade;
@@ -44,7 +45,7 @@ class ImportBlueprintsTest extends TestCase
         File::withAbsolutePaths()->getFilesByTypeRecursively(resource_path('fieldsets'), 'yaml')->each(fn ($file) => unlink($file));
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_blueprints_and_fieldsets()
     {
         BlueprintFacade::make('user')->setContents([
@@ -75,7 +76,7 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(1, FieldsetModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_blueprints_with_console_question()
     {
         BlueprintFacade::make('user')->setContents([
@@ -105,7 +106,7 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(0, FieldsetModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_fieldsets_with_console_question()
     {
         BlueprintFacade::make('user')->setContents([
@@ -135,7 +136,7 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(1, FieldsetModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_blueprints_with_only_blueprints_argument()
     {
         BlueprintFacade::make('user')->setContents([
@@ -163,7 +164,7 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(0, FieldsetModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_fieldsets_with_only_fieldsets_argument()
     {
         BlueprintFacade::make('user')->setContents([
@@ -191,7 +192,7 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(1, FieldsetModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_blueprints_and_fieldsets_with_force_argument()
     {
         BlueprintFacade::make('user')->setContents([

@@ -4,6 +4,7 @@ namespace Tests\Repositories;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Structures\Structure;
 use Statamic\Eloquent\Structures\Nav;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -28,7 +29,7 @@ class NavigationRepositoryTest extends TestCase
         $sidebar->makeTree('en', [['entry' => 'pages-contact'], ['entry' => 'pages-contact']])->save();
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_all_navs()
     {
         $navs = $this->repo->all();
@@ -42,7 +43,7 @@ class NavigationRepositoryTest extends TestCase
         $this->assertEquals(['Footer', 'Sidebar'], $ordered->map->title()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_nav_by_handle()
     {
         tap($this->repo->findByHandle('sidebar'), function ($nav) {
@@ -60,7 +61,7 @@ class NavigationRepositoryTest extends TestCase
         $this->assertNull($this->repo->findByHandle('unknown'));
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_a_nav_to_the_database()
     {
         $structure = (new Nav())->handle('new');

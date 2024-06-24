@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\Entry as EntryContract;
@@ -38,7 +39,7 @@ class ImportEntriesTest extends TestCase
         app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_entries()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -55,7 +56,7 @@ class ImportEntriesTest extends TestCase
         $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_localized_entries()
     {
         Site::setSites([

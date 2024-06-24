@@ -4,6 +4,7 @@ namespace Tests\Repositories;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Tokens\Token;
 use Statamic\Eloquent\Tokens\TokenRepository;
 use Tests\TestCase;
@@ -21,7 +22,7 @@ class TokenRepositoryTest extends TestCase
         $this->repo->make('abc', 'ExampleHandler', ['foo' => 'bar'])->save();
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_token()
     {
         tap($this->repo->find('abc'), function ($token) {
@@ -35,7 +36,7 @@ class TokenRepositoryTest extends TestCase
         $this->assertNull($this->repo->find('unknown'));
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_a_token_to_the_database()
     {
         $token = $this->repo->make('new', 'ExampleHandler', ['foo' => 'bar']);

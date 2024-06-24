@@ -6,6 +6,8 @@ use BadMethodCallException;
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Contracts\Support\Arrayable;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\Variables;
 use Statamic\Facades;
 use Statamic\Facades\Blueprint;
@@ -17,7 +19,7 @@ use Tests\TestCase;
 
 class VariablesTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_gets_file_contents_for_saving()
     {
         $entry = (new Variables())->data([
@@ -37,7 +39,7 @@ EOT;
         $this->assertEquals($expected, $entry->fileContents());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_file_contents_for_saving_a_localized_set()
     {
         $global = GlobalSet::make('test');
@@ -98,7 +100,7 @@ EOT;
         $this->assertEquals($expected, $c->fileContents());
     }
 
-    /** @test */
+    #[Test]
     public function if_the_value_is_explicitly_set_to_null_then_it_should_not_fall_back()
     {
         $global = GlobalSet::make('test');
@@ -194,7 +196,7 @@ EOT;
         $this->assertEquals(null, $e->value('four'));
     }
 
-    /** @test */
+    #[Test]
     public function it_sets_data_values_using_magic_properties()
     {
         $variables = new Variables();
@@ -206,7 +208,7 @@ EOT;
         $this->assertEquals('bar', $variables->get('foo'));
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_evaluated_augmented_value_using_magic_property()
     {
         (new class() extends Fieldtype
@@ -232,11 +234,8 @@ EOT;
         $this->assertEquals('delta (augmented)', $variables['charlie']);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider queryBuilderProvider
-     **/
+    #[Test]
+    #[DataProvider('queryBuilderProvider')]
     public function it_has_magic_property_and_methods_for_fields_that_augment_to_query_builders($builder)
     {
         $builder->shouldReceive('get')->times(2)->andReturn('query builder results');
@@ -272,7 +271,7 @@ EOT;
         ];
     }
 
-    /** @test */
+    #[Test]
     public function calling_unknown_method_throws_exception()
     {
         $this->expectException(BadMethodCallException::class);
@@ -281,7 +280,7 @@ EOT;
         GlobalSet::make('settings')->makeLocalization('en')->thisFieldDoesntExist();
     }
 
-    /** @test */
+    #[Test]
     public function it_converts_to_an_array()
     {
         $fieldtype = new class() extends Fieldtype
@@ -327,7 +326,7 @@ EOT;
         ], $array['baz'], 'Value objects are not resolved recursively');
     }
 
-    /** @test */
+    #[Test]
     public function only_requested_relationship_fields_are_included_in_to_array()
     {
         $regularFieldtype = new class() extends Fieldtype

@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
@@ -31,7 +32,7 @@ class ImportFormsTest extends TestCase
         app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_forms_and_submissions()
     {
         $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
@@ -57,7 +58,7 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_forms_and_submissions_with_force_argument()
     {
         $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
@@ -81,7 +82,7 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_forms_with_only_forms_argument()
     {
         $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
@@ -105,7 +106,7 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_forms_with_console_question()
     {
         $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
@@ -131,7 +132,7 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_submissions_with_only_form_submissions_argument()
     {
         $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
@@ -155,7 +156,7 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_form_submissions_with_console_question()
     {
         $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();

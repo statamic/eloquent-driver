@@ -3,6 +3,8 @@
 namespace Tests\Data\Entries;
 
 use Facades\Tests\Factories\EntryFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -21,7 +23,7 @@ class EntryQueryBuilderTest extends TestCase
         return $entry;
     }
 
-    /** @test **/
+    #[Test]
     public function entry_is_found_within_all_created_entries_using_entry_facade_with_find_method()
     {
         $this->freezeTime();
@@ -36,7 +38,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame(json_encode($searchedEntry), json_encode($retrievedEntry));
     }
 
-    /** @test **/
+    #[Test]
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
         $searchedEntry = $this->createDummyCollectionAndEntries();
@@ -50,7 +52,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame($retrievedEntry->selectedQueryColumns(), $columns);
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where()
     {
         $this->createDummyCollectionAndEntries();
@@ -61,7 +63,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_in()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
@@ -76,7 +78,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 4', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_not_in()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
@@ -91,7 +93,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_date()
     {
         $this->createWhereDateTestEntries();
@@ -112,7 +114,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_month()
     {
         $this->createWhereDateTestEntries();
@@ -128,7 +130,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_day()
     {
         $this->createWhereDateTestEntries();
@@ -144,7 +146,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_year()
     {
         $this->createWhereDateTestEntries();
@@ -160,7 +162,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_time()
     {
         $this->createWhereDateTestEntries();
@@ -202,7 +204,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 3', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_not_null()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'text' => 'Text 1'])->create();
@@ -217,7 +219,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_null()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'text' => 'Text 1', 'content' => 'Content 1'])->create();
@@ -232,7 +234,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_not_null()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'text' => 'Text 1', 'content' => 'Content 1'])->create();
@@ -247,7 +249,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 3', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_column()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'other_title' => 'Not Post 1'])->create();
@@ -267,7 +269,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_nested_where()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
@@ -291,7 +293,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['1', '3', '4', '6'], $entries->map->id()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_nested_where_in()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
@@ -318,7 +320,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['1', '2', '4', '6', '7', '9'], $entries->map->id()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_between()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
@@ -333,7 +335,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_not_between()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
@@ -348,7 +350,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_between()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
@@ -363,7 +365,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_not_between()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
@@ -378,7 +380,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_json_contains()
     {
         if ($this->isUsingSqlite()) {
@@ -402,7 +404,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_json_doesnt_contain()
     {
         if ($this->isUsingSqlite()) {
@@ -426,7 +428,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 4', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_json_contains()
     {
         if ($this->isUsingSqlite()) {
@@ -445,7 +447,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_or_where_json_doesnt_contain()
     {
         if ($this->isUsingSqlite()) {
@@ -464,7 +466,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3', 'Post 2', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_json_length()
     {
         if ($this->isUsingSqlite()) {
@@ -483,7 +485,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 5'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_array_of_wheres()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'content' => 'Test'])->create();
@@ -504,7 +506,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['3', '5'], $entries->map->id()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_with_json_value()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'content' => ['value' => 1]])->create();
@@ -527,7 +529,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_when()
     {
         $this->createDummyCollectionAndEntries();
@@ -547,7 +549,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 2', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_unless()
     {
         $this->createDummyCollectionAndEntries();
@@ -567,7 +569,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_tap()
     {
         $this->createDummyCollectionAndEntries();
@@ -580,7 +582,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_entries_by_id()
     {
         Collection::make('posts')->routes('/posts/{slug}')->save();
@@ -601,7 +603,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame($found, $substitute);
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_entries_by_uri()
     {
         Collection::make('posts')->routes('/posts/{slug}')->save();
@@ -624,7 +626,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame($found, $substitute);
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_entries_by_uri_and_site()
     {
         $this->setSites([
@@ -675,7 +677,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertSame($found, $substituteFr);
     }
 
-    /** @test */
+    #[Test]
     public function entries_are_found_using_offset()
     {
         $this->createDummyCollectionAndEntries();
@@ -690,7 +692,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function entries_are_found_using_offset_but_no_limit()
     {
         $this->createDummyCollectionAndEntries();
@@ -705,7 +707,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function entries_can_be_retrieved_on_join_table_conditions()
     {
         Collection::make('posts')->save();
@@ -743,7 +745,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertCount(2, $entries);
     }
 
-    /** @test */
+    #[Test]
     public function entries_can_be_ordered_by_an_integer_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer']]);
@@ -760,7 +762,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function entries_can_be_ordered_by_an_float_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
@@ -777,7 +779,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function entries_can_be_ordered_by_an_date_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
@@ -794,7 +796,7 @@ class EntryQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test */
+    #[Test]
     public function filtering_using_where_status_column_writes_deprecation_log()
     {
         $this->withoutDeprecationHandling();
@@ -806,7 +808,7 @@ class EntryQueryBuilderTest extends TestCase
         Entry::query()->where('collection', 'posts')->where('status', 'published')->get();
     }
 
-    /** @test */
+    #[Test]
     public function filtering_using_whereIn_status_column_writes_deprecation_log()
     {
         $this->withoutDeprecationHandling();
@@ -818,7 +820,7 @@ class EntryQueryBuilderTest extends TestCase
         Entry::query()->where('collection', 'posts')->whereIn('status', ['published'])->get();
     }
 
-    /** @test */
+    #[Test]
     public function filtering_by_unexpected_status_throws_exception()
     {
         $this->expectExceptionMessage('Invalid status [foo]');
@@ -826,11 +828,8 @@ class EntryQueryBuilderTest extends TestCase
         Entry::query()->whereStatus('foo')->get();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider filterByStatusProvider
-     */
+    #[Test]
+    #[DataProvider('filterByStatusProvider')]
     public function it_filters_by_status($status, $expected)
     {
         Collection::make('pages')->dated(false)->save();

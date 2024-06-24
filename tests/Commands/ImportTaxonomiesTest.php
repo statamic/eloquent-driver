@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
@@ -31,7 +32,7 @@ class ImportTaxonomiesTest extends TestCase
         app()->bind(TermRepositoryContract::class, \Statamic\Stache\Repositories\TermRepository::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_taxonomies_and_terms()
     {
         Taxonomy::make('tags')->save();
@@ -58,7 +59,7 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'charlie']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_taxonomies_and_terms_with_force_argument()
     {
         Taxonomy::make('tags')->save();
@@ -83,7 +84,7 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'charlie']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_taxonomies_with_console_question()
     {
         Taxonomy::make('tags')->save();
@@ -110,7 +111,7 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseMissing('taxonomy_terms', ['slug' => 'charlie']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_taxonomies_with_only_taxonomies_argument()
     {
         Taxonomy::make('tags')->save();
@@ -135,7 +136,7 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseMissing('taxonomy_terms', ['slug' => 'charlie']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_terms_with_console_question()
     {
         Taxonomy::make('tags')->save();
@@ -162,7 +163,7 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'charlie']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_terms_with_only_terms_argument()
     {
         Taxonomy::make('tags')->save();
