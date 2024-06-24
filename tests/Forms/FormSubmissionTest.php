@@ -83,7 +83,7 @@ class FormSubmissionTest extends TestCase
         $this->assertCount(2, SubmissionModel::all());
     }
 
-    /** @test */
+    #[Test]
     public function it_should_not_save_date_in_data()
     {
         $form = tap(Facades\Form::make('test')->title('Test'))
