@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Facades;
 use Tests\TestCase;
 
 class FormSubmissionTest extends TestCase
@@ -80,5 +81,24 @@ class FormSubmissionTest extends TestCase
         ]);
 
         $this->assertCount(2, SubmissionModel::all());
+    }
+
+    #[Test]
+    public function it_should_not_save_date_in_data()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        $this->assertInstanceOf(Carbon::class, $submission->date());
+        $this->assertArrayNotHasKey('date', $submission->model()->data);
+
+        $fresh = \Statamic\Eloquent\Forms\Submission::fromModel($submission->model()->fresh());
+
+        $this->assertInstanceOf(Carbon::class, $fresh->date());
+        $this->assertSame($fresh->date()->format('u'), $submission->date()->format('u'));
     }
 }

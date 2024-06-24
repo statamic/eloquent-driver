@@ -22,7 +22,7 @@ class Submission extends FileEntry
     {
         return (new static())
             ->id($model->id)
-            ->date($model->data['date'] ?? Carbon::now())
+            ->date($model->created_at ?? Carbon::now())
             ->data(Arr::except($model->data, 'date'))
             ->model($model);
     }
