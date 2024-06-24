@@ -3,6 +3,7 @@
 namespace Tests\Forms;
 
 use Carbon\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Facades;
@@ -10,7 +11,7 @@ use Tests\TestCase;
 
 class FormSubmissionTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_should_have_timestamps()
     {
         $form = FormModel::create([
@@ -30,7 +31,7 @@ class FormSubmissionTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $submission->updated_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_should_save_to_the_database()
     {
         $form = FormModel::create([
@@ -55,7 +56,7 @@ class FormSubmissionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_should_not_overwrite_submissions()
     {
         $form = FormModel::create([

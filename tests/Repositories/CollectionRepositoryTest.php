@@ -4,6 +4,7 @@ namespace Tests\Repositories;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection as IlluminateCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Facades\Collection as CollectionAPI;
@@ -28,7 +29,7 @@ class CollectionRepositoryTest extends TestCase
         $this->repo->make('pages')->title('Pages')->routes('{parent_uri}/{slug}')->structureContents(['root' => true])->save();
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_all_collections()
     {
         $collections = $this->repo->all();
@@ -42,7 +43,7 @@ class CollectionRepositoryTest extends TestCase
         $this->assertEquals(['Alphabetical', 'Blog', 'Numeric', 'Pages'], $ordered->map->title()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_a_collection_by_handle()
     {
         tap($this->repo->findByHandle('alphabetical'), function ($collection) {
@@ -72,7 +73,7 @@ class CollectionRepositoryTest extends TestCase
         $this->assertNull($this->repo->findByHandle('unknown'));
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_a_collection_to_the_database()
     {
         $collection = CollectionAPI::make('new');

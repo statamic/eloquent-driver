@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\Entry as EntryContract;
@@ -37,7 +38,7 @@ class ImportCollectionsTest extends TestCase
         app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collections_and_collection_trees()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -67,7 +68,7 @@ class ImportCollectionsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'pages', 'type' => 'collection']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collections_and_collection_trees_with_force_argument()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -95,7 +96,7 @@ class ImportCollectionsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'pages', 'type' => 'collection']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collections_with_console_question()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -125,7 +126,7 @@ class ImportCollectionsTest extends TestCase
         $this->assertDatabaseMissing('trees', ['handle' => 'pages', 'type' => 'collection']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collections_with_only_collections_argument()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -153,7 +154,7 @@ class ImportCollectionsTest extends TestCase
         $this->assertDatabaseMissing('trees', ['handle' => 'pages', 'type' => 'collection']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collection_trees_with_console_question()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
@@ -183,7 +184,7 @@ class ImportCollectionsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'pages', 'type' => 'collection']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_collection_trees_with_only_collections_argument()
     {
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
