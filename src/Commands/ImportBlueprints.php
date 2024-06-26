@@ -139,6 +139,11 @@ class ImportBlueprints extends Command
             $handle = Str::before($basename, '.yaml');
             $handle = str_replace('/', '.', $handle);
 
+            // handle any add-on fieldsets
+            if (Str::startsWith($handle, 'vendor.')) {
+                $handle = Str::of($handle)->after('vendor.')->replaceFirst('.', '::');
+            }
+
             $fieldset = Fieldset::make($handle)->setContents(YAML::file($path)->parse());
 
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
@@ -160,6 +165,10 @@ class ImportBlueprints extends Command
         $handle = array_pop($parts);
         $namespace = implode('.', $parts);
         $namespace = empty($namespace) ? null : $namespace;
+
+        if (Str::startsWith($namespace, 'vendor.')) {
+            $namespace = Str::after($namespace, 'vendor.');
+        }
 
         return [$namespace, $handle];
     }
