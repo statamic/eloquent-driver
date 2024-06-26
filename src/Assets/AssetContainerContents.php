@@ -40,26 +40,13 @@ class AssetContainerContents extends CoreAssetContainerContents
         }
 
         $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
-            return collect($this->directoryRecurse(''))
-                ->map(fn ($dir) => ['path' => $dir, 'type' => 'dir']);
+            return $this->query()->select(['folder'])
+                ->distinct()
+                ->get()
+                ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir']);
         });
 
         return $this->folders;
-    }
-
-    private function directoryRecurse($directory)
-    {
-        $rootFolders = $this->container->disk()->getFolders($directory, false);
-
-        $folders = [];
-        foreach ($rootFolders as $folder) {
-            $folders[] = $folder;
-            if ($subfolders = $this->directoryRecurse($folder)) {
-                $folders = array_merge($folders, $subfolders);
-            }
-        }
-
-        return $folders;
     }
 
     public function metaFilesIn($folder, $recursive)
