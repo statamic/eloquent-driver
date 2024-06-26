@@ -96,8 +96,6 @@ class SyncAssets extends Command
                     return;
                 }
 
-                $this->info($folder.'|'.$subfolder);
-
                 if ($folder != $subfolder && (strlen($subfolder) > strlen($folder))) {
                     $this->processFolder($container, $subfolder);
                 }
