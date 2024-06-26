@@ -38,13 +38,13 @@ class AssetContainerContentsTest extends TestCase
 
         $this->assertSame([
             [
-                'path' => "one",
-                'type' => "dir",
+                'path' => 'one',
+                'type' => 'dir',
             ],
             [
-                'path' => "two",
-                'type' => "dir",
-            ]
+                'path' => 'two',
+                'type' => 'dir',
+            ],
         ], $container->contents()->directories()->all());
     }
 
