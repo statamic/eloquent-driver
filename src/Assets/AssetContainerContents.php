@@ -39,12 +39,14 @@ class AssetContainerContents extends CoreAssetContainerContents
             return $this->folders;
         }
 
-        return Cache::remember($this->key(), $this->ttl(), function () {
+        $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
             return $this->query()->select(['folder'])
                 ->distinct()
                 ->get()
                 ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir']);
         });
+
+        return $this->folders;
     }
 
     public function metaFilesIn($folder, $recursive)
