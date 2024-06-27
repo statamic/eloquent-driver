@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Structures\Nav as NavContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTree as NavTreeContract;
@@ -30,7 +31,7 @@ class ImportNavsTest extends TestCase
         app()->bind(NavTreeRepositoryContract::class, \Statamic\Stache\Repositories\NavTreeRepository::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_navs_and_nav_trees()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();
@@ -55,7 +56,7 @@ class ImportNavsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'footer', 'type' => 'navigation']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_navs_and_nav_trees_with_force_argument()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();
@@ -78,7 +79,7 @@ class ImportNavsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'footer', 'type' => 'navigation']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_navs_with_console_question()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();
@@ -103,7 +104,7 @@ class ImportNavsTest extends TestCase
         $this->assertDatabaseMissing('trees', ['handle' => 'footer', 'type' => 'navigation']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_navs_with_only_navs_argument()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();
@@ -126,7 +127,7 @@ class ImportNavsTest extends TestCase
         $this->assertDatabaseMissing('trees', ['handle' => 'footer', 'type' => 'navigation']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_nav_trees_with_console_question()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();
@@ -151,7 +152,7 @@ class ImportNavsTest extends TestCase
         $this->assertDatabaseHas('trees', ['handle' => 'footer', 'type' => 'navigation']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_nav_trees_with_only_nav_trees_argument()
     {
         $nav = tap(Nav::make('footer')->title('Footer'))->save();

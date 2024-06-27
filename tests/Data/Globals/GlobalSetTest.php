@@ -2,12 +2,13 @@
 
 namespace Tests\Data\Globals;
 
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\GlobalSet;
 use Tests\TestCase;
 
 class GlobalSetTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_gets_file_contents_for_saving_with_a_single_site()
     {
         config()->set('statamic.system.multisite', false);
@@ -37,7 +38,7 @@ EOT;
         $this->assertEquals($expected, $set->fileContents());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_file_contents_for_saving_with_multiple_sites()
     {
         config()->set('statamic.system.multisite', true);

@@ -3,6 +3,7 @@
 namespace Tests\Commands;
 
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;
 use Statamic\Contracts\Globals\GlobalSet as GlobalSetContract;
 use Statamic\Contracts\Globals\GlobalVariablesRepository as GlobalVariablesRepositoryContract;
@@ -30,7 +31,7 @@ class ImportGlobalsTest extends TestCase
         app()->bind(GlobalVariablesRepositoryContract::class, \Statamic\Stache\Repositories\GlobalVariablesRepository::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_global_sets_and_variables()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
@@ -53,7 +54,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_global_sets_and_variables_with_force_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
@@ -74,7 +75,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_global_sets_with_console_question()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
@@ -97,7 +98,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_global_sets_with_only_global_sets_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
@@ -118,7 +119,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_variables_with_console_question()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
@@ -141,7 +142,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_only_variables_with_only_global_variables_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();

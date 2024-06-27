@@ -2,12 +2,13 @@
 
 namespace Tests\Entries;
 
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Entries\EntryModel;
 use Tests\TestCase;
 
 class EntryModelTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_gets_attributes_from_json_column()
     {
         $model = new EntryModel([

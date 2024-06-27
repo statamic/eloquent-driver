@@ -3,6 +3,7 @@
 namespace Tests\Data\Taxonomies;
 
 use Facades\Tests\Factories\EntryFactory;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Taxonomy;
@@ -13,7 +14,7 @@ use Tests\TestCase;
 
 class TermQueryBuilderTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_gets_terms()
     {
         Taxonomy::make('tags')->save();
@@ -26,7 +27,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEveryItemIsInstanceOf(LocalizedTerm::class, $terms);
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_wheres()
     {
         Taxonomy::make('tags')->save();
@@ -38,7 +39,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'c'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_or_wheres()
     {
         Taxonomy::make('tags')->save();
@@ -52,7 +53,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'b', 'd'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_or_where_ins()
     {
         Taxonomy::make('tags')->save();
@@ -67,7 +68,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'b', 'd', 'e'], $terms->map->slug()->values()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function it_filters_using_or_where_not_ins()
     {
         Taxonomy::make('tags')->save();
@@ -83,7 +84,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['c', 'f'], $terms->map->slug()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_nested_wheres()
     {
         Taxonomy::make('tags')->save();
@@ -107,7 +108,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'c', 'd', 'e'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_nested_where_ins()
     {
         Taxonomy::make('tags')->save();
@@ -132,7 +133,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'c', 'd', 'e', 'f'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_using_nested_where_not_ins()
     {
         Taxonomy::make('tags')->save();
@@ -153,7 +154,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'b', 'd'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_by_taxonomy()
     {
         Taxonomy::make('tags')->save();
@@ -171,7 +172,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'b', 'd'], $terms->map->slug()->sort()->values()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_sorts()
     {
         Taxonomy::make('tags')->save();
@@ -185,7 +186,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['c', 'b', 'e', 'a', 'd'], $terms->map->slug()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_where_column()
     {
         Taxonomy::make('tags')->save();
@@ -206,7 +207,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['a', 'b', 'e'], $terms->map->slug()->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_usage_in_collections()
     {
         Taxonomy::make('tags')->save();
@@ -275,7 +276,7 @@ class TermQueryBuilderTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_terms_by_id()
     {
         Taxonomy::make('tags')->save();
@@ -299,7 +300,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(collect($found->toArray())->except(['updated_at'])->all(), collect($substitute->toArray())->except(['updated_at'])->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_terms_by_uri()
     {
         Taxonomy::make('tags')->save();
@@ -322,7 +323,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals($found, $substitute);
     }
 
-    /** @test */
+    #[Test]
     public function it_substitutes_terms_by_uri_and_site()
     {
         $this->setSites([
@@ -384,7 +385,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertSame($found, $substituteFr);
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_date()
     {
         $this->createWhereDateTestTerms();
@@ -400,7 +401,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_month()
     {
         $this->createWhereDateTestTerms();
@@ -416,7 +417,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_day()
     {
         $this->createWhereDateTestTerms();
@@ -432,7 +433,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 2', 'Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_year()
     {
         $this->createWhereDateTestTerms();
@@ -448,7 +449,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['Post 4'], $entries->map->title->all());
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_time()
     {
         $this->createWhereDateTestTerms();
@@ -477,7 +478,7 @@ class TermQueryBuilderTest extends TestCase
         Term::make('e')->taxonomy('tags')->data(['title' => 'Post 5', 'test_date' => null])->save();
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_where_json_contains()
     {
         if ($this->isUsingSqlite()) {
@@ -502,7 +503,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['1', '3'], $entries->map->slug()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_where_json_doesnt_contain()
     {
         if ($this->isUsingSqlite()) {
@@ -527,7 +528,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['2', '4', '5'], $entries->map->slug()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_or_where_json_contains()
     {
         if ($this->isUsingSqlite()) {
@@ -547,7 +548,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['1', '3', '5'], $entries->map->slug()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_or_where_json_doesnt_contain()
     {
         if ($this->isUsingSqlite()) {
@@ -567,7 +568,7 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['1', '2', '3', '4'], $entries->map->slug()->all());
     }
 
-    /** @test **/
+    #[Test]
     public function terms_are_found_using_where_json_length()
     {
         Taxonomy::make('tags')->save();
