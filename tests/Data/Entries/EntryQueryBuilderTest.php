@@ -5,7 +5,6 @@ namespace Tests\Data\Entries;
 use Facades\Tests\Factories\EntryFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
