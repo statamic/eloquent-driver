@@ -190,6 +190,7 @@ class EntryQueryBuilderTest extends TestCase
         EntryFactory::id('5')->slug('post-5')->collection('posts')->data(['title' => 'Post 5', 'test_date' => null])->create();
     }
 
+    #[Test]
     public function entries_are_found_using_where_null()
     {
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'text' => 'Text 1'])->create();
@@ -797,6 +798,46 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function entries_can_be_ordered_by_a_mapped_data_column()
+    {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'foo' => 2])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'foo' => 3])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'foo' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('foo', 'desc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_can_be_queried_by_a_mapped_data_column()
+    {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'foo' => 2])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'foo' => 3])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'foo' => 1])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->where('foo', 3)->get();
+
+        $this->assertCount(1, $entries);
+        $this->assertEquals(['Post 2'], $entries->map->title->all());
+    }
+
+    #[Test]
     public function filtering_using_where_status_column_writes_deprecation_log()
     {
         $this->withoutDeprecationHandling();
@@ -883,5 +924,16 @@ class EntryQueryBuilderTest extends TestCase
                 'event-past',
             ]],
         ];
+    }
+
+    #[Test]
+    public function entries_are_found_using_where_data()
+    {
+        $this->createDummyCollectionAndEntries();
+
+        $entries = Entry::query()->where('data->title', 'Post 1')->orWhere('data->title', 'Post 3')->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
     }
 }

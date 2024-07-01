@@ -241,4 +241,64 @@ class EntryTest extends TestCase
 
         $this->assertEquals($entry->descendants()->get('fr')->model()->date, '2024-01-01 00:00:00');
     }
+
+    #[Test]
+    public function it_stores_and_retrieves_mapped_data_values()
+    {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
+        $collection = Collection::make('blog')->title('blog')->routes([
+            'en' => '/blog/{slug}',
+        ])->save();
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30);
+        });
+
+        $entry = (new Entry())
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data([
+                'foo' => 'bar',
+            ]);
+
+        $entry->save();
+
+        $this->assertEquals('bar', $entry->model()->toArray()['foo']);
+        $this->assertArrayNotHasKey('foo', $entry->model()->data);
+
+        $fresh = Entry::fromModel($entry->model()->fresh());
+
+        $this->assertSame($entry->foo, $fresh->foo);
+    }
+
+    #[Test]
+    public function it_doesnt_store_mapped_data_when_config_is_disabled()
+    {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', false);
+
+        $collection = Collection::make('blog')->title('blog')->routes([
+            'en' => '/blog/{slug}',
+        ])->save();
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30)->nullable();
+        });
+
+        $entry = (new Entry())
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data([
+                'foo' => 'bar',
+            ]);
+
+        $entry->save();
+
+        $this->assertNull($entry->model()->toArray()['foo']);
+        $this->assertArrayHasKey('foo', $entry->model()->data);
+
+        $fresh = Entry::fromModel($entry->model()->fresh());
+
+        $this->assertSame($entry->foo, $fresh->foo);
+    }
 }

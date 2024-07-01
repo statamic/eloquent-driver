@@ -4,7 +4,9 @@ namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
+use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Entries\EntryCollection;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Query\EloquentQueryBuilder;
@@ -21,7 +23,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     private const STATUSES = ['published', 'draft', 'scheduled', 'expired'];
 
     const COLUMNS = [
-        'id', 'site', 'origin_id', 'published', 'slug', 'uri',
+        'id', 'site', 'origin_id', 'published', 'slug', 'uri', 'data',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
 
@@ -117,7 +119,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        if (! in_array($column, self::COLUMNS)) {
+        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
+
+        if (! in_array($column, $columns)) {
             if (! Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }

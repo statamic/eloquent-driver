@@ -52,6 +52,10 @@ The configuration file, found in `config/statamic/eloquent-driver.php` is automa
 
 For each of the repositories, it allows you to determine if they should be driven by flat-files (`file`) or Eloquent (`eloquent`). Some repositories also have additional options, like the ability to override the model used.
 
+### Mapping Entry data
+
+If you want to map fields from your blueprints to columns with the same handle in your blueprint, set `entries.map_data_to_columns` to true. When adding new columns in a migration we recommend resaving all Entries so that column data is filled: `Entry::all()->each->save()`.
+
 ## Upgrading
 
 After updating to a new version of the Eloquent Driver, please ensure you run `php artisan migrate` to update your database to the latest schema.

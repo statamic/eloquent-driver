@@ -4,6 +4,7 @@ namespace Tests\Assets;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -40,7 +41,7 @@ class AssetTest extends TestCase
         Facades\Asset::make()->container('test')->path('f.jpg')->save();
     }
 
-    /** @test */
+    #[Test]
     public function saving_an_asset_clears_the_eloquent_blink_cache()
     {
         $asset = Facades\Asset::find('test::f.jpg');
