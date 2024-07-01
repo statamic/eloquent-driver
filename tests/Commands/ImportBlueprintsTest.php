@@ -220,4 +220,42 @@ class ImportBlueprintsTest extends TestCase
         $this->assertCount(1, BlueprintModel::all());
         $this->assertCount(1, FieldsetModel::all());
     }
+
+    #[Test]
+    public function it_imports_namespaced_blueprints_and_fieldsets()
+    {
+        BlueprintFacade::addNamespace('myaddon', __DIR__.'/__fixtures__/blueprints');
+        FieldsetFacade::addNamespace('myaddon', __DIR__.'/__fixtures__/blueprints');
+
+        BlueprintFacade::make('test')
+            ->setNamespace('myaddon')
+            ->setContents([
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text']],
+                    ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
+                ],
+            ])->save();
+
+        FieldsetFacade::make('myaddon::test')
+            ->setContents([
+                'fields' => [
+                    ['handle' => 'foo', 'field' => ['type' => 'text']],
+                    ['handle' => 'bar', 'field' => ['type' => 'textarea', 'validate' => 'required']],
+                ],
+            ])->save();
+
+        $this->assertCount(0, BlueprintModel::all());
+        $this->assertCount(0, FieldsetModel::all());
+
+        $this->artisan('statamic:eloquent:import-blueprints', ['--force' => true])
+            ->expectsOutputToContain('Blueprints imported successfully.')
+            ->expectsOutputToContain('Fieldsets imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, BlueprintModel::all());
+        $this->assertCount(1, FieldsetModel::all());
+
+        $this->assertSame('myaddon', BlueprintModel::first()->namespace);
+        $this->assertStringContainsString('myaddon::', FieldsetModel::first()->handle);
+    }
 }
