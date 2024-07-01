@@ -801,10 +801,6 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_can_be_ordered_by_a_mapped_data_column()
     {
-        EloquentEntry::hook('data-column-mappings', fn ($payload, $next) => [
-            'foo' => 'foo',
-        ]);
-
         \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
@@ -823,10 +819,6 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_can_be_queried_by_a_mapped_data_column()
     {
-        EloquentEntry::hook('data-column-mappings', fn ($payload, $next) => [
-            'foo' => 'foo',
-        ]);
-
         \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
