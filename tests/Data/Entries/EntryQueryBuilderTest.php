@@ -931,7 +931,7 @@ class EntryQueryBuilderTest extends TestCase
         ];
     }
 
-    /** @test **/
+    #[Test]
     public function entries_are_found_using_where_data()
     {
         $this->createDummyCollectionAndEntries();

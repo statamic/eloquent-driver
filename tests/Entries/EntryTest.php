@@ -242,7 +242,7 @@ class EntryTest extends TestCase
         $this->assertEquals($entry->descendants()->get('fr')->model()->date, '2024-01-01 00:00:00');
     }
 
-    /** @test */
+    #[Test]
     public function it_stores_and_retrieves_mapped_data_values()
     {
         $collection = Collection::make('blog')->title('blog')->routes([
