@@ -800,6 +800,8 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_can_be_ordered_by_a_mapped_data_column()
     {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
         \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
@@ -818,6 +820,8 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_can_be_queried_by_a_mapped_data_column()
     {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
         \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });

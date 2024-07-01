@@ -187,6 +187,10 @@ class Entry extends FileEntry
 
     public function getDataColumnMappings(Model $model)
     {
+        if (! config('statamic.eloquent-driver.entries.map_data_to_columns', false)) {
+            return [];
+        }
+
         return Blink::once("eloquent-schema-{$model->getTable()}", function () use ($model) {
             $schema = $model->getConnection()->getSchemaBuilder()->getColumnListing($model->getTable());
 
