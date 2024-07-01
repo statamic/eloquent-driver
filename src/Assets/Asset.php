@@ -223,7 +223,7 @@ class Asset extends FileAsset
         ]);
     }
 
-    private function clearCaches()
+    protected function clearCaches()
     {
         $this->meta = null;
 

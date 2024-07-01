@@ -4,6 +4,7 @@ namespace Tests\Commands;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Eloquent\Revisions\RevisionModel;
@@ -39,7 +40,7 @@ class ImportRevisionsTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_import_revisions_when_feature_is_disabled()
     {
         config(['statamic.revisions.enabled' => false]);
@@ -48,7 +49,7 @@ class ImportRevisionsTest extends TestCase
             ->expectsOutputToContain('This import can only be run when revisions are enabled.');
     }
 
-    /** @test */
+    #[Test]
     public function it_imports_revisions()
     {
         Revision::make()

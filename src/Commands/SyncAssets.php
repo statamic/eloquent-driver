@@ -51,7 +51,9 @@ class SyncAssets extends Command
         $this->line("Processing folder: {$folder}");
 
         // get raw listing of this folder, avoiding any of statamic's asset container caching
-        $files = collect($container->disk()->filesystem()->listContents($folder))
+        $contents = collect($container->disk()->filesystem()->listContents($folder));
+
+        $files = $contents
             ->reject(fn ($item) => $item['type'] != 'file')
             ->pluck('path');
 
@@ -86,7 +88,9 @@ class SyncAssets extends Command
             });
 
         // process any sub-folders of this folder
-        $container->folders($folder)
+        $contents
+            ->reject(fn ($item) => $item['type'] != 'dir')
+            ->pluck('path')
             ->each(function ($subfolder) use ($container, $folder) {
                 if (str_contains($subfolder.'/', '.meta/')) {
                     return;
