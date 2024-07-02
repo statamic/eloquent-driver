@@ -329,12 +329,11 @@ class EntryTest extends TestCase
         $collection->structure()->in('en')->tree([['entry' => '1.0', 'children' => []]])->save();
 
         $this->assertSame('/the-slug', $entry->uri());
-        $this->assertSame('/the-slug', $entry->model()->uri);
+        $this->assertSame('/the-slug', $entry->model()->fresh()->uri);
 
         $entry->slug('the-new-slug')->save();
 
-        dd($entry->model());
-
-        $this->assertSame('/blog/the-new-slug', $entry->model()->uri);
+        $this->assertSame('/the-new-slug', $entry->uri());
+        $this->assertSame('/the-new-slug', $entry->model()->fresh()->uri);
     }
 }
