@@ -56,7 +56,9 @@ class EntryRepository extends StacheRepository
 
         $entry->model($model->fresh());
 
-        Blink::store('entry-uris')->forget($entry->id());
+        if ($entry->isDirty('slug')) {
+            Blink::store('entry-uris')->forget($entry->id());
+        }
 
         Blink::put("eloquent-entry-{$entry->id()}", $entry);
         Blink::put("eloquent-entry-{$entry->uri()}", $entry);
