@@ -67,4 +67,16 @@ class EntryRepository extends StacheRepository
 
         $entry->model()->delete();
     }
+
+    public function updateUris($collection, $ids = null)
+    {
+        $ids = collect($ids);
+
+        $this
+            ->query()
+            ->where('collection', $collection->handle())
+            ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
+            ->get()
+            ->each(fn ($entry) => $entry->model()->update(['uri' => $entry->uri()]));
+    }
 }
