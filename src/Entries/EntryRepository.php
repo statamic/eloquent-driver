@@ -72,9 +72,7 @@ class EntryRepository extends StacheRepository
     {
         $ids = collect($ids);
 
-        $this
-            ->query()
-            ->where('collection', $collection->handle())
+        $collection->queryEntries()
             ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
             ->get()
             ->each(fn ($entry) => $entry->model()->update(['uri' => $entry->uri()]));

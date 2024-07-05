@@ -10,16 +10,6 @@ use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository
 {
-    public function updateEntryUris($collection, $ids = null)
-    {
-        $query = $collection->queryEntries()
-            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
-            ->get()
-            ->each(function ($entry) {
-                app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
-            });
-    }
-
     public function all(): IlluminateCollection
     {
         return Blink::once('eloquent-collections', function () {
