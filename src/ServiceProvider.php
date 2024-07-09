@@ -31,7 +31,6 @@ use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
 use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\GlobalVariablesRepository;
-use Statamic\Eloquent\Listeners\UpdateStructuredEntryOrder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -40,7 +39,6 @@ use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Tokens\TokenRepository;
-use Statamic\Events\CollectionTreeSaved;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -59,12 +57,6 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
-    ];
-
-    protected $listen = [
-        CollectionTreeSaved::class => [
-            UpdateStructuredEntryOrder::class,
-        ],
     ];
 
     public function boot()

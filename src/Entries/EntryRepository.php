@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Entries;
 
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\QueryBuilder;
+use Statamic\Eloquent\Jobs\UpdateCollectionEntryOrder;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\EntryRepository as StacheRepository;
 
@@ -76,5 +77,23 @@ class EntryRepository extends StacheRepository
             ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
             ->get()
             ->each(fn ($entry) => $entry->model()->update(['uri' => $entry->uri()]));
+    }
+
+    public function updateOrders($collection, $ids = null)
+    {
+        $collection->queryEntries()
+            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
+            ->get(['id'])
+            ->each(function ($entry) {
+                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
+
+                $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
+
+                if ($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+
+                $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
+            });
     }
 }
