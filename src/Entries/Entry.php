@@ -100,7 +100,17 @@ class Entry extends FileEntry
 
         $dataMappings = (new self)->getDataColumnMappings(new $class);
 
+        $attributes = [];
+
+        if ($id = $source->id()) {
+            $attributes['id'] = $id;
+
+            // Ensure that when calling $source->uri() that it doesn't use the cached value.
+            Blink::store('entry-uris')->forget($source->id());
+        }
+
         $attributes = [
+            ...$attributes,
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
@@ -116,10 +126,6 @@ class Entry extends FileEntry
 
         foreach ($dataMappings as $key) {
             $attributes[$key] = $data->get($key);
-        }
-
-        if ($id = $source->id()) {
-            $attributes['id'] = $id;
         }
 
         return $class::findOrNew($id)->fill($attributes);

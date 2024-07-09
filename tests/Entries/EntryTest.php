@@ -5,15 +5,12 @@ namespace Tests\Entries;
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades;
 use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
-use Statamic\Stache\Repositories\CollectionRepository;
-use Statamic\Statamic;
 use Tests\TestCase;
 
 class EntryTest extends TestCase
@@ -306,34 +303,29 @@ class EntryTest extends TestCase
     }
 
     #[Test]
-    public function saving_an_entry_with_a_different_slug_clears_the_uri_cache_when_collections_are_file_driven()
+    public function saving_an_entry_updates_the_uri()
     {
-        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+        // The URI is stored in the Blink cache. This test ensures
+        // that the new URI is stored and not the blinked one.
 
-        $collection = Collection::make('blog')->title('blog')
-            ->structureContents(['max_depth' => 2, 'orderable' => true])
-            ->routes([
-                'en' => '{parent_uri}/{slug}',
-            ])->save();
+        Collection::make('blog')->title('blog')
+            ->routes('{parent_uri}/{slug}')
+            ->save();
 
         $entry = (new Entry())
             ->id('1.0')
             ->collection('blog')
             ->slug('the-slug')
-            ->data([
-                'foo' => 'bar',
-            ]);
+            ->data(['foo' => 'bar']);
 
         $entry->save();
 
-        $collection->structure()->in('en')->tree([['entry' => '1.0', 'children' => []]])->save();
-
         $this->assertSame('/the-slug', $entry->uri());
-        $this->assertSame('/the-slug', $entry->model()->fresh()->uri);
+        $this->assertSame('/the-slug', $entry->model()->uri);
 
         $entry->slug('the-new-slug')->save();
 
         $this->assertSame('/the-new-slug', $entry->uri());
-        $this->assertSame('/the-new-slug', $entry->model()->fresh()->uri);
+        $this->assertSame('/the-new-slug', $entry->model()->uri);
     }
 }
