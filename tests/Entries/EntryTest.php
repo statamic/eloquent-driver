@@ -301,4 +301,31 @@ class EntryTest extends TestCase
 
         $this->assertSame($entry->foo, $fresh->foo);
     }
+
+    #[Test]
+    public function saving_an_entry_updates_the_uri()
+    {
+        // The URI is stored in the Blink cache. This test ensures
+        // that the new URI is stored and not the blinked one.
+
+        Collection::make('blog')->title('blog')
+            ->routes('{parent_uri}/{slug}')
+            ->save();
+
+        $entry = (new Entry())
+            ->id('1.0')
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data(['foo' => 'bar']);
+
+        $entry->save();
+
+        $this->assertSame('/the-slug', $entry->uri());
+        $this->assertSame('/the-slug', $entry->model()->uri);
+
+        $entry->slug('the-new-slug')->save();
+
+        $this->assertSame('/the-new-slug', $entry->uri());
+        $this->assertSame('/the-new-slug', $entry->model()->uri);
+    }
 }
