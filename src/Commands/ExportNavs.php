@@ -81,7 +81,6 @@ class ExportNavs extends Command
                 ->collections($model->settings['collections'] ?? null)
                 ->maxDepth($model->settings['max_depth'] ?? null)
                 ->expectsRoot($model->settings['expects_root'] ?? false)
-                ->initialPath($model->settings['initial_path'] ?? null)
                 ->save();
         });
 
@@ -106,7 +105,6 @@ class ExportNavs extends Command
                         ->tree($treeModel->tree)
                         ->handle($treeModel->handle)
                         ->locale($treeModel->locale)
-                        ->initialPath($treeModel->settings['initial_path'] ?? null)
                         ->syncOriginal()
                         ->save();
                 });

@@ -18,7 +18,6 @@ class Nav extends FileEntry
             ->collections($model->settings['collections'] ?? null)
             ->maxDepth($model->settings['max_depth'] ?? null)
             ->expectsRoot($model->settings['expects_root'] ?? false)
-            ->initialPath($model->settings['initial_path'] ?? null)
             ->model($model);
     }
 
@@ -42,7 +41,6 @@ class Nav extends FileEntry
                 'collections'  => $source->collections()->map->handle(),
                 'max_depth'    => $source->maxDepth(),
                 'expects_root' => $source->expectsRoot(),
-                'initial_path' => $source->initialPath(),
             ],
         ]);
     }
