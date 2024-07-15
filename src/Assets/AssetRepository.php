@@ -18,6 +18,10 @@ class AssetRepository extends BaseRepository
         [$container, $path] = explode('::', $id);
 
         if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) && str_contains($path, '.') === false) {
+            if (! $path) {
+                $path = $container;
+            }
+
             $item = Blink::once($blinkKey, fn () => $this->query()->where('id', $path)->first());
 
             if (! $item) {

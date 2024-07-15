@@ -92,6 +92,11 @@ class AssetTest extends TestCase
 
         $this->assertInstanceOf(Asset::class, $asset);
         $this->assertSame('f.jpg', $asset->basename());
+
+        $asset = Facades\Asset::find('6');
+
+        $this->assertInstanceOf(Asset::class, $asset);
+        $this->assertSame('f.jpg', $asset->basename());
     }
 
     protected function setUseModelKeysConfig($app)
