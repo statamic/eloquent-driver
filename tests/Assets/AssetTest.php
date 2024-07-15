@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Assets\Asset;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -81,6 +82,16 @@ class AssetTest extends TestCase
 
         Storage::disk('test')->put('new.jpg', '');
         Facades\Asset::make()->container('test')->path('new.jpg')->id();
+    }
+
+    #[Test]
+    #[DefineEnvironment('setUseModelKeysConfig')]
+    public function using_find_with_an_id_returns_an_asset()
+    {
+        $asset = Facades\Asset::find('test::6');
+
+        $this->assertInstanceOf(Asset::class, $asset);
+        $this->assertSame('f.jpg', $asset->basename());
     }
 
     protected function setUseModelKeysConfig($app)

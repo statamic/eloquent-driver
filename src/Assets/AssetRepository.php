@@ -13,12 +13,25 @@ class AssetRepository extends BaseRepository
 {
     public function findById($id): ?AssetContract
     {
+        $blinkKey = "eloquent-asset-{$id}";
+
         [$container, $path] = explode('::', $id);
+
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) && str_contains($path, '.') === false) {
+            $item = Blink::once($blinkKey, fn () => $this->query()->where('id', $path)->first());
+
+            if (! $item) {
+                Blink::forget($blinkKey);
+
+                return null;
+            }
+
+            return $item;
+        }
 
         $filename = Str::afterLast($path, '/');
         $folder = str_contains($path, '/') ? Str::beforeLast($path, '/') : '/';
 
-        $blinkKey = "eloquent-asset-{$id}";
         $item = Blink::once($blinkKey, function () use ($container, $filename, $folder) {
             return $this->query()
                 ->where('container', $container)
