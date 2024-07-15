@@ -17,14 +17,10 @@ class AssetRepository extends BaseRepository
 
         [$container, $path] = explode('::', $id);
 
-        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) && str_contains($path, '.') === false) {
-            if (! $path) {
-                $path = $container;
-            }
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) && (str_contains($path, '.') === false)) {
+            $item = Blink::once($blinkKey, fn() => $this->query()->where('id', $path)->first());
 
-            $item = Blink::once($blinkKey, fn () => $this->query()->where('id', $path)->first());
-
-            if (! $item) {
+            if (!$item) {
                 Blink::forget($blinkKey);
 
                 return null;
@@ -55,6 +51,11 @@ class AssetRepository extends BaseRepository
 
     public function findByUrl(string $url)
     {
+        // handle find('model-key'), with no container
+        if (! str_contains('.', $url)) {
+            return $this->findById('::'.$url);
+        }
+
         if (! $container = $this->resolveContainerFromUrl($url)) {
             return null;
         }
