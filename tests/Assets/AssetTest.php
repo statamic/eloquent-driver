@@ -60,7 +60,7 @@ class AssetTest extends TestCase
         $asset = Facades\Asset::find('test::f.jpg');
 
         $this->assertNotSame($asset->id(), $asset->model()->getKey());
-        $this->assertStringContainsString("::", $asset->id());
+        $this->assertStringContainsString('::', $asset->id());
     }
 
     #[Test]
