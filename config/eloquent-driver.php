@@ -14,6 +14,7 @@ return [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Assets\AssetModel::class,
         'asset' => \Statamic\Eloquent\Assets\Asset::class,
+        'use_model_keys_for_ids' => false,
     ],
 
     'blueprints' => [

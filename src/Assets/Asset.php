@@ -30,12 +30,15 @@ class Asset extends FileAsset
     protected $existsOnDisk = false;
     protected $removedData = [];
 
+    protected $model;
+
     public static function fromModel(Model $model)
     {
         return (new static())
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
             ->hydrateMeta($model->meta)
+            ->model($model)
             ->syncOriginal();
     }
 
@@ -56,6 +59,20 @@ class Asset extends FileAsset
                 ->merge($this->data->all())
                 ->except($this->removedData)
                 ->all();
+
+            return $meta;
+        }
+
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            if ($this->model) {
+                return $this->model->meta;
+            }
+
+            $meta = $this->generateMeta();
+
+            if (! $meta['data']) {
+                $meta['data'] = [];
+            }
 
             return $meta;
         }
@@ -129,7 +146,11 @@ class Asset extends FileAsset
     {
         $meta['data'] = Arr::removeNullValues($meta['data']);
 
-        self::makeModelFromContract($this, $meta)?->save();
+        if ($model = self::makeModelFromContract($this, $meta)) {
+            $model->save();
+
+            $this->model = $model;
+        }
 
         Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
@@ -147,11 +168,21 @@ class Asset extends FileAsset
 
         $original = $source->getOriginal();
 
-        $model = app('statamic.eloquent.assets.model')::firstOrNew([
-            'container' => $source->containerHandle(),
-            'folder' => Arr::get($original, 'folder', $source->folder()),
-            'basename' => Arr::get($original, 'basename', $source->basename()),
-        ])->fill([
+        $model = false;
+
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            $model = $source->model();
+        }
+
+        if (! $model) {
+            $model = app('statamic.eloquent.assets.model')::firstOrNew([
+                'container' => $source->containerHandle(),
+                'folder' => Arr::get($original, 'folder', $source->folder()),
+                'basename' => Arr::get($original, 'basename', $source->basename()),
+            ]);
+        }
+
+        $model->fill([
             'meta' => $meta,
             'filename' => $source->filename(),
             'extension' => $extension,
@@ -195,7 +226,8 @@ class Asset extends FileAsset
         $this->path($newPath);
         $this->save();
 
-        if ($oldMetaPath != $this->metaPath()) {
+        // if we arent referencing assets by the database model id, then we need to find any old models by the previous path and update them
+        if (! config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) && ($oldMetaPath != $this->metaPath())) {
             $oldMetaModel = app('statamic.eloquent.assets.model')::where([
                 'container' => $this->containerHandle(),
                 'folder' => $oldFolder,
@@ -211,6 +243,30 @@ class Asset extends FileAsset
         }
 
         return $this;
+    }
+
+    public function model($model = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->model;
+        }
+
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function id($id = null)
+    {
+        if ($id || ! config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            return parent::id($id);
+        }
+
+        if (! $this->model) {
+            throw new \Exception('ID is not available until asset is saved');
+        }
+
+        return $this->model->getKey();
     }
 
     public function getCurrentDirtyStateAttributes(): array
