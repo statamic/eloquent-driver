@@ -3,12 +3,9 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\File;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Sites\Sites as EloquentSites;
 use Statamic\Sites\Sites;
-
 
 class ImportSites extends Command
 {
