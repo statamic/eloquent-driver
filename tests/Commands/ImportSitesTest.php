@@ -3,6 +3,7 @@
 namespace Commands;
 
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Sites\SiteModel;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
