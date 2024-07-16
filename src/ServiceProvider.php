@@ -161,6 +161,10 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2024_03_07_100000_create_tokens_table.php' => database_path('migrations/2024_03_07_100000_create_tokens_table.php'),
         ], 'statamic-eloquent-token-migrations');
 
+        $this->publishes($siteMigrations = [
+            __DIR__.'/../database/migrations/2024_07_16_100000_create_sites_table.php' => database_path('migrations/2024_07_16_100000_create_sites_table.php'),
+        ], 'statamic-eloquent-site-migrations');
+
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
@@ -177,7 +181,8 @@ class ServiceProvider extends AddonServiceProvider
                 $assetContainerMigrations,
                 $assetMigrations,
                 $revisionMigrations,
-                $tokenMigrations
+                $tokenMigrations,
+                $siteMigrations,
             ),
             'migrations'
         );
@@ -210,6 +215,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerTaxonomies();
         $this->registerTerms();
         $this->registerTokens();
+        $this->registerSites();
     }
 
     private function registerAssetContainers()
@@ -517,6 +523,21 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
+    public function registerSites()
+    {
+        if (config('statamic.eloquent-driver.sites.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        $this->app->bind('statamic.eloquent.sites.model', function () {
+            return config('statamic.eloquent-driver.sites.model');
+        });
+
+        $this->app->singleton(\Statamic\Sites\Sites::class, \Statamic\Eloquent\Sites\Sites::class);
+
+        Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
+    }
+
     protected function addAboutCommandInfo()
     {
         if (! class_exists(AboutCommand::class)) {
@@ -539,6 +560,7 @@ class ServiceProvider extends AddonServiceProvider
             'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
             'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
             'Tokens' => config('statamic.eloquent-driver.tokens.driver', 'file'),
+            'Sites' => config('statamic.eloquent-driver.sites.driver', 'file'),
         ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 
