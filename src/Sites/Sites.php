@@ -6,7 +6,7 @@ class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
     {
-        $sites = SiteModel::all();
+        $sites = app('statamic.eloquent.sites.model')::all();
 
         return $sites->isEmpty() ? $this->getDefaultSite() : $sites->mapWithKeys(function ($model) {
             return [
@@ -24,7 +24,7 @@ class Sites extends \Statamic\Sites\Sites
     protected function saveToStore()
     {
         foreach ($this->config() as $handle => $config) {
-            SiteModel::firstOrNew(['handle' => $handle])
+            app('statamic.eloquent.sites.model')::firstOrNew(['handle' => $handle])
                 ->fill([
                     'name' => $config['name'] ?? '',
                     'lang' => $config['lang'] ?? '',
@@ -35,6 +35,6 @@ class Sites extends \Statamic\Sites\Sites
                 ->save();
         }
 
-        SiteModel::whereNotIn('handle', array_keys($this->config()))->get()->each->delete();
+        app('statamic.eloquent.sites.model')::whereNotIn('handle', array_keys($this->config()))->get()->each->delete();
     }
 }
