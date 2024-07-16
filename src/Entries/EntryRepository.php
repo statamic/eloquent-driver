@@ -4,6 +4,8 @@ namespace Statamic\Eloquent\Entries;
 
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\QueryBuilder;
+use Statamic\Eloquent\Jobs\UpdateCollectionEntryOrder;
+use Statamic\Eloquent\Jobs\UpdateCollectionEntryParent;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\EntryRepository as StacheRepository;
 
@@ -66,5 +68,51 @@ class EntryRepository extends StacheRepository
         Blink::forget("eloquent-entry-{$entry->uri()}");
 
         $entry->model()->delete();
+    }
+
+    public function updateUris($collection, $ids = null)
+    {
+        $ids = collect($ids);
+
+        $collection->queryEntries()
+            ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
+            ->get()
+            ->each(fn ($entry) => $entry->model()->update(['uri' => $entry->uri()]));
+    }
+
+    public function updateOrders($collection, $ids = null)
+    {
+        $collection->queryEntries()
+            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
+            ->get(['id'])
+            ->each(function ($entry) {
+                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
+
+                $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
+
+                if ($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+
+                $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
+            });
+    }
+
+    public function updateParents($collection, $ids = null)
+    {
+        $collection->queryEntries()
+            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
+            ->get(['id'])
+            ->each(function ($entry) {
+                $dispatch = UpdateCollectionEntryParent::dispatch($entry->id());
+
+                $connection = config('statamic.eloquent-driver.collections.update_entry_parent_connection', 'default');
+
+                if ($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+
+                $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_parent_queue', 'default'));
+            });
     }
 }

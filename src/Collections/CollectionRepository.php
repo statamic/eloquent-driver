@@ -4,22 +4,11 @@ namespace Statamic\Eloquent\Collections;
 
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
-use Statamic\Eloquent\Jobs\UpdateCollectionEntryOrder;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
 class CollectionRepository extends StacheRepository
 {
-    public function updateEntryUris($collection, $ids = null)
-    {
-        $query = $collection->queryEntries()
-            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
-            ->get()
-            ->each(function ($entry) {
-                app('statamic.eloquent.entries.model')::find($entry->id())->update(['uri' => $entry->uri()]);
-            });
-    }
-
     public function all(): IlluminateCollection
     {
         return Blink::once('eloquent-collections', function () {
@@ -75,23 +64,5 @@ class CollectionRepository extends StacheRepository
         return [
             CollectionContract::class => Collection::class,
         ];
-    }
-
-    public function updateEntryOrder(CollectionContract $collection, $ids = null)
-    {
-        $query = $collection->queryEntries()
-            ->when($ids, fn ($query) => $query->whereIn('id', $ids))
-            ->get(['id'])
-            ->each(function ($entry) {
-                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id());
-
-                $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
-
-                if ($connection != 'default') {
-                    $dispatch->onConnection($connection);
-                }
-
-                $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_order_queue', 'default'));
-            });
     }
 }

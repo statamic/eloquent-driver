@@ -15,7 +15,6 @@ class NavTree extends FileEntry
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)
-            ->initialPath($model->settings['initial_path'] ?? null)
             ->syncOriginal()
             ->model($model);
     }
@@ -37,9 +36,7 @@ class NavTree extends FileEntry
             'locale' => $source->locale(),
         ])->fill([
             'tree'     => ($isFileEntry || $source->model) ? $source->tree() : [],
-            'settings' => [
-                'initial_path' => $source->initialPath(),
-            ],
+            'settings' => [],
         ]);
     }
 

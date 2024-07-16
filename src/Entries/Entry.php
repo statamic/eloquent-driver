@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
 
 class Entry extends FileEntry
@@ -15,6 +16,10 @@ class Entry extends FileEntry
     public static function fromModel(Model $model)
     {
         $data = isset($model->data['__localized_fields']) ? collect($model->data)->only($model->data['__localized_fields']) : $model->data;
+
+        foreach ((new self)->getDataColumnMappings($model) as $key) {
+            $data[$key] = $model->$key;
+        }
 
         $entry = (new static())
             ->origin($model->origin_id)
@@ -93,7 +98,19 @@ class Entry extends FileEntry
             $data->put('parent', (string) $parent->id);
         }
 
+        $dataMappings = (new self)->getDataColumnMappings(new $class);
+
+        $attributes = [];
+
+        if ($id = $source->id()) {
+            $attributes['id'] = $id;
+
+            // Ensure that when calling $source->uri() that it doesn't use the cached value.
+            Blink::store('entry-uris')->forget($source->id());
+        }
+
         $attributes = [
+            ...$attributes,
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
@@ -101,14 +118,14 @@ class Entry extends FileEntry
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
-            'data' => $data->except(EntryQueryBuilder::COLUMNS),
+            'data' => $data->except(array_merge(EntryQueryBuilder::COLUMNS, $dataMappings)),
             'published' => $source->published(),
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
 
-        if ($id = $source->id()) {
-            $attributes['id'] = $id;
+        foreach ($dataMappings as $key) {
+            $attributes[$key] = $data->get($key);
         }
 
         return $class::findOrNew($id)->fill($attributes);
@@ -172,5 +189,18 @@ class Entry extends FileEntry
 
         return parent::makeLocalization($site)
             ->data($this->data());
+    }
+
+    public function getDataColumnMappings(Model $model)
+    {
+        if (! config('statamic.eloquent-driver.entries.map_data_to_columns', false)) {
+            return [];
+        }
+
+        return Blink::once("eloquent-schema-{$model->getTable()}", function () use ($model) {
+            $schema = $model->getConnection()->getSchemaBuilder()->getColumnListing($model->getTable());
+
+            return collect($schema)->reject(fn ($value) => in_array($value, EntryQueryBuilder::COLUMNS))->all();
+        });
     }
 }
