@@ -9,6 +9,8 @@ use Statamic\Fields\FieldsetRepository as StacheRepository;
 
 class FieldsetRepository extends StacheRepository
 {
+    use Traits\StoresAndRetrievesFieldOrder;
+
     public function all(): Collection
     {
         return Blink::once('eloquent-fieldsets', function () {
@@ -18,9 +20,12 @@ class FieldsetRepository extends StacheRepository
 
             return $models->map(function ($model) {
                 return Blink::once("eloquent-fieldset-{$model->handle}", function () use ($model) {
+                    $fields = $model->data;
+                    $fields['fields'] = $this->applyOrderToBlueprintFields($fields['fields']);
+
                     return (new Fieldset())
                         ->setHandle($model->handle)
-                        ->setContents($model->data);
+                        ->setContents($fields);
                 });
             });
         });
@@ -51,7 +56,10 @@ class FieldsetRepository extends StacheRepository
             'handle' => $fieldset->handle(),
         ]);
 
-        $model->data = $fieldset->contents();
+        $fields = $fieldset->contents();
+        $fields['fields'] = $this->addOrderToBlueprintFields($fields['fields'] ?? []);
+
+        $model->data = $fields;
         $model->save();
 
         Blink::forget("eloquent-fieldset-{$model->handle}");
@@ -67,5 +75,10 @@ class FieldsetRepository extends StacheRepository
 
         Blink::forget("eloquent-fieldset-{$model->handle}");
         Blink::forget('eloquent-fieldsets');
+    }
+
+    public function getModel($fieldset)
+    {
+        return $model = app('statamic.eloquent.fieldsets.model')::where('handle', $fieldset->handle())->first();
     }
 }

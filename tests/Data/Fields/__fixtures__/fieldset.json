@@ -1,0 +1,71 @@
+{
+    "title": "Testing",
+    "fields": [
+        {
+            "field": {
+                "type": "select",
+                "display": "Select Field",
+                "options": {
+                    "one": "One",
+                    "two": "Two"
+                },
+                "localizable": false
+            },
+            "handle": "select_field"
+        },
+        {
+            "field": {
+                "sets": {
+                    "new_set_group": {
+                        "sets": {
+                            "new_set": {
+                                "fields": [
+                                    {
+                                        "field": {
+                                            "type": "select",
+                                            "display": "Select Field",
+                                            "options": {
+                                                "one": "One",
+                                                "two": "Two"
+                                            },
+                                            "localizable": false
+                                        },
+                                        "handle": "select_field"
+                                    }
+                                ],
+                                "display": "New Set"
+                            }
+                        },
+                        "display": "New Set Group"
+                    }
+                },
+                "type": "replicator",
+                "display": "Replicator Field",
+                "localizable": false
+            },
+            "handle": "replicator_field"
+        },
+        {
+            "field": {
+                "type": "grid",
+                "fields": [
+                    {
+                        "field": {
+                            "type": "select",
+                            "display": "Select Field",
+                            "options": {
+                                "one": "One",
+                                "two": "Two"
+                            },
+                            "localizable": false
+                        },
+                        "handle": "select_field"
+                    }
+                ],
+                "display": "Grid Field",
+                "localizable": false
+            },
+            "handle": "grid_field"
+        }
+    ]
+}
