@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Facades\Blueprint;
+use Statamic\Support\Arr;
 use Tests\TestCase;
 
 class BlueprintTest extends TestCase
@@ -87,5 +88,86 @@ class BlueprintTest extends TestCase
             ->save();
 
         $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
+    }
+
+    #[Test]
+    public function it_stores_and_resets_select_field_order()
+    {
+        $contents = json_decode(file_get_contents(__DIR__.'/__fixtures__/blueprint.json'), true);
+
+        $blueprint = Blueprint::make()
+            ->setNamespace('forms')
+            ->setHandle('test')
+            ->setHidden(true)
+            ->setContents($contents)
+            ->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.1.field'));
+        $this->assertSame(['sms', 'tel', 'email'], Arr::get($savedData, 'tabs.main.sections.0.fields.1.field.__order'));
+
+        Arr::set($contents, 'tabs.main.sections.0.fields.1.field.options', ['email' => 'Email', 'tel' => 'Telephone', 'sms' => 'SMS']);
+
+        $blueprint->setContents($contents)->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.1.field'));
+        $this->assertSame(['email', 'tel', 'sms'], Arr::get($savedData, 'tabs.main.sections.0.fields.1.field.__order'));
+    }
+
+    #[Test]
+    public function it_stores_and_resets_select_field_order_within_replicators()
+    {
+        $contents = json_decode(file_get_contents(__DIR__.'/__fixtures__/blueprint.json'), true);
+
+        $blueprint = Blueprint::make()
+            ->setNamespace('forms')
+            ->setHandle('test')
+            ->setHidden(true)
+            ->setContents($contents)
+            ->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.2.field.sets.new_set_group.sets.new_set.fields.0.field'));
+        $this->assertSame(['one', 'two'], Arr::get($savedData, 'tabs.main.sections.0.fields.2.field.sets.new_set_group.sets.new_set.fields.0.field.__order'));
+
+        Arr::set($contents, 'tabs.main.sections.0.fields.2.field.sets.new_set_group.sets.new_set.fields.0.field.options', ['two' => 'Two', 'one' => 'One']);
+
+        $blueprint->setContents($contents)->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.2.field.sets.new_set_group.sets.new_set.fields.0.field'));
+        $this->assertSame(['two', 'one'], Arr::get($savedData, 'tabs.main.sections.0.fields.2.field.sets.new_set_group.sets.new_set.fields.0.field.__order'));
+    }
+
+    #[Test]
+    public function it_stores_and_resets_select_field_order_within_grids()
+    {
+        $contents = json_decode(file_get_contents(__DIR__.'/__fixtures__/blueprint.json'), true);
+
+        $blueprint = Blueprint::make()
+            ->setNamespace('forms')
+            ->setHandle('test')
+            ->setHidden(true)
+            ->setContents($contents)
+            ->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.3.field.fields.0.field'));
+        $this->assertSame(['one', 'two'], Arr::get($savedData, 'tabs.main.sections.0.fields.3.field.fields.0.field.__order'));
+
+        Arr::set($contents, 'tabs.main.sections.0.fields.3.field.fields.0.field.options', ['two' => 'Two', 'one' => 'One']);
+
+        $blueprint->setContents($contents)->save();
+
+        $savedData = Blueprint::getModel($blueprint)->data;
+
+        $this->assertArrayHasKey('__order', Arr::get($savedData, 'tabs.main.sections.0.fields.3.field.fields.0.field'));
+        $this->assertSame(['two', 'one'], Arr::get($savedData, 'tabs.main.sections.0.fields.3.field.fields.0.field.__order'));
     }
 }

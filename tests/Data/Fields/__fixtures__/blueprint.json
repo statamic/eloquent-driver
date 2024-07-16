@@ -1,0 +1,148 @@
+{
+    "tabs": {
+        "SEO": {
+            "__count": 2,
+            "display": "SEO",
+            "sections": [
+                {
+                    "fields": [
+                        {
+                            "field": {
+                                "type": "seo_pro",
+                                "display": "SEO",
+                                "listable": false,
+                                "localizable": false
+                            },
+                            "handle": "seo"
+                        }
+                    ],
+                    "__count": 0
+                }
+            ]
+        },
+        "main": {
+            "__count": 0,
+            "display": "Main",
+            "sections": [
+                {
+                    "fields": [
+                        {
+                            "field": {
+                                "type": "text",
+                                "required": true,
+                                "validate": [
+                                    "required"
+                                ],
+                                "localizable": false
+                            },
+                            "handle": "title"
+                        },
+                        {
+                            "field": {
+                                "type": "select",
+                                "display": "Select Field",
+                                "options": {
+                                    "sms": "SMS",
+                                    "tel": "Telephone",
+                                    "email": "Email"
+                                },
+                                "localizable": false
+                            },
+                            "handle": "select_field"
+                        },
+                        {
+                            "field": {
+                                "sets": {
+                                    "new_set_group": {
+                                        "sets": {
+                                            "new_set": {
+                                                "fields": [
+                                                    {
+                                                        "field": {
+                                                            "type": "select",
+                                                            "display": "Select Field",
+                                                            "options": {
+                                                                "one": "One",
+                                                                "two": "Two"
+                                                            },
+                                                            "localizable": false
+                                                        },
+                                                        "handle": "select_field"
+                                                    }
+                                                ],
+                                                "display": "New Set"
+                                            }
+                                        },
+                                        "display": "New Set Group"
+                                    }
+                                },
+                                "type": "replicator",
+                                "display": "Replicator Field",
+                                "localizable": false
+                            },
+                            "handle": "replicator_field"
+                        },
+                        {
+                            "field": {
+                                "type": "grid",
+                                "fields": [
+                                    {
+                                        "field": {
+                                            "type": "select",
+                                            "display": "Select Field",
+                                            "options": {
+                                                "one": "One",
+                                                "two": "Two"
+                                            },
+                                            "localizable": false
+                                        },
+                                        "handle": "select_field"
+                                    }
+                                ],
+                                "display": "Grid Field",
+                                "localizable": false
+                            },
+                            "handle": "grid_field"
+                        }
+                    ],
+                    "__count": 0
+                }
+            ]
+        },
+        "sidebar": {
+            "__count": 1,
+            "display": "Sidebar",
+            "sections": [
+                {
+                    "fields": [
+                        {
+                            "field": {
+                                "type": "slug",
+                                "validate": [
+                                    "required",
+                                    "unique_entry_value:{collection},{id},{site}"
+                                ],
+                                "localizable": true
+                            },
+                            "handle": "slug"
+                        },
+                        {
+                            "field": {
+                                "type": "entries",
+                                "listable": true,
+                                "max_items": 1,
+                                "collections": [
+                                    "pretend_terms"
+                                ],
+                                "localizable": true
+                            },
+                            "handle": "parent"
+                        }
+                    ],
+                    "__count": 0
+                }
+            ]
+        }
+    },
+    "title": "Pretend term"
+}
