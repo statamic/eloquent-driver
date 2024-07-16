@@ -9,6 +9,10 @@ use Statamic\Eloquent\Forms\SubmissionModel;
 return new class extends Migration {
     public function up()
     {
+        if (Schema::hasColumn($this->prefix('form_submissions'), 'form')) {
+            return;
+        }
+
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->string('form', 30)->nullable()->index()->after('id');
         });
@@ -24,7 +28,10 @@ return new class extends Migration {
             });
 
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
-            $table->dropForeign(['form_id']);
+            if (in_array($this->prefix('form_submissions').'_form_id_foreign', $this->listTableForeignKeys($this->prefix('form_submissions')))) {
+                $table->dropForeign(['form_id']);
+            }
+
             $table->dropColumn('form_id');
         });
     }
@@ -48,5 +55,14 @@ return new class extends Migration {
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->dropColumn('form');
         });
+    }
+
+    private function listTableForeignKeys($table)
+    {
+        $conn = Schema::getConnection()->getDoctrineSchemaManager();
+
+        return array_map(function($key) {
+    		return $key->getName();
+        }, $conn->listTableForeignKeys($table));
     }
 };
