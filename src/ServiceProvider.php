@@ -534,8 +534,6 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->singleton(\Statamic\Sites\Sites::class, \Statamic\Eloquent\Sites\Sites::class);
-
-        Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
     protected function addAboutCommandInfo()
