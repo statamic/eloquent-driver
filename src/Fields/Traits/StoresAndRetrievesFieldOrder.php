@@ -29,7 +29,7 @@ trait StoresAndRetrievesFieldOrder
                 return $field;
             }
 
-            if (!in_array($field['field']['type'], ['select'])) {
+            if (! in_array($field['field']['type'], ['select'])) {
                 return $field;
             }
 

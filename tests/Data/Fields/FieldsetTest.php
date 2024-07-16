@@ -4,7 +4,6 @@ namespace Tests\Data\Fields;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Fieldset;
 use Statamic\Support\Arr;
 use Tests\TestCase;
