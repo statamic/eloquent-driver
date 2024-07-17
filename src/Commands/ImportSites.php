@@ -30,10 +30,12 @@ class ImportSites extends Command
      */
     public function handle(): int
     {
-        $sites = (new Sites)->getConfig();
+        $sites = (new Sites)->config();
 
         (new EloquentSites)->setSites($sites)->save();
 
         $this->components->info('Sites imported successfully.');
+
+        return 0;
     }
 }

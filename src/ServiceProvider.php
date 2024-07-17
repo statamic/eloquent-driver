@@ -83,6 +83,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ExportNavs::class,
             Commands\ExportRevisions::class,
             Commands\ExportTaxonomies::class,
+            Commands\ExportSites::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
@@ -92,6 +93,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportNavs::class,
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
+            Commands\ImportSites::class,
             Commands\SyncAssets::class,
         ]);
 

@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create($this->prefix('sites'), function (Blueprint $table) {
             $table->id();
             $table->string('handle')->unique();
+            $table->string('name');
             $table->string('url');
             $table->string('locale');
             $table->string('lang');
