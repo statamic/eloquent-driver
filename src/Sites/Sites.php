@@ -8,7 +8,7 @@ class Sites extends \Statamic\Sites\Sites
     {
         $sites = app('statamic.eloquent.sites.model')::all();
 
-        return $sites->isEmpty() ? $this->getDefaultSite() : $sites->mapWithKeys(function ($model) {
+        return $sites->isEmpty() ? $this->getFallbackConfig() : $sites->mapWithKeys(function ($model) {
             return [
                 $model->handle => [
                     'name' => $model->name,
