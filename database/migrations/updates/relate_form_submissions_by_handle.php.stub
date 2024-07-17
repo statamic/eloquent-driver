@@ -28,9 +28,11 @@ return new class extends Migration {
             });
 
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
-            if (in_array($this->prefix('form_submissions').'_form_id_foreign', $this->listTableForeignKeys($this->prefix('form_submissions')))) {
-                $table->dropForeign(['form_id']);
-            }
+            collect(Schema::getForeignKeys($this->prefix('form_submissions')))->each(function ($fk) use ($table) {
+                if (count($fk['columns']) == 1 && in_array('form_id', $fk['columns'])) {
+                    $table->dropForeign(['form_id']);
+                }
+            });
 
             $table->dropColumn('form_id');
         });
@@ -55,14 +57,5 @@ return new class extends Migration {
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
             $table->dropColumn('form');
         });
-    }
-
-    private function listTableForeignKeys($table)
-    {
-        $conn = Schema::getConnection()->getDoctrineSchemaManager();
-
-        return array_map(function($key) {
-    		return $key->getName();
-        }, $conn->listTableForeignKeys($table));
     }
 };
