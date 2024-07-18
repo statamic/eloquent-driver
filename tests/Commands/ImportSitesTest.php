@@ -25,6 +25,13 @@ class ImportSitesTest extends TestCase
     {
         $this->assertCount(0, SiteModel::all());
 
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+            'es' => ['name' => 'Spanish', 'locale' => 'es_ES', 'url' => 'http://test.com/es/'],
+            'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
+        ]);
+
         $this->artisan('statamic:eloquent:import-sites')
             ->expectsOutputToContain('Sites imported successfully.')
             ->assertExitCode(0);
