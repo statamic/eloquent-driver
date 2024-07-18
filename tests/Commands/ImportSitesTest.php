@@ -19,13 +19,6 @@ class ImportSitesTest extends TestCase
         $this->app->bind('statamic.eloquent.sites.model', function () {
             return SiteModel::class;
         });
-
-        $this->app->singleton(
-            'Statamic\Sites\Sites',
-            'Statamic\Eloquent\Sites\Sites'
-        );
-
-        Facade::clearResolvedInstance(\Statamic\Sites\Sites::class);
     }
 
     #[Test]
