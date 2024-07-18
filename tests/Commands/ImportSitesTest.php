@@ -32,6 +32,8 @@ class ImportSitesTest extends TestCase
             'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
         ]);
 
+        \Statamic\Facades\Site::save();
+
         $this->artisan('statamic:eloquent:import-sites')
             ->expectsOutputToContain('Sites imported successfully.')
             ->assertExitCode(0);
