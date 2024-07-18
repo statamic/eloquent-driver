@@ -2,7 +2,6 @@
 
 namespace Commands;
 
-use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Sites\SiteModel;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
