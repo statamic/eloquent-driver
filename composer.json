@@ -25,7 +25,7 @@
     },
     "require": {
         "php": "^8.1",
-        "statamic/cms": "^5.14"
+        "statamic/cms": "^5.16"
     },
     "require-dev": {
         "doctrine/dbal": "^3.8",
