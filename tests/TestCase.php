@@ -23,6 +23,7 @@ abstract class TestCase extends AddonTestCase
 
         collect(config('statamic.eloquent-driver'))
             ->filter(fn ($config) => isset($config['driver']))
+            ->reject(fn ($config, $key) => $key === 'sites')
             ->each(fn ($config, $key) => $app['config']->set("statamic.eloquent-driver.{$key}.driver", 'eloquent'));
     }
 
