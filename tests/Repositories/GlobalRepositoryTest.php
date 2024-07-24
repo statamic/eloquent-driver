@@ -20,15 +20,15 @@ class GlobalRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $stache = (new Stache())->sites(['en', 'fr']);
+        $stache = (new Stache)->sites(['en', 'fr']);
         $this->app->instance(Stache::class, $stache);
         $this->repo = new GlobalRepository($stache);
 
         $globalOne = $this->repo->make('contact')->title('Contact Details')->save();
-        (new Variables())->globalSet($globalOne)->data(['phone' => '555-1234'])->save();
+        (new Variables)->globalSet($globalOne)->data(['phone' => '555-1234'])->save();
 
         $globalTwo = $this->repo->make('global')->title('General')->save();
-        (new Variables())->globalSet($globalTwo)->data(['foo' => 'Bar'])->save();
+        (new Variables)->globalSet($globalTwo)->data(['foo' => 'Bar'])->save();
     }
 
     #[Test]

@@ -8,6 +8,6 @@ class CollectionStructure extends StatamicCollectionStructure
 {
     public function newTreeInstance()
     {
-        return new CollectionTree();
+        return new CollectionTree;
     }
 }

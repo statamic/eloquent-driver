@@ -19,7 +19,7 @@ class AssetContainerRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $stache = (new Stache())->sites(['en', 'fr']);
+        $stache = (new Stache)->sites(['en', 'fr']);
         $this->directory = __DIR__.'/../__fixtures__/content/assets';
         $this->repo = new AssetContainerRepository($stache);
 

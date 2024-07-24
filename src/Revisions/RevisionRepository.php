@@ -43,7 +43,7 @@ class RevisionRepository extends StacheRepository
             ])->delete();
         }
 
-        $revision = (new Revision())
+        $revision = (new Revision)
             ->fromRevisionOrWorkingCopy($copy)
             ->toModel()
             ->save();
@@ -62,7 +62,7 @@ class RevisionRepository extends StacheRepository
 
     protected function makeRevisionFromFile($key, $model)
     {
-        return (new Revision())->fromModel($model);
+        return (new Revision)->fromModel($model);
     }
 
     public static function bindings(): array
