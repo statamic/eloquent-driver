@@ -21,7 +21,7 @@ class Entry extends FileEntry
             $data[$key] = $model->$key;
         }
 
-        $entry = (new static())
+        $entry = (new static)
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)

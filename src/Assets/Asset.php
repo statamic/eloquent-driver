@@ -32,7 +32,7 @@ class Asset extends FileAsset
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
             ->hydrateMeta($model->meta)

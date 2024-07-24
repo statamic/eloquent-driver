@@ -48,7 +48,7 @@ class ImportRevisions extends Command
         $this->withProgressBar(File::allFiles(config('statamic.revisions.path')), function ($file) {
             $yaml = YAML::file($file->getPathname())->parse();
 
-            $revision = (new Revision())
+            $revision = (new Revision)
                 ->key($file->getRelativePath())
                 ->action($yaml['action'] ?? false)
                 ->date(Carbon::parse($yaml['date']))
