@@ -23,7 +23,7 @@ class FieldsetRepository extends StacheRepository
                     $fields = $model->data;
                     $fields['fields'] = $this->applyOrderToBlueprintFields($fields['fields']);
 
-                    return (new Fieldset())
+                    return (new Fieldset)
                         ->setHandle($model->handle)
                         ->setContents($fields);
                 });

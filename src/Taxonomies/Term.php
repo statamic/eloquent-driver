@@ -16,7 +16,7 @@ class Term extends FileEntry
         $data = $model->data;
 
         /** @var Term $term */
-        $term = (new static())
+        $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
             ->model($model)

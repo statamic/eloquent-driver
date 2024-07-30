@@ -1,6 +1,10 @@
 # Statamic Eloquent Driver
 
+<!-- statamic:hide -->
+
 > Provides support for storing your Statamic data in a database, rather than flat files.
+
+<!-- /statamic:hide -->
 
 ## Installation & Usage
 

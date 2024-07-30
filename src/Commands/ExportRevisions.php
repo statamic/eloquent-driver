@@ -47,7 +47,7 @@ class ExportRevisions extends Command
         $this->withProgressBar($files, function ($model) {
             $class = $model->action != 'working' ? Revision::class : WorkingCopy::class;
 
-            $revision = (new $class())
+            $revision = (new $class)
                 ->key($model->key)
                 ->action($model->action ?? false)
                 ->id($model->created_at->timestamp)

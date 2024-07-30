@@ -17,7 +17,7 @@ class TokenRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $this->repo = new TokenRepository();
+        $this->repo = new TokenRepository;
 
         $this->repo->make('abc', 'ExampleHandler', ['foo' => 'bar'])->save();
     }

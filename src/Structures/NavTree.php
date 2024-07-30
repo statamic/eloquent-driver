@@ -11,7 +11,7 @@ class NavTree extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->tree($model->tree)
             ->handle($model->handle)
             ->locale($model->locale)

@@ -65,12 +65,12 @@ class ExportForms extends Command
 
     private function exportForms()
     {
-        $forms = (new FormRepository())->all();
+        $forms = (new FormRepository)->all();
 
         app()->bind(FormContract::class, StacheForm::class);
 
         $this->withProgressBar($forms, function ($form) {
-            $newForm = (new StacheForm())
+            $newForm = (new StacheForm)
                 ->handle($form->handle())
                 ->title($form->title())
                 ->store($form->store())

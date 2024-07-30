@@ -21,7 +21,7 @@ class TaxonomyRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $stache = (new Stache())->sites(['en', 'fr']);
+        $stache = (new Stache)->sites(['en', 'fr']);
         $this->app->instance(Stache::class, $stache);
         $this->directory = __DIR__.'/../__fixtures__/content/taxonomies';
 
