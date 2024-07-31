@@ -34,17 +34,9 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
 
     protected function transform($items, $columns = [])
     {
-        $forms = Form::all()->keyBy->handle();
-
-        return $items->map(function ($model) use ($forms) {
-            $submission = Submission::fromModel($model);
-
-            $form = $forms[$model->form] ?? null;
-            if ($form) {
-                $submission->form($form);
-            }
-
-            return $submission;
+        return $items->map(function ($model) {
+            return Submission::fromModel($model)
+                ->form(Form::find($model->form));
         });
     }
 
