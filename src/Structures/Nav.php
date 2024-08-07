@@ -18,7 +18,7 @@ class Nav extends FileEntry
             ->collections($model->settings['collections'] ?? null)
             ->maxDepth($model->settings['max_depth'] ?? null)
             ->expectsRoot($model->settings['expects_root'] ?? false)
-            ->canSelectAcrossSites($model->settings['select_across_sites'] ?? null)
+            ->canSelectAcrossSites($model->settings['select_across_sites'] ?? false)
             ->model($model);
     }
 
