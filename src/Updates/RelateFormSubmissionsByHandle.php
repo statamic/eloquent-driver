@@ -9,7 +9,7 @@ class RelateFormSubmissionsByHandle extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'form_submissions', 'form');
+        return Schema::hasTable(config('statamic.eloquent-driver.table_prefix', '').'form_submissions') && ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'form_submissions', 'form');
     }
 
     public function update()
