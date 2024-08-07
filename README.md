@@ -31,6 +31,7 @@ If you originally opt-out of importing existing content, then later change your 
 - Navs: `php please eloquent:import-navs`
 - Revisions: `php please eloquent:import-revisions`
 - Taxonomies: `php please eloquent:import-taxonomies`
+- Sites: `php please eloquent:import-sites`
 
 ### Syncing Assets
 
@@ -49,6 +50,7 @@ If you wish to move back to flat-files, you may use the following commands to ex
 - Navs: `php please eloquent:export-navs`
 - Revisions: `php please eloquent:export-revisions`
 - Taxonomies: `php please eloquent:export-taxonomies`
+- Sites: `php please eloquent:export-sites`
 
 ## Configuration
 
