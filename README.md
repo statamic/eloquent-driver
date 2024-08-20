@@ -64,7 +64,7 @@ For each of the repositories, it allows you to determine if they should be drive
 
 By default, the Eloquent Driver stores all data in a single `data` column. However, it is possible to store fields in their own columns. 
 
-1. First, you'll need to enable the `use_dedicated_columns` option in the `entries` section of the configuration file:
+1. First, you'll need to enable the `map_data_to_columns` option in the `entries` section of the configuration file:
 
     ```php
     // config/statamic/eloquent-driver.php
