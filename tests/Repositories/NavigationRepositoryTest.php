@@ -19,7 +19,7 @@ class NavigationRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $stache = (new Stache())->sites(['en']);
+        $stache = (new Stache)->sites(['en']);
         $this->app->instance(Stache::class, $stache);
 
         $this->repo = new NavigationRepository($stache);
@@ -64,7 +64,7 @@ class NavigationRepositoryTest extends TestCase
     #[Test]
     public function it_saves_a_nav_to_the_database()
     {
-        $structure = (new Nav())->handle('new');
+        $structure = (new Nav)->handle('new');
 
         $this->assertNull($this->repo->findByHandle('new'));
 

@@ -12,7 +12,7 @@ class Taxonomy extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->handle($model->handle)
             ->title($model->title)
             ->sites($model->sites)

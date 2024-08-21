@@ -70,7 +70,7 @@ class ExportBlueprints extends Command
                 return;
             }
 
-            (new StacheBlueprint())
+            (new StacheBlueprint)
                 ->setHandle($model->handle)
                 ->setHidden(Arr::get($model->data, 'hide'))
                 ->setOrder(Arr::get($model->data, 'order'))

@@ -60,7 +60,7 @@ class ImportAssets extends Command
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
 
         app()->bind(AssetContainerContract::class, AssetContainer::class);
-        app()->bind(AssetContainerContents::class, fn ($app) => new AssetContainerContents());
+        app()->bind(AssetContainerContents::class, fn ($app) => new AssetContainerContents);
     }
 
     private function importAssetContainers(): void

@@ -12,7 +12,7 @@ class GlobalSet extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $global = (new static())
+        $global = (new static)
             ->handle($model->handle)
             ->title($model->title)
             ->model($model);

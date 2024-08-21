@@ -12,7 +12,7 @@ class Variables extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->globalSet($model->handle)
             ->locale($model->locale)
             ->data($model->data)

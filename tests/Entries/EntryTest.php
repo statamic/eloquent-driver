@@ -30,7 +30,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())->fromModel($model);
+        $entry = (new Entry)->fromModel($model);
 
         $this->assertEquals('the-slug', $entry->slug());
         $this->assertEquals('bar', $entry->data()->get('foo'));
@@ -59,7 +59,7 @@ class EntryTest extends TestCase
             'en' => '/blog/{slug}',
         ])->save();
 
-        $entry = (new Entry())->fromModel($model)->collection($collection);
+        $entry = (new Entry)->fromModel($model)->collection($collection);
 
         $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
     }
@@ -82,7 +82,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -112,7 +112,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -255,7 +255,7 @@ class EntryTest extends TestCase
             $table->string('foo', 30);
         });
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -285,7 +285,7 @@ class EntryTest extends TestCase
             $table->string('foo', 30)->nullable();
         });
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -312,7 +312,7 @@ class EntryTest extends TestCase
             ->routes('{parent_uri}/{slug}')
             ->save();
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->id('1.0')
             ->collection('blog')
             ->slug('the-slug')

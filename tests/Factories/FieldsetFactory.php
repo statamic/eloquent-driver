@@ -48,7 +48,7 @@ class FieldsetFactory
 
     public function create()
     {
-        return tap(new Fieldset())
+        return tap(new Fieldset)
             ->contents($this->contents);
     }
 }

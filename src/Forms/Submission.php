@@ -20,7 +20,7 @@ class Submission extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->id($model->id)
             ->date($model->created_at ?? Carbon::now())
             ->data(Arr::except($model->data, 'date'))

@@ -13,7 +13,7 @@ class Collection extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->title($model->title ?? null)
             ->routes($model->settings['routes'] ?? null)
             ->requiresSlugs($model->settings['slugs'] ?? true)
@@ -94,7 +94,7 @@ class Collection extends FileEntry
 
     protected function makeStructureFromContents()
     {
-        return (new CollectionStructure())
+        return (new CollectionStructure)
             ->handle($this->handle())
             ->expectsRoot($this->structureContents['root'] ?? false)
             ->showSlugs($this->structureContents['slugs'] ?? false)

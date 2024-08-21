@@ -3,27 +3,32 @@
 namespace Statamic\Eloquent\Forms;
 
 use Statamic\Contracts\Forms\Form as FormContract;
+use Statamic\Facades\Blink;
 use Statamic\Forms\FormRepository as StacheRepository;
 
 class FormRepository extends StacheRepository
 {
     public function find($handle)
     {
-        $model = app('statamic.eloquent.forms.model')::whereHandle($handle)->first();
+        return Blink::once("eloquent-forms-{$handle}", function () use ($handle) {
+            $model = app('statamic.eloquent.forms.model')::whereHandle($handle)->first();
 
-        if (! $model) {
-            return;
-        }
+            if (! $model) {
+                return;
+            }
 
-        return app(FormContract::class)->fromModel($model);
+            return app(FormContract::class)->fromModel($model);
+        });
     }
 
     public function all()
     {
-        return app('statamic.eloquent.forms.model')::all()
-            ->map(function ($form) {
-                return app(FormContract::class)::fromModel($form);
-            });
+        return Blink::once('eloquent-forms', function () {
+            return app('statamic.eloquent.forms.model')::all()
+                ->map(function ($form) {
+                    return app(FormContract::class)::fromModel($form);
+                });
+        });
     }
 
     public function make($handle = null)

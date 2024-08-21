@@ -260,7 +260,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind(AssetContainerContents::class, function ($app) {
-            return new EloquentAssetContainerContents();
+            return new EloquentAssetContainerContents;
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
