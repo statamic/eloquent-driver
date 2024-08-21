@@ -4,6 +4,7 @@ namespace Tests\Forms;
 
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
+use Statamic\Support\Arr;
 use Tests\TestCase;
 
 class FormTest extends TestCase
@@ -61,5 +62,13 @@ class FormTest extends TestCase
 
         $this->assertNull(Facades\Blink::get('eloquent-forms-test'));
         $this->assertNull(Facades\Blink::get('eloquent-forms'));
+    }
+
+    #[Test]
+    public function it_stores_form_data()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test form')->data(['some' => 'data']))->save();
+
+        $this->assertSame(['some' => 'data'], Arr::get($form->model(), 'settings.data'));
     }
 }

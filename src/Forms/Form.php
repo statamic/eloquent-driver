@@ -21,6 +21,7 @@ class Form extends FileEntry
             ->store($model->settings['store'] ?? null)
             ->email($model->settings['email'] ?? null)
             ->honeypot($model->settings['honeypot'] ?? null)
+            ->data($model->settings['data'] ?? [])
             ->model($model);
     }
 
@@ -39,6 +40,7 @@ class Form extends FileEntry
                 'store'    => $source->store(),
                 'email'    => $source->email(),
                 'honeypot' => $source->honeypot(),
+                'data' => $source->data(),
             ],
         ]);
     }
