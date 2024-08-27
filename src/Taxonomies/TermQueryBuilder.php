@@ -223,6 +223,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         }
 
                         return TermModel::where('taxonomy', $taxonomy)
+                            ->select('slug')
                             ->get()
                             ->map(function ($term) use ($taxonomy) {
                                 return Entry::query()
@@ -232,7 +233,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             })
                             ->filter()
                             ->values();
-
                     });
 
                     if ($terms->isNotEmpty()) {
