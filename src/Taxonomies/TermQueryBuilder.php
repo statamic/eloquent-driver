@@ -215,46 +215,34 @@ class TermQueryBuilder extends EloquentQueryBuilder
                     ? Taxonomy::handles()->all()
                     : $this->taxonomies;
 
-                // get entries in each collection that have a value for the taxonomies we are querying
-                // or the ones associated with the collection
-                // what we ultimately want is a subquery for terms in the form:
-                // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
-                $collectionTaxonomyHash = md5(collect($this->collections)->merge(collect($taxonomies))->sort()->join('-'));
+                collect($taxonomies)->each(function ($taxonomy) use ($query) {
+                    $collectionTaxonomyHash = md5(collect($this->collections)->merge([$taxonomy])->sort()->join('-'));
 
-                Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomies) {
-                    return Entry::query()
-                        ->whereIn('collection', $this->collections)
-                        ->select($taxonomies)
-                        ->get();
-                })
-                    ->flatMap(function ($entry) use ($taxonomies) {
-                        $slugs = [];
-                        foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
-                            if (in_array($taxonomy, $taxonomies)) {
-                                foreach (Arr::wrap($entry->get($taxonomy, [])) as $term) {
-                                    $slugs[] = $taxonomy.'::'.$term;
-                                }
-                            }
+                    $terms = Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomy) {
+                        if (! $taxonomy = Taxonomy::find($taxonomy)) {
+                            return [];
                         }
 
-                        return $slugs;
-                    })
-                    ->unique()
-                    ->map(function ($term) {
-                        return [
-                            'taxonomy' => Str::before($term, '::'),
-                            'term'     => Str::after($term, '::'),
-                        ];
-                    })
-                    ->mapToGroups(function ($item) {
-                        return [$item['taxonomy'] => $item['term']];
-                    })
-                    ->each(function ($terms, $taxonomy) use ($query) {
+                        return TermModel::where('taxonomy', $taxonomy)
+                            ->get()
+                            ->map(function ($term) use ($taxonomy) {
+                                return Entry::query()
+                                    ->whereIn('collection', $this->collections)
+                                    ->whereJsonContains('data->'.$taxonomy, [$term->slug])
+                                    ->count() > 0 ? $term->slug : null;
+                            })
+                            ->filter()
+                            ->values();
+
+                    });
+
+                    if ($terms->isNotEmpty()) {
                         $query->orWhere(function ($query) use ($terms, $taxonomy) {
                             $query->where('taxonomy', $taxonomy)
-                                ->whereIn('slug', $terms);
+                                ->whereIn('slug', $terms->all());
                         });
-                    });
+                    }
+                });
             });
         }
 
