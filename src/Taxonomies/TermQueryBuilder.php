@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Blink;
