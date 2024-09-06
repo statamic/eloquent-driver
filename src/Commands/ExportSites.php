@@ -41,7 +41,7 @@ class ExportSites extends Command
                         'locale' => $model->locale,
                         'url' => $model->url,
                         'attributes' => $model->attributes ?? [],
-                    ])->filter()->all()
+                    ])->filter()->all(),
                 ];
             });
 
