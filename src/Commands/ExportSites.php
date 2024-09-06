@@ -35,13 +35,13 @@ class ExportSites extends Command
         $sites = SiteModel::all()
             ->mapWithKeys(function ($model) {
                 return [
-                    $model->handle => [
+                    $model->handle => collect([
                         'name' => $model->name,
-                        'lang' => $model->lang,
+                        'lang' => $model->lang ?? null,
                         'locale' => $model->locale,
                         'url' => $model->url,
                         'attributes' => $model->attributes ?? [],
-                    ],
+                    ])->filter()->all(),
                 ];
             });
 
