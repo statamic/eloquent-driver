@@ -34,14 +34,16 @@ class ExportSites extends Command
     {
         $sites = SiteModel::all()
             ->mapWithKeys(function ($model) {
+                $config = [
+                    'name' => $model->name,
+                    'lang' => $model->lang ?? null,
+                    'locale' => $model->locale,
+                    'url' => $model->url,
+                    'attributes' => $model->attributes ?? [],
+                ];
+
                 return [
-                    $model->handle => [
-                        'name' => $model->name,
-                        'lang' => $model->lang,
-                        'locale' => $model->locale,
-                        'url' => $model->url,
-                        'attributes' => $model->attributes ?? [],
-                    ],
+                    $model->handle => collect($config)->filter()->all()
                 ];
             });
 
