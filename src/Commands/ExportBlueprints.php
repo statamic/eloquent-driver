@@ -6,9 +6,9 @@ use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
+use Statamic\Eloquent\Fields\Blueprint as StacheBlueprint;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
-use Statamic\Fields\Blueprint as StacheBlueprint;
 use Statamic\Fields\Fieldset as StacheFieldset;
 use Statamic\Support\Arr;
 
