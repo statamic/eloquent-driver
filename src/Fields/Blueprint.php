@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Fields;
 
+use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as CoreBlueprint;
 use Statamic\Support\Str;
 
@@ -9,11 +10,11 @@ class Blueprint extends CoreBlueprint
 {
     public function namespace(): ?string
     {
-        $blueprintDir = str_replace('\\', '/', \Statamic\Facades\Blueprint::directory());
-        $blueprintDir = str_replace('/', '.', $blueprintDir);
+        $blueprintDirectory = str_replace('\\', '/', BlueprintFacade::directory());
+        $blueprintDirectory = str_replace('/', '.', $blueprintDirectory);
 
-        if (Str::startsWith($this->namespace, $blueprintDir)) {
-            return mb_substr($this->namespace, mb_strlen($blueprintDir));
+        if (Str::startsWith($this->namespace, $blueprintDirectory)) {
+            return mb_substr($this->namespace, mb_strlen($blueprintDirectory));
         }
 
         return $this->namespace;
