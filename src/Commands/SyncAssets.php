@@ -46,7 +46,7 @@ class SyncAssets extends Command
         $this->processFolder($container);
     }
 
-    private function processFolder(AssetContainer $container, $folder = '')
+    private function processFolder(AssetContainer $container, $folder = '/')
     {
         $this->line("Processing folder: {$folder}");
 
