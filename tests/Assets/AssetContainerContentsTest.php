@@ -86,7 +86,7 @@ class AssetContainerContentsTest extends TestCase
     }
 
     #[Test]
-    public function it_doesnt_nest_folders_with_the_same_name()
+    public function it_doesnt_nest_folders_that_start_with_the_same_name()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
         $container->makeAsset('one/file.txt')->upload(UploadedFile::fake()->create('one.txt'));
