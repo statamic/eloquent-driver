@@ -84,4 +84,18 @@ class AssetContainerContentsTest extends TestCase
 
         $this->assertCount(3, $container->contents()->filteredDirectoriesIn('', true));
     }
+
+    #[Test]
+    public function it_doesnt_nest_folders_with_the_same_name()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one/file.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('one-two/file.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('one/two/file.txt')->upload(UploadedFile::fake()->create('one.txt'));
+
+        $filtered = $container->contents()->filteredDirectoriesIn('one/', true);
+
+        $this->assertCount(1, $filtered);
+        $this->assertSame($filtered->keys()->all(), ['one/two']);
+    }
 }
