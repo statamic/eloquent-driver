@@ -71,7 +71,7 @@ class AssetContainerContents extends CoreAssetContainerContents
 
         return $this->directories()
             ->filter(function ($dir) use ($folder) {
-                if ($folder && ! Str::startsWith($dir['path'], $folder)) {
+                if ($folder && ! Str::startsWith($dir['path'], Str::finish($folder, '/'))) {
                     return false;
                 }
 
