@@ -73,15 +73,15 @@ class ExportGlobals extends Command
         $this->withProgressBar($sets, function ($model) use ($variables) {
             $global = GlobalSetFacade::make()
                 ->handle($model->handle)
-                ->title($model->title)
-                ->save();
+                ->title($model->title);
 
             foreach ($variables->where('handle', $model->handle) as $localization) {
                 $global->makeLocalization($localization->locale)
                     ->data($localization->data)
-                    ->origin($localization->origin ?? null)
-                    ->save();
+                    ->origin($localization->origin ?? null);
             }
+
+            $global->save();
         });
 
         $this->newLine();
