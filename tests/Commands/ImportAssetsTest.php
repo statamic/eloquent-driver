@@ -4,6 +4,7 @@ namespace Tests\Commands;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
@@ -44,6 +45,21 @@ class ImportAssetsTest extends TestCase
         app('files')->deleteDirectory(__DIR__.'/tmp');
 
         parent::tearDown();
+    }
+
+    #[Test]
+    public function it_gets_all_meta_files_by_default()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        Storage::disk('test')->put('.meta/a.txt.yaml',
+            "data:
+                    title: 'File A'
+                    size: 123
+                    last_modified: 0000000000"
+        );
+        $this->assertEquals([
+            '.meta/a.txt.yaml',
+        ], $container->metaFiles()->all());
     }
 
     #[Test]
