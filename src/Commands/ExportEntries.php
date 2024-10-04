@@ -10,7 +10,6 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Entries\Entry as StacheEntry;
 use Statamic\Facades\Entry;
 use Statamic\Stache\Repositories\CollectionRepository;
