@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -63,7 +64,7 @@ class ExportEntries extends Command
 
     private function importEntries()
     {
-        $entries = EntryModel::all();
+        $entries = app('statamic.eloquent.entries.entry')::all();
 
         $entriesWithOrigin = $entries->filter(function ($model) {
             return (bool) $model->origin_id;
@@ -85,6 +86,10 @@ class ExportEntries extends Command
                 ->data($model->data)
                 ->blueprint($model->data['blueprint'] ?? null)
                 ->published($model->published);
+
+            if (in_array(HasUuids::class, class_uses_recursive($model))) {
+                $entry->id($model->getKey());
+            }
 
             if ($model->date && $entry->collection()->dated()) {
                 $entry->date($model->date);
