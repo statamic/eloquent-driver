@@ -83,7 +83,7 @@ class ExportEntries extends Command
                 ->slug($model->slug)
                 ->collection($model->collection)
                 ->data($model->data)
-                ->blueprint($model->data['blueprint'] ?? null)
+                ->blueprint($model->blueprint)
                 ->published($model->published);
 
             if (in_array(HasUuids::class, class_uses_recursive($model))) {
