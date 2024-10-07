@@ -95,6 +95,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportTaxonomies::class,
             Commands\ImportSites::class,
             Commands\SyncAssets::class,
+            Commands\UpdateAssetReferencesToUseModelKeys::class,
         ]);
 
         $this->addAboutCommandInfo();
