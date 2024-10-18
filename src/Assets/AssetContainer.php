@@ -136,7 +136,7 @@ class AssetContainer extends FileEntry
 
         return $this->queryAssets()
             ->when($recursive, fn ($query) => $query->where('folder', $folder), fn ($query) => $query->where('folder', 'like', Str::replaceEnd('/', '', $folder).'/%'))
-            ->get()
-            ->pluck('path');
+            ->lazy()
+            ->map(fn ($value) => $value->path());
     }
 }

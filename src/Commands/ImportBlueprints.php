@@ -69,7 +69,7 @@ class ImportBlueprints extends Command
             return;
         }
 
-        $directory = resource_path('blueprints');
+        $directory = str_replace('\\', '/', resource_path('blueprints'));
 
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
@@ -129,7 +129,7 @@ class ImportBlueprints extends Command
             return;
         }
 
-        $directory = resource_path('fieldsets');
+        $directory = str_replace('\\', '/', resource_path('fieldsets'));
 
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
