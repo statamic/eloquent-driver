@@ -12,7 +12,7 @@ class GlobalVariablesRepository extends StacheRepository
     public function all(): VariablesCollection
     {
         return VariablesCollection::make(
-            VariablesModel::all()
+            app('statamic.eloquent.global_set_variables.model')::all()
                 ->each(function ($model) {
                     return app(Variables::class)::fromModel($model);
                 })
@@ -23,7 +23,7 @@ class GlobalVariablesRepository extends StacheRepository
     {
         $id = Str::split($id, '::');
 
-        $model = VariablesModel::query()
+        $model = app('statamic.eloquent.global_set_variables.model')::query()
             ->where('handle', $id[0])
             ->when(count($id) > 1, function ($query) use ($id) {
                 $query->where('locale', $id[1]);
@@ -40,7 +40,7 @@ class GlobalVariablesRepository extends StacheRepository
     public function whereSet($handle): VariablesCollection
     {
         return VariablesCollection::make(
-            VariablesModel::query()
+            app('statamic.eloquent.global_set_variables.model')::query()
                 ->where('handle', $handle)
                 ->get()
                 ->map(function ($model) {
