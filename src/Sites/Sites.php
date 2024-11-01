@@ -2,6 +2,8 @@
 
 namespace Statamic\Eloquent\Sites;
 
+use Statamic\Support\Str;
+
 class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
@@ -24,10 +26,12 @@ class Sites extends \Statamic\Sites\Sites
     protected function saveToStore()
     {
         foreach ($this->config() as $handle => $config) {
+            $lang = $config['lang'] ?? Str::before($config['locale'] ?? '', '_') ?? 'en';
+
             app('statamic.eloquent.sites.model')::firstOrNew(['handle' => $handle])
                 ->fill([
                     'name' => $config['name'] ?? '',
-                    'lang' => $config['lang'] ?? '',
+                    'lang' => $lang,
                     'locale' => $config['locale'] ?? '',
                     'url' => $config['url'] ?? '',
                     'attributes' => $config['attributes'] ?? [],
