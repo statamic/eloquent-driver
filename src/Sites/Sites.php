@@ -9,7 +9,9 @@ class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
     {
-        if (! Schema::hasTable((new app('statamic.eloquent.sites.model'))->getTable())) {
+        $class = app('statamic.eloquent.sites.model');
+
+        if (! Schema::hasTable((new $class)->getTable())) {
             return $this->getFallbackConfig();
         }
 
