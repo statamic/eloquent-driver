@@ -9,8 +9,7 @@ class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
     {
-        $sitesTable = config('statamic.eloquent-driver.table_prefix', '').'entries';
-        if (! Schema::hasTable($sitesTable)) {
+        if (! Schema::hasTable((new app('statamic.eloquent.sites.model'))->getTable())) {
             return $this->getFallbackConfig();
         }
 
