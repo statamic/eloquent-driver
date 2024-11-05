@@ -2,17 +2,17 @@
 
 namespace Statamic\Eloquent\Sites;
 
-use Statamic\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Statamic\Support\Str;
 
 class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
     {
         $sitesTable = config('statamic.eloquent-driver.table_prefix', '').'entries';
-        if(! Schema::hasTable($sitesTable)) {
+        if (! Schema::hasTable($sitesTable)) {
             return $this->getFallbackConfig();
-        };
+        }
 
         $sites = app('statamic.eloquent.sites.model')::all();
 
