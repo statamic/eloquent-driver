@@ -2,12 +2,19 @@
 
 namespace Statamic\Eloquent\Sites;
 
+use Illuminate\Support\Facades\Schema;
 use Statamic\Support\Str;
 
 class Sites extends \Statamic\Sites\Sites
 {
     protected function getSavedSites()
     {
+        $class = app('statamic.eloquent.sites.model');
+
+        if (! Schema::hasTable((new $class)->getTable())) {
+            return $this->getFallbackConfig();
+        }
+
         $sites = app('statamic.eloquent.sites.model')::all();
 
         return $sites->isEmpty() ? $this->getFallbackConfig() : $sites->mapWithKeys(function ($model) {
