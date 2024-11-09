@@ -237,7 +237,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                         ->whereJsonContains("{$enrtiesTable}.data->{$taxonomy}", $columnExpression);
                                 })
                                 ->select('taxonomy_terms.slug')
-                                ->get();
+                                ->pluck('slug');
                         } else {
                             $query = TermModel::where('taxonomy', $taxonomy)
                                 ->select('slug')
