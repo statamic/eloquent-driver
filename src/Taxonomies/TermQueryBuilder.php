@@ -2,8 +2,11 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Query\Expression;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -222,17 +225,34 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             return [];
                         }
 
-                        return TermModel::where('taxonomy', $taxonomy)
-                            ->select('slug')
-                            ->get()
-                            ->map(function ($term) use ($taxonomy) {
-                                return Entry::query()
-                                    ->whereIn('collection', $this->collections)
-                                    ->whereJsonContains('data->'.$taxonomy, [$term->slug])
-                                    ->count() > 0 ? $term->slug : null;
-                            })
-                            ->filter()
-                            ->values();
+                        if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
+                            $enrtiesTable = (new EntryModel)->getTable();
+                            $termsTable = (new TermModel)->getTable();
+                            $query = TermModel::where('taxonomy', $taxonomy)
+                                ->join($enrtiesTable, function (JoinClause $join) use ($taxonomy, $enrtiesTable, $termsTable) {
+                                    // TODO: make Expression db driver independent
+                                    $columnExpression = new Expression("JSON_QUOTE({$termsTable}.slug)");
+                                    $join->on("{$enrtiesTable}.collection", '=', "{$enrtiesTable}.collection")
+                                        ->where("{$enrtiesTable}.collection", $this->collections)
+                                        ->whereJsonContains("{$enrtiesTable}.data->{$taxonomy}", $columnExpression);
+                                })
+                                ->select('taxonomy_terms.slug')
+                                ->get();
+                        } else {
+                            $query = TermModel::where('taxonomy', $taxonomy)
+                                ->select('slug')
+                                ->get()
+                                ->map(function ($term) use ($taxonomy) {
+                                    return Entry::query()
+                                        ->whereIn('collection', $this->collections)
+                                        ->whereJsonContains('data->'.$taxonomy, [$term->slug])
+                                        ->count() > 0 ? $term->slug : null;
+                                })
+                                ->filter()
+                                ->values();
+                        }
+
+                        return $query;
                     });
 
                     if ($terms->isNotEmpty()) {
