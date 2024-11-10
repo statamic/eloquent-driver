@@ -237,7 +237,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                         'mysql' => "json_quote({$wrappedColumn})",
                                         default => $wrappedColumn,
                                     };
-                                    
                                     $columnExpression = new Expression($column);
                                     $join->on("{$enrtiesTable}.collection", '=', "{$enrtiesTable}.collection")
                                         ->whereIn("{$enrtiesTable}.collection", $this->collections)
