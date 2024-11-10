@@ -227,10 +227,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         }
 
                         if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
-                            $enrtiesTable = (new EntryModel)->getTable();
+                            $entriesTable = (new EntryModel)->getTable();
                             $termsTable = (new TermModel)->getTable();
                             $query = TermModel::where('taxonomy', $taxonomy)
-                                ->join($enrtiesTable, function (JoinClause $join) use ($taxonomy, $enrtiesTable, $termsTable) {
+                                ->join($entriesTable, function (JoinClause $join) use ($taxonomy, $entriesTable, $termsTable) {
                                     $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
                                     $column = match (DB::getDriverName()) {
                                         'mysql' => "json_quote({$wrappedColumn})",
@@ -238,9 +238,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                         default => $wrappedColumn,
                                     };
                                     $columnExpression = new Expression($column);
-                                    $join->on("{$enrtiesTable}.collection", '=', "{$enrtiesTable}.collection")
-                                        ->whereIn("{$enrtiesTable}.collection", $this->collections)
-                                        ->whereJsonContains("{$enrtiesTable}.data->{$taxonomy}", $columnExpression);
+                                    $join->on("{$entriesTable}.collection", '=', "{$entriesTable}.collection")
+                                        ->whereIn("{$entriesTable}.collection", $this->collections)
+                                        ->whereJsonContains("{$entriesTable}.data->{$taxonomy}", $columnExpression);
                                 })
                                 ->select('taxonomy_terms.slug')
                                 ->pluck('slug');
