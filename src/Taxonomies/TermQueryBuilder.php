@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Taxonomies;
 
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Eloquent\Entries\EntryModel;
@@ -232,7 +233,12 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                 ->join($enrtiesTable, function (JoinClause $join) use ($taxonomy, $enrtiesTable, $termsTable) {
                                     // TODO: make Expression db driver independent
                                     $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
-                                    $columnExpression = new Expression("json_quote({$wrappedColumn})");
+                                    $column = match (DB::getDriverName()) {
+                                        'mysql' => "json_quote({$wrappedColumn})",
+                                        default => $wrappedColumn,
+                                    };
+                                    
+                                    $columnExpression = new Expression($column);
                                     $join->on("{$enrtiesTable}.collection", '=', "{$enrtiesTable}.collection")
                                         ->whereIn("{$enrtiesTable}.collection", $this->collections)
                                         ->whereJsonContains("{$enrtiesTable}.data->{$taxonomy}", $columnExpression);
