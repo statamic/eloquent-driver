@@ -231,9 +231,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             $query = TermModel::where('taxonomy', $taxonomy)
                                 ->join($enrtiesTable, function (JoinClause $join) use ($taxonomy, $enrtiesTable, $termsTable) {
                                     // TODO: make Expression db driver independent
-                                    $columnExpression = new Expression("JSON_QUOTE({$termsTable}.slug)");
+                                    $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
+                                    $columnExpression = new Expression("json_quote({$wrappedColumn})");
                                     $join->on("{$enrtiesTable}.collection", '=', "{$enrtiesTable}.collection")
-                                        ->where("{$enrtiesTable}.collection", $this->collections)
+                                        ->whereIn("{$enrtiesTable}.collection", $this->collections)
                                         ->whereJsonContains("{$enrtiesTable}.data->{$taxonomy}", $columnExpression);
                                 })
                                 ->select('taxonomy_terms.slug')
