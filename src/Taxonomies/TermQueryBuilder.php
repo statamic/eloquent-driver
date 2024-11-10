@@ -235,6 +235,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                     $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
                                     $column = match (DB::getDriverName()) {
                                         'mysql' => "json_quote({$wrappedColumn})",
+                                        'pgsql' => "to_jsonb({$wrappedColumn}::text)",
                                         default => $wrappedColumn,
                                     };
                                     $columnExpression = new Expression($column);
