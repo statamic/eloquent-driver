@@ -231,7 +231,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             $termsTable = (new TermModel)->getTable();
                             $query = TermModel::where('taxonomy', $taxonomy)
                                 ->join($enrtiesTable, function (JoinClause $join) use ($taxonomy, $enrtiesTable, $termsTable) {
-                                    // TODO: make Expression db driver independent
                                     $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
                                     $column = match (DB::getDriverName()) {
                                         'mysql' => "json_quote({$wrappedColumn})",
