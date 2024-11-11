@@ -226,23 +226,23 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             return [];
                         }
 
+                        // workaround to handle potential n+1 queries on the database site
+                        // if/when Statamic core supports relationships in a meaningful way this should be removed
                         if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
                             $entriesTable = (new EntryModel)->getTable();
                             $termsTable = (new TermModel)->getTable();
+
                             $query = TermModel::where('taxonomy', $taxonomy)
-                                ->join($entriesTable, function (JoinClause $join) use ($taxonomy, $entriesTable, $termsTable) {
-                                    $wrappedColumn = $join->getGrammar()->wrap("{$termsTable}.slug");
-                                    $column = match (DB::getDriverName()) {
-                                        'mysql' => "json_quote({$wrappedColumn})",
-                                        'pgsql' => "to_jsonb({$wrappedColumn}::text)",
-                                        default => $wrappedColumn,
+                                ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
+                                    $value = match($query->getConnection()->getDriverName()) {
+                                        'sqlite' => DB::raw('"" || '.$termsTable.'. slug || ""'),
+                                        default => DB::raw('concat(\'"\', '.$termsTable.'.slug, \'"\')'),
                                     };
-                                    $columnExpression = new Expression($column);
-                                    $join->on("{$entriesTable}.collection", '=', "{$entriesTable}.collection")
-                                        ->whereIn("{$entriesTable}.collection", $this->collections)
-                                        ->whereJsonContains("{$entriesTable}.data->{$taxonomy}", $columnExpression);
+
+                                    $query->select(DB::raw(1))
+                                        ->from($entriesTable)
+                                        ->whereJsonContains("data->{$taxonomy}", $value);
                                 })
-                                ->select('taxonomy_terms.slug')
                                 ->pluck('slug');
                         } else {
                             $query = TermModel::where('taxonomy', $taxonomy)
