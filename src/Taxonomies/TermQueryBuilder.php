@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
@@ -226,23 +227,28 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         // workaround to handle potential n+1 queries on the database site
                         // if/when Statamic core supports relationships in a meaningful way this should be removed
                         if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
-                            $entriesTable = (new app('statamic.eloquent.entries.entry'))->getTable();
-                            $termsTable = (new app('statamic.eloquent.terms.model'))->getTable();
+                            $entryClass = app('statamic.eloquent.entries.model');
+                            $termClass = app('statamic.eloquent.terms.model');
 
-                            $query = TermModel::where('taxonomy', $taxonomy)
+                            $entriesTable = (new $entryClass)->getTable();
+                            $termsTable = (new $termClass)->getTable();
+
+                            return TermModel::where('taxonomy', $taxonomy)
                                 ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
                                     $value = match ($query->getConnection()->getDriverName()) {
-                                        'sqlite' => DB::raw('"" || '.$termsTable.'. slug || ""'),
-                                        default => DB::raw('concat(\'"\', '.$termsTable.'.slug, \'"\')'),
+                                        'sqlite' => new Expression($query->getGrammar()->wrap("{$termsTable}.slug")),
+                                        default => DB::raw("concat('\"', {$termsTable}.slug, '\"')"),
                                     };
 
                                     $query->select(DB::raw(1))
                                         ->from($entriesTable)
+                                        ->whereIn('collection', $this->collections)
                                         ->whereJsonContains("data->{$taxonomy}", $value);
                                 })
                                 ->pluck('slug');
-                        } else {
-                            $query = TermModel::where('taxonomy', $taxonomy)
+                        }
+
+                        return TermModel::where('taxonomy', $taxonomy)
                                 ->select('slug')
                                 ->get()
                                 ->map(function ($term) use ($taxonomy) {
@@ -253,9 +259,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                 })
                                 ->filter()
                                 ->values();
-                        }
-
-                        return $query;
                     });
 
                     if ($terms->isNotEmpty()) {
