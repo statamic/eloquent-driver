@@ -224,7 +224,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             return [];
                         }
 
-                        // workaround to handle potential n+1 queries on the database site
+                        // workaround to handle potential n+1 queries in the database
                         // if/when Statamic core supports relationships in a meaningful way this should be removed
                         if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
                             $entryClass = app('statamic.eloquent.entries.model');
