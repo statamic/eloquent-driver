@@ -249,16 +249,16 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         }
 
                         return TermModel::where('taxonomy', $taxonomy)
-                                ->select('slug')
-                                ->get()
-                                ->map(function ($term) use ($taxonomy) {
-                                    return Entry::query()
-                                        ->whereIn('collection', $this->collections)
-                                        ->whereJsonContains('data->'.$taxonomy, [$term->slug])
-                                        ->count() > 0 ? $term->slug : null;
-                                })
-                                ->filter()
-                                ->values();
+                            ->select('slug')
+                            ->get()
+                            ->map(function ($term) use ($taxonomy) {
+                                return Entry::query()
+                                    ->whereIn('collection', $this->collections)
+                                    ->whereJsonContains('data->'.$taxonomy, [$term->slug])
+                                    ->count() > 0 ? $term->slug : null;
+                            })
+                            ->filter()
+                            ->values();
                     });
 
                     if ($terms->isNotEmpty()) {
