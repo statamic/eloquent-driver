@@ -2,12 +2,9 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Database\Query\Expression;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
-use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -229,12 +226,12 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         // workaround to handle potential n+1 queries on the database site
                         // if/when Statamic core supports relationships in a meaningful way this should be removed
                         if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
-                            $entriesTable = (new EntryModel)->getTable();
-                            $termsTable = (new TermModel)->getTable();
+                            $entriesTable = (new app('statamic.eloquent.entries.entry'))->getTable();
+                            $termsTable = (new app('statamic.eloquent.terms.model'))->getTable();
 
                             $query = TermModel::where('taxonomy', $taxonomy)
                                 ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
-                                    $value = match($query->getConnection()->getDriverName()) {
+                                    $value = match ($query->getConnection()->getDriverName()) {
                                         'sqlite' => DB::raw('"" || '.$termsTable.'. slug || ""'),
                                         default => DB::raw('concat(\'"\', '.$termsTable.'.slug, \'"\')'),
                                     };
