@@ -235,9 +235,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
                             return TermModel::where('taxonomy', $taxonomy)
                                 ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
+                                    $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
                                     $value = match ($query->getConnection()->getDriverName()) {
-                                        'sqlite' => new Expression($query->getGrammar()->wrap("{$termsTable}.slug")),
-                                        default => DB::raw("concat('\"', {$termsTable}.slug, '\"')"),
+                                        'sqlite' => new Expression($wrappedColumn),
+                                        'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
+                                        default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
                                     };
 
                                     $query->select(DB::raw(1))
