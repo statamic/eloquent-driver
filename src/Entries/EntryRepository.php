@@ -85,8 +85,8 @@ class EntryRepository extends StacheRepository
         $collection->queryEntries()
             ->when($ids, fn ($query) => $query->whereIn('id', $ids))
             ->get(['id'])
-            ->each(function ($entry, $index) {
-                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id(), $index + 1);
+            ->each(function ($entry) {
+                $dispatch = UpdateCollectionEntryOrder::dispatch($entry->id(), $entry->order());
 
                 $connection = config('statamic.eloquent-driver.collections.update_entry_order_connection', 'default');
 
