@@ -250,7 +250,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                 ->pluck('slug');
                         }
 
-                        dump("using map");
                         return TermModel::where('taxonomy', $taxonomy)
                             ->select('slug')
                             ->get()
