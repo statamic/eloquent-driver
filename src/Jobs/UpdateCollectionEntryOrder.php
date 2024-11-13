@@ -12,16 +12,17 @@ class UpdateCollectionEntryOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public $entryId;
-
-    public function __construct($entryId)
+    public function __construct(public $entryId, public $order)
     {
-        $this->entryId = $entryId;
     }
 
     public function handle()
     {
         if ($entry = Entry::find($this->entryId)) {
+            if ($this->order) {
+                $entry->order($this->order);
+            }
+
             $entry->save();
         }
     }
