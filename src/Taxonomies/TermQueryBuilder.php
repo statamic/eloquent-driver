@@ -245,7 +245,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                                     $query->select(DB::raw(1))
                                         ->from($entriesTable)
                                         ->whereIn('collection', $this->collections)
-                                        ->whereJsonContains("data->{$taxonomy}", $value);
+                                        ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
                                 })
                                 ->pluck('slug');
                         }
@@ -256,7 +256,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             ->map(function ($term) use ($taxonomy) {
                                 return Entry::query()
                                     ->whereIn('collection', $this->collections)
-                                    ->whereJsonContains('data->'.$taxonomy, [$term->slug])
+                                    ->whereJsonContains($taxonomy->handle(), [$term->slug])
                                     ->count() > 0 ? $term->slug : null;
                             })
                             ->filter()
