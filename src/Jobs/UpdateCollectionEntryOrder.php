@@ -18,7 +18,7 @@ class UpdateCollectionEntryOrder implements ShouldQueue
     {
         if ($entry = Entry::find($this->entryId)) {
             if ($this->entryOrder) {
-                $entry->order($this->entryOrder);
+                $entry->set('order', $this->entryOrder);
             }
 
             $entry->save();
