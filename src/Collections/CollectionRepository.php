@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Collections;
 
 use Illuminate\Support\Collection as IlluminateCollection;
 use Statamic\Contracts\Entries\Collection as CollectionContract;
+use Statamic\Eloquent\Jobs\UpdateCollectionEntryUris;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\CollectionRepository as StacheRepository;
 
@@ -33,7 +34,24 @@ class CollectionRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
+        $original = $model->getOriginal();
+
         $model->save();
+
+        if (
+            $model->wasChanged('settings')
+            && ($model->settings['routes'] ?? null) !== ($original['settings']['routes'] ?? null)
+        ) {
+            $dispatch = UpdateCollectionEntryUris::dispatch($entry->handle());
+
+            $connection = config('statamic.eloquent-driver.collections.update_entry_uris_connection', 'default');
+
+            if ($connection != 'default') {
+                $dispatch->onConnection($connection);
+            }
+
+            $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_uris_queue', 'default'));
+        }
 
         Blink::forget("eloquent-collection-{$model->handle}");
         Blink::forget('eloquent-collections');
