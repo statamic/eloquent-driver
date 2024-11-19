@@ -53,6 +53,8 @@ class AssetContainer extends FileEntry
             ->sourcePreset($model->settings['source_preset'] ?? null)
             ->warmPresets($model->settings['warm_presets'] ?? null)
             ->validationRules($model->settings['validation_rules'] ?? null)
+            ->sortField($model->settings['sort_by'] ?? null)
+            ->sortDirection($model->settings['sort_dir'] ?? null)
             ->model($model);
 
         return $this;
@@ -81,6 +83,8 @@ class AssetContainer extends FileEntry
             'source_preset'     => $source->sourcePreset,
             'warm_presets'      => $source->warmPresets,
             'validation_rules'  => $source->validationRules(),
+            'sort_by'           => $source->sortField(),
+            'sort_dir'          => $source->sortDirection(),
         ]);
 
         // Set initial timestamps.
