@@ -54,7 +54,7 @@ class Collection extends FileEntry
             'settings' => [],
         ]);
 
-        $model->settings = array_merge($model->settings, [
+        $model->settings = array_merge($model->settings ?? [], [
             'routes'               => $source->routes,
             'slugs'                => $source->requiresSlugs(),
             'title_formats'        => collect($source->titleFormats())->filter(),
