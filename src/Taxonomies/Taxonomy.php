@@ -40,7 +40,7 @@ class Taxonomy extends FileEntry
             'settings' => [],
         ]);
 
-        $model->settings = array_merge($model->settings, [
+        $model->settings = array_merge($model->settings ?? [], [
             'revisions' => $source->revisionsEnabled(),
             'preview_targets' => $source->previewTargets(),
             'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
