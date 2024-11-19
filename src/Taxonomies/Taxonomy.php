@@ -34,17 +34,21 @@ class Taxonomy extends FileEntry
     {
         $class = app('statamic.eloquent.taxonomies.model');
 
-        return $class::firstOrNew(['handle' => $source->handle()])->fill([
+        $model = $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title' => $source->title(),
             'sites' => $source->sites(),
-            'settings' => [
-                'revisions' => $source->revisionsEnabled(),
-                'preview_targets' => $source->previewTargets(),
-                'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
-                'template' => $source->hasCustomTemplate() ? $source->template() : null,
-                'layout' => $source->layout,
-            ],
+            'settings' => [],
         ]);
+
+        $model->settings = array_merge($model->settings ?? [], [
+            'revisions' => $source->revisionsEnabled(),
+            'preview_targets' => $source->previewTargets(),
+            'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
+            'template' => $source->hasCustomTemplate() ? $source->template() : null,
+            'layout' => $source->layout,
+        ]);
+
+        return $model;
     }
 
     public function model($model = null)
