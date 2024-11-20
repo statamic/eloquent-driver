@@ -14,7 +14,7 @@ class AssetTest extends TestCase
 
     private $container;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -20,7 +20,7 @@ class ImportAssetsTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class ImportAssetsTest extends TestCase
         app()->bind(\Statamic\Assets\AssetContainerContents::class, \Statamic\Assets\AssetContainerContents::class);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         app('files')->deleteDirectory(__DIR__.'/tmp');
 
