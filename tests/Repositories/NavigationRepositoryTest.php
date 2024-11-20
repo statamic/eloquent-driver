@@ -15,7 +15,7 @@ class NavigationRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 

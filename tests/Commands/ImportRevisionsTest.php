@@ -16,7 +16,7 @@ class ImportRevisionsTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -33,7 +33,7 @@ class ImportRevisionsTest extends TestCase
         app()->bind(RevisionContract::class, \Statamic\Revisions\Revision::class);
     }
 
-    protected function tearDown(): void
+    public function tearDown(): void
     {
         app('files')->deleteDirectory(__DIR__.'/tmp');
 

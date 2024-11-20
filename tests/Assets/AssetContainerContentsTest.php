@@ -12,7 +12,7 @@ class AssetContainerContentsTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -22,7 +22,7 @@ class AssetContainerContentsTest extends TestCase
         ]]);
     }
 
-    protected function tearDown(): void
+    public function tearDown(): void
     {
         app('files')->deleteDirectory(__DIR__.'/tmp');
 

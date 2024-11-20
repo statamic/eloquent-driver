@@ -21,7 +21,7 @@ class ImportEntriesTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         $this->shouldUseStringEntryIds = true;
 
