@@ -74,10 +74,11 @@ class Term extends FileEntry
         }
 
         return $class::firstOrNew([
-            'slug'     => $source->slug(),
+            'slug'     => $source->getOriginal('slug', $source->slug()),
             'taxonomy' => $source->taxonomy(),
             'site'     => $source->locale(),
         ])->fill([
+            'slug'       => $source->slug(),
             'uri'        => $source->uri(),
             'data'       => $data,
             'updated_at' => $source->lastModified(),
