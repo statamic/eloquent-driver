@@ -389,6 +389,7 @@ class ServiceProvider extends AddonServiceProvider
         if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.driver' : 'statamic.eloquent-driver.form_submissions.driver', 'file') != 'eloquent') {
             return;
         }
+
         Statamic::repository(FormSubmissionRepositoryContract::class, SubmissionRepository::class);
 
         $this->app->bind('statamic.eloquent.form_submissions.model', function () use ($usingOldConfigKeys) {
