@@ -31,7 +31,7 @@
         "doctrine/dbal": "^3.8",
         "laravel/pint": "^1.0",
         "orchestra/testbench": "^8.0 || ^9.0.2",
-        "phpunit/phpunit": "^9.4 || ^10.0 || ^11.0"
+        "phpunit/phpunit": "^10.0"
     },
     "scripts": {
         "test": "phpunit"
