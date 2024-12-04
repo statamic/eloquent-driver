@@ -21,6 +21,10 @@ class Entry extends FileEntry
             $data[$key] = $model->$key;
         }
 
+        if ($model->order) {
+            $data['order'] = $model->order;
+        }
+
         $entry = (new static)
             ->origin($model->origin_id)
             ->locale($model->site)
