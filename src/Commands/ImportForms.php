@@ -69,7 +69,7 @@ class ImportForms extends Command
         $shouldImportForms = $this->shouldImportForms();
         $shouldImportSubmissions = $this->shouldImportFormSubmissions();
 
-        $this->withProgressBar((new FormRepository)->all(), function ($form, $shouldImportForms, $shouldImportSubmissions) {
+        $this->withProgressBar((new FormRepository)->all(), function ($form) use ($shouldImportForms, $shouldImportSubmissions) {
             if ($shouldImportForms) {
                 $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
 

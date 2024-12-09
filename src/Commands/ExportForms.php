@@ -9,12 +9,15 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
+use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Eloquent\Forms\FormRepository;
 use Statamic\Eloquent\Forms\Submission;
+use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository as StacheFormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
+use Statamic\Stache\Repositories\SubmissionRepository as StacheSubmissionRepository;
 use Statamic\Statamic;
 
 class ExportForms extends Command
@@ -55,10 +58,15 @@ class ExportForms extends Command
     private function usingDefaultRepositories(Closure $callback)
     {
         Facade::clearResolvedInstance(FormContract::class);
+        Facade::clearResolvedInstance(FormRepositoryContract::class);
         Facade::clearResolvedInstance(SubmissionContract::class);
+        Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
         app()->bind(FormContract::class, Form::class);
+        app()->bind(FormRepositoryContract::class, FormRepository::class);
         app()->bind(SubmissionContract::class, Submission::class);
+        app()->bind(SubmissionRepositoryContract::class, SubmissionRepository::class);
+        app()->bind(\Statamic\Contracts\Forms\SubmissionQueryBuilder::class, \Statamic\Eloquent\Forms\SubmissionQueryBuilder::class);
 
         $callback();
     }
@@ -78,10 +86,12 @@ class ExportForms extends Command
                 ->honeypot($form->honeypot());
 
             Statamic::repository(FormRepositoryContract::class, StacheFormRepository::class);
+            Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
             $newForm->save();
 
             Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+            Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
             $form->submissions()->each(function ($submission) use ($newForm) {
                 $id = $submission->date()->getPreciseTimestamp(4);
@@ -92,7 +102,13 @@ class ExportForms extends Command
                     ->form($newForm)
                     ->data($submission->data());
 
+                Statamic::repository(SubmissionRepositoryContract::class, StacheSubmissionRepository::class);
+                Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
+
                 $newSubmission->save();
+
+                Statamic::repository(SubmissionRepositoryContract::class, SubmissionRepository::class);
+                Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
             });
         });
 
