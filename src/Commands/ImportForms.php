@@ -7,12 +7,15 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
+use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
+use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Facades\File;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
+use Statamic\Stache\Repositories\SubmissionRepository;
 
 class ImportForms extends Command
 {
@@ -50,11 +53,15 @@ class ImportForms extends Command
     private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(FormContract::class);
+        Facade::clearResolvedInstance(FormRepositoryContract::class);
         Facade::clearResolvedInstance(SubmissionContract::class);
+        Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
         app()->bind(FormContract::class, StacheForm::class);
+        app()->bind(FormRepositoryContract::class, FormRepository::class);
         app()->bind(SubmissionContract::class, StacheSubmission::class);
-        app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
+        app()->bind(SubmissionRepositoryContract::class, SubmissionRepository::class);
+        app()->bind(\Statamic\Contracts\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
     private function importForms(): void
@@ -72,7 +79,7 @@ class ImportForms extends Command
             }
 
             if ($shouldImportSubmissions) {
-                $form->submissions()->each(function ($submission) use ($form) {
+                $form->querySubmissions()->lazy()->each(function ($submission) use ($form) {
                     $timestamp = app('statamic.eloquent.form_submissions.model')::make()->fromDateTime($submission->date());
 
                     app('statamic.eloquent.form_submissions.model')::firstOrNew(['created_at' => $timestamp])
