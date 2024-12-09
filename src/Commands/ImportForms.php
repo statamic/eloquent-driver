@@ -59,8 +59,11 @@ class ImportForms extends Command
 
     private function importForms(): void
     {
-        $this->withProgressBar((new FormRepository)->all(), function ($form) {
-            if ($this->shouldImportForms()) {
+        $shouldImportForms = $this->shouldImportForms();
+        $shouldImportSubmissions = $this->shouldImportFormSubmissions();
+
+        $this->withProgressBar((new FormRepository)->all(), function ($form, $shouldImportForms, $shouldImportSubmissions) {
+            if ($shouldImportForms) {
                 $lastModified = Carbon::createFromTimestamp(File::lastModified($form->path()));
 
                 Form::makeModelFromContract($form)
@@ -68,7 +71,7 @@ class ImportForms extends Command
                     ->save();
             }
 
-            if ($this->shouldImportFormSubmissions()) {
+            if ($shouldImportSubmissions) {
                 $form->submissions()->each(function ($submission) use ($form) {
                     $timestamp = app('statamic.eloquent.form_submissions.model')::make()->fromDateTime($submission->date());
 
