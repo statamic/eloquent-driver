@@ -114,7 +114,7 @@ class Entry extends FileEntry
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
-            'uri' => $source->uri(),
+            'uri' => $source->routableUri(), // we intentionally go to the trait to get the most up to date uri
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
