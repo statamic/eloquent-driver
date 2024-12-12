@@ -109,12 +109,15 @@ class Entry extends FileEntry
             Blink::store('entry-uris')->forget($source->id());
         }
 
+        // disable the uri cache so any slug updates give us the latest slug
+        $source->structure()?->in($source->locale())->disableUriCache();
+
         $attributes = [
             ...$attributes,
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
-            'uri' => $source->uri(),
+            'uri' => $source->uri() ?? $source->routableUri(),
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
