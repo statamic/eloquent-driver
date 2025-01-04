@@ -72,7 +72,7 @@ class ExportTaxonomies extends Command
 
     private function exportTaxonomies()
     {
-        if (!$this->shouldExportTaxonomies()) {
+        if (! $this->shouldExportTaxonomies()) {
             return;
         }
 
@@ -93,7 +93,7 @@ class ExportTaxonomies extends Command
 
     private function exportTerms()
     {
-        if (!$this->shouldExportTerms()) {
+        if (! $this->shouldExportTerms()) {
             return;
         }
 
@@ -137,14 +137,14 @@ class ExportTaxonomies extends Command
     private function shouldExportTaxonomies(): bool
     {
         return $this->option('only-taxonomies')
-            || !$this->option('only-terms')
+            || ! $this->option('only-terms')
             && ($this->option('force') || $this->confirm('Do you want to export taxonomies?'));
     }
 
     private function shouldExportTerms(): bool
     {
         return $this->option('only-terms')
-            || !$this->option('only-taxonomies')
+            || ! $this->option('only-taxonomies')
             && ($this->option('force') || $this->confirm('Do you want to export terms?'));
     }
 }
