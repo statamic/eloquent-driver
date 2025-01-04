@@ -29,7 +29,10 @@ class ExportTaxonomies extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-taxonomies {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-taxonomies
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-taxonomies : Only export taxonomies}
+        {--only-terms : Only export terms}';
 
     /**
      * The console command description.
@@ -69,7 +72,7 @@ class ExportTaxonomies extends Command
 
     private function exportTaxonomies()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export taxonomies?')) {
+        if (!$this->shouldExportTaxonomies()) {
             return;
         }
 
@@ -90,7 +93,7 @@ class ExportTaxonomies extends Command
 
     private function exportTerms()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export terms?')) {
+        if (!$this->shouldExportTerms()) {
             return;
         }
 
@@ -129,5 +132,19 @@ class ExportTaxonomies extends Command
 
         $this->newLine();
         $this->info('Terms exported');
+    }
+
+    private function shouldExportTaxonomies(): bool
+    {
+        return $this->option('only-taxonomies')
+            || !$this->option('only-terms')
+            && ($this->option('force') || $this->confirm('Do you want to export taxonomies?'));
+    }
+
+    private function shouldExportTerms(): bool
+    {
+        return $this->option('only-terms')
+            || !$this->option('only-taxonomies')
+            && ($this->option('force') || $this->confirm('Do you want to export terms?'));
     }
 }
