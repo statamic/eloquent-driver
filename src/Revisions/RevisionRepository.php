@@ -16,6 +16,7 @@ class RevisionRepository extends StacheRepository
     public function whereKey($key)
     {
         return app('statamic.eloquent.revisions.model')::where('key', $key)
+            ->orderBy('created_at')
             ->get()
             ->map(function ($revision) use ($key) {
                 return $this->makeRevisionFromFile($key, $revision);
