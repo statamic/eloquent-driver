@@ -138,15 +138,9 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
    
     Once created, you will need to update the model in the `entries` section of the configuration file:
 
-    ```php
-    // config/statamic/eloquent-driver.php
-    
-    'entries' => [
-        'driver' => 'file',
-        'model' => \App\Models\Entry::class, // Your custom Entry model
-        'entry' => \Statamic\Eloquent\Entries\Entry::class,
-        'map_data_to_columns' => false,
-    ],
+    ```diff
+    - 'model' => \Statamic\Eloquent\Entries\EntryModel::class,
+    + 'model' => \App\Models\Entry::class,
     ```
 
 5. If you have existing entries, you will need to re-save them to populate the new columns. You can do this by pasting the following snippet into `php artisan tinker`:
