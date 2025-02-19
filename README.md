@@ -109,7 +109,8 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     php artisan migrate
     ```
 
-4. If you're adding `json` or `integer` columns, you will need to provide your own `Entry` model in order to set the appropriate casts. You can do this by creating a new model which extends the default `Entry` model:
+4. If you're adding a column that [requires an Eloquent cast](https://laravel.com/docs/master/eloquent-mutators#attribute-casting) (eg. a `json` or `integer` column), you will need to provide your own `Entry` model in order to set the appropriate casts. You can do this by creating a new model which extends the default `Entry` model:
+
     ```php
     <?php
     
@@ -133,6 +134,19 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     
     ```php
     class Entry extends \Statamic\Eloquent\Entries\UuidEntryModel
+    ```
+   
+    Once created, you will need to update the model in the `entries` section of the configuration file:
+
+    ```php
+    // config/statamic/eloquent-driver.php
+    
+    'entries' => [
+        'driver' => 'file',
+        'model' => \App\Models\Entry::class, // Your custom Entry model
+        'entry' => \Statamic\Eloquent\Entries\Entry::class,
+        'map_data_to_columns' => false,
+    ],
     ```
 
 5. If you have existing entries, you will need to re-save them to populate the new columns. You can do this by pasting the following snippet into `php artisan tinker`:
