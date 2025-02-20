@@ -3,6 +3,8 @@
 namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Database\BaseModel;
 
 class EntryModel extends BaseModel
@@ -12,10 +14,29 @@ class EntryModel extends BaseModel
     protected $table = 'entries';
 
     protected $casts = [
-        'date'      => 'datetime',
         'data'      => 'json',
         'published' => 'boolean',
     ];
+
+    public function date(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                return Carbon::parse($value, 'UTC');
+            },
+            set: function ($value) {
+                if (! $value instanceof Carbon) {
+                    $value = Carbon::parse($value, 'UTC');
+                }
+
+                if ($value->tzName !== 'UTC') {
+                    $value = $value->utc();
+                }
+
+                return $value->format('Y-m-d H:i:s');
+            },
+        );
+    }
 
     public function author()
     {
