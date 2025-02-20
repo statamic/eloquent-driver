@@ -2,8 +2,8 @@
 
 namespace Statamic\Eloquent\Entries;
 
-use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Statamic\Eloquent\Database\BaseModel;
 

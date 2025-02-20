@@ -55,7 +55,7 @@ class EntryModelTest extends TestCase
         config()->set('app.timezone', 'America/New_York'); // -05:00
         date_default_timezone_set('America/New_York');
 
-        $model = new EntryModel();
+        $model = new EntryModel;
         $model->id = 1;
         $model->site = 'en';
         $model->published = true;
@@ -76,7 +76,7 @@ class EntryModelTest extends TestCase
         config()->set('app.timezone', 'America/New_York'); // -05:00
         date_default_timezone_set('America/New_York');
 
-        $model = new EntryModel();
+        $model = new EntryModel;
         $model->id = 1;
         $model->site = 'en';
         $model->published = true;
@@ -97,7 +97,7 @@ class EntryModelTest extends TestCase
         config()->set('app.timezone', 'America/New_York'); // -05:00
         date_default_timezone_set('America/New_York');
 
-        $model = new EntryModel();
+        $model = new EntryModel;
         $model->id = 1;
         $model->site = 'en';
         $model->published = true;
