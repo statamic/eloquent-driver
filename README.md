@@ -118,15 +118,18 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     
     class Entry extends \Statamic\Eloquent\Entries\EntryModel
     {
-        protected $casts = [
-            // The casts from Statamic's base model...
-            'date'      => 'datetime',
-            'data'      => 'json',
-            'published' => 'boolean',
-    
-            // Your custom casts...
-            'featured_images' => 'json',
-        ];
+        protected function casts(): array
+        {
+            return [
+                // The casts from Statamic's base model...
+                'date'      => 'datetime',
+                'data'      => 'json',
+                'published' => 'boolean',
+        
+                // Your custom casts...
+                'featured_images' => 'json',
+            ];
+        }
     }
     ```
     

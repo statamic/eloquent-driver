@@ -11,10 +11,13 @@ class TaxonomyModel extends BaseModel
 
     protected $table = 'taxonomies';
 
-    protected $casts = [
-        'settings' => 'json',
-        'sites'    => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'json',
+            'sites'    => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {

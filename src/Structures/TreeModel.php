@@ -10,8 +10,11 @@ class TreeModel extends BaseModel
 
     protected $table = 'trees';
 
-    protected $casts = [
-        'tree'     => 'json',
-        'settings' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'tree'     => 'json',
+            'settings' => 'json',
+        ];
+    }
 }

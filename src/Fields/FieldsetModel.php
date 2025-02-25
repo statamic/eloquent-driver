@@ -11,9 +11,12 @@ class FieldsetModel extends BaseModel
 
     protected $table = 'fieldsets';
 
-    protected $casts = [
-        'data' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {
