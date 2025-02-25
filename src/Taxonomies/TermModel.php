@@ -11,9 +11,12 @@ class TermModel extends BaseModel
 
     protected $table = 'taxonomy_terms';
 
-    protected $casts = [
-        'data' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {
