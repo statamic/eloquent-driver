@@ -11,9 +11,12 @@ class BlueprintModel extends BaseModel
 
     protected $table = 'blueprints';
 
-    protected $casts = [
-        'data' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {

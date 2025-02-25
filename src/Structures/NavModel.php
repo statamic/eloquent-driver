@@ -10,7 +10,10 @@ class NavModel extends BaseModel
 
     protected $table = 'navigations';
 
-    protected $casts = [
-        'settings' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'json',
+        ];
+    }
 }

@@ -11,11 +11,14 @@ class EntryModel extends BaseModel
 
     protected $table = 'entries';
 
-    protected $casts = [
-        'date'      => 'datetime',
-        'data'      => 'json',
-        'published' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'date'      => 'datetime',
+            'data'      => 'json',
+            'published' => 'boolean',
+        ];
+    }
 
     public function author()
     {

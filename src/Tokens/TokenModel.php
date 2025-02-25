@@ -10,8 +10,11 @@ class TokenModel extends BaseModel
 
     protected $table = 'tokens';
 
-    protected $casts = [
-        'data' => 'json',
-        'expire_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+            'expire_at' => 'datetime',
+        ];
+    }
 }

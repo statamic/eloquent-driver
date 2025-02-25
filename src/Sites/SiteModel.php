@@ -11,9 +11,12 @@ class SiteModel extends BaseModel
 
     protected $table = 'sites';
 
-    protected $casts = [
-        'attributes' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'attributes' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {

@@ -11,9 +11,12 @@ class VariablesModel extends BaseModel
 
     protected $table = 'global_set_variables';
 
-    protected $casts = [
-        'data' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+        ];
+    }
 
     public function getAttribute($key)
     {

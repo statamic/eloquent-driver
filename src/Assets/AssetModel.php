@@ -10,8 +10,11 @@ class AssetModel extends BaseModel
 
     protected $table = 'assets_meta';
 
-    protected $casts = [
-        'data' => 'json',
-        'meta' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+            'meta' => 'json',
+        ];
+    }
 }

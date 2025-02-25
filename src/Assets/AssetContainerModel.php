@@ -11,9 +11,12 @@ class AssetContainerModel extends BaseModel
 
     protected $table = 'asset_containers';
 
-    protected $casts = [
-        'settings' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {
