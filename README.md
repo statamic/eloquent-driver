@@ -122,7 +122,6 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
         {
             return [
                 // The casts from Statamic's base model...
-                'date'      => 'datetime',
                 'data'      => 'json',
                 'published' => 'boolean',
         
