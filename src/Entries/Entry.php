@@ -127,6 +127,10 @@ class Entry extends FileEntry
             'order' => $source->order(),
         ];
 
+        if ($source->template) {
+            $attributes['data']->put('template', $source->template);
+        }
+
         foreach ($dataMappings as $key) {
             $attributes[$key] = $data->get($key);
         }

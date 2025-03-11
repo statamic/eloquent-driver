@@ -850,7 +850,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function filtering_using_whereIn_status_column_writes_deprecation_log()
+    public function filtering_using_where_in_status_column_writes_deprecation_log()
     {
         $this->withoutDeprecationHandling();
         $this->expectException(\ErrorException::class);
