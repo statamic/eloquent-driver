@@ -8,6 +8,7 @@ use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Support\Arr;
 
 class Entry extends FileEntry
 {
@@ -126,6 +127,10 @@ class Entry extends FileEntry
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
+
+        if ($source->template) {
+            $attributes['data']->put('template', $source->template);
+        }
 
         foreach ($dataMappings as $key) {
             $attributes[$key] = $data->get($key);
