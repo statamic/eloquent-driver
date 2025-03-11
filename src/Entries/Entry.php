@@ -8,7 +8,6 @@ use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
-use Statamic\Support\Arr;
 
 class Entry extends FileEntry
 {
