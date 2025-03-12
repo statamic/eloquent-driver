@@ -28,6 +28,7 @@ class Entry extends FileEntry
             ->collection($model->collection)
             ->data($data)
             ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
+            ->template($model->data['template'] ?? null)
             ->published($model->published)
             ->model($model);
 
