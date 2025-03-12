@@ -84,7 +84,7 @@ class BlueprintRepository extends StacheRepository
             ->mapWithKeys(function ($file) {
                 $blueprint = $this->makeBlueprintFromModel($file);
 
-                return [$blueprint->handle() => $file];
+                return [$blueprint->handle() => $blueprint];
             });
 
         if (in_array($namespace, array_keys($this->additionalNamespaces))) {
