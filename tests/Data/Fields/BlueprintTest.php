@@ -79,4 +79,18 @@ class BlueprintTest extends TestCase
 
         $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
     }
+
+    #[Test]
+    public function it_handles_blueprints_registered_by_addons()
+    {
+        $this->assertCount(0, Blueprint::in('my-addon'));
+
+        Blueprint::addNamespace(
+            'my-addon',
+            directory: __DIR__.'/../../__fixtures__/resources/blueprints'
+        );
+
+        $this->assertCount(1, Blueprint::in('my-addon'));
+        $this->assertSame('collection', Blueprint::in('my-addon')->first()->handle());
+    }
 }
