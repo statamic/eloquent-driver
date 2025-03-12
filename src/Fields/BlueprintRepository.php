@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Fields;
 
 use Statamic\Facades\Blink;
-use Statamic\Facades\File;
 use Statamic\Fields\Blueprint;
 use Statamic\Fields\BlueprintRepository as StacheRepository;
 use Statamic\Support\Arr;
@@ -79,31 +78,11 @@ class BlueprintRepository extends StacheRepository
             return parent::in($namespace);
         }
 
-        $blueprints = $this
+        return $this
             ->filesIn($namespace)
-            ->mapWithKeys(function ($file) {
-                $blueprint = $this->makeBlueprintFromModel($file);
-
-                return [$blueprint->handle() => $blueprint];
-            });
-
-        if (in_array($namespace, array_keys($this->additionalNamespaces))) {
-            $directory = $this->additionalNamespaces[$namespace];
-
-            File::withAbsolutePaths()
-                ->getFilesByType($directory, 'yaml')
-                ->map(function ($file) use ($namespace) {
-                    return $this->makeBlueprintFromFile($file, $namespace);
-                })
-                ->each(function ($blueprint) use ($blueprints) {
-                    if (! $blueprints->has($blueprint->handle())) {
-                        $blueprints->put($blueprint->handle(), $blueprint);
-                    }
-                });
-        }
-
-        return $blueprints
-            ->values()
+            ->map(function ($file) {
+                return $this->makeBlueprintFromModel($file);
+            })
             ->sort(function ($a, $b) {
                 $orderA = $a->order() ?? 99999;
                 $orderB = $b->order() ?? 99999;

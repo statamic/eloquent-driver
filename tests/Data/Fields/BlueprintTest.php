@@ -21,8 +21,17 @@ class BlueprintTest extends TestCase
                 ->setDirectory(resource_path('blueprints'));
         });
 
-        $this->app->bind('statamic.eloquent.blueprints.model', function () {
+        $this->app->singleton(
+            'Statamic\Fields\FieldsetRepository',
+            'Statamic\Eloquent\Fields\FieldsetRepository'
+        );
+
+        $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
             return \Statamic\Eloquent\Fields\BlueprintModel::class;
+        });
+
+        $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
+            return \Statamic\Eloquent\Fields\FieldsetModel::class;
         });
     }
 
@@ -78,19 +87,5 @@ class BlueprintTest extends TestCase
             ->save();
 
         $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
-    }
-
-    #[Test]
-    public function it_handles_blueprints_registered_by_addons()
-    {
-        $this->assertCount(0, Blueprint::in('my-addon'));
-
-        Blueprint::addNamespace(
-            'my-addon',
-            directory: __DIR__.'/../../__fixtures__/resources/blueprints'
-        );
-
-        $this->assertCount(1, Blueprint::in('my-addon'));
-        $this->assertSame('collection', Blueprint::in('my-addon')->first()->handle());
     }
 }
