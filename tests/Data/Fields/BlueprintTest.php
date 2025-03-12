@@ -21,17 +21,8 @@ class BlueprintTest extends TestCase
                 ->setDirectory(resource_path('blueprints'));
         });
 
-        $this->app->singleton(
-            'Statamic\Fields\FieldsetRepository',
-            'Statamic\Eloquent\Fields\FieldsetRepository'
-        );
-
-        $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
+        $this->app->bind('statamic.eloquent.blueprints.model', function () {
             return \Statamic\Eloquent\Fields\BlueprintModel::class;
-        });
-
-        $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
-            return \Statamic\Eloquent\Fields\FieldsetModel::class;
         });
     }
 
