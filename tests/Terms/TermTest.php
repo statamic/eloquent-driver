@@ -45,5 +45,6 @@ class TermTest extends TestCase
         $term->save();
 
         $this->assertEquals(now(), $term->updated_at);
+        $this->assertEquals(now(), TermFacade::query()->first()->updated_at);
     }
 }

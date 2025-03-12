@@ -38,7 +38,9 @@ class Term extends FileEntry
         $term->data($data);
 
         if (config('statamic.system.track_last_update')) {
-            $term->set('updated_at', ($model->updated_at ?? $model->created_at)->timestamp);
+            $updatedAt = ($model->updated_at ?? $model->created_at);
+
+            $term->set('updated_at', $updatedAt instanceof Carbon ? $updatedAt->timestamp : $updatedAt);
         }
 
         return $term->syncOriginal();
