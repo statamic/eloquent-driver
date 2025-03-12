@@ -29,4 +29,21 @@ class TermTest extends TestCase
         $this->assertCount(1, TermModel::all());
         $this->assertSame('new-slug', TermModel::first()->slug);
     }
+
+    #[Test]
+    public function it_saves_updated_at_value_correctly()
+    {
+        $this->freezeSecond();
+
+        Taxonomy::make('test')->title('test')->save();
+
+        tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        /** @var LocalizedTerm $term */
+        $term = TermFacade::query()->first();
+        $term->set('foo', 'bar');
+        $term->save();
+
+        $this->assertEquals(now(), $term->updated_at);
+    }
 }
