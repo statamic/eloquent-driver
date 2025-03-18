@@ -15,6 +15,7 @@ class GlobalSet extends FileEntry
         $global = (new static)
             ->handle($model->handle)
             ->title($model->title)
+            ->sites($model->settings['sites'])
             ->model($model);
 
         return $global;
@@ -31,7 +32,9 @@ class GlobalSet extends FileEntry
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title' => $source->title(),
-            'settings'  => [], // future proofing
+            'settings' => [
+                'sites' => $source->sites(),
+            ],
         ]);
     }
 
