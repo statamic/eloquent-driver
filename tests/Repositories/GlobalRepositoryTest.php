@@ -24,10 +24,10 @@ class GlobalRepositoryTest extends TestCase
         $this->app->instance(Stache::class, $stache);
         $this->repo = new GlobalRepository($stache);
 
-        $globalOne = $this->repo->make('contact')->title('Contact Details')->save();
+        $globalOne = $this->repo->make('contact')->title('Contact Details')->sites(['en' => null])->save();
         (new Variables)->globalSet($globalOne)->data(['phone' => '555-1234'])->save();
 
-        $globalTwo = $this->repo->make('global')->title('General')->save();
+        $globalTwo = $this->repo->make('global')->title('General')->sites(['en' => null])->save();
         (new Variables)->globalSet($globalTwo)->data(['foo' => 'Bar'])->save();
     }
 
@@ -89,7 +89,7 @@ class GlobalRepositoryTest extends TestCase
     #[Test]
     public function it_saves_a_global_to_the_database()
     {
-        $global = GlobalSetAPI::make('new');
+        $global = GlobalSetAPI::make('new')->sites(['en' => null]);
 
         $global->addLocalization(
             $global->makeLocalization('en')->data(['foo' => 'bar', 'baz' => 'qux'])
