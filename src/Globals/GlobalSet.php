@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Globals;
 use Statamic\Contracts\Globals\GlobalSet as Contract;
 use Statamic\Eloquent\Globals\GlobalSetModel as Model;
 use Statamic\Globals\GlobalSet as FileEntry;
+use Statamic\Support\Arr;
 
 class GlobalSet extends FileEntry
 {
@@ -15,7 +16,7 @@ class GlobalSet extends FileEntry
         $global = (new static)
             ->handle($model->handle)
             ->title($model->title)
-            ->sites($model->settings['sites'])
+            ->sites(Arr::get($model->settings, 'sites'))
             ->model($model);
 
         return $global;
