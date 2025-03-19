@@ -132,6 +132,8 @@ class Entry extends FileEntry
             $attributes['data']->put('template', $source->template);
         }
 
+        $attributes['data'] = $attributes['data']->filter(fn ($v) => $v !== null);
+
         foreach ($dataMappings as $key) {
             $attributes[$key] = $data->get($key);
         }

@@ -328,4 +328,22 @@ class EntryTest extends TestCase
         $this->assertSame('/the-new-slug', $entry->uri());
         $this->assertSame('/the-new-slug', $entry->model()->uri);
     }
+
+    #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        Collection::make('blog')->title('blog')
+            ->routes('{parent_uri}/{slug}')
+            ->save();
+
+        $entry = (new Entry)
+            ->id('1.0')
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data(['foo' => 'bar', 'null_value' => null]);
+
+        $entry->save();
+
+        $this->assertArrayNotHasKey('null_value', $entry->model()->data);
+    }
 }
