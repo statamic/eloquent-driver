@@ -58,6 +58,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
         \Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables::class,
+        \Statamic\Eloquent\Updates\UpdateGlobalVariables::class,
     ];
 
     public function boot()
