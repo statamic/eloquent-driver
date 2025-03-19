@@ -19,6 +19,18 @@ use Tests\TestCase;
 
 class VariablesTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setSites([
+            'a' => ['url' => '/', 'locale' => 'en'],
+            'b' => ['url' => '/b/', 'locale' => 'fr'],
+            'c' => ['url' => '/b/', 'locale' => 'fr'],
+            'd' => ['url' => '/d/', 'locale' => 'fr'],
+        ]);
+    }
+
     #[Test]
     public function it_gets_file_contents_for_saving()
     {
@@ -51,24 +63,24 @@ EOT;
         ]);
 
         $a = $global->makeLocalization('a')->data([
-            'array'  => ['first one', 'second one'],
+            'array' => ['first one', 'second one'],
             'string' => 'The string',
-            'null'   => null, // this...
-            'empty'  => [],  // and this should get stripped out because there's no origin to fall back to.
+            'null' => null, // this...
+            'empty' => [],  // and this should get stripped out because there's no origin to fall back to.
         ]);
 
         $b = $global->makeLocalization('b')->data([
-            'array'  => ['first one', 'second one'],
+            'array' => ['first one', 'second one'],
             'string' => 'The string',
-            'null'   => null, // this...
-            'empty'  => [],  // and this should not get stripped out, otherwise it would fall back to the origin.
+            'null' => null, // this...
+            'empty' => [],  // and this should not get stripped out, otherwise it would fall back to the origin.
         ]);
 
         $c = $global->makeLocalization('c')->data([
-            'array'  => ['first one', 'second one'],
+            'array' => ['first one', 'second one'],
             'string' => 'The string',
-            'null'   => null, // this...
-            'empty'  => [],  // and this should get stripped out because there's no origin to fall back to.
+            'null' => null, // this...
+            'empty' => [],  // and this should get stripped out because there's no origin to fall back to.
         ]);
 
         $global->addLocalization($a);
