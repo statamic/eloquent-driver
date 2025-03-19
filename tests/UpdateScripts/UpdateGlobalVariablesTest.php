@@ -15,7 +15,7 @@ class UpdateGlobalVariablesTest extends TestCase
 {
     use RefreshDatabase, RunsUpdateScripts;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
