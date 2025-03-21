@@ -82,7 +82,7 @@ class Term extends FileEntry
         ])->fill([
             'slug'       => $source->slug(),
             'uri'        => $source->uri(),
-            'data'       => $data,
+            'data'       => collect($data)->filter(fn ($v) => $v !== null),
             'updated_at' => $source->lastModified(),
         ]);
     }

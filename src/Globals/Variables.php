@@ -39,7 +39,7 @@ class Variables extends FileEntry
             'handle' => $source->globalSet()->handle(),
             'locale' => $source->locale,
         ])->fill([
-            'data'   => $data,
+            'data'   => $data->filter(fn ($v) => $v !== null),
             'origin' => $source->hasOrigin() ? $source->origin()->locale() : null,
         ]);
     }

@@ -31,6 +31,16 @@ class TermTest extends TestCase
     }
 
     #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        Taxonomy::make('test')->title('test')->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data(['null_value' => null]))->save();
+
+        $this->assertArrayNotHasKey('null_value', $term->model()->data);
+    }
+
+    #[Test]
     public function it_saves_updated_at_value_correctly()
     {
         $this->freezeSecond();
