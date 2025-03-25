@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('handle')->index();
             $table->string('locale')->nullable();
-            $table->string('origin')->nullable();
             $table->jsonb('data');
             $table->timestamps();
         });
