@@ -128,7 +128,7 @@ class Entry extends FileEntry
             'order' => $source->order(),
         ];
 
-        if ($template = $source->get('template')) {
+        if ($template = $source->get('template', $source->template)) {
             $attributes['data']->put('template', $template);
         }
 
