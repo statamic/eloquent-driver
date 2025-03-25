@@ -101,4 +101,18 @@ class FormSubmissionTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $fresh->date());
         $this->assertSame($fresh->date()->format('u'), $submission->date()->format('u'));
     }
+
+    #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+            'null_value' => null,
+        ]))->save();
+
+        $this->assertArrayNotHasKey('null_value', $submission->model()->data);
+    }
 }
