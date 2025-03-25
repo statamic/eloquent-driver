@@ -34,7 +34,9 @@ class GlobalSet extends FileEntry
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title' => $source->title(),
             'settings' => [
-                'sites' => $source->sites(),
+                'sites' => $source->sites()
+                    ->mapWithKeys(fn ($site) => [$site => $source->origins()->get($site)])
+                    ->all(),
             ],
         ]);
     }
