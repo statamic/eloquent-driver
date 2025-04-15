@@ -128,8 +128,8 @@ class Entry extends FileEntry
             'order' => $source->order(),
         ];
 
-        if ($source->template) {
-            $attributes['data']->put('template', $source->template);
+        if ($template = $source->get('template', $source->template)) {
+            $attributes['data']->put('template', $template);
         }
 
         $attributes['data'] = $attributes['data']->filter(fn ($v) => $v !== null);
