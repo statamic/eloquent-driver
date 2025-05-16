@@ -20,6 +20,7 @@ class CollectionTest extends TestCase
             'title' => 'Blog',
             'handle' => 'blog',
             'settings' => [
+                'icon' => 'crane',
                 'routes' => '/blog/{slug}',
                 'slugs' => true,
                 'dated' => true,
@@ -33,6 +34,7 @@ class CollectionTest extends TestCase
         $this->assertTrue($model->is($find->model()));
         $this->assertEquals('blog', $find->handle());
         $this->assertEquals('Blog', $find->title());
+        $this->assertEquals('crane', $find->icon());
         $this->assertEquals('/blog/{slug}', $find->route('en'));
         $this->assertTrue($find->requiresSlugs());
         $this->assertTrue($find->dated());
