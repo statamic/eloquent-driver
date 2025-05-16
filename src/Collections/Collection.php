@@ -15,6 +15,7 @@ class Collection extends FileEntry
     {
         return (new static)
             ->title($model->title ?? null)
+            ->icon($model->settings['icon'] ?? null)
             ->routes($model->settings['routes'] ?? null)
             ->requiresSlugs($model->settings['slugs'] ?? true)
             ->titleFormats($model->settings['title_formats'] ?? null)
@@ -55,6 +56,7 @@ class Collection extends FileEntry
         ]);
 
         $model->settings = array_merge($model->settings ?? [], [
+            'icon'                 => $source->icon,
             'routes'               => $source->routes,
             'slugs'                => $source->requiresSlugs(),
             'title_formats'        => collect($source->titleFormats())->filter(),
