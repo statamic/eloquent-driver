@@ -181,7 +181,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
         }
 
-        return parent::where($column, $operator, $value, $boolean);
+        return parent::where(...func_get_args());
     }
 
     public function whereIn($column, $values, $boolean = 'and')
@@ -190,7 +190,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
         }
 
-        return parent::whereIn($column, $values, $boolean);
+        return parent::whereIn(...func_get_args());
     }
 
     private function ensureCollectionsAreQueriedForStatusQuery(): void
