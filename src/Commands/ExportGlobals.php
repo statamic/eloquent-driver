@@ -28,7 +28,7 @@ class ExportGlobals extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-globals';
+    protected $signature = 'statamic:eloquent:export-globals {--force : Force the export to run, with all prompts answered "yes"}';
 
     /**
      * The console command description.
@@ -46,6 +46,7 @@ class ExportGlobals extends Command
     {
         $this->usingDefaultRepositories(function () {
             $this->exportGlobals();
+            $this->exportGlobalVariables();
         });
 
         return 0;
@@ -67,24 +68,51 @@ class ExportGlobals extends Command
 
     private function exportGlobals()
     {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export global sets?')) {
+            return;
+        }
+
         $sets = GlobalSetModel::all();
-        $variables = VariablesModel::all();
 
-        $this->withProgressBar($sets, function ($model) use ($variables) {
-            $global = GlobalSetFacade::make()
+        $this->withProgressBar($sets, function ($model) {
+            GlobalSetFacade::make()
                 ->handle($model->handle)
-                ->title($model->title);
-
-            foreach ($variables->where('handle', $model->handle) as $localization) {
-                $global->makeLocalization($localization->locale)
-                    ->data($localization->data)
-                    ->origin($localization->origin ?? null);
-            }
-
-            $global->save();
+                ->title($model->title)
+                ->save();
         });
 
         $this->newLine();
         $this->info('Globals exported');
+    }
+
+    private function exportGlobalVariables()
+    {
+        if (! $this->option('force') && ! $this->confirm('Do you want to export global variables?')) {
+            return;
+        }
+
+        $variables = VariablesModel::all();
+
+        $this->withProgressBar($variables, function ($model) {
+            if (! $global = GlobalSetFacade::find($model->handle)) {
+                $global = tap(
+                    GlobalSetFacade::make()
+                        ->handle($model->handle)
+                        ->title($model->handle)
+                )
+                    ->save();
+            }
+
+            $globalVariable = $global->in($model->locale);
+
+            $globalVariable
+                ->data($localization->data)
+                ->origin($localization->origin ?? null);
+
+            $globalVariable->save();
+        });
+
+        $this->newLine();
+        $this->info('Global variables exported');
     }
 }
