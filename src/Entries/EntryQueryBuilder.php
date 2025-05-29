@@ -256,7 +256,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return app('statamic.eloquent.entries.model')::query()
                 ->select(['id'])
                 ->where(function ($query) use ($taxonomy, $terms) {
-                    foreach ($terms as  $term) {
+                    foreach ($terms as $term) {
                         $query->orWhereJsonContains($this->column($taxonomy), $term);
                     }
                 })
