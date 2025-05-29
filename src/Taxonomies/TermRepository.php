@@ -125,7 +125,7 @@ class TermRepository extends StacheRepository
 
     protected function ensureAssociations()
     {
-        if (config('statamic.eloquent-driver.terms.driver', 'file') === 'eloquent') {
+        if (config('statamic.eloquent-driver.taxonomies.driver', 'file') === 'eloquent') {
             return;
         }
 
