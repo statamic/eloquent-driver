@@ -69,9 +69,9 @@ class TermTest extends TestCase
 
         $collection = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
-        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
         (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
-        (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
 
         $this->assertEquals(2, TermFacade::entriesCount($term));
     }
