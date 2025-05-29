@@ -222,4 +222,46 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
             ->map(fn ($handle) => Collection::find($handle));
     }
+
+    private function getKeysForTaxonomyWhereBasic($where)
+    {
+        $term = $where['value'];
+
+        [$taxonomy, $slug] = explode('::', $term);
+
+        return app('statamic.eloquent.entries.model')::query()
+            ->select(['id'])
+            ->whereJsonContains($this->column($taxonomy), $term)
+            ->get()
+            ->pluck('id');
+    }
+
+    private function getKeysForTaxonomyWhereIn($where)
+    {
+        // Get the terms grouped by taxonomy.
+        // [tags::foo, categories::baz, tags::bar]
+        // becomes [tags => [foo, bar], categories => [baz]]
+        $taxonomies = collect($where['values'])
+            ->map(function ($value) {
+                [$taxonomy, $term] = explode('::', $value);
+
+                return compact('taxonomy', 'term');
+            })
+            ->groupBy->taxonomy
+            ->map(function ($group) {
+                return collect($group)->map->term;
+            });
+
+        return $taxonomies->flatMap(function ($terms, $taxonomy) {
+            return app('statamic.eloquent.entries.model')::query()
+                ->select(['id'])
+                ->where(function ($query) use ($taxonomy, $terms) {
+                    foreach ($terms as  $term) {
+                        $query->orWhereJsonContains($this->column($taxonomy), $term);
+                    }
+                })
+                ->get()
+                ->pluck('id');
+        });
+    }
 }
