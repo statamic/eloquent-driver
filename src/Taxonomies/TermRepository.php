@@ -13,8 +13,6 @@ class TermRepository extends StacheRepository
 {
     public function query()
     {
-        $this->ensureAssociations();
-
         return app(TermQueryBuilder::class);
     }
 
