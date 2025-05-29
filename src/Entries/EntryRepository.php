@@ -115,4 +115,13 @@ class EntryRepository extends StacheRepository
                 $dispatch->onQueue(config('statamic.eloquent-driver.collections.update_entry_parent_queue', 'default'));
             });
     }
+
+    public function taxonomize($entry)
+    {
+        if (config('statamic.eloquent-driver.terms.driver') === 'eloquent') {
+            return;
+        }
+
+        parent::taxonomize($entry);
+    }
 }
