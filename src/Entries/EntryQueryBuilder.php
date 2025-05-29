@@ -9,6 +9,7 @@ use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Taxonomy;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -229,9 +230,14 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         [$taxonomy, $slug] = explode('::', $term);
 
+        if (! $taxonomy = Taxonomy::find($taxonomy)) {
+            return collect();
+        }
+
         return app('statamic.eloquent.entries.model')::query()
             ->select(['id'])
-            ->whereJsonContains($this->column($taxonomy), $term)
+            ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
+            ->whereJsonContains($this->column($taxonomy->handle()), $term)
             ->get()
             ->pluck('id');
     }
@@ -253,11 +259,16 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             });
 
         return $taxonomies->flatMap(function ($terms, $taxonomy) {
+            if (! $taxonomy = Taxonomy::find($taxonomy)) {
+                return collect();
+            }
+
             return app('statamic.eloquent.entries.model')::query()
                 ->select(['id'])
+                ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
                 ->where(function ($query) use ($taxonomy, $terms) {
                     foreach ($terms as $term) {
-                        $query->orWhereJsonContains($this->column($taxonomy), $term);
+                        $query->orWhereJsonContains($this->column($taxonomy->handle()), $term);
                     }
                 })
                 ->get()
