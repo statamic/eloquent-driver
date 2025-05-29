@@ -39,6 +39,7 @@ use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Tokens\TokenRepository;
+use Statamic\Facades\Stache;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -238,6 +239,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('asset-containers'));
     }
 
     private function registerAssets()
@@ -265,6 +268,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('assets'));
     }
 
     private function registerBlueprints()
@@ -299,6 +304,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('collections'));
     }
 
     private function registerCollectionTrees()
@@ -322,6 +329,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('collection-trees'));
     }
 
     private function registerEntries()
@@ -345,6 +354,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('entries'));
     }
 
     private function registerFieldsets()
@@ -381,6 +392,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('forms'));
     }
 
     private function registerFormSubmissions()
@@ -402,6 +415,8 @@ class ServiceProvider extends AddonServiceProvider
                 $app['statamic.eloquent.form_submissions.model']::query()
             );
         });
+
+        Statamic::booted(fn () => Stache::removeStore('form-submissions'));
     }
 
     private function registerGlobals()
@@ -415,6 +430,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('globals'));
     }
 
     private function registerGlobalVariables()
@@ -430,6 +447,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
+
+        Statamic::booted(fn () => Stache::removeStore('global-variables'));
     }
 
     private function registerRevisions()
@@ -456,6 +475,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('navigation'));
     }
 
     private function registerStructureTrees()
@@ -479,6 +500,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('nav-trees'));
     }
 
     public function registerTaxonomies()
@@ -492,6 +515,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('taxonomies'));
     }
 
     public function registerTerms()
@@ -511,6 +536,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+
+        Statamic::booted(fn () => Stache::removeStore('terms'));
     }
 
     public function registerTokens()
