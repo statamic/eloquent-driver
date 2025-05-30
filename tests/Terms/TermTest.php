@@ -85,6 +85,8 @@ class TermTest extends TestCase
     #[Test]
     public function it_build_stache_associations_when_taxonomy_driver_is_not_eloquent()
     {
+        config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
+
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
         Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
 

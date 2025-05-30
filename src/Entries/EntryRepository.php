@@ -118,7 +118,7 @@ class EntryRepository extends StacheRepository
 
     public function taxonomize($entry)
     {
-        if (config('statamic.eloquent-driver.terms.driver') === 'eloquent') {
+        if (config('statamic.eloquent-driver.taxonomies.driver') === 'eloquent') {
             return;
         }
 
