@@ -78,8 +78,11 @@ class ImportCollections extends Command
 
     private function importCollections(): void
     {
-        $this->withProgressBar(CollectionFacade::all(), function ($collection) {
-            if ($this->shouldImportCollections()) {
+        $importCollections = $this->shouldImportCollections();
+        $importCollectionTrees = $this->shouldImportCollections();
+
+        $this->withProgressBar(CollectionFacade::all(), function ($collection) use ($importCollections, $importCollectionTrees) {
+            if ($importCollections) {
                 $lastModified = $collection->fileLastModified();
 
                 EloquentCollection::makeModelFromContract($collection)
@@ -87,7 +90,7 @@ class ImportCollections extends Command
                     ->save();
             }
 
-            if ($this->shouldImportCollectionTrees() && $structure = $collection->structure()) {
+            if ($importCollectionTrees && $structure = $collection->structure()) {
                 $structure->trees()->each(function ($tree) {
                     $lastModified = $tree->fileLastModified();
 

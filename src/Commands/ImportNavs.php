@@ -61,8 +61,11 @@ class ImportNavs extends Command
 
     private function importNavs(): void
     {
-        $this->withProgressBar(NavFacade::all(), function ($nav) {
-            if ($this->shouldImportNavigations()) {
+        $importNavs = $this->shouldImportNavigations();
+        $importTrees = $this->shouldImportNavigations();
+
+        $this->withProgressBar(NavFacade::all(), function ($nav) use ($importNavs, $importTrees) {
+            if ($importNavs) {
                 $lastModified = $nav->fileLastModified();
 
                 EloquentNav::makeModelFromContract($nav)
@@ -70,7 +73,7 @@ class ImportNavs extends Command
                     ->save();
             }
 
-            if ($this->shouldImportNavigationTrees()) {
+            if ($importTrees) {
                 $nav->trees()->each(function ($tree) {
                     $lastModified = $tree->fileLastModified();
 
