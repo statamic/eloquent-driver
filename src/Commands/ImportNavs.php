@@ -62,7 +62,7 @@ class ImportNavs extends Command
     private function importNavs(): void
     {
         $importNavs = $this->shouldImportNavigations();
-        $importTrees = $this->shouldImportNavigations();
+        $importTrees = $this->shouldImportNavigationTrees();
 
         $this->withProgressBar(NavFacade::all(), function ($nav) use ($importNavs, $importTrees) {
             if ($importNavs) {
