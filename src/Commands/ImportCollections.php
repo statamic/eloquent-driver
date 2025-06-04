@@ -79,7 +79,7 @@ class ImportCollections extends Command
     private function importCollections(): void
     {
         $importCollections = $this->shouldImportCollections();
-        $importCollectionTrees = $this->shouldImportCollections();
+        $importCollectionTrees = $this->shouldImportCollectionTrees();
 
         $this->withProgressBar(CollectionFacade::all(), function ($collection) use ($importCollections, $importCollectionTrees) {
             if ($importCollections) {
