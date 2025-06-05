@@ -51,7 +51,6 @@ class Submission extends FileEntry
         }
 
         $this->model = $model;
-        $this->id = $model->id;
 
         return $this;
     }
@@ -85,7 +84,10 @@ class Submission extends FileEntry
 
         $model = $this->toModel();
         $model->save();
-        $isNew = $model->wasRecentlyCreated;
+
+        if ($isNew = $model->wasRecentlyCreated) {
+            $this->id = $model->getKey();
+        }
 
         $this->model($model->fresh());
 
