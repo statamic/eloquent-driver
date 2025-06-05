@@ -51,6 +51,7 @@ class Submission extends FileEntry
         }
 
         $this->model = $model;
+        $this->id = $model->id;
 
         return $this;
     }
