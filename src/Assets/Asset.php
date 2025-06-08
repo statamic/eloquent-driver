@@ -38,6 +38,7 @@ class Asset extends FileAsset
             ->hydrateMeta($model->meta)
             ->syncOriginal();
 
+        Blink::put('eloquent-asset-'.$asset->id(), $model);
         Blink::put('asset-meta-'.$asset->id(), $model->meta);
 
         return $asset;
@@ -90,7 +91,7 @@ class Asset extends FileAsset
 
     public function metaExists()
     {
-        if (Blink::has('eloquent-asset-'.$this->id())) {
+        if (Blink::has($this->metaCacheKey())) {
             return true;
         }
 
@@ -139,6 +140,7 @@ class Asset extends FileAsset
 
         self::makeModelFromContract($this, $meta)?->save();
 
+        Blink::put($this->metaCacheKey(), $meta);
         Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
 
