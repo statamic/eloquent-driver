@@ -39,7 +39,7 @@ class Asset extends FileAsset
             ->syncOriginal();
 
         Blink::put('eloquent-asset-'.$asset->id(), $model);
-        Blink::put('asset-meta-'.$asset->id(), $model->meta);
+        Blink::put($asset->metaCacheKey(), $model->meta);
 
         return $asset;
     }
