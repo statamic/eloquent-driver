@@ -32,11 +32,16 @@ class Asset extends FileAsset
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        $asset = (new static)
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
             ->hydrateMeta($model->meta)
             ->syncOriginal();
+
+        Blink::put('eloquent-asset-'.$asset->id(), $model);
+        Blink::put($asset->metaCacheKey(), $model->meta);
+
+        return $asset;
     }
 
     public function meta($key = null)
@@ -86,6 +91,10 @@ class Asset extends FileAsset
 
     public function metaExists()
     {
+        if (Blink::has($this->metaCacheKey())) {
+            return true;
+        }
+
         return Blink::once('eloquent-asset-meta-exists-'.$this->id(), function () {
             return app('statamic.eloquent.assets.model')::query()
                 ->where([
@@ -131,6 +140,7 @@ class Asset extends FileAsset
 
         self::makeModelFromContract($this, $meta)?->save();
 
+        Blink::put($this->metaCacheKey(), $meta);
         Blink::put('eloquent-asset-meta-exists-'.$this->id(), true);
     }
 
