@@ -38,6 +38,7 @@ class Asset extends FileAsset
             ->hydrateMeta($model->meta)
             ->syncOriginal();
 
+        Blink::put('eloquent-asset-'.$asset->id(), $asset);
         Blink::put($asset->metaCacheKey(), $model->meta);
 
         return $asset;
