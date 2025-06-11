@@ -5,6 +5,7 @@ namespace Tests\Assets;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Assets\Asset;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -47,6 +48,7 @@ class AssetTest extends TestCase
         $asset = Facades\Asset::find('test::f.jpg');
 
         $this->assertTrue(Facades\Blink::has("eloquent-asset-{$asset->id()}"));
+        $this->assertInstanceOf(Asset::class, Facades\Blink::get("eloquent-asset-{$asset->id()}"));
 
         $asset->save();
 
