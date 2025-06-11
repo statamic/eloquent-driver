@@ -4,6 +4,7 @@ namespace Assets;
 
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
@@ -55,5 +56,19 @@ class AssetContainerTest extends TestCase
         $this->container->folders();
 
         $this->assertTrue($queryExecuted);
+    }
+
+    #[Test]
+    public function creating_a_folder_adds_it_to_the_folder_cache()
+    {
+        $this->assertCount(1, $this->container->folders());
+        $this->assertCount(1, Cache::get('asset-folder-contents-'.$this->container->handle()));
+
+        $this->container->assetFolder('foo')->save();
+
+        $this->assertCount(2, $this->container->folders());
+        $this->assertCount(2, Cache::get('asset-folder-contents-'.$this->container->handle()));
+        $this->assertSame(['/', 'foo'], $this->container->folders()->all());
+
     }
 }

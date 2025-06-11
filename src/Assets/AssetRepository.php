@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Assets;
 use Statamic\Assets\AssetRepository as BaseRepository;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\QueryBuilder as QueryBuilderContract;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Site;
 use Statamic\Support\Str;
 
@@ -17,11 +18,22 @@ class AssetRepository extends BaseRepository
         $filename = Str::afterLast($path, '/');
         $folder = str_contains($path, '/') ? Str::beforeLast($path, '/') : '/';
 
-        return $this->query()
-            ->where('container', $container)
-            ->where('folder', $folder)
-            ->where('basename', $filename)
-            ->first();
+        $blinkKey = "eloquent-asset-{$id}";
+        $item = Blink::once($blinkKey, function () use ($container, $filename, $folder) {
+            return $this->query()
+                ->where('container', $container)
+                ->where('folder', $folder)
+                ->where('basename', $filename)
+                ->first();
+        });
+
+        if (! $item) {
+            Blink::forget($blinkKey);
+
+            return null;
+        }
+
+        return $item;
     }
 
     public function findByUrl(string $url)
@@ -52,6 +64,10 @@ class AssetRepository extends BaseRepository
 
     public function delete($asset)
     {
+        if ($id = $asset->id()) {
+            Blink::forget("eloquent-asset-{$id}");
+        }
+
         $this->query()
             ->where([
                 'container' => $asset->container(),
@@ -64,6 +80,9 @@ class AssetRepository extends BaseRepository
     public function save($asset)
     {
         $asset->writeMeta($asset->generateMeta());
+
+        $id = $asset->id();
+        Blink::put("eloquent-asset-{$id}", $asset);
     }
 
     public static function bindings(): array
