@@ -5,7 +5,6 @@ namespace Statamic\Eloquent\Assets;
 use Statamic\Assets\AssetRepository as BaseRepository;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\QueryBuilder as QueryBuilderContract;
-use Statamic\Facades\Blink;
 use Statamic\Facades\Site;
 use Statamic\Support\Str;
 
@@ -18,22 +17,11 @@ class AssetRepository extends BaseRepository
         $filename = Str::afterLast($path, '/');
         $folder = str_contains($path, '/') ? Str::beforeLast($path, '/') : '/';
 
-        $blinkKey = "eloquent-asset-{$id}";
-        $item = Blink::once($blinkKey, function () use ($container, $filename, $folder) {
-            return $this->query()
-                ->where('container', $container)
-                ->where('folder', $folder)
-                ->where('basename', $filename)
-                ->first();
-        });
-
-        if (! $item) {
-            Blink::forget($blinkKey);
-
-            return null;
-        }
-
-        return $item;
+        return $this->query()
+            ->where('container', $container)
+            ->where('folder', $folder)
+            ->where('basename', $filename)
+            ->first();
     }
 
     public function findByUrl(string $url)
