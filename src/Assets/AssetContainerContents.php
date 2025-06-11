@@ -136,7 +136,7 @@ class AssetContainerContents extends CoreAssetContainerContents
             $this->add($dir);
         }
 
-        $this->folders->push(['path' => $path]);
+        $this->folders->push(['path' => $path, 'type' => 'dir']);
 
         return $this;
     }
