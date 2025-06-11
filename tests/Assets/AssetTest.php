@@ -54,4 +54,21 @@ class AssetTest extends TestCase
 
         $this->assertFalse(Facades\Blink::has("eloquent-asset-{$asset->id()}"));
     }
+
+    #[Test]
+    public function making_an_asset_without_saving_doesnt_make_a_meta_exists_blink_cache_entry()
+    {
+        Facades\Blink::flush();
+
+        $this->assertCount(0, Facades\Blink::allStartingWith('eloquent-asset-meta-exists-'));
+
+        Storage::disk('test')->put('test.jpg', '');
+        $asset = Facades\Asset::make()->container('test')->path('test.jpg');
+
+        $this->assertCount(0, Facades\Blink::allStartingWith('eloquent-asset-meta-exists-'));
+
+        $asset->save();
+
+        $this->assertCount(1, Facades\Blink::allStartingWith('eloquent-asset-meta-exists-'));
+    }
 }

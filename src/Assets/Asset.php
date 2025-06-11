@@ -65,6 +65,12 @@ class Asset extends FileAsset
             return $meta;
         }
 
+        // this handles asset::make() without save()
+        // e.g. when checking a file exists already when uploading
+        if (! $this->disk()->exists($this->path())) {
+            return ['data' => []];
+        }
+
         return Blink::once($this->metaCacheKey(), function () {
             if ($model = app('statamic.eloquent.assets.model')::where([
                 'container' => $this->containerHandle(),
@@ -101,7 +107,7 @@ class Asset extends FileAsset
                     'container' => $this->containerHandle(),
                     'folder' => $this->folder(),
                     'basename' => $this->basename(),
-                ])->count() > 0;
+                ])->exists();
         });
     }
 
