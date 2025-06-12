@@ -204,17 +204,13 @@ class Entry extends FileEntry
 
     public function directDescendants()
     {
-        return Blink::once('entry-descendants-'.$this->id(), function () {
-            // if you eager-loaded `descendants`, this will NOT fire a new query:
-            $models = $this->model()->relationLoaded('descendants')
-                ? $this->model()->getRelation('descendants')
-                : $this->model()->descendants()->get();
-
-            $entries = $models
-                ->map(fn ($model) => static::fromModel($model))
-                ->keyBy->locale();
-
-            return new EntryCollection($entries);
+        return Blink::once('entry-descendants-' . $this->id(), function () {
+            return new EntryCollection($this
+                    ->model()
+                    ->descendants
+                    ->map(fn($model) => static::fromModel($model))
+                    ->keyBy
+                    ->locale());
         });
     }
 
