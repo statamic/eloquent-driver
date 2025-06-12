@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
+use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
 
@@ -199,6 +200,22 @@ class Entry extends FileEntry
 
         return parent::makeLocalization($site)
             ->data($this->data());
+    }
+
+    public function directDescendants()
+    {
+        return Blink::once('entry-descendants-'.$this->id(), function () {
+            // if you eager-loaded `descendants`, this will NOT fire a new query:
+            $models = $this->model()->relationLoaded('descendants')
+                ? $this->model()->getRelation('descendants')
+                : $this->model()->descendants()->get();
+
+            $entries = $models
+                ->map(fn ($model) => static::fromModel($model))
+                ->keyBy->locale();
+
+            return new EntryCollection($entries);
+        });
     }
 
     public function getDataColumnMappings(Model $model)
