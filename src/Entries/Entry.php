@@ -207,7 +207,8 @@ class Entry extends FileEntry
         return Blink::once('entry-descendants-' . $this->id(), function () {
             return new EntryCollection($this
                     ->model()
-                    ->descendants
+                    ->descendants()
+                    ->get()
                     ->map(fn($model) => static::fromModel($model))
                     ->keyBy
                     ->locale());
