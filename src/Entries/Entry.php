@@ -204,14 +204,14 @@ class Entry extends FileEntry
 
     public function directDescendants()
     {
-        return Blink::once('entry-descendants-' . $this->id(), function () {
+        return Blink::once('entry-descendants-'.$this->id(), function () {
             return new EntryCollection($this
-                    ->model()
-                    ->descendants()
-                    ->get()
-                    ->map(fn($model) => static::fromModel($model))
-                    ->keyBy
-                    ->locale());
+                ->model()
+                ->descendants()
+                ->get()
+                ->map(fn ($model) => static::fromModel($model))
+                ->keyBy
+                ->locale());
         });
     }
 
