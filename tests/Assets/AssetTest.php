@@ -206,4 +206,24 @@ class AssetTest extends TestCase
         Event::assertDispatched(AssetUploaded::class, fn ($event) => $event->asset === $asset);
         Event::assertDispatched(AssetCreated::class, fn ($event) => $event->asset === $asset);
     }
+
+    #[Test]
+    public function can_save_an_asset_made_on_the_container()
+    {
+        Event::fake();
+
+        $this->assertCount(6, AssetModel::all());
+
+        $asset = $this->container->makeAsset('a.jpg');
+
+        $this->assertNull($asset->model());
+
+        $asset->save();
+
+        $this->assertNotNull($asset->model());
+
+        Event::assertDispatched(AssetSaved::class, fn ($event) => $event->asset === $asset);
+
+        $this->assertCount(6, AssetModel::all());
+    }
 }

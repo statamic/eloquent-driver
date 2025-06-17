@@ -145,7 +145,7 @@ class Asset extends FileAsset
         }
 
         if (! $model) {
-            $model = app('statamic.eloquent.assets.model')::make([
+            $model = app('statamic.eloquent.assets.model')::firstOrNew([
                 'container' => $source->containerHandle(),
                 'folder' => $source->folder(),
                 'basename' => $source->basename(),
