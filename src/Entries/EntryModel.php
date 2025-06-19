@@ -11,6 +11,8 @@ class EntryModel extends BaseModel
 
     protected $table = 'entries';
 
+    protected $with = ['descendants'];
+
     protected $casts = [
         'date'      => 'datetime',
         'data'      => 'json',
@@ -25,6 +27,11 @@ class EntryModel extends BaseModel
     public function origin()
     {
         return $this->belongsTo(static::class);
+    }
+
+    public function descendants()
+    {
+        return $this->hasMany(static::class, 'origin_id');
     }
 
     public function parent()
