@@ -40,10 +40,20 @@ class AssetContainerContents extends CoreAssetContainerContents
         }
 
         $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
-            return $this->query()->select(['folder'])
-                ->distinct()
-                ->get()
-                ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir']);
+            return
+                collect(
+                    $this->query()->select(['folder'])
+                        ->distinct()
+                        ->get()
+                        ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir'])
+                )
+                    ->merge(
+                        collect($this->container->disk()->getFolders('/', true)
+                            ->filter(fn ($folder) => ! Str::startsWith($folder, '.'))
+                        )
+                            ->map(fn ($folder) => ['path' => $folder, 'type' => 'dir'])
+                    )
+                    ->unique();
         });
 
         return $this->folders;
@@ -136,7 +146,7 @@ class AssetContainerContents extends CoreAssetContainerContents
             $this->add($dir);
         }
 
-        $this->folders->push(['path' => $path]);
+        $this->folders->push(['path' => $path, 'type' => 'dir']);
 
         return $this;
     }
