@@ -798,6 +798,41 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function entries_can_be_ordered_by_a_datetime_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true, 'mode' => 'range']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00']])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04']])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 20:31:04']])->create();
+        EntryFactory::id('4')->slug('post-4')->collection('posts')->data(['title' => 'Post 4', 'date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 22:00:00']])->create();
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 4', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_can_be_ordered_by_a_date_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => false, 'mode' => 'range']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => ['start' => '2021-06-15', 'end' => '2021-06-15']])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => ['start' => '2021-01-13', 'end' => '2021-06-16']])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => ['start' => '2021-11-17', 'end' => '2021-11-16']])->create();
+        EntryFactory::id('4')->slug('post-4')->collection('posts')->data(['title' => 'Post 4', 'date_field' => ['start' => '2021-06-15', 'end' => '2021-06-16']])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 4', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
     public function entries_can_be_ordered_by_a_mapped_data_column()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
