@@ -73,6 +73,23 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                                     $castType = 'date';
                                 }
 
+                                // take range into account
+                                if ($blueprintField->get('mode') == 'range') {
+                                    $actualColumnStartDate = $grammar->wrap($this->column($column).'->start');
+                                    $actualColumnEndDate = $grammar->wrap($this->column($column).'->end');
+                                    if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                        $this->builder
+                                            ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
+                                            ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
+                                    } else {
+                                        $this->builder
+                                            ->orderByRaw("cast({$actualColumnStartDate} as {$castType}) {$direction}")
+                                            ->orderByRaw("cast({$actualColumnEndDate} as {$castType}) {$direction}");
+                                    }
+
+                                    return $this;
+                                }
+
                                 // sqlite casts dates to year, which is pretty unhelpful
                                 if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
                                     $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
