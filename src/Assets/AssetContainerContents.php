@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\AssetContainerContents as CoreAssetContainerContents;
 use Statamic\Statamic;
 use Statamic\Support\Str;
@@ -39,7 +38,7 @@ class AssetContainerContents extends CoreAssetContainerContents
             return $this->folders;
         }
 
-        $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
+        $this->folders = $this->cacheStore()->remember($this->key(), $this->ttl(), function () {
             return
                 collect(
                     $this->query()->select(['folder'])
@@ -125,7 +124,7 @@ class AssetContainerContents extends CoreAssetContainerContents
 
     public function save()
     {
-        Cache::put($this->key(), $this->folders, $this->ttl());
+        $this->cacheStore()->put($this->key(), $this->folders, $this->ttl());
     }
 
     public function forget($path)
