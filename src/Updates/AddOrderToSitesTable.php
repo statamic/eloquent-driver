@@ -17,7 +17,7 @@ class AddOrderToSitesTable extends UpdateScript
     public function update()
     {
         $source = __DIR__.'/../../database/migrations/updates/add_order_to_sites_table.php.stub';
-        $dest = database_path('migrations/'.date('Y_m_d_His').'_add_order_to_sites_table.php');
+        $dest = database_path('migrations/2025_07_03_add_order_to_sites_table.php');
 
         $this->files->copy($source, $dest);
 
