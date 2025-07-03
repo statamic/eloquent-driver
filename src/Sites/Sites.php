@@ -43,7 +43,7 @@ class Sites extends \Statamic\Sites\Sites
                     'locale' => $config['locale'] ?? '',
                     'url' => $config['url'] ?? '',
                     'attributes' => $config['attributes'] ?? [],
-                    'order' => ++$count;
+                    'order' => ++$count,
                 ])
                 ->save();
         }
