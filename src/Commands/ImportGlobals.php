@@ -60,8 +60,11 @@ class ImportGlobals extends Command
 
     private function importGlobals(): void
     {
-        $this->withProgressBar(GlobalSetFacade::all(), function ($set) {
-            if ($this->shouldImportGlobalSets()) {
+        $importGlobals = $this->shouldImportGlobalSets();
+        $importVariables = $this->shouldImportGlobalVariables();
+
+        $this->withProgressBar(GlobalSetFacade::all(), function ($set) use ($importGlobals, $importVariables) {
+            if ($importGlobals) {
                 $lastModified = $set->fileLastModified();
 
                 GlobalSet::makeModelFromContract($set)
@@ -69,7 +72,7 @@ class ImportGlobals extends Command
                     ->save();
             }
 
-            if ($this->shouldImportGlobalVariables()) {
+            if ($importVariables) {
                 $set->localizations()->each(function ($locale) {
                     Variables::makeModelFromContract($locale)->save();
                 });

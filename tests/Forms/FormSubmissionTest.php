@@ -3,9 +3,13 @@
 namespace Tests\Forms;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Events\SubmissionCreated;
+use Statamic\Events\SubmissionDeleted;
+use Statamic\Events\SubmissionSaved;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -114,5 +118,55 @@ class FormSubmissionTest extends TestCase
         ]))->save();
 
         $this->assertArrayNotHasKey('null_value', $submission->model()->data);
+    }
+
+    #[Test]
+    public function it_should_save_quietly()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->saveQuietly();
+
+        Event::assertNotDispatched(SubmissionSaved::class);
+        Event::assertNotDispatched(SubmissionCreated::class);
+
+        tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        Event::assertDispatched(SubmissionSaved::class);
+        Event::assertDispatched(SubmissionCreated::class);
+    }
+
+    #[Test]
+    public function it_should_delete_quietly()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        $result = $submission->deleteQuietly();
+
+        Event::assertNotDispatched(SubmissionDeleted::class);
+        $this->assertSame($result, true);
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        $submission->delete();
+
+        Event::assertDispatched(SubmissionDeleted::class);
+        $this->assertSame($result, true);
     }
 }

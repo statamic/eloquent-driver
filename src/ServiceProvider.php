@@ -57,6 +57,8 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
+        \Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
         \Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables::class,
         \Statamic\Eloquent\Updates\UpdateGlobalVariables::class,
     ];

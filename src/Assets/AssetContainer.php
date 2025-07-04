@@ -128,11 +128,6 @@ class AssetContainer extends FileEntry
         return true;
     }
 
-    public function folders($folder = '/', $recursive = false)
-    {
-        return $this->disk()->getFolders($folder, $recursive);
-    }
-
     public function metaFiles($folder = '/', $recursive = false)
     {
         // When requesting files() as-is, we want all of them.
