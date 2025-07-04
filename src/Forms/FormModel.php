@@ -10,7 +10,10 @@ class FormModel extends BaseModel
 
     protected $table = 'forms';
 
-    protected $casts = [
-        'settings' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'json',
+        ];
+    }
 }

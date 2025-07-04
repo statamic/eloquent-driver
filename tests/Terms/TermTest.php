@@ -3,14 +3,22 @@
 namespace Tests\Terms;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
+use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TermModel;
+use Statamic\Facades\Collection;
+use Statamic\Facades\Stache;
 use Statamic\Facades\Term as TermFacade;
+use Statamic\Statamic;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class TermTest extends TestCase
 {
+    use PreventsSavingStacheItemsToDisk;
     use RefreshDatabase;
 
     #[Test]
@@ -56,5 +64,45 @@ class TermTest extends TestCase
 
         $this->assertEquals(now(), $term->updated_at);
         $this->assertEquals(now(), TermFacade::query()->first()->updated_at);
+    }
+
+    #[Test]
+    public function it_gets_entry_count_for_term()
+    {
+        Taxonomy::make('test')->title('test')->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        $collection = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+
+        $this->assertEquals(2, TermFacade::entriesCount($term));
+    }
+
+    #[Test]
+    public function it_build_stache_associations_when_taxonomy_driver_is_not_eloquent()
+    {
+        config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
+
+        Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
+        Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
+
+        Taxonomy::make('test')->title('test')->save();
+
+        TermFacade::make('test-term')->taxonomy('test')->data([])->save();
+
+        $taxonomyStore = Stache::stores()->get('terms');
+        $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
+
+        $collection = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+
+        $this->assertCount(2, $taxonomyStore->store('test')->index('associations')->items());
     }
 }

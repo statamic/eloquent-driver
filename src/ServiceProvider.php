@@ -58,6 +58,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
         \Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
     ];
 
     public function boot()

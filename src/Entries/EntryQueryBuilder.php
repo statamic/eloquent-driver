@@ -9,6 +9,7 @@ use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Taxonomy;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -70,6 +71,23 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                                     $castType = 'datetime';
                                 } else {
                                     $castType = 'date';
+                                }
+
+                                // take range into account
+                                if ($blueprintField->get('mode') == 'range') {
+                                    $actualColumnStartDate = $grammar->wrap($this->column($column).'->start');
+                                    $actualColumnEndDate = $grammar->wrap($this->column($column).'->end');
+                                    if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                                        $this->builder
+                                            ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
+                                            ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
+                                    } else {
+                                        $this->builder
+                                            ->orderByRaw("cast({$actualColumnStartDate} as {$castType}) {$direction}")
+                                            ->orderByRaw("cast({$actualColumnEndDate} as {$castType}) {$direction}");
+                                    }
+
+                                    return $this;
                                 }
 
                                 // sqlite casts dates to year, which is pretty unhelpful
@@ -221,5 +239,57 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             ->where('column', 'collection')
             ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
             ->map(fn ($handle) => Collection::find($handle));
+    }
+
+    private function getKeysForTaxonomyWhereBasic($where)
+    {
+        $term = $where['value'];
+
+        [$taxonomy, $slug] = explode('::', $term);
+
+        if (! $taxonomy = Taxonomy::find($taxonomy)) {
+            return collect();
+        }
+
+        return app('statamic.eloquent.entries.model')::query()
+            ->select(['id'])
+            ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
+            ->whereJsonContains($this->column($taxonomy->handle()), $slug)
+            ->get()
+            ->pluck('id');
+    }
+
+    private function getKeysForTaxonomyWhereIn($where)
+    {
+        // Get the terms grouped by taxonomy.
+        // [tags::foo, categories::baz, tags::bar]
+        // becomes [tags => [foo, bar], categories => [baz]]
+        $taxonomies = collect($where['values'])
+            ->map(function ($value) {
+                [$taxonomy, $term] = explode('::', $value);
+
+                return compact('taxonomy', 'term');
+            })
+            ->groupBy->taxonomy
+            ->map(function ($group) {
+                return collect($group)->map->term;
+            });
+
+        return $taxonomies->flatMap(function ($terms, $taxonomy) {
+            if (! $taxonomy = Taxonomy::find($taxonomy)) {
+                return collect();
+            }
+
+            return app('statamic.eloquent.entries.model')::query()
+                ->select(['id'])
+                ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
+                ->where(function ($query) use ($taxonomy, $terms) {
+                    foreach ($terms as $term) {
+                        $query->orWhereJsonContains($this->column($taxonomy->handle()), $term);
+                    }
+                })
+                ->get()
+                ->pluck('id');
+        });
     }
 }

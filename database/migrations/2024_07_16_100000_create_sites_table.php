@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('locale');
             $table->string('lang');
             $table->jsonb('attributes');
+            $table->integer('order')->default(0)->index();
             $table->timestamps();
         });
     }
