@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Commands;
 
-use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
@@ -47,6 +46,16 @@ class ExportGlobals extends Command
      */
     public function handle()
     {
+        // ensure we are using stache globals, no matter what our config is
+        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+        app()->bind(GlobalSetContract::class, GlobalSet::class);
+
+        // ensure we are using stache variables, no matter what our config is
+        Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
+        app()->bind(VariablesContract::class, Variables::class);
+
         $this->exportGlobals();
         $this->exportGlobalVariables();
 
@@ -58,11 +67,6 @@ class ExportGlobals extends Command
         if (! $this->shouldExportGlobals()) {
             return;
         }
-
-        // ensure we are using stache globals, no matter what our config is
-        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
-        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
-        app()->bind(GlobalSetContract::class, GlobalSet::class);
 
         $sets = GlobalSetModel::all();
 
@@ -84,11 +88,6 @@ class ExportGlobals extends Command
             return;
         }
 
-        // ensure we are using stache variables, no matter what our config is
-        Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
-        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
-        app()->bind(VariablesContract::class, Variables::class);
-
         $variables = VariablesModel::all();
 
         $this->withProgressBar($variables, function ($model) {
@@ -96,7 +95,7 @@ class ExportGlobals extends Command
                 return;
             }
 
-            $globalVariable = $global->in($model->locale);
+            $globalVariable = $global->makeLocalization($model->locale);
             $globalVariable->data($model->data);
             $globalVariable->save();
         });
