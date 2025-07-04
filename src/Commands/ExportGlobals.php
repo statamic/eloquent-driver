@@ -28,7 +28,10 @@ class ExportGlobals extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-globals {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-globals
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-globals : Only export global sets}
+        {--only-variables : Only export global variables}';
 
     /**
      * The console command description.
@@ -44,33 +47,22 @@ class ExportGlobals extends Command
      */
     public function handle()
     {
-        $this->usingDefaultRepositories(function () {
-            $this->exportGlobals();
-            $this->exportGlobalVariables();
-        });
+        $this->exportGlobals();
+        $this->exportGlobalVariables();
 
         return 0;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
-    {
-        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
-        Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
-
-        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
-        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
-
-        app()->bind(GlobalSetContract::class, GlobalSet::class);
-        app()->bind(VariablesContract::class, Variables::class);
-
-        $callback();
-    }
-
     private function exportGlobals()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export global sets?')) {
+        if (! $this->shouldExportGlobals()) {
             return;
         }
+
+        // ensure we are using stache globals, no matter what our config is
+        Facade::clearResolvedInstance(GlobalRepositoryContract::class);
+        Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+        app()->bind(GlobalSetContract::class, GlobalSet::class);
 
         $sets = GlobalSetModel::all();
 
@@ -88,20 +80,20 @@ class ExportGlobals extends Command
 
     private function exportGlobalVariables()
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export global variables?')) {
+        if (! $this->shouldExportVariables()) {
             return;
         }
+
+        // ensure we are using stache variables, no matter what our config is
+        Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
+        Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
+        app()->bind(VariablesContract::class, Variables::class);
 
         $variables = VariablesModel::all();
 
         $this->withProgressBar($variables, function ($model) {
             if (! $global = GlobalSetFacade::find($model->handle)) {
-                $global = tap(
-                    GlobalSetFacade::make()
-                        ->handle($model->handle)
-                        ->title($model->handle)
-                )
-                    ->save();
+                return;
             }
 
             $globalVariable = $global->in($model->locale);
@@ -111,5 +103,19 @@ class ExportGlobals extends Command
 
         $this->newLine();
         $this->info('Global variables exported');
+    }
+
+    private function shouldExportGlobals(): bool
+    {
+        return $this->option('only-globals')
+            || ! $this->option('only-variables')
+            && ($this->option('force') || $this->confirm('Do you want to export global sets?'));
+    }
+
+    private function shouldExportVariables(): bool
+    {
+        return $this->option('only-variables')
+            || ! $this->option('only-globals')
+            && ($this->option('force') || $this->confirm('Do you want to export global variables?'));
     }
 }
