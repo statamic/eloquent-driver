@@ -78,6 +78,7 @@ class ExportGlobals extends Command
             GlobalSetFacade::make()
                 ->handle($model->handle)
                 ->title($model->title)
+                ->sites($model->sites)
                 ->save();
         });
 
@@ -104,11 +105,7 @@ class ExportGlobals extends Command
             }
 
             $globalVariable = $global->in($model->locale);
-
-            $globalVariable
-                ->data($localization->data)
-                ->origin($localization->origin ?? null);
-
+            $globalVariable->data($model->data);
             $globalVariable->save();
         });
 
