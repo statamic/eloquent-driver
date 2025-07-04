@@ -49,13 +49,6 @@ class Variables extends FileEntry
         return $this->globalSet()->in($origin);
     }
 
-    public function save()
-    {
-        $this->toModel()->save();
-
-        return $this;
-    }
-
     public function model($model = null)
     {
         if (func_num_args() === 0) {
