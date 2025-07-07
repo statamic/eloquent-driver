@@ -31,10 +31,6 @@ class Variables extends FileEntry
 
         $data = $source->data();
 
-        if ($source->hasOrigin()) {
-            $data = $source->origin()->data()->merge($data);
-        }
-
         return $class::firstOrNew([
             'handle' => $source->globalSet()->handle(),
             'locale' => $source->locale,
