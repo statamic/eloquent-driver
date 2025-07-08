@@ -177,7 +177,6 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2025_07_07_100000_create_addon_settings_table.php' => database_path('migrations/2025_07_07_100000_create_addon_settings_table.php'),
         ], 'statamic-eloquent-addon-setting-migrations');
 
-
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
