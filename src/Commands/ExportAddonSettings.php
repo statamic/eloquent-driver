@@ -37,10 +37,9 @@ class ExportAddonSettings extends Command
     {
         Statamic::repository(AddonSettingsRepositoryContract::class, FileAddonSettingsRepository::class);
 
-        AddonSettingsModel::all()
-            ->each(function ($model) {
-                Addon::get($model->addon)?->settings()->values($model->settings)->save();
-            });
+        AddonSettingsModel::all()->each(function ($model) {
+            Addon::get($model->addon)?->settings()->values($model->settings)->save();
+        });
 
         $this->newLine();
         $this->info('Addon settings exported');
