@@ -118,7 +118,7 @@ class ImportBlueprintsTest extends TestCase
             ],
         ])->save();
 
-        BlueprintFacade::make('contact')->setNamespace('assets')->setContents([
+        BlueprintFacade::make('images')->setNamespace('assets')->setContents([
             'fields' => [
                 ['handle' => 'title', 'field' => ['type' => 'text']],
                 ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
@@ -147,7 +147,7 @@ class ImportBlueprintsTest extends TestCase
             ],
         ])->save();
 
-        BlueprintFacade::make('contact')->setNamespace('assets')->setContents([
+        BlueprintFacade::make('images')->setNamespace('assets')->setContents([
             'fields' => [
                 ['handle' => 'title', 'field' => ['type' => 'text']],
                 ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
