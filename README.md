@@ -150,6 +150,22 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
 
 6. And that's it! Statamic will now read and write data to the new columns in the `entries` table, rather than the `data` column.
 
+### Selecting specific blueprint types for Eloquent
+
+By default, setting the driver for blueprints to `eloquent` will apply to *all* blueprints. However, if you only wish to move certain groups of blueprint over, you can do so by setting an array of namespaces, such as:
+
+```php
+// config/statamic/eloquent-driver.php
+
+'blueprints' => [
+    'driver' => 'eloquent',
+    'model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+    'namespaces' => ['forms', 'navigation'],
+],
+```
+
+The above example will set all forms and navigation blueprints to use eloquent, while keeping the rest as files.
+
 ## Upgrading
 
 After updating to a new version of the Eloquent Driver, please ensure you run `php artisan migrate` to update your database to the latest schema.
