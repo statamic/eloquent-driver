@@ -22,6 +22,7 @@ The command will also give you the opportunity to indicate whether you'd like ex
 
 If you originally opt-out of importing existing content, then later change your mind, you can import existing content by running the relevant commands:
 
+- Addon Settings: `php please eloquent:import-addon-settings`
 - Assets: `php please eloquent:import-assets`
 - Blueprints and Fieldsets: `php please eloquent:import-blueprints`
 - Collections: `php please eloquent:import-collections`
@@ -47,6 +48,7 @@ If your assets are being driven by the Eloquent Driver and you're managing your 
 
 If you wish to move back to flat-files, you may use the following commands to export your content out of the database:
 
+- Addon Settings: `php please eloquent:export-addon-settings`
 - Assets: `php please eloquent:export-assets`
 - Blueprints and Fieldsets: `php please eloquent:export-blueprints`
 - Collections: `php please eloquent:export-collections`
