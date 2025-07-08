@@ -107,6 +107,64 @@ class ImportBlueprintsTest extends TestCase
     }
 
     #[Test]
+    public function it_imports_only_the_configured_namespaces()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        BlueprintFacade::make('contact')->setNamespace('forms')->setContents([
+            'fields' => [
+                ['handle' => 'name', 'field' => ['type' => 'text']],
+                ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
+            ],
+        ])->save();
+
+        BlueprintFacade::make('contact')->setNamespace('assets')->setContents([
+            'fields' => [
+                ['handle' => 'title', 'field' => ['type' => 'text']],
+                ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
+            ],
+        ])->save();
+
+        $this->artisan('statamic:eloquent:import-blueprints')
+            ->expectsQuestion('Do you want to import blueprints?', true)
+            ->expectsQuestion('Do you want to import fieldsets?', false)
+            ->expectsOutputToContain('Blueprints imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, BlueprintModel::query()->where('namespace', 'forms')->get());
+        $this->assertCount(0, BlueprintModel::query()->where('namespace', 'assets')->get());
+    }
+
+    #[Test]
+    public function it_imports_everything_when_all_namespaces_flag_is_passed()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        BlueprintFacade::make('contact')->setNamespace('forms')->setContents([
+            'fields' => [
+                ['handle' => 'name', 'field' => ['type' => 'text']],
+                ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
+            ],
+        ])->save();
+
+        BlueprintFacade::make('contact')->setNamespace('assets')->setContents([
+            'fields' => [
+                ['handle' => 'title', 'field' => ['type' => 'text']],
+                ['handle' => 'email', 'field' => ['type' => 'text'], 'validate' => 'required'],
+            ],
+        ])->save();
+
+        $this->artisan('statamic:eloquent:import-blueprints', ['--all-blueprints' => true])
+            ->expectsQuestion('Do you want to import blueprints?', true)
+            ->expectsQuestion('Do you want to import fieldsets?', false)
+            ->expectsOutputToContain('Blueprints imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, BlueprintModel::query()->where('namespace', 'forms')->get());
+        $this->assertCount(1, BlueprintModel::query()->where('namespace', 'assets')->get());
+    }
+
+    #[Test]
     public function it_imports_fieldsets_with_console_question()
     {
         BlueprintFacade::make('user')->setContents([
