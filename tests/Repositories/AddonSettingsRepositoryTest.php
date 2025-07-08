@@ -37,7 +37,7 @@ class AddonSettingsRepositoryTest extends TestCase
 
         $this->assertInstanceOf(AddonSettings::class, $settings);
         $this->assertEquals($addon, $settings->addon());
-        $this->assertEquals(['foo' => 'bar', 'baz' => 'qux'], $settings->values()->all());
+        $this->assertEquals(['foo' => 'bar', 'baz' => 'qux'], $settings->values());
     }
 
     #[Test]

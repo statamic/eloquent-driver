@@ -27,7 +27,7 @@ class AddonSettings extends AbstractAddonSettings
         $class = app('statamic.eloquent.addon_settings.model');
 
         return $class::firstOrNew(['addon' => $settings->addon()->id()])->fill([
-            'settings' => $settings->values()->filter()->all(),
+            'settings' => array_filter($settings->rawValues()),
         ]);
     }
 

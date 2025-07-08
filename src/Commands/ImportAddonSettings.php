@@ -37,7 +37,7 @@ class ImportAddonSettings extends Command
         Addon::all()->each(function ($addon) {
             app('statamic.eloquent.addon_settings.model')::updateOrCreate(
                 ['addon' => $addon->id()],
-                ['settings' => $addon->settings()->values()->all()]
+                ['settings' => $addon->settings()->rawValues()]
             );
         });
 
