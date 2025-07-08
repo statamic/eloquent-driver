@@ -10,9 +10,9 @@ use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
 use Statamic\Extend\Addon;
 use Statamic\Extend\AddonSettings as FileAddonSettings;
 use Statamic\Extend\AddonSettingsRepository as FileAddonSettingsRepository;
+use Statamic\Facades;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
-use Statamic\Facades;
 
 class ImportAddonSettingsTest extends TestCase
 {
