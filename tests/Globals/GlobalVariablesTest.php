@@ -2,11 +2,8 @@
 
 namespace Globals;
 
-use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\VariablesModel;
-use Statamic\Events\GlobalSetSaved;
-use Statamic\Events\GlobalVariablesSaved;
 use Statamic\Facades;
 use Tests\TestCase;
 
