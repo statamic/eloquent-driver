@@ -28,6 +28,8 @@ class ImportAddonSettingsTest extends TestCase
         $this->app->bind('statamic.eloquent.addon_settings.model', function () {
             return AddonSettingsModel::class;
         });
+
+        $this->app['files']->deleteDirectory(resource_path('addons'));
     }
 
     #[Test]
@@ -59,6 +61,36 @@ class ImportAddonSettingsTest extends TestCase
         $this->assertDatabaseHas('addon_settings', [
             'addon' => 'statamic/importer',
             'settings' => json_encode(['chunk_size' => 100]),
+        ]);
+    }
+
+    #[Test]
+    public function it_doesnt_import_addons_without_settings()
+    {
+        $this->assertCount(0, AddonSettingsModel::all());
+
+        $seoPro = $this->makeFromPackage(['id' => 'statamic/seo-pro']);
+        Facades\Addon::shouldReceive('get')->with('statamic/seo-pro')->andReturn($seoPro);
+        app(AddonSettingsRepositoryContract::class)->make($seoPro, ['title' => 'SEO Title', 'description' => 'SEO Description'])->save();
+
+        $importer = $this->makeFromPackage(['id' => 'statamic/importer']);
+        Facades\Addon::shouldReceive('get')->with('statamic/importer')->andReturn($importer);
+
+        Facades\Addon::shouldReceive('all')->andReturn(collect([$seoPro, $importer]));
+
+        $this->artisan('statamic:eloquent:import-addon-settings')
+            ->expectsOutputToContain('Addon settings imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, AddonSettingsModel::all());
+
+        $this->assertDatabaseHas('addon_settings', [
+            'addon' => 'statamic/seo-pro',
+            'settings' => json_encode(['title' => 'SEO Title', 'description' => 'SEO Description']),
+        ]);
+
+        $this->assertDatabaseMissing('addon_settings', [
+            'addon' => 'statamic/importer',
         ]);
     }
 

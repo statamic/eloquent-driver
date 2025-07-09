@@ -34,12 +34,14 @@ class ImportAddonSettings extends Command
     {
         Statamic::repository(AddonSettingsRepositoryContract::class, FileAddonSettingsRepository::class);
 
-        Addon::all()->each(function ($addon) {
-            app('statamic.eloquent.addon_settings.model')::updateOrCreate(
-                ['addon' => $addon->id()],
-                ['settings' => $addon->settings()->rawValues()]
-            );
-        });
+        Addon::all()
+            ->filter(fn ($addon) => collect($addon->settings()->rawValues())->filter()->isNotEmpty())
+            ->each(function ($addon) {
+                app('statamic.eloquent.addon_settings.model')::updateOrCreate(
+                    ['addon' => $addon->id()],
+                    ['settings' => $addon->settings()->rawValues()]
+                );
+            });
 
         $this->components->info('Addon settings imported successfully.');
 
