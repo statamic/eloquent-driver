@@ -10,12 +10,15 @@ class Sites extends \Statamic\Sites\Sites
     protected function getSavedSites()
     {
         $class = app('statamic.eloquent.sites.model');
+        $table = (new $class)->getTable();
 
-        if (! Schema::hasTable((new $class)->getTable())) {
+        if (! Schema::hasTable($table)) {
             return $this->getFallbackConfig();
         }
 
-        $sites = app('statamic.eloquent.sites.model')::query()->orderBy('order')->get();
+        $sites = app('statamic.eloquent.sites.model')::query()
+            ->when(Schema::hasColumn($table, 'order'), fn($query) => $query->orderBy('order'))
+            ->get();
 
         return $sites->isEmpty() ? $this->getFallbackConfig() : $sites->mapWithKeys(function ($model) {
             return [
