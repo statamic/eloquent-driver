@@ -17,7 +17,7 @@ class Sites extends \Statamic\Sites\Sites
         }
 
         $sites = app('statamic.eloquent.sites.model')::query()
-            ->when(Schema::hasColumn($table, 'order'), fn($query) => $query->orderBy('order'))
+            ->when(Schema::hasColumn($table, 'order'), fn ($query) => $query->orderBy('order'))
             ->get();
 
         return $sites->isEmpty() ? $this->getFallbackConfig() : $sites->mapWithKeys(function ($model) {
