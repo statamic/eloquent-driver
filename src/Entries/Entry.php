@@ -16,7 +16,7 @@ class Entry extends FileEntry
     public static function fromModel(Model $model)
     {
         $data = isset($model->data['__localized_fields'])
-            ? collect($model->data['__localized_fields'])->mapWithKeys(fn($field) => [$field => $model->data[$field] ?? null])
+            ? collect($model->data['__localized_fields'])->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
             : $model->data;
 
         foreach ((new self)->getDataColumnMappings($model) as $key) {
