@@ -35,10 +35,6 @@ If you originally opt-out of importing existing content, then later change your 
 
 ### Assets
 
-#### Empty Folders
-
-If your assets are being driven by the Eloquent driver then the database is used as the source of truth for the folder listing, so if no file is present inside a folder then it will not be shown.
-
 #### Syncing
 
 If your assets are being driven by the Eloquent Driver and you're managing your assets outside of Statamic (eg. directly in the filesystem), you should run the `php please eloquent:sync-assets` command to add any missing files to the database, and remove files that no longer exist on the filesystem.
