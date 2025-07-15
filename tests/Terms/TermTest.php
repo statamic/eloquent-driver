@@ -105,4 +105,16 @@ class TermTest extends TestCase
 
         $this->assertCount(2, $taxonomyStore->store('test')->index('associations')->items());
     }
+
+    #[Test]
+    public function it_applies_taxonomy_wheres_using_pluck_count_and_get()
+    {
+        $taxonomy = tap(Taxonomy::make('test')->title('test'))->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        $this->assertSame(1, $taxonomy->queryTerms()->pluck('slug')->unique()->count());
+        $this->assertSame(1, $taxonomy->queryTerms()->count());
+        $this->assertSame($term->slug(), $taxonomy->queryTerms()->get()->pluck('slug')->first());
+    }
 }
