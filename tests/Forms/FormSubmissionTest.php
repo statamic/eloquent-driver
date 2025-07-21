@@ -5,7 +5,9 @@ namespace Tests\Forms;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Data\DataCollection;
 use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\Submission;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Events\SubmissionCreated;
 use Statamic\Events\SubmissionDeleted;
@@ -168,5 +170,20 @@ class FormSubmissionTest extends TestCase
 
         Event::assertDispatched(SubmissionDeleted::class);
         $this->assertSame($result, true);
+    }
+
+    #[Test]
+    public function querying_submissions_should_return_data_collections()
+    {
+        $form = Facades\Form::make('test');
+
+        $form->makeSubmission([
+            'name' => 'John Doe',
+        ])->save();
+
+        $submissions = $form->querySubmissions()->get();
+
+        $this->assertInstanceOf(DataCollection::class, $submissions);
+        $this->assertEveryItemIsInstanceOf(Submission::class, $submissions);
     }
 }
