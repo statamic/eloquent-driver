@@ -58,6 +58,8 @@ class AssetTest extends TestCase
 
         Storage::disk('test')->put('f.jpg', '');
         Facades\Asset::make()->container('test')->path('f.jpg')->save();
+
+        Storage::disk('test')->put('test-folder/test.jpg', '');
     }
 
     #[Test]
