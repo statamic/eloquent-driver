@@ -229,9 +229,13 @@ class AssetTest extends TestCase
 
         $asset = $this->container->makeAsset('a.jpg');
 
+        $model = $asset->model(); // it should find the existing model meta
+        $this->assertNotNull($model);
+
         $asset->save();
 
         $this->assertNotNull($asset->model());
+        $this->assertSame($model, $asset->model());
 
         Event::assertDispatched(AssetSaved::class, fn ($event) => $event->asset === $asset);
 
