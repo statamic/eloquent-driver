@@ -74,7 +74,6 @@ class AssetTest extends TestCase
             'extension' => 'jpg',
             'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
         ]);
-        $model->save();
 
         $asset = (new Asset)->fromModel($model);
 
@@ -85,10 +84,26 @@ class AssetTest extends TestCase
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
         $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+    }
+
+    #[Test]
+    public function it_loads_from_an_existing_model_outside_the_query_builder()
+    {
+        $model = new AssetModel([
+            'container' => 'test',
+            'path' => 'test-folder/test.jpg',
+            'folder' => 'test-folder',
+            'basename' => 'test.jpg',
+            'filename' => 'test',
+            'extension' => 'jpg',
+            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+        ]);
+
+        $model->save();
 
         $asset = $this->container->asset($model->path);
 
-        $this->assertSame($model->id, $asset->model()->id);
+        $this->assertSame($model->getKey(), $asset->model()->getKey());
         $this->assertSame('test-folder/test.jpg', $asset->path());
         $this->assertSame('test-folder', $asset->folder());
         $this->assertSame('test.jpg', $asset->basename());
