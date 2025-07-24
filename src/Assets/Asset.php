@@ -173,6 +173,18 @@ class Asset extends FileAsset
     public function model($model = null)
     {
         if (func_num_args() === 0) {
+            if ($this->model) {
+                return $this->model;
+            }
+
+            $this->model = app('statamic.eloquent.assets.model')::query()
+                ->where([
+                    'container' => $this->containerHandle(),
+                    'folder' => $this->folder(),
+                    'basename' => $this->basename(),
+                ])
+                ->first();
+
             return $this->model;
         }
 
