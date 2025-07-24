@@ -83,7 +83,7 @@ class AssetTest extends TestCase
         $this->assertSame('jpg', $asset->extension());
         $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
 
-        $asset = $this->container->makeAsset($model->path);
+        $asset = $this->container->asset($model->path);
 
         $this->assertSame($model, $asset->model());
         $this->assertSame('test-folder/test.jpg', $asset->path());
