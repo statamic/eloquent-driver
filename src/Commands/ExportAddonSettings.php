@@ -3,10 +3,10 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Statamic\Addons\FileSettingsRepository;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Extend\AddonSettingsRepository as AddonSettingsRepositoryContract;
+use Statamic\Contracts\Addons\SettingsRepository as SettingsRepositoryContract;
 use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
-use Statamic\Extend\AddonSettingsRepository as FileAddonSettingsRepository;
 use Statamic\Facades\Addon;
 use Statamic\Statamic;
 
@@ -35,10 +35,10 @@ class ExportAddonSettings extends Command
      */
     public function handle()
     {
-        Statamic::repository(AddonSettingsRepositoryContract::class, FileAddonSettingsRepository::class);
+        Statamic::repository(SettingsRepositoryContract::class, FileSettingsRepository::class);
 
         AddonSettingsModel::all()->each(function ($model) {
-            Addon::get($model->addon)?->settings()->values($model->settings)->save();
+            Addon::get($model->addon)?->settings()->set($model->settings)->save();
         });
 
         $this->newLine();

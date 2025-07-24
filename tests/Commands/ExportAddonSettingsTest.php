@@ -6,8 +6,8 @@ use Foo\Bar\TestAddonServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Addons\Addon;
 use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
-use Statamic\Extend\Addon;
 use Statamic\Facades;
 use Tests\TestCase;
 

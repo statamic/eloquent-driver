@@ -4,11 +4,11 @@ namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
 use Statamic\Assets\AssetContainerContents;
+use Statamic\Contracts\Addons\SettingsRepository as AddonSettingsRepositoryContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Contracts\Extend\AddonSettingsRepository as AddonSettingsRepositoryContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\SubmissionRepository as FormSubmissionRepositoryContract;
 use Statamic\Contracts\Globals\GlobalRepository as GlobalRepositoryContract;

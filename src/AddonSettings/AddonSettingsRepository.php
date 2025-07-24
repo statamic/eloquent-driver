@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\AddonSettings;
 
-use Statamic\Contracts\Extend\AddonSettings as AddonSettingsContract;
-use Statamic\Extend\AddonSettingsRepository as FileAddonSettingsRepository;
+use Statamic\Addons\SettingsRepository as FileSettingsRepository;
+use Statamic\Contracts\Addons\Settings as AddonSettingsContract;
 
-class AddonSettingsRepository extends FileAddonSettingsRepository
+class AddonSettingsRepository extends FileSettingsRepository
 {
     public function find(string $addon): ?AddonSettingsContract
     {

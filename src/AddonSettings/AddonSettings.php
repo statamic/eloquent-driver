@@ -3,10 +3,10 @@
 namespace Statamic\Eloquent\AddonSettings;
 
 use Illuminate\Database\Eloquent\Model;
-use Statamic\Extend\AddonSettings as AbstractAddonSettings;
+use Statamic\Addons\Settings as AbstractSettings;
 use Statamic\Facades\Addon;
 
-class AddonSettings extends AbstractAddonSettings
+class AddonSettings extends AbstractSettings
 {
     protected $model;
 
@@ -22,12 +22,12 @@ class AddonSettings extends AbstractAddonSettings
         return self::makeModelFromContract($this);
     }
 
-    public static function makeModelFromContract(AbstractAddonSettings $settings)
+    public static function makeModelFromContract(AbstractSettings $settings)
     {
         $class = app('statamic.eloquent.addon_settings.model');
 
         return $class::firstOrNew(['addon' => $settings->addon()->id()])->fill([
-            'settings' => array_filter($settings->rawValues()),
+            'settings' => array_filter($settings->raw()),
         ]);
     }
 

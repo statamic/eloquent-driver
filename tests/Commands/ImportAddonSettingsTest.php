@@ -4,12 +4,12 @@ namespace Tests\Commands;
 
 use Foo\Bar\TestAddonServiceProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Statamic\Contracts\Extend\AddonSettings as AddonSettingsContract;
-use Statamic\Contracts\Extend\AddonSettingsRepository as AddonSettingsRepositoryContract;
+use Statamic\Addons\Addon;
+use Statamic\Addons\FileSettings;
+use Statamic\Addons\FileSettingsRepository;
+use Statamic\Contracts\Addons\Settings as SettingsContract;
+use Statamic\Contracts\Addons\SettingsRepository as SettingsRepositoryContract;
 use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
-use Statamic\Extend\Addon;
-use Statamic\Extend\AddonSettings as FileAddonSettings;
-use Statamic\Extend\AddonSettingsRepository as FileAddonSettingsRepository;
 use Statamic\Facades;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
@@ -22,8 +22,8 @@ class ImportAddonSettingsTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->bind(AddonSettingsContract::class, FileAddonSettings::class);
-        $this->app->bind(AddonSettingsRepositoryContract::class, FileAddonSettingsRepository::class);
+        $this->app->bind(SettingsContract::class, FileSettings::class);
+        $this->app->bind(SettingsRepositoryContract::class, FileSettingsRepository::class);
 
         $this->app->bind('statamic.eloquent.addon_settings.model', function () {
             return AddonSettingsModel::class;
@@ -39,11 +39,11 @@ class ImportAddonSettingsTest extends TestCase
 
         $seoPro = $this->makeFromPackage(['id' => 'statamic/seo-pro']);
         Facades\Addon::shouldReceive('get')->with('statamic/seo-pro')->andReturn($seoPro);
-        app(AddonSettingsRepositoryContract::class)->make($seoPro, ['title' => 'SEO Title', 'description' => 'SEO Description'])->save();
+        app(SettingsRepositoryContract::class)->make($seoPro, ['title' => 'SEO Title', 'description' => 'SEO Description'])->save();
 
         $importer = $this->makeFromPackage(['id' => 'statamic/importer']);
         Facades\Addon::shouldReceive('get')->with('statamic/importer')->andReturn($importer);
-        app(AddonSettingsRepositoryContract::class)->make($importer, ['chunk_size' => 100])->save();
+        app(SettingsRepositoryContract::class)->make($importer, ['chunk_size' => 100])->save();
 
         Facades\Addon::shouldReceive('all')->andReturn(collect([$seoPro, $importer]));
 
@@ -71,7 +71,7 @@ class ImportAddonSettingsTest extends TestCase
 
         $seoPro = $this->makeFromPackage(['id' => 'statamic/seo-pro']);
         Facades\Addon::shouldReceive('get')->with('statamic/seo-pro')->andReturn($seoPro);
-        app(AddonSettingsRepositoryContract::class)->make($seoPro, ['title' => 'SEO Title', 'description' => 'SEO Description'])->save();
+        app(SettingsRepositoryContract::class)->make($seoPro, ['title' => 'SEO Title', 'description' => 'SEO Description'])->save();
 
         $importer = $this->makeFromPackage(['id' => 'statamic/importer']);
         Facades\Addon::shouldReceive('get')->with('statamic/importer')->andReturn($importer);

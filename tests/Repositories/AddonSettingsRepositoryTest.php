@@ -5,10 +5,10 @@ namespace Tests\Repositories;
 use Foo\Bar\TestAddonServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Addons\Addon;
 use Statamic\Eloquent\AddonSettings\AddonSettings;
 use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
 use Statamic\Eloquent\AddonSettings\AddonSettingsRepository;
-use Statamic\Extend\Addon;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -37,7 +37,7 @@ class AddonSettingsRepositoryTest extends TestCase
 
         $this->assertInstanceOf(AddonSettings::class, $settings);
         $this->assertEquals($addon, $settings->addon());
-        $this->assertEquals(['foo' => 'bar', 'baz' => 'qux'], $settings->values());
+        $this->assertEquals(['foo' => 'bar', 'baz' => 'qux'], $settings->all());
     }
 
     #[Test]

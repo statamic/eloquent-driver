@@ -3,9 +3,9 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Statamic\Addons\FileSettingsRepository;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Extend\AddonSettingsRepository as AddonSettingsRepositoryContract;
-use Statamic\Extend\AddonSettingsRepository as FileAddonSettingsRepository;
+use Statamic\Contracts\Addons\SettingsRepository as SettingsRepositoryContract;
 use Statamic\Facades\Addon;
 use Statamic\Statamic;
 
@@ -32,14 +32,14 @@ class ImportAddonSettings extends Command
      */
     public function handle(): int
     {
-        Statamic::repository(AddonSettingsRepositoryContract::class, FileAddonSettingsRepository::class);
+        Statamic::repository(SettingsRepositoryContract::class, FileSettingsRepository::class);
 
         Addon::all()
-            ->filter(fn ($addon) => collect($addon->settings()->rawValues())->filter()->isNotEmpty())
+            ->filter(fn ($addon) => collect($addon->settings()->raw())->filter()->isNotEmpty())
             ->each(function ($addon) {
                 app('statamic.eloquent.addon_settings.model')::updateOrCreate(
                     ['addon' => $addon->id()],
-                    ['settings' => $addon->settings()->rawValues()]
+                    ['settings' => $addon->settings()->raw()]
                 );
             });
 
