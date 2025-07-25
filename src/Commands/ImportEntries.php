@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
+use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Entry;
 use Statamic\Stache\Repositories\EntryRepository;
 use Statamic\Statamic;
@@ -63,7 +64,7 @@ class ImportEntries extends Command
         $this->withProgressBar($entriesWithoutOrigin, function ($entry) {
             $lastModified = $entry->fileLastModified();
 
-            app('statamic.eloquent.entries.entry')::makeModelFromContract($entry)
+            (app()->has('statamic.eloquent.entries.entry') ? app('statamic.eloquent.entries.entry') : EloquentEntry)::makeModelFromContract($entry)
                 ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                 ->save();
         });
@@ -74,7 +75,7 @@ class ImportEntries extends Command
             $this->withProgressBar($entriesWithOrigin, function ($entry) {
                 $lastModified = $entry->fileLastModified();
 
-                app('statamic.eloquent.entries.entry')::makeModelFromContract($entry)
+                (app()->has('statamic.eloquent.entries.entry') ? app('statamic.eloquent.entries.entry') : EloquentEntry)::makeModelFromContract($entry)
                     ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                     ->save();
             });
