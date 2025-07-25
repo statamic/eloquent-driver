@@ -5,12 +5,8 @@ namespace Statamic\Eloquent\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
-use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
-use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\EntryRepository as EntryRepositoryContract;
-use Statamic\Eloquent\Entries\Entry as EloquentEntry;
 use Statamic\Facades\Entry;
-use Statamic\Stache\Repositories\CollectionRepository;
 use Statamic\Stache\Repositories\EntryRepository;
 use Statamic\Statamic;
 
@@ -47,12 +43,8 @@ class ImportEntries extends Command
     private function useDefaultRepositories(): void
     {
         Facade::clearResolvedInstance(EntryRepositoryContract::class);
-        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
-        Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-
-        app()->bind(EntryContract::class, app('statamic.eloquent.entries.entry'));
     }
 
     private function importEntries(): void
@@ -71,7 +63,7 @@ class ImportEntries extends Command
         $this->withProgressBar($entriesWithoutOrigin, function ($entry) {
             $lastModified = $entry->fileLastModified();
 
-            $entry = EloquentEntry::makeModelFromContract($entry)
+            app('statamic.eloquent.entries.entry')::makeModelFromContract($entry)
                 ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                 ->save();
         });
@@ -82,7 +74,7 @@ class ImportEntries extends Command
             $this->withProgressBar($entriesWithOrigin, function ($entry) {
                 $lastModified = $entry->fileLastModified();
 
-                EloquentEntry::makeModelFromContract($entry)
+                app('statamic.eloquent.entries.entry')::makeModelFromContract($entry)
                     ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
                     ->save();
             });
