@@ -7,7 +7,7 @@ use Statamic\Eloquent\Database\BaseMigration as Migration;
 return new class extends Migration {
     public function up()
     {
-        if (Schema::hasIndex($this->prefix('entries'), 'date')) {
+        if (Schema::hasIndex($this->prefix('entries'), ['date'])) {
             return;
         }
 
@@ -18,7 +18,7 @@ return new class extends Migration {
 
     public function down()
     {
-        if (! Schema::hasIndex($this->prefix('entries'), 'date')) {
+        if (! Schema::hasIndex($this->prefix('entries'), ['date'])) {
             return;
         }
 
