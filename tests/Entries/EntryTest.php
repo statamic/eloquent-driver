@@ -195,7 +195,7 @@ class EntryTest extends TestCase
                 'roo' => 'rar',
             ]);
 
-        $return = $entry->save();
+        $entry->save();
 
         $this->assertNull($entry->descendants()->get('fr')->model()->data['too'] ?? null);
         $this->assertNull($entry->descendants()->get('de')->model()->data['too'] ?? null);
