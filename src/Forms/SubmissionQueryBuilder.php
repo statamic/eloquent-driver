@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Forms;
 
 use Statamic\Contracts\Forms\SubmissionQueryBuilder as BuilderContract;
+use Statamic\Data\DataCollection;
 use Statamic\Facades\Form;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Support\Str;
@@ -34,7 +35,7 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
 
     protected function transform($items, $columns = [])
     {
-        return $items->map(function ($model) {
+        return DataCollection::make($items)->map(function ($model) {
             return Submission::fromModel($model)
                 ->form(Form::find($model->form));
         });

@@ -251,6 +251,43 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_localizes_null_fields()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+            'es' => ['name' => 'Spanish', 'locale' => 'es_ES', 'url' => 'http://test.com/es/'],
+            'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'text', 'localizable' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'fr', 'es', 'de'])
+            ->save();
+
+        $entry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->data(['foo' => 'bar']);
+
+        $entry->save();
+        $entry->descendants()->get('fr')->data(['foo' => null])->save();
+        $entry->descendants()->get('es')->data(['foo' => 'baz'])->save();
+
+        $this->assertNull($entry->descendants()->get('fr')->foo ?? null);
+        $this->assertEquals('bar', $entry->descendants()->get('de')->foo ?? null);
+        $this->assertEquals('baz', $entry->descendants()->get('es')->foo ?? null);
+    }
+
+    #[Test]
     public function it_stores_and_retrieves_mapped_data_values()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);

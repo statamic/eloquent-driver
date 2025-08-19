@@ -58,6 +58,8 @@ class AssetTest extends TestCase
 
         Storage::disk('test')->put('f.jpg', '');
         Facades\Asset::make()->container('test')->path('f.jpg')->save();
+
+        Storage::disk('test')->put('test-folder/test.jpg', '');
     }
 
     #[Test]
@@ -70,7 +72,7 @@ class AssetTest extends TestCase
             'basename' => 'test.jpg',
             'filename' => 'test',
             'extension' => 'jpg',
-            'meta' => ['width' => 100, 'height' => 100, 'data' => []],
+            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
         ]);
 
         $asset = (new Asset)->fromModel($model);
@@ -81,7 +83,33 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertSame(['width' => 100, 'height' => 100, 'data' => []], $asset->meta());
+        $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+    }
+
+    #[Test]
+    public function it_loads_from_an_existing_model_outside_the_query_builder()
+    {
+        $model = new AssetModel([
+            'container' => 'test',
+            'path' => 'test-folder/test.jpg',
+            'folder' => 'test-folder',
+            'basename' => 'test.jpg',
+            'filename' => 'test',
+            'extension' => 'jpg',
+            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+        ]);
+
+        $model->save();
+
+        $asset = $this->container->asset($model->path);
+
+        $this->assertSame($model->getKey(), $asset->model()->getKey());
+        $this->assertSame('test-folder/test.jpg', $asset->path());
+        $this->assertSame('test-folder', $asset->folder());
+        $this->assertSame('test.jpg', $asset->basename());
+        $this->assertSame('test', $asset->filename());
+        $this->assertSame('jpg', $asset->extension());
+        $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
     }
 
     #[Test]
@@ -216,11 +244,13 @@ class AssetTest extends TestCase
 
         $asset = $this->container->makeAsset('a.jpg');
 
-        $this->assertNull($asset->model());
+        $model = $asset->model(); // it should find the existing model meta
+        $this->assertNotNull($model);
 
         $asset->save();
 
         $this->assertNotNull($asset->model());
+        $this->assertSame($model, $asset->model());
 
         Event::assertDispatched(AssetSaved::class, fn ($event) => $event->asset === $asset);
 
