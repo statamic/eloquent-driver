@@ -2,10 +2,10 @@
 
 namespace Statamic\Eloquent\Assets;
 
+use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
 use Statamic\Assets\AssetCollection;
 use Statamic\Contracts\Assets\QueryBuilder;
-use Statamic\Facades\Collection;
 use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
 
@@ -23,77 +23,26 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         $actualColumn = $this->column($column);
 
-        if (Str::contains($actualColumn, 'meta->')) {
-            $wheres = collect($this->builder->getQuery()->wheres);
+        if (
+            Str::contains($actualColumn, 'meta->')
+            && $metaColumnCast = $this->getMetaColumnCasts()->get($column)
+        ) {
+            $grammar = $this->builder->getConnection()->getQueryGrammar();
+            $actualColumn = $grammar->wrap($actualColumn);
 
-            if ($wheres->where('column', 'container')->count() == 1) {
-                $containerWhere = $wheres->firstWhere('column', 'container');
-                if (isset($containerWhere['values']) && count($containerWhere['values']) == 1) {
-                    $containerWhere['value'] = $containerWhere['values'][0];
-                }
+            // SQLite casts dates to year, which is pretty unhelpful.
+            if (
+                in_array($metaColumnCast['cast'], ['date', 'datetime'])
+                && Str::contains(get_class($grammar), 'SQLiteGrammar')
+            ) {
+                $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
 
-                if (isset($containerWhere['value'])) {
-                    // todo: the entryquerybuilder expects value to be a string, but here it seems to be an AssetContainer instance
-                    if ($container = $containerWhere['value']) {
-                        $blueprintField = $container->blueprint()->fields()->all()
-                            ->filter(fn ($field) => in_array($field->type(), ['float', 'integer', 'date']))
-                            ->filter()
-                            ->merge(['size' => new Field('size', ['type' => 'integer'])])
-                            ->get($column);
-
-                        if ($blueprintField) {
-                            $castType = '';
-                            $fieldType = $blueprintField->type();
-
-                            $grammar = $this->builder->getConnection()->getQueryGrammar();
-                            $actualColumn = $grammar->wrap($actualColumn);
-
-                            if (in_array($fieldType, ['float'])) {
-                                $castType = 'float';
-                            } elseif (in_array($fieldType, ['integer'])) {
-                                $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
-                            } elseif (in_array($fieldType, ['date'])) {
-                                // Take time into account when enabled
-                                if ($blueprintField->get('time_enabled')) {
-                                    $castType = 'datetime';
-                                } else {
-                                    $castType = 'date';
-                                }
-
-                                // take range into account
-                                if ($blueprintField->get('mode') == 'range') {
-                                    $actualColumnStartDate = $grammar->wrap($this->column($column).'->start');
-                                    $actualColumnEndDate = $grammar->wrap($this->column($column).'->end');
-                                    if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                                        $this->builder
-                                            ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
-                                            ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
-                                    } else {
-                                        $this->builder
-                                            ->orderByRaw("cast({$actualColumnStartDate} as {$castType}) {$direction}")
-                                            ->orderByRaw("cast({$actualColumnEndDate} as {$castType}) {$direction}");
-                                    }
-
-                                    return $this;
-                                }
-
-                                // sqlite casts dates to year, which is pretty unhelpful
-                                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                                    $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
-
-                                    return $this;
-                                }
-                            }
-
-                            if ($castType) {
-                                $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
-
-                                return $this;
-                            }
-                        }
-                    }
-                }
+                return $this;
             }
+
+            $this->builder->orderByRaw("cast({$actualColumn} as {$metaColumnCast['cast']}) {$direction}");
+
+            return $this;
         }
 
         parent::orderBy($column, $direction);
@@ -123,5 +72,65 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function with($relations, $callback = null)
     {
         return $this;
+    }
+
+    private function getMetaColumnCasts(): IlluminateCollection
+    {
+        $grammar = $this->builder->getConnection()->getQueryGrammar();
+
+        $wheres = collect($this->builder->getQuery()->wheres);
+        $containerWhere = $wheres->firstWhere('column', 'container');
+
+        if (! $containerWhere || ! isset($containerWhere['value'])) {
+            return [];
+        }
+
+        $container = $containerWhere['value'];
+
+        return $container->blueprint()->fields()->all()
+            ->filter(fn (Field $field) => in_array($field->type(), ['float', 'integer', 'date']))
+            ->filter()
+            ->map(function (Field $field) use ($grammar) {
+                $cast = null;
+
+                if ($field->type() === 'float') {
+                    $cast = 'float';
+                }
+
+                if ($field->type() === 'integer') {
+                    $cast = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
+                }
+
+                if ($field->type() === 'date') {
+                    $cast = $field->get('time_enabled') ? 'datetime' : 'date';
+
+                    if ($field->get('mode') === 'range') {
+                        $columnWithoutTheJsonBit = Str::after($field->handle(), '->');
+
+                        $actualColumnStartDate = $grammar->wrap($this->column($columnWithoutTheJsonBit).'->start');
+                        $actualColumnEndDate = $grammar->wrap($this->column($columnWithoutTheJsonBit).'->end');
+
+                    }
+
+                    //                    if ($field->get('mode') === 'range') {
+                    //                        if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                    //                            $this->builder
+                    //                                ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
+                    //                                ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
+                    //                        } else {
+                    //                            $this->builder
+                    //                                ->orderByRaw("cast({$actualColumnStartDate} as {$castType}) {$direction}")
+                    //                                ->orderByRaw("cast({$actualColumnEndDate} as {$castType}) {$direction}");
+                    //                        }
+                    //
+                    //                        return $this;
+                    //                    }
+
+                    return [
+                        'column' => $field->handle(),
+                        'cast' => $cast,
+                    ];
+                }
+            });
     }
 }
