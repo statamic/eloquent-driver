@@ -2,14 +2,14 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Statamic\Facades;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Statamic\Assets\AssetCollection;
+use Statamic\Contracts\Assets\AssetContainer;
 use Statamic\Contracts\Assets\QueryBuilder;
+use Statamic\Facades;
 use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
-use Statamic\Contracts\Assets\AssetContainer;
 
 class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
