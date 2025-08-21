@@ -58,7 +58,7 @@ trait QueriesJsonColumns
         return $this;
     }
 
-    abstract protected function column($column): string;
+    abstract protected function column($column);
 
     abstract protected function getJsonCasts(): Collection;
 

@@ -23,7 +23,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'size', 'width', 'height', 'duration', 'mime_type', 'last_modified',
     ];
 
-    protected function column($column): string
+    protected function column($column)
     {
         if (in_array($column, self::META_COLUMNS)) {
             $column = 'meta->'.$column;
