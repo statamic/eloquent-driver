@@ -13,6 +13,8 @@ use Statamic\Query\EloquentQueryBuilder;
 
 class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
+    use QueriesJsonColumns;
+
     const COLUMNS = [
         'id', 'container', 'folder', 'basename', 'filename', 'extension', 'path', 'created_at', 'updated_at',
     ];
@@ -21,57 +23,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'size', 'width', 'height', 'duration', 'mime_type', 'last_modified',
     ];
 
-    public function orderBy($column, $direction = 'asc')
-    {
-        $actualColumn = $this->column($column);
-
-        if (
-            Str::contains($actualColumn, 'meta->')
-            && $metaColumnCast = $this->getMetaColumnCasts()->get($column)
-        ) {
-            $grammar = $this->builder->getConnection()->getQueryGrammar();
-            $wrappedColumn = $grammar->wrap($actualColumn);
-
-            if (Str::contains($metaColumnCast, 'range_')) {
-                $metaColumnCast = Str::after($metaColumnCast, 'range_');
-
-                $wrappedStartDateColumn = $grammar->wrap("{$actualColumn}->start");
-                $wrappedEndDateColumn = $grammar->wrap("{$actualColumn}->end");
-
-                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                    $this->builder
-                        ->orderByRaw("datetime({$wrappedStartDateColumn}) {$direction}")
-                        ->orderByRaw("datetime({$wrappedEndDateColumn}) {$direction}");
-                } else {
-                    $this->builder
-                        ->orderByRaw("cast({$wrappedStartDateColumn} as {$metaColumnCast}) {$direction}")
-                        ->orderByRaw("cast({$wrappedEndDateColumn} as {$metaColumnCast}) {$direction}");
-                }
-
-                return $this;
-            }
-
-            // SQLite casts dates to year, which is pretty unhelpful.
-            if (
-                in_array($metaColumnCast, ['date', 'datetime'])
-                && Str::contains(get_class($grammar), 'SQLiteGrammar')
-            ) {
-                $this->builder->orderByRaw("datetime({$wrappedColumn}) {$direction}");
-
-                return $this;
-            }
-
-            $this->builder->orderByRaw("cast({$wrappedColumn} as {$metaColumnCast}) {$direction}");
-
-            return $this;
-        }
-
-        parent::orderBy($column, $direction);
-
-        return $this;
-    }
-
-    protected function column($column)
+    protected function column($column): string
     {
         if (in_array($column, self::META_COLUMNS)) {
             $column = 'meta->'.$column;
@@ -95,7 +47,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return $this;
     }
 
-    private function getMetaColumnCasts(): Collection
+    protected function getMetaColumnCasts(): Collection
     {
         $wheres = collect($this->builder->getQuery()->wheres);
         $containerWhere = $wheres->firstWhere('column', 'container');
