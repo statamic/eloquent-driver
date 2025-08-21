@@ -30,22 +30,22 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             && $metaColumnCast = $this->getMetaColumnCasts()->get($column)
         ) {
             $grammar = $this->builder->getConnection()->getQueryGrammar();
-            $actualColumn = $grammar->wrap($actualColumn);
+            $wrappedColumn = $grammar->wrap($actualColumn);
 
             if (Str::contains($metaColumnCast, 'range_')) {
                 $metaColumnCast = Str::after($metaColumnCast, 'range_');
 
-                $actualColumnStartDate = $actualColumn.'->start';
-                $actualColumnEndDate = $actualColumn.'->end';
+                $wrappedStartDateColumn = $grammar->wrap("{$actualColumn}->start");
+                $wrappedEndDateColumn = $grammar->wrap("{$actualColumn}->end");
 
                 if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
                     $this->builder
-                        ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
-                        ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
+                        ->orderByRaw("datetime({$wrappedStartDateColumn}) {$direction}")
+                        ->orderByRaw("datetime({$wrappedEndDateColumn}) {$direction}");
                 } else {
                     $this->builder
-                        ->orderByRaw("cast({$actualColumnStartDate} as {$metaColumnCast}) {$direction}")
-                        ->orderByRaw("cast({$actualColumnEndDate} as {$metaColumnCast}) {$direction}");
+                        ->orderByRaw("cast({$wrappedStartDateColumn} as {$metaColumnCast}) {$direction}")
+                        ->orderByRaw("cast({$wrappedEndDateColumn} as {$metaColumnCast}) {$direction}");
                 }
 
                 return $this;
@@ -56,12 +56,12 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                 in_array($metaColumnCast, ['date', 'datetime'])
                 && Str::contains(get_class($grammar), 'SQLiteGrammar')
             ) {
-                $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
+                $this->builder->orderByRaw("datetime({$wrappedColumn}) {$direction}");
 
                 return $this;
             }
 
-            $this->builder->orderByRaw("cast({$actualColumn} as {$metaColumnCast}) {$direction}");
+            $this->builder->orderByRaw("cast({$wrappedColumn} as {$metaColumnCast}) {$direction}");
 
             return $this;
         }
