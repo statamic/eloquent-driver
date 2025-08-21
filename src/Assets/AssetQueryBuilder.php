@@ -2,12 +2,14 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Illuminate\Support\Collection as IlluminateCollection;
+use Statamic\Facades;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Statamic\Assets\AssetCollection;
 use Statamic\Contracts\Assets\QueryBuilder;
 use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
+use Statamic\Contracts\Assets\AssetContainer;
 
 class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
@@ -30,9 +32,28 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $grammar = $this->builder->getConnection()->getQueryGrammar();
             $actualColumn = $grammar->wrap($actualColumn);
 
+            if (Str::contains($metaColumnCast, 'range_')) {
+                $metaColumnCast = Str::after($metaColumnCast, 'range_');
+
+                $actualColumnStartDate = $actualColumn.'->start';
+                $actualColumnEndDate = $actualColumn.'->end';
+
+                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
+                    $this->builder
+                        ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
+                        ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
+                } else {
+                    $this->builder
+                        ->orderByRaw("cast({$actualColumnStartDate} as {$metaColumnCast}) {$direction}")
+                        ->orderByRaw("cast({$actualColumnEndDate} as {$metaColumnCast}) {$direction}");
+                }
+
+                return $this;
+            }
+
             // SQLite casts dates to year, which is pretty unhelpful.
             if (
-                in_array($metaColumnCast['cast'], ['date', 'datetime'])
+                in_array($metaColumnCast, ['date', 'datetime'])
                 && Str::contains(get_class($grammar), 'SQLiteGrammar')
             ) {
                 $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
@@ -40,7 +61,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                 return $this;
             }
 
-            $this->builder->orderByRaw("cast({$actualColumn} as {$metaColumnCast['cast']}) {$direction}");
+            $this->builder->orderByRaw("cast({$actualColumn} as {$metaColumnCast}) {$direction}");
 
             return $this;
         }
@@ -74,10 +95,8 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return $this;
     }
 
-    private function getMetaColumnCasts(): IlluminateCollection
+    private function getMetaColumnCasts(): Collection
     {
-        $grammar = $this->builder->getConnection()->getQueryGrammar();
-
         $wheres = collect($this->builder->getQuery()->wheres);
         $containerWhere = $wheres->firstWhere('column', 'container');
 
@@ -87,50 +106,34 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         $container = $containerWhere['value'];
 
+        if (! $container instanceof AssetContainer) {
+            $container = Facades\AssetContainer::find($container);
+        }
+
         return $container->blueprint()->fields()->all()
             ->filter(fn (Field $field) => in_array($field->type(), ['float', 'integer', 'date']))
             ->filter()
-            ->map(function (Field $field) use ($grammar) {
-                $cast = null;
+            ->map(function (Field $field): ?string {
+                $cast = match (true) {
+                    $field->type() === 'float' => 'float',
+                    $field->type() === 'integer' => 'float', // A bit sneaky, but MySQL doesn't support casting as integer, it wants unsigned.
+                    $field->type() === 'date' => $field->get('time_enabled') ? 'datetime' : 'date',
+                    default => null,
+                };
 
-                if ($field->type() === 'float') {
-                    $cast = 'float';
+                // Date Ranges are dealt with a little bit differently.
+                if ($field->type() === 'date' && $field->get('mode') === 'range') {
+                    $cast = "range_{$cast}";
                 }
 
-                if ($field->type() === 'integer') {
-                    $cast = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
-                }
-
-                if ($field->type() === 'date') {
-                    $cast = $field->get('time_enabled') ? 'datetime' : 'date';
-
-                    if ($field->get('mode') === 'range') {
-                        $columnWithoutTheJsonBit = Str::after($field->handle(), '->');
-
-                        $actualColumnStartDate = $grammar->wrap($this->column($columnWithoutTheJsonBit).'->start');
-                        $actualColumnEndDate = $grammar->wrap($this->column($columnWithoutTheJsonBit).'->end');
-
-                    }
-
-                    //                    if ($field->get('mode') === 'range') {
-                    //                        if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                    //                            $this->builder
-                    //                                ->orderByRaw("datetime({$actualColumnStartDate}) {$direction}")
-                    //                                ->orderByRaw("datetime({$actualColumnEndDate}) {$direction}");
-                    //                        } else {
-                    //                            $this->builder
-                    //                                ->orderByRaw("cast({$actualColumnStartDate} as {$castType}) {$direction}")
-                    //                                ->orderByRaw("cast({$actualColumnEndDate} as {$castType}) {$direction}");
-                    //                        }
-                    //
-                    //                        return $this;
-                    //                    }
-
-                    return [
-                        'column' => $field->handle(),
-                        'cast' => $cast,
-                    ];
-                }
-            });
+                return $cast;
+            })
+            ->filter()
+            ->merge([
+                'size' => 'float',
+                'width' => 'float',
+                'height' => 'float',
+                'duration' => 'float',
+            ]);
     }
 }
