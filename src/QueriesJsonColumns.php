@@ -1,9 +1,10 @@
 <?php
 
-namespace Statamic\Eloquent\Assets;
+namespace Statamic\Eloquent;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Statamic\Fields\Field;
 
 trait QueriesJsonColumns
 {
@@ -60,4 +61,21 @@ trait QueriesJsonColumns
     abstract protected function column($column): string;
 
     abstract protected function getMetaColumnCasts(): Collection;
+
+    protected function toCast(Field $field): string
+    {
+        $cast = match (true) {
+            $field->type() === 'float' => 'float',
+            $field->type() === 'integer' => 'float', // A bit sneaky, but MySQL doesn't support casting as integer, it wants unsigned.
+            $field->type() === 'date' => $field->get('time_enabled') ? 'datetime' : 'date',
+            default => null,
+        };
+
+        // Date Ranges are dealt with a little bit differently.
+        if ($field->type() === 'date' && $field->get('mode') === 'range') {
+            $cast = "range_{$cast}";
+        }
+
+        return $cast;
+    }
 }

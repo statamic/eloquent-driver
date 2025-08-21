@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Statamic\Assets\AssetCollection;
 use Statamic\Contracts\Assets\AssetContainer;
 use Statamic\Contracts\Assets\QueryBuilder;
+use Statamic\Eloquent\QueriesJsonColumns;
 use Statamic\Facades;
 use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
@@ -60,30 +61,13 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             ];
         }
 
-        $container = $containerWhere['value'];
-
-        if (! $container instanceof AssetContainer) {
-            $container = Facades\AssetContainer::find($container);
-        }
+        $container = $containerWhere['value'] instanceof AssetContainer
+            ? $containerWhere['value']
+            : Facades\AssetContainer::find($containerWhere['value']);
 
         return $container->blueprint()->fields()->all()
-            ->filter(fn (Field $field) => in_array($field->type(), ['float', 'integer', 'date']))
-            ->filter()
-            ->map(function (Field $field): ?string {
-                $cast = match (true) {
-                    $field->type() === 'float' => 'float',
-                    $field->type() === 'integer' => 'float', // A bit sneaky, but MySQL doesn't support casting as integer, it wants unsigned.
-                    $field->type() === 'date' => $field->get('time_enabled') ? 'datetime' : 'date',
-                    default => null,
-                };
-
-                // Date Ranges are dealt with a little bit differently.
-                if ($field->type() === 'date' && $field->get('mode') === 'range') {
-                    $cast = "range_{$cast}";
-                }
-
-                return $cast;
-            })
+            ->filter(fn (Field $field): bool => in_array($field->type(), ['float', 'integer', 'date']))
+            ->map(fn (Field $field): string => $this->toCast($field))
             ->filter()
             ->merge([
                 'size' => 'float',
