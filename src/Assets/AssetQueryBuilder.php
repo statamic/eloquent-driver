@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Statamic\Assets\AssetCollection;
 use Statamic\Contracts\Assets\AssetContainer;
 use Statamic\Contracts\Assets\QueryBuilder;
