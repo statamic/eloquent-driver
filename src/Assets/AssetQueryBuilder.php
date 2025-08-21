@@ -47,7 +47,7 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return $this;
     }
 
-    protected function getMetaColumnCasts(): Collection
+    protected function getJsonCasts(): Collection
     {
         $wheres = collect($this->builder->getQuery()->wheres);
         $containerWhere = $wheres->firstWhere('column', 'container');

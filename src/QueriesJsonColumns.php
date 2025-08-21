@@ -13,14 +13,14 @@ trait QueriesJsonColumns
         $actualColumn = $this->column($column);
 
         if (
-            Str::contains($actualColumn, 'meta->')
-            && $metaColumnCast = $this->getMetaColumnCasts()->get($column)
+            Str::contains($actualColumn, ['data->', 'meta->'])
+            && $jsonCast = $this->getJsonCasts()->get($column)
         ) {
             $grammar = $this->builder->getConnection()->getQueryGrammar();
             $wrappedColumn = $grammar->wrap($actualColumn);
 
-            if (Str::contains($metaColumnCast, 'range_')) {
-                $metaColumnCast = Str::after($metaColumnCast, 'range_');
+            if (Str::contains($jsonCast, 'range_')) {
+                $jsonCast = Str::after($jsonCast, 'range_');
 
                 $wrappedStartDateColumn = $grammar->wrap("{$actualColumn}->start");
                 $wrappedEndDateColumn = $grammar->wrap("{$actualColumn}->end");
@@ -31,8 +31,8 @@ trait QueriesJsonColumns
                         ->orderByRaw("datetime({$wrappedEndDateColumn}) {$direction}");
                 } else {
                     $this->builder
-                        ->orderByRaw("cast({$wrappedStartDateColumn} as {$metaColumnCast}) {$direction}")
-                        ->orderByRaw("cast({$wrappedEndDateColumn} as {$metaColumnCast}) {$direction}");
+                        ->orderByRaw("cast({$wrappedStartDateColumn} as {$jsonCast}) {$direction}")
+                        ->orderByRaw("cast({$wrappedEndDateColumn} as {$jsonCast}) {$direction}");
                 }
 
                 return $this;
@@ -40,7 +40,7 @@ trait QueriesJsonColumns
 
             // SQLite casts dates to year, which is pretty unhelpful.
             if (
-                in_array($metaColumnCast, ['date', 'datetime'])
+                in_array($jsonCast, ['date', 'datetime'])
                 && Str::contains(get_class($grammar), 'SQLiteGrammar')
             ) {
                 $this->builder->orderByRaw("datetime({$wrappedColumn}) {$direction}");
@@ -48,7 +48,7 @@ trait QueriesJsonColumns
                 return $this;
             }
 
-            $this->builder->orderByRaw("cast({$wrappedColumn} as {$metaColumnCast}) {$direction}");
+            $this->builder->orderByRaw("cast({$wrappedColumn} as {$jsonCast}) {$direction}");
 
             return $this;
         }
@@ -60,7 +60,7 @@ trait QueriesJsonColumns
 
     abstract protected function column($column): string;
 
-    abstract protected function getMetaColumnCasts(): Collection;
+    abstract protected function getJsonCasts(): Collection;
 
     protected function toCast(Field $field): string
     {
