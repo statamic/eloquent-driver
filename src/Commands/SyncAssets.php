@@ -3,11 +3,11 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Assets\AssetContainer;
 use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades;
+use Statamic\Support\Str;
 
 class SyncAssets extends Command
 {
@@ -66,7 +66,7 @@ class SyncAssets extends Command
             $this->info($file);
 
             if (! Facades\Asset::find($container->handle().'::'.$file)) {
-                $asset = Facades\Asset::make()
+                Facades\Asset::make()
                     ->container($container->handle())
                     ->path($file)
                     ->saveQuietly();
@@ -95,6 +95,8 @@ class SyncAssets extends Command
                 if (str_contains($subfolder.'/', '.meta/')) {
                     return;
                 }
+
+                $subfolder = Str::ensureLeft($subfolder, '/');
 
                 if ($folder != $subfolder && (strlen($subfolder) > strlen($folder))) {
                     $this->processFolder($container, $subfolder);

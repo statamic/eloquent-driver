@@ -208,6 +208,16 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_usage_in_collections_using_file_based_entries()
+    {
+        config()->set('statamic.eloquent-driver.entries.driver', 'file');
+        $this->it_filters_usage_in_collections();
+
+        // revert config to original
+        config()->set('statamic.eloquent-driver.entries.driver', 'eloquent');
+    }
+
+    #[Test]
     public function it_filters_usage_in_collections()
     {
         Taxonomy::make('tags')->save();

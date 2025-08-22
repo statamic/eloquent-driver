@@ -18,7 +18,7 @@ class ImportGlobalsTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -35,8 +35,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_global_sets_and_variables()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
@@ -58,8 +57,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_global_sets_and_variables_with_force_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
@@ -79,8 +77,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_only_global_sets_with_console_question()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
@@ -102,8 +99,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_only_global_sets_with_only_global_sets_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
@@ -123,8 +119,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_only_variables_with_console_question()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());
@@ -146,8 +141,7 @@ class ImportGlobalsTest extends TestCase
     public function it_imports_only_variables_with_only_global_variables_argument()
     {
         $globalSet = tap(GlobalSet::make('footer')->title('Footer'))->save();
-        $variables = $globalSet->makeLocalization('en')->data(['foo' => 'bar']);
-        $globalSet->addLocalization($variables)->save();
+        $globalSet->in('en')->data(['foo' => 'bar'])->save();
 
         $this->assertCount(0, GlobalSetModel::all());
         $this->assertCount(0, VariablesModel::all());

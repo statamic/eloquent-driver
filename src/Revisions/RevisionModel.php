@@ -10,7 +10,10 @@ class RevisionModel extends BaseModel
 
     protected $table = 'revisions';
 
-    protected $casts = [
-        'attributes' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'attributes' => 'json',
+        ];
+    }
 }

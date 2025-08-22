@@ -2,6 +2,8 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Blink;
@@ -192,6 +194,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
         });
     }
 
+    public function pluck($column, $key = null)
+    {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        return parent::pluck($column, $key);
+    }
+
     public function count()
     {
         $this->applyCollectionAndTaxonomyWheres();
@@ -222,13 +231,39 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             return [];
                         }
 
+                        // workaround to handle potential n+1 queries in the database
+                        // if/when Statamic core supports relationships in a meaningful way this should be removed
+                        if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
+                            $entryClass = app('statamic.eloquent.entries.model');
+                            $termClass = app('statamic.eloquent.terms.model');
+
+                            $entriesTable = (new $entryClass)->getTable();
+                            $termsTable = (new $termClass)->getTable();
+
+                            return TermModel::where('taxonomy', $taxonomy)
+                                ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
+                                    $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
+                                    $value = match ($query->getConnection()->getDriverName()) {
+                                        'sqlite' => new Expression($wrappedColumn),
+                                        'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
+                                        default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
+                                    };
+
+                                    $query->select(DB::raw(1))
+                                        ->from($entriesTable)
+                                        ->whereIn('collection', $this->collections)
+                                        ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
+                                })
+                                ->pluck('slug');
+                        }
+
                         return TermModel::where('taxonomy', $taxonomy)
                             ->select('slug')
                             ->get()
                             ->map(function ($term) use ($taxonomy) {
                                 return Entry::query()
                                     ->whereIn('collection', $this->collections)
-                                    ->whereJsonContains('data->'.$taxonomy, [$term->slug])
+                                    ->whereJsonContains($taxonomy->handle(), [$term->slug])
                                     ->count() > 0 ? $term->slug : null;
                             })
                             ->filter()

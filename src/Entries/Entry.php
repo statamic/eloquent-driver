@@ -15,7 +15,9 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = isset($model->data['__localized_fields']) ? collect($model->data)->only($model->data['__localized_fields']) : $model->data;
+        $data = isset($model->data['__localized_fields'])
+            ? collect($model->data['__localized_fields'])->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
+            : $model->data;
 
         foreach ((new self)->getDataColumnMappings($model) as $key) {
             $data[$key] = $model->$key;
@@ -28,6 +30,7 @@ class Entry extends FileEntry
             ->collection($model->collection)
             ->data($data)
             ->blueprint($model->blueprint ?? $model->data['blueprint'] ?? null)
+            ->template($model->data['template'] ?? null)
             ->published($model->published)
             ->model($model);
 
@@ -109,12 +112,15 @@ class Entry extends FileEntry
             Blink::store('entry-uris')->forget($source->id());
         }
 
+        // disable the uri cache so any slug updates give us the latest slug
+        $source->structure()?->in($source->locale())->disableUriCache();
+
         $attributes = [
             ...$attributes,
             'origin_id' => $origin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
-            'uri' => $source->uri(),
+            'uri' => $source->uri() ?? $source->routableUri(),
             'date' => $date,
             'collection' => $source->collectionHandle(),
             'blueprint' => $source->blueprint ?? $source->blueprint()->handle(),
@@ -123,6 +129,12 @@ class Entry extends FileEntry
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
+
+        if ($template = $source->get('template', $source->template)) {
+            $attributes['data']->put('template', $template);
+        }
+
+        $attributes['data'] = $attributes['data']->filter(fn ($v) => $v !== null);
 
         foreach ($dataMappings as $key) {
             $attributes[$key] = $data->get($key);

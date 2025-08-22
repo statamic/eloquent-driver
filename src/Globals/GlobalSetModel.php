@@ -11,9 +11,12 @@ class GlobalSetModel extends BaseModel
 
     protected $table = 'global_sets';
 
-    protected $casts = [
-        'settings' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'json',
+        ];
+    }
 
     public function getAttribute($key)
     {

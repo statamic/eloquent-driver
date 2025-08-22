@@ -53,6 +53,8 @@ class AssetContainer extends FileEntry
             ->sourcePreset($model->settings['source_preset'] ?? null)
             ->warmPresets($model->settings['warm_presets'] ?? null)
             ->validationRules($model->settings['validation_rules'] ?? null)
+            ->sortField($model->settings['sort_by'] ?? null)
+            ->sortDirection($model->settings['sort_dir'] ?? null)
             ->model($model);
 
         return $this;
@@ -68,17 +70,21 @@ class AssetContainer extends FileEntry
         $model = app('statamic.eloquent.assets.container_model')::firstOrNew(['handle' => $source->handle()])->fill([
             'title'    => $source->title(),
             'disk'     => $source->diskHandle() ?? config('filesystems.default'),
-            'settings' => [
-                'allow_uploads'     => $source->allowUploads(),
-                'allow_downloading' => $source->allowDownloading(),
-                'allow_moving'      => $source->allowMoving(),
-                'allow_renaming'    => $source->allowRenaming(),
-                'create_folders'    => $source->createFolders(),
-                'search_index'      => $source->searchIndex(),
-                'source_preset'     => $source->sourcePreset,
-                'warm_presets'      => $source->warmPresets,
-                'validation_rules'  => $source->validationRules(),
-            ],
+            'settings' => [],
+        ]);
+
+        $model->settings = array_merge($model->settings ?? [], [
+            'allow_uploads'     => $source->allowUploads(),
+            'allow_downloading' => $source->allowDownloading(),
+            'allow_moving'      => $source->allowMoving(),
+            'allow_renaming'    => $source->allowRenaming(),
+            'create_folders'    => $source->createFolders(),
+            'search_index'      => $source->searchIndex(),
+            'source_preset'     => $source->sourcePreset,
+            'warm_presets'      => $source->warmPresets,
+            'validation_rules'  => $source->validationRules(),
+            'sort_by'           => $source->sortField(),
+            'sort_dir'          => $source->sortDirection(),
         ]);
 
         // Set initial timestamps.
@@ -120,11 +126,6 @@ class AssetContainer extends FileEntry
         AssetContainerDeleted::dispatch($this);
 
         return true;
-    }
-
-    public function folders($folder = '/', $recursive = false)
-    {
-        return $this->disk()->getFolders($folder, $recursive);
     }
 
     public function metaFiles($folder = '/', $recursive = false)

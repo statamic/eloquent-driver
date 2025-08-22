@@ -49,32 +49,36 @@ class Collection extends FileEntry
     {
         $class = app('statamic.eloquent.collections.model');
 
-        return $class::firstOrNew(['handle' => $source->handle])->fill([
+        $model = $class::firstOrNew(['handle' => $source->handle])->fill([
             'title'    => $source->title ?? $source->handle,
-            'settings' => [
-                'routes'               => $source->routes,
-                'slugs'                => $source->requiresSlugs(),
-                'title_formats'        => collect($source->titleFormats())->filter(),
-                'mount'                => $source->mount,
-                'dated'                => $source->dated,
-                'sites'                => $source->sites,
-                'template'             => $source->template,
-                'layout'               => $source->layout,
-                'inject'               => $source->cascade,
-                'search_index'         => $source->searchIndex,
-                'revisions'            => $source->revisionsEnabled(),
-                'default_status'       => $source->defaultPublishState,
-                'structure'            => $source->structureContents(),
-                'sort_dir'             => $source->customSortDirection(),
-                'sort_field'           => $source->customSortField(),
-                'taxonomies'           => $source->taxonomies,
-                'propagate'            => $source->propagate(),
-                'past_date_behavior'   => $source->pastDateBehavior(),
-                'future_date_behavior' => $source->futureDateBehavior(),
-                'preview_targets'      => $source->previewTargets(),
-                'origin_behavior'      => $source->originBehavior(),
-            ],
+            'settings' => [],
         ]);
+
+        $model->settings = array_merge($model->settings ?? [], [
+            'routes'               => $source->routes,
+            'slugs'                => $source->requiresSlugs(),
+            'title_formats'        => collect($source->titleFormats())->filter(),
+            'mount'                => $source->mount,
+            'dated'                => $source->dated,
+            'sites'                => $source->sites,
+            'template'             => $source->template,
+            'layout'               => $source->layout,
+            'inject'               => $source->cascade,
+            'search_index'         => $source->searchIndex,
+            'revisions'            => $source->revisionsEnabled(),
+            'default_status'       => $source->defaultPublishState,
+            'structure'            => $source->structureContents(),
+            'sort_dir'             => $source->customSortDirection(),
+            'sort_field'           => $source->customSortField(),
+            'taxonomies'           => $source->taxonomies,
+            'propagate'            => $source->propagate(),
+            'past_date_behavior'   => $source->pastDateBehavior(),
+            'future_date_behavior' => $source->futureDateBehavior(),
+            'preview_targets'      => $source->previewTargets(),
+            'origin_behavior'      => $source->originBehavior(),
+        ]);
+
+        return $model;
     }
 
     public function model($model = null)

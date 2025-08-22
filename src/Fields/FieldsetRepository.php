@@ -30,7 +30,8 @@ class FieldsetRepository extends StacheRepository
                         ->setContents($model->data);
                 });
             });
-        });
+        })
+            ->merge($this->getNamespacedFieldsets());
     }
 
     public function find($handle): ?Fieldset
