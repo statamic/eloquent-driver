@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Eloquent\Entries\Entry as EloquentEntry;
@@ -15,13 +16,12 @@ use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
-use Illuminate\Support\Collection as IlluminateCollection;
 
 class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     use QueriesEntryStatus,
-        QueriesTaxonomizedEntries,
-        QueriesJsonColumns;
+        QueriesJsonColumns,
+        QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
 
