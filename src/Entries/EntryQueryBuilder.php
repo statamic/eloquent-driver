@@ -145,7 +145,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // If no IDs were queried, fall back to all collections.
         $ids->isEmpty()
             ? $this->whereIn('collection', Collection::handles())
-            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->unique()->values());
+            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->map(fn ($collection) => $collection?->handle)->filter()->unique()->values());
     }
 
     private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
@@ -221,7 +221,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             || ! isset($collectionWhere['value'])
             || ! ($collection = Collection::find($collectionWhere['value']))
         ) {
-            return [];
+            return collect([]);
         }
 
         return $collection->entryBlueprints()
