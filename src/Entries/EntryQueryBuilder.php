@@ -220,7 +220,9 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return [];
         }
 
-        $collection = Collection::find($collectionWhere['value']);
+        if (! ($collection = Collection::find($collectionWhere['value']))) {
+            return [];
+        }
 
         return $collection->entryBlueprints()
             ->flatMap(function ($blueprint) {
