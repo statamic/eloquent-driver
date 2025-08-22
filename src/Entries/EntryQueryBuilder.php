@@ -141,11 +141,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
         // Otherwise, we'll detect them by looking at where clauses targeting the "id" column.
         $ids = $wheres->where('column', 'id')->flatMap(fn ($where) => $where['values'] ?? [$where['value']]);
-
+        
         // If no IDs were queried, fall back to all collections.
         $ids->isEmpty()
             ? $this->whereIn('collection', Collection::handles())
-            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collectionHandle')->unique()->values());
+            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->map(fn ($collection) => $collection?->handle)->filter()->unique()->values());
     }
 
     private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
@@ -221,7 +221,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             || ! isset($collectionWhere['value'])
             || ! ($collection = Collection::find($collectionWhere['value']))
         ) {
-            return [];
+            return collect([]);
         }
 
         return $collection->entryBlueprints()
