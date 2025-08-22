@@ -58,8 +58,6 @@ trait QueriesJsonColumns
         return $this;
     }
 
-    abstract protected function column($column);
-
     abstract protected function getJsonCasts(): Collection;
 
     protected function toCast(Field $field): string
