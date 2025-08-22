@@ -764,7 +764,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function entries_can_be_ordered_by_an_float_json_field()
+    public function entries_can_be_ordered_by_a_float_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
@@ -781,7 +781,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function entries_can_be_ordered_by_an_date_json_field()
+    public function entries_can_be_ordered_by_a_date_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
