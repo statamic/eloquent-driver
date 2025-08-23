@@ -212,6 +212,6 @@ class Asset extends FileAsset
     {
         $this->meta = null;
 
-        Cache::forget($this->metaCacheKey());
+        $this->cacheStore()->forget($this->metaCacheKey());
     }
 }
