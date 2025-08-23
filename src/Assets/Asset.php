@@ -207,11 +207,4 @@ class Asset extends FileAsset
             'data' => $this->data()->toArray(),
         ]);
     }
-
-    protected function clearCaches()
-    {
-        $this->meta = null;
-
-        $this->cacheStore()->forget($this->metaCacheKey());
-    }
 }
