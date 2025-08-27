@@ -11,7 +11,7 @@ class AddOrderToSitesTable extends UpdateScript
     {
         $sitesTable = config('statamic.eloquent-driver.table_prefix', '').'sites';
 
-        return config('statamic.eloquent-driver.tokens.driver', 'file') === 'eloquent' &&
+        return config('statamic.eloquent-driver.sites.driver', 'file') === 'eloquent' &&
             Schema::hasTable($sitesTable) &&
             ! Schema::hasColumn($sitesTable, 'order');
     }
