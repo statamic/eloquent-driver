@@ -13,7 +13,7 @@ return new class extends Migration {
         });
 
         $count = 0;
-        app('statamic.eloquent.sites.model')::all()
+        config('statamic.eloquent-driver.sites.model')::all()
             ->each(function ($siteModel) use (&$count) {
                 $siteModel->order = ++$count;
                 $siteModel->save();
