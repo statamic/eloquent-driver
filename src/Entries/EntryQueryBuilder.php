@@ -233,4 +233,13 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             })
             ->filter();
     }
+
+    public function pluck($column, $key = null)
+    {
+        if (! $key && ($column == 'id')) {
+            return $this->builder->pluck('id');
+        }
+
+        return parent::pluck($column, $key);
+    }
 }
