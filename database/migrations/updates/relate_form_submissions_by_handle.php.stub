@@ -14,7 +14,7 @@ return new class extends Migration {
         }
 
         Schema::table($this->prefix('form_submissions'), function (Blueprint $table) {
-            $table->string('form', 30)->nullable()->index()->after('id');
+            $table->string('form')->nullable()->index()->after('id');
         });
 
         $forms = FormModel::all()->pluck('handle', 'id');
