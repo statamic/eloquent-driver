@@ -40,7 +40,7 @@ class Form extends FileEntry
                 'store'    => $source->store(),
                 'email'    => $source->email(),
                 'honeypot' => $source->honeypot(),
-                'data' => $source->data(),
+                'data' => $source->data()->filter(fn ($v) => $v !== null),
             ],
         ]);
     }

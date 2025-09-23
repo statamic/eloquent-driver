@@ -22,6 +22,7 @@ The command will also give you the opportunity to indicate whether you'd like ex
 
 If you originally opt-out of importing existing content, then later change your mind, you can import existing content by running the relevant commands:
 
+- Addon Settings: `php please eloquent:import-addon-settings`
 - Assets: `php please eloquent:import-assets`
 - Blueprints and Fieldsets: `php please eloquent:import-blueprints`
 - Collections: `php please eloquent:import-collections`
@@ -35,10 +36,6 @@ If you originally opt-out of importing existing content, then later change your 
 
 ### Assets
 
-#### Empty Folders
-
-If your assets are being driven by the Eloquent driver then the database is used as the source of truth for the folder listing, so if no file is present inside a folder then it will not be shown.
-
 #### Syncing
 
 If your assets are being driven by the Eloquent Driver and you're managing your assets outside of Statamic (eg. directly in the filesystem), you should run the `php please eloquent:sync-assets` command to add any missing files to the database, and remove files that no longer exist on the filesystem.
@@ -47,6 +44,7 @@ If your assets are being driven by the Eloquent Driver and you're managing your 
 
 If you wish to move back to flat-files, you may use the following commands to export your content out of the database:
 
+- Addon Settings: `php please eloquent:export-addon-settings`
 - Assets: `php please eloquent:export-assets`
 - Blueprints and Fieldsets: `php please eloquent:export-blueprints`
 - Collections: `php please eloquent:export-collections`
@@ -109,7 +107,8 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     php artisan migrate
     ```
 
-4. If you're adding `json` or `integer` columns, you will need to provide your own `Entry` model in order to set the appropriate casts. You can do this by creating a new model which extends the default `Entry` model:
+4. If you're adding a column that [requires an Eloquent cast](https://laravel.com/docs/master/eloquent-mutators#attribute-casting) (eg. a `json` or `integer` column), you will need to provide your own `Entry` model in order to set the appropriate casts. You can do this by creating a new model which extends the default `Entry` model:
+
     ```php
     <?php
     
@@ -117,15 +116,18 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     
     class Entry extends \Statamic\Eloquent\Entries\EntryModel
     {
-        protected $casts = [
-            // The casts from Statamic's base model...
-            'date'      => 'datetime',
-            'data'      => 'json',
-            'published' => 'boolean',
-    
-            // Your custom casts...
-            'featured_images' => 'json',
-        ];
+        protected function casts(): array
+        {
+            return [
+                // The casts from Statamic's base model...
+                'date'      => 'datetime',
+                'data'      => 'json',
+                'published' => 'boolean',
+        
+                // Your custom casts...
+                'featured_images' => 'json',
+            ];
+        }
     }
     ```
     
@@ -134,6 +136,13 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     ```php
     class Entry extends \Statamic\Eloquent\Entries\UuidEntryModel
     ```
+   
+    Once created, you will need to update the model in the `entries` section of the configuration file:
+
+    ```diff
+    - 'model' => \Statamic\Eloquent\Entries\EntryModel::class,
+    + 'model' => \App\Models\Entry::class,
+    ```
 
 5. If you have existing entries, you will need to re-save them to populate the new columns. You can do this by pasting the following snippet into `php artisan tinker`:
     ```php
@@ -141,6 +150,22 @@ By default, the Eloquent Driver stores all data in a single `data` column. Howev
     ```
 
 6. And that's it! Statamic will now read and write data to the new columns in the `entries` table, rather than the `data` column.
+
+### Selecting specific blueprint types for Eloquent
+
+By default, setting the driver for blueprints to `eloquent` will apply to *all* blueprints. However, if you only wish to move certain groups of blueprint over, you can do so by setting an array of namespaces, such as:
+
+```php
+// config/statamic/eloquent-driver.php
+
+'blueprints' => [
+    'driver' => 'eloquent',
+    'model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+    'namespaces' => ['forms', 'navigation'],
+],
+```
+
+The above example will set all forms and navigation blueprints to use eloquent, while keeping the rest as files.
 
 ## Upgrading
 

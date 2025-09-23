@@ -4,6 +4,7 @@ namespace Statamic\Eloquent;
 
 use Illuminate\Foundation\Console\AboutCommand;
 use Statamic\Assets\AssetContainerContents;
+use Statamic\Contracts\Addons\SettingsRepository as AddonSettingsRepositoryContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContract;
@@ -19,6 +20,7 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Tokens\TokenRepository as TokenRepositoryContract;
+use Statamic\Eloquent\AddonSettings\AddonSettingsRepository;
 use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetQueryBuilder;
@@ -57,6 +59,10 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
+        \Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
+        \Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables::class,
+        \Statamic\Eloquent\Updates\UpdateGlobalVariables::class,
     ];
 
     public function boot()
@@ -167,6 +173,10 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2024_07_16_100000_create_sites_table.php' => database_path('migrations/2024_07_16_100000_create_sites_table.php'),
         ], 'statamic-eloquent-site-migrations');
 
+        $this->publishes($addonSettingMigrations = [
+            __DIR__.'/../database/migrations/2025_07_07_100000_create_addon_settings_table.php' => database_path('migrations/2025_07_07_100000_create_addon_settings_table.php'),
+        ], 'statamic-eloquent-addon-setting-migrations');
+
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
@@ -185,6 +195,7 @@ class ServiceProvider extends AddonServiceProvider
                 $revisionMigrations,
                 $tokenMigrations,
                 $siteMigrations,
+                $addonSettingMigrations
             ),
             'migrations'
         );
@@ -200,6 +211,7 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
+        $this->registerAddonSettings();
         $this->registerAssetContainers();
         $this->registerAssets();
         $this->registerBlueprints();
@@ -218,6 +230,19 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerTerms();
         $this->registerTokens();
         $this->registerSites();
+    }
+
+    private function registerAddonSettings()
+    {
+        if (config('statamic.eloquent-driver.addon_settings.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        $this->app->bind('statamic.eloquent.addon_settings.model', function () {
+            return config('statamic.eloquent-driver.addon_settings.model');
+        });
+
+        Statamic::repository(AddonSettingsRepositoryContract::class, AddonSettingsRepository::class);
     }
 
     private function registerAssetContainers()
@@ -545,13 +570,16 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         AboutCommand::add('Statamic Eloquent Driver', collect([
+            'Addon Settings' => config('statamic.eloquent-driver.addon_settings.driver', 'file'),
             'Asset Containers' => config('statamic.eloquent-driver.asset_containers.driver', 'file'),
             'Assets' => config('statamic.eloquent-driver.assets.driver', 'file'),
             'Blueprints' => config('statamic.eloquent-driver.blueprints.driver', 'file'),
             'Collections' => config('statamic.eloquent-driver.collections.driver', 'file'),
             'Collection Trees' => config('statamic.eloquent-driver.collection_trees.driver', 'file'),
             'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
+            'Fieldsets' => config('statamic.eloquent-driver.fieldsets.driver', 'file'),
             'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
+            'Form Submissions' => config('statamic.eloquent-driver.form_submissions.driver', 'file'),
             'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
             'Global Variables' => config('statamic.eloquent-driver.global_set_variables.driver', 'file'),
             'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),

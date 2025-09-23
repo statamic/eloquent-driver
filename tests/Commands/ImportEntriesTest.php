@@ -82,4 +82,21 @@ class ImportEntriesTest extends TestCase
         $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => '{"foo":"bar"}']);
         $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => '{"foo":"bar","baz":"qux","__localized_fields":[]}']);
     }
+
+    #[Test]
+    public function it_imports_template_correctly()
+    {
+        $collection = tap(Collection::make('pages')->title('Pages'))->save();
+        Entry::make()->collection($collection)->slug('template-test')->data(['foo' => 'bar'])->template('some.template')->save();
+
+        $this->assertCount(0, EntryModel::all());
+
+        $this->artisan('statamic:eloquent:import-entries')
+            ->expectsOutputToContain('Entries imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(1, EntryModel::all());
+
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'template-test', 'data' => '{"foo":"bar","template":"some.template"}']);
+    }
 }

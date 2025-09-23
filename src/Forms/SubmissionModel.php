@@ -12,9 +12,12 @@ class SubmissionModel extends BaseModel
 
     protected $table = 'form_submissions';
 
-    protected $casts = [
-        'data' => 'json',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+        ];
+    }
 
     protected $dateFormat = 'Y-m-d H:i:s.u';
 }

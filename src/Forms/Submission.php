@@ -35,7 +35,7 @@ class Submission extends FileEntry
         $model = $class::findOrNew($this->id());
 
         return (! empty($model->id)) ? $model->fill([
-            'data' => $this->data,
+            'data' => $this->data->filter(fn ($v) => $v !== null),
         ]) : $model->fill([
             'id' => $this->id(),
             'data' => $this->data,
@@ -76,16 +76,32 @@ class Submission extends FileEntry
             return false;
         }
 
+        $withEvents = $this->withEvents;
+        $this->withEvents = true;
+
+        $afterSaveCallbacks = $this->afterSaveCallbacks;
+        $this->afterSaveCallbacks = [];
+
         $model = $this->toModel();
         $model->save();
-        $isNew = $model->wasRecentlyCreated;
+
+        if ($isNew = $model->wasRecentlyCreated) {
+            $this->id = $model->getKey();
+        }
 
         $this->model($model->fresh());
 
-        if ($isNew) {
-            SubmissionCreated::dispatch($this);
+        foreach ($afterSaveCallbacks as $callback) {
+            $callback($this);
         }
-        SubmissionSaved::dispatch($this);
+
+        if ($withEvents) {
+            if ($isNew) {
+                SubmissionCreated::dispatch($this);
+            }
+
+            SubmissionSaved::dispatch($this);
+        }
     }
 
     public function delete()
@@ -95,8 +111,15 @@ class Submission extends FileEntry
             $this->model = $class::findOrNew($this->id);
         }
 
+        $withEvents = $this->withEvents;
+        $this->withEvents = true;
+
         $this->model->delete();
 
-        SubmissionDeleted::dispatch($this);
+        if ($withEvents) {
+            SubmissionDeleted::dispatch($this);
+        }
+
+        return true;
     }
 }

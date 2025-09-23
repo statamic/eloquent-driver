@@ -509,6 +509,101 @@ class AssetQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function assets_can_be_ordered_by_an_integer_json_column()
+    {
+        $blueprint = Blueprint::makeFromFields(['integer' => ['type' => 'integer']]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['integer' => 3])->save();
+        Asset::find('test::b.txt')->data(['integer' => 5])->save();
+        Asset::find('test::c.txt')->data(['integer' => 1])->save();
+        Asset::find('test::d.jpg')->data(['integer' => 35])->save();
+        Asset::find('test::e.jpg')->data(['integer' => 20])->save();
+        Asset::find('test::f.jpg')->data(['integer' => 12])->save();
+
+        $assets = Asset::query()->where('container', 'test')->orderBy('integer', 'asc')->get();
+
+        $this->assertCount(6, $assets);
+        $this->assertEquals(['c', 'a', 'b', 'f', 'e', 'd'], $assets->map->filename()->all());
+    }
+
+    #[Test]
+    public function assets_can_be_ordered_by_a_float_json_column()
+    {
+        $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['float' => 3.3])->save();
+        Asset::find('test::b.txt')->data(['float' => 5.5])->save();
+        Asset::find('test::c.txt')->data(['float' => 1.1])->save();
+        Asset::find('test::d.jpg')->data(['float' => 35.5])->save();
+        Asset::find('test::e.jpg')->data(['float' => 20.0])->save();
+        Asset::find('test::f.jpg')->data(['float' => 12.2])->save();
+
+        $assets = Asset::query()->where('container', 'test')->orderBy('float', 'asc')->get();
+
+        $this->assertCount(6, $assets);
+        $this->assertEquals(['c', 'a', 'b', 'f', 'e', 'd'], $assets->map->filename()->all());
+    }
+
+    #[Test]
+    public function assets_can_be_ordered_by_a_date_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['date_field' => '2021-06-15 20:31:04'])->save();
+        Asset::find('test::b.txt')->data(['date_field' => '2021-01-13 20:31:04'])->save();
+        Asset::find('test::c.txt')->data(['date_field' => '2021-11-17 20:31:04'])->save();
+        Asset::find('test::d.jpg')->data(['date_field' => '2023-01-01 20:31:04'])->save();
+        Asset::find('test::e.jpg')->data(['date_field' => '2025-01-01 20:31:04'])->save();
+        Asset::find('test::f.jpg')->data(['date_field' => '2024-01-01 20:31:04'])->save();
+
+        $assets = Asset::query()->where('container', 'test')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(6, $assets);
+        $this->assertEquals(['b', 'a', 'c', 'd', 'f', 'e'], $assets->map->filename()->all());
+    }
+
+    #[Test]
+    public function assets_can_be_ordered_by_a_datetime_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true, 'mode' => 'range']]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00']])->save();
+        Asset::find('test::b.txt')->data(['date_field' => ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04']])->save();
+        Asset::find('test::c.txt')->data(['date_field' => ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 20:31:04']])->save();
+        Asset::find('test::d.jpg')->data(['date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 22:00:00']])->save();
+        Asset::find('test::e.jpg')->data(['date_field' => ['start' => '2024-06-15 20:31:04', 'end' => '2024-06-15 22:00:00']])->save();
+        Asset::find('test::f.jpg')->data(['date_field' => ['start' => '2025-06-15 20:31:04', 'end' => '2025-06-15 22:00:00']])->save();
+
+        $assets = Asset::query()->where('container', 'test')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(6, $assets);
+        $this->assertEquals(['b', 'a', 'd', 'c', 'e', 'f'], $assets->map->filename()->all());
+    }
+
+    #[Test]
+    public function assets_can_be_ordered_by_a_date_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => false, 'mode' => 'range']]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['date_field' => ['start' => '2021-06-15', 'end' => '2021-06-15']])->save();
+        Asset::find('test::b.txt')->data(['date_field' => ['start' => '2021-01-13', 'end' => '2021-06-16']])->save();
+        Asset::find('test::c.txt')->data(['date_field' => ['start' => '2021-11-17', 'end' => '2021-11-17']])->save();
+        Asset::find('test::d.jpg')->data(['date_field' => ['start' => '2021-06-15', 'end' => '2021-06-15']])->save();
+        Asset::find('test::e.jpg')->data(['date_field' => ['start' => '2024-06-15', 'end' => '2024-06-15']])->save();
+        Asset::find('test::f.jpg')->data(['date_field' => ['start' => '2025-06-15', 'end' => '2025-06-15']])->save();
+
+        $assets = Asset::query()->where('container', 'test')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(6, $assets);
+        $this->assertEquals(['b', 'a', 'd', 'c', 'e', 'f'], $assets->map->filename()->all());
+    }
+
+    #[Test]
     public function it_can_get_assets_using_when()
     {
         $assets = Asset::query()->when(true, function ($query) {

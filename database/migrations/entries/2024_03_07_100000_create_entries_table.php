@@ -15,7 +15,7 @@ return new class extends Migration
             $table->boolean('published')->default(true);
             $table->string('slug')->nullable();
             $table->string('uri')->nullable()->index();
-            $table->string('date')->nullable();
+            $table->string('date')->nullable()->index();
             $table->integer('order')->nullable()->index();
             $table->string('collection')->index();
             $table->string('blueprint', 30)->nullable()->index();

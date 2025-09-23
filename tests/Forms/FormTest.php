@@ -71,4 +71,12 @@ class FormTest extends TestCase
 
         $this->assertSame(['some' => 'data'], Arr::get($form->model(), 'settings.data'));
     }
+
+    #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test form')->data(['some' => 'data', 'null_value' => null]))->save();
+
+        $this->assertSame(['some' => 'data'], Arr::get($form->model(), 'settings.data'));
+    }
 }

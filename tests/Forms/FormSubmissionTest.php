@@ -3,9 +3,15 @@
 namespace Tests\Forms;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Data\DataCollection;
 use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\Submission;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Events\SubmissionCreated;
+use Statamic\Events\SubmissionDeleted;
+use Statamic\Events\SubmissionSaved;
 use Statamic\Facades;
 use Tests\TestCase;
 
@@ -100,5 +106,84 @@ class FormSubmissionTest extends TestCase
 
         $this->assertInstanceOf(Carbon::class, $fresh->date());
         $this->assertSame($fresh->date()->format('u'), $submission->date()->format('u'));
+    }
+
+    #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+            'null_value' => null,
+        ]))->save();
+
+        $this->assertArrayNotHasKey('null_value', $submission->model()->data);
+    }
+
+    #[Test]
+    public function it_should_save_quietly()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->saveQuietly();
+
+        Event::assertNotDispatched(SubmissionSaved::class);
+        Event::assertNotDispatched(SubmissionCreated::class);
+
+        tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        Event::assertDispatched(SubmissionSaved::class);
+        Event::assertDispatched(SubmissionCreated::class);
+    }
+
+    #[Test]
+    public function it_should_delete_quietly()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        $result = $submission->deleteQuietly();
+
+        Event::assertNotDispatched(SubmissionDeleted::class);
+        $this->assertSame($result, true);
+
+        $submission = tap($form->makeSubmission([
+            'name' => 'John Doe',
+        ]))->save();
+
+        $submission->delete();
+
+        Event::assertDispatched(SubmissionDeleted::class);
+        $this->assertSame($result, true);
+    }
+
+    #[Test]
+    public function querying_submissions_should_return_data_collections()
+    {
+        $form = Facades\Form::make('test');
+
+        $form->makeSubmission([
+            'name' => 'John Doe',
+        ])->save();
+
+        $submissions = $form->querySubmissions()->get();
+
+        $this->assertInstanceOf(DataCollection::class, $submissions);
+        $this->assertEveryItemIsInstanceOf(Submission::class, $submissions);
     }
 }

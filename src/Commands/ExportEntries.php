@@ -84,6 +84,7 @@ class ExportEntries extends Command
                 ->collection($model->collection)
                 ->data($model->data)
                 ->blueprint($model->blueprint)
+                ->template($model->data['template'] ?? null)
                 ->published($model->published);
 
             if (in_array(HasUuids::class, class_uses_recursive($model))) {
@@ -113,6 +114,7 @@ class ExportEntries extends Command
                     ->collection($model->collection)
                     ->data($model->data)
                     ->blueprint($model->data['blueprint'] ?? null)
+                    ->template($model->data['template'] ?? null)
                     ->published($model->published);
 
                 if ($model->date && $entry->collection()->dated()) {
