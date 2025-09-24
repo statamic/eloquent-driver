@@ -19,16 +19,6 @@ class AssetContainer extends FileEntry
 
     protected $private;
 
-    protected $allowUploads;
-
-    protected $allowDownloading;
-
-    protected $allowMoving;
-
-    protected $allowRenaming;
-
-    protected $createFolders;
-
     protected $searchIndex;
 
     protected $model;
@@ -44,11 +34,6 @@ class AssetContainer extends FileEntry
             ->title($model->title)
             ->handle($model->handle)
             ->disk($model->disk ?? config('filesystems.default'))
-            ->allowUploads($model->settings['allow_uploads'] ?? null)
-            ->allowDownloading($model->settings['allow_downloading'] ?? null)
-            ->allowMoving($model->settings['allow_moving'] ?? null)
-            ->allowRenaming($model->settings['allow_renaming'] ?? null)
-            ->createFolders($model->settings['create_folders'] ?? null)
             ->searchIndex($model->settings['search_index'] ?? null)
             ->sourcePreset($model->settings['source_preset'] ?? null)
             ->warmPresets($model->settings['warm_presets'] ?? null)
@@ -74,11 +59,6 @@ class AssetContainer extends FileEntry
         ]);
 
         $model->settings = array_merge($model->settings ?? [], [
-            'allow_uploads'     => $source->allowUploads(),
-            'allow_downloading' => $source->allowDownloading(),
-            'allow_moving'      => $source->allowMoving(),
-            'allow_renaming'    => $source->allowRenaming(),
-            'create_folders'    => $source->createFolders(),
             'search_index'      => $source->searchIndex(),
             'source_preset'     => $source->sourcePreset,
             'warm_presets'      => $source->warmPresets,
