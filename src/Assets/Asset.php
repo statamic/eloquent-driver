@@ -30,10 +30,20 @@ class Asset extends FileAsset
 
     public static function fromModel(Model $model)
     {
+        $meta = ['data' => $model->meta];
+        $meta['duration'] = $model->duration;
+        $meta['height'] = $model->height;
+        $meta['last_modified'] = $model->last_modified;
+        $meta['mime_type'] = $model->mime_type;
+        $meta['size'] = $model->size;
+        $meta['width'] = $model->width;
+
+        $meta = Arr::removeNullValues($meta);
+
         $asset = (new static)
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->hydrateMeta($model->meta)
+            ->hydrateMeta($meta)
             ->syncOriginal()
             ->model($model);
 
@@ -61,8 +71,17 @@ class Asset extends FileAsset
             return $meta;
         }
 
-        if ($meta = $this->model()?->meta) {
-            return $meta;
+        if ($this->model()?->meta) {
+            $model = $this->model();
+            $meta = ['data' => $model->meta];
+            $meta['duration'] = $model->duration;
+            $meta['height'] = $model->height;
+            $meta['last_modified'] = $model->last_modified;
+            $meta['mime_type'] = $model->mime_type;
+            $meta['size'] = $model->size;
+            $meta['width'] = $model->width;
+
+            return Arr::removeNullValues($meta);
         }
 
         $meta = $this->generateMeta();
@@ -121,6 +140,13 @@ class Asset extends FileAsset
             return;
         }
 
+        $model->meta = $meta['data'];
+        $model->duration = $meta['duration'] ?? null;
+        $model->height = $meta['height'] ?? null;
+        $model->last_modified = $meta['last_modified'] ?? time();
+        $model->mime_type = $meta['mime_type'] ?? '';
+        $model->size = $meta['size'] ?? 0;
+        $model->width = $meta['width'] ?? null;
         $model->save();
 
         $this->model($model);
@@ -152,12 +178,19 @@ class Asset extends FileAsset
         }
 
         $model->fill([
-            'meta' => $meta,
+            'meta' => $meta['data'],
             'filename' => $source->filename(),
             'extension' => $extension,
             'path' => $source->path(),
             'folder' => $source->folder(),
             'basename' => $source->basename(),
+
+            'duration' => $source->duration(),
+            'height' => $source->height(),
+            'last_modified' => $source->lastModified()?->timestamp ?? time(),
+            'mime_type' => $source->mimeType(),
+            'size' => $source->size(),
+            'width' => $source->width(),
         ]);
 
         // Set initial timestamps.
