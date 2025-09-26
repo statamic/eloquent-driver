@@ -10,15 +10,14 @@ use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
-use Statamic\Eloquent\Forms\Form;
-use Statamic\Eloquent\Forms\FormRepository;
-use Statamic\Eloquent\Forms\Submission;
-use Statamic\Eloquent\Forms\SubmissionRepository;
+use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Facades\Form;
+use Statamic\Facades\FormSubmission;
 use Statamic\Forms\Form as StacheForm;
 use Statamic\Forms\FormRepository as StacheFormRepository;
 use Statamic\Forms\Submission as StacheSubmission;
 use Statamic\Stache\Repositories\SubmissionRepository as StacheSubmissionRepository;
-use Statamic\Statamic;
 
 class ExportForms extends Command
 {
@@ -29,14 +28,17 @@ class ExportForms extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-forms';
+    protected $signature = 'statamic:eloquent:export-forms
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-forms : Only export forms}
+        {--only-submissions : Only export submissions}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Export eloquent based forms to flat files.';
+    protected $description = 'Export eloquent based forms and submissions to flat files.';
 
     /**
      * Execute the console command.
@@ -47,10 +49,8 @@ class ExportForms extends Command
     {
         $this->usingDefaultRepositories(function () {
             $this->exportForms();
+            $this->exportSubmissions();
         });
-
-        $this->newLine();
-        $this->info('Forms exported');
 
         return 0;
     }
@@ -62,57 +62,75 @@ class ExportForms extends Command
         Facade::clearResolvedInstance(SubmissionContract::class);
         Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
-        app()->bind(FormContract::class, Form::class);
-        app()->bind(FormRepositoryContract::class, FormRepository::class);
-        app()->bind(SubmissionContract::class, Submission::class);
-        app()->bind(SubmissionRepositoryContract::class, SubmissionRepository::class);
-        app()->bind(\Statamic\Contracts\Forms\SubmissionQueryBuilder::class, \Statamic\Eloquent\Forms\SubmissionQueryBuilder::class);
+        app()->bind(FormContract::class, StacheForm::class);
+        app()->bind(FormRepositoryContract::class, StacheFormRepository::class);
+        app()->bind(SubmissionContract::class, StacheSubmission::class);
+        app()->bind(SubmissionRepositoryContract::class, StacheSubmissionRepository::class);
 
         $callback();
     }
 
     private function exportForms()
     {
-        $forms = (new FormRepository)->all();
+        if (! $this->shouldExportForms()) {
+            return;
+        }
 
-        app()->bind(FormContract::class, StacheForm::class);
+        $forms = FormModel::all();
 
         $this->withProgressBar($forms, function ($form) {
-            $newForm = (new StacheForm)
-                ->handle($form->handle())
-                ->title($form->title())
-                ->store($form->store())
-                ->email($form->email())
-                ->honeypot($form->honeypot());
-
-            Statamic::repository(FormRepositoryContract::class, StacheFormRepository::class);
-            Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
-
-            $newForm->save();
-
-            Statamic::repository(FormRepositoryContract::class, FormRepository::class);
-            Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
-
-            $form->submissions()->each(function ($submission) use ($newForm) {
-                $id = $submission->date()->getPreciseTimestamp(4);
-                $id = substr($id, 0, -4).'.'.substr($id, -4);
-
-                $newSubmission = (new StacheSubmission)
-                    ->id($id)
-                    ->form($newForm)
-                    ->data($submission->data());
-
-                Statamic::repository(SubmissionRepositoryContract::class, StacheSubmissionRepository::class);
-                Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
-
-                $newSubmission->save();
-
-                Statamic::repository(SubmissionRepositoryContract::class, SubmissionRepository::class);
-                Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
-            });
+            Form::make()
+                ->handle($form->handle)
+                ->title($form->title)
+                ->store($form->settings['store'] ?? null)
+                ->email($form->settings['email'] ?? null)
+                ->honeypot($form->settings['honeypot'] ?? null)
+                ->data($form->settings['data'] ?? [])
+                ->save();
         });
 
         $this->newLine();
         $this->info('Forms exported');
+    }
+
+    private function exportSubmissions()
+    {
+        if (! $this->shouldExportSubmissions()) {
+            return;
+        }
+
+        $submissions = SubmissionModel::all();
+
+        $this->withProgressBar($submissions, function ($submission) {
+            if (! $form = Form::find($submission->form)) {
+                return;
+            }
+
+            $id = $submission->created_at->getPreciseTimestamp(4);
+            $id = substr($id, 0, -4).'.'.substr($id, -4);
+
+            FormSubmission::make()
+                ->id($id)
+                ->form($form)
+                ->data($submission->data)
+                ->save();
+        });
+
+        $this->newLine();
+        $this->info('Submissions exported');
+    }
+
+    private function shouldExportForms(): bool
+    {
+        return $this->option('only-forms')
+            || ! $this->option('only-submissions')
+            && ($this->option('force') || $this->confirm('Do you want to export forms?'));
+    }
+
+    private function shouldExportSubmissions(): bool
+    {
+        return $this->option('only-submissions')
+            || ! $this->option('only-forms')
+            && ($this->option('force') || $this->confirm('Do you want to export submissions?'));
     }
 }
