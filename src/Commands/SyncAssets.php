@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Commands;
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Assets\AssetContainer;
+use Statamic\Eloquent\Assets\AssetContainerContents;
 use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades;
 use Statamic\Support\Str;
@@ -108,7 +109,7 @@ class SyncAssets extends Command
             ->pluck('folder')
             ->unique()
             ->each(function ($folder) use ($filesystemFolders, $container) {
-                if ($filesystemFolders->contains(fn ($fsFolder) => str_starts_with($folder, $fsFolder))) {
+                if ($filesystemFolders->contains(fn ($fsFolder) => Str::startsWith($folder, $fsFolder.'/'))) {
                     return;
                 }
 
@@ -141,5 +142,7 @@ class SyncAssets extends Command
                     $this->processFolder($container, $subfolder);
                 }
             });
+
+        app(AssetContainerContents::class)->directories();
     }
 }
