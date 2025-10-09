@@ -127,14 +127,21 @@ class SyncAssets extends Command
         $assetFolders
             ->each(function ($path) use ($folders, $container) {
                 if (!$folders->contains($path)) {
+<<<<<<< Updated upstream
                     dump("deleting " . ltrim($path, '/') . '%');
+=======
+>>>>>>> Stashed changes
                     AssetModel::query()
                         ->where('container', $container->handle())
                         ->where('folder', 'like',  ltrim($path, '/') . '%')
                         ->get()
                         ->each(function ($asset) {
                             $this->error("Deleting {$asset->path}");
+<<<<<<< Updated upstream
                             // $asset->delete();
+=======
+                            $asset->delete();
+>>>>>>> Stashed changes
                         });
                 }
             });
