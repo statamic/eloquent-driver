@@ -123,7 +123,7 @@ class SyncAssets extends Command
                 $this->error("Deleting assets in {$folder}");
                 AssetModel::query()
                     ->where('container', $container->handle())
-                    ->where("folder", "like", $folder . "/%")
+                    ->where('folder', 'like', $folder.'/%')
                     ->chunk(100, function ($assets) {
                         $assets->each(function ($asset) {
                             dump("Deleting {$asset->path}");
