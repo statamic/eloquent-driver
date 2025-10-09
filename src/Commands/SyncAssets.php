@@ -33,8 +33,8 @@ class SyncAssets extends Command
     public function handle()
     {
         Facades\AssetContainer::all()
-            ->reject(fn($container) => $this->option('container') != 'all' && $this->option('container') != $container->handle())
-            ->each(fn($container) => $this->processContainer($container));
+            ->reject(fn ($container) => $this->option('container') != 'all' && $this->option('container') != $container->handle())
+            ->each(fn ($container) => $this->processContainer($container));
 
         $this->info('Complete');
     }
@@ -54,7 +54,7 @@ class SyncAssets extends Command
         $contents = collect($container->disk()->filesystem()->listContents($folder));
 
         $files = $contents
-            ->reject(fn($item) => $item['type'] != 'file')
+            ->reject(fn ($item) => $item['type'] != 'file')
             ->pluck('path');
 
         // ensure we have an asset for any paths
@@ -65,7 +65,7 @@ class SyncAssets extends Command
 
             $this->info($file);
 
-            if (! Facades\Asset::find($container->handle() . '::' . $file)) {
+            if (! Facades\Asset::find($container->handle().'::'.$file)) {
                 Facades\Asset::make()
                     ->container($container->handle())
                     ->path($file)
@@ -89,30 +89,30 @@ class SyncAssets extends Command
 
         // delete any sub-folders we have a db entry for that no longer exist
         $filesystemFolders = $contents
-            ->reject(fn($item) => $item["type"] != "dir")
-            ->pluck("path");
+            ->reject(fn ($item) => $item['type'] != 'dir')
+            ->pluck('path');
 
         // The folder variable is passed with a leading slash. This must be removed
         // in order to match against the folder column in the database.
-        $folderNoLeadingSlash = Str::chopStart($folder, "/");
+        $folderNoLeadingSlash = Str::chopStart($folder, '/');
 
         AssetModel::query()
-            ->where("container", $container->handle())
+            ->where('container', $container->handle())
             ->when(
-                $folder != "/",
-                fn($query) => $query->where("folder", "like", $folderNoLeadingSlash . "/%"),
-                fn($query) => $query->where("folder", "not like", "%/")
+                $folder != '/',
+                fn ($query) => $query->where('folder', 'like', $folderNoLeadingSlash.'/%'),
+                fn ($query) => $query->where('folder', 'not like', '%/')
             )
-            ->select("folder")
+            ->select('folder')
             ->distinct()
-            ->pluck("folder")
+            ->pluck('folder')
             ->map(function ($item) use ($folder, $folderNoLeadingSlash) {
-                if ($folder === "/") {
-                    return explode("/", $item)[0];
+                if ($folder === '/') {
+                    return explode('/', $item)[0];
                 }
                 $item = Str::chopStart($item, [$folderNoLeadingSlash]);
 
-                return $folderNoLeadingSlash . "/" . explode("/", $item)[1];
+                return $folderNoLeadingSlash.'/'.explode('/', $item)[1];
             })
             ->unique()
             ->each(function ($folder) use ($filesystemFolders, $container) {
@@ -122,8 +122,8 @@ class SyncAssets extends Command
 
                 $this->error("Deleting assets in {$folder}");
                 AssetModel::query()
-                    ->where("container", $container->handle())
-                    ->where("folder", $folder)
+                    ->where('container', $container->handle())
+                    ->where('folder', $folder)
                     ->chunk(100, function ($assets) {
                         $assets->each(function ($asset) {
                             dump("Deleting {$asset->path}");
@@ -135,10 +135,10 @@ class SyncAssets extends Command
 
         // process any sub-folders of this folder
         $contents
-            ->reject(fn($item) => $item['type'] != 'dir')
+            ->reject(fn ($item) => $item['type'] != 'dir')
             ->pluck('path')
             ->each(function ($subfolder) use ($container, $folder) {
-                if (str_contains($subfolder . '/', '.meta/')) {
+                if (str_contains($subfolder.'/', '.meta/')) {
                     return;
                 }
 
