@@ -106,17 +106,9 @@ class SyncAssets extends Command
             ->select('folder')
             ->distinct()
             ->pluck('folder')
-            ->map(function ($item) use ($folder, $folderNoLeadingSlash) {
-                if ($folder === '/') {
-                    return explode('/', $item)[0];
-                }
-                $item = Str::chopStart($item, [$folderNoLeadingSlash]);
-
-                return $folderNoLeadingSlash.'/'.explode('/', $item)[1];
-            })
             ->unique()
             ->each(function ($folder) use ($filesystemFolders, $container) {
-                if ($filesystemFolders->contains($folder)) {
+                if ($filesystemFolders->contains(fn ($fsFolder) => str_starts_with($folder, $fsFolder))) {
                     return;
                 }
 
