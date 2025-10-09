@@ -33,8 +33,8 @@ class SyncAssets extends Command
     public function handle()
     {
         Facades\AssetContainer::all()
-            ->reject(fn($container) => $this->option('container') != 'all' && $this->option('container') != $container->handle())
-            ->each(fn($container) => $this->processContainer($container));
+            ->reject(fn ($container) => $this->option('container') != 'all' && $this->option('container') != $container->handle())
+            ->each(fn ($container) => $this->processContainer($container));
 
         $this->info('Complete');
     }
@@ -54,7 +54,7 @@ class SyncAssets extends Command
         $contents = collect($container->disk()->filesystem()->listContents($folder));
 
         $files = $contents
-            ->reject(fn($item) => $item['type'] != 'file')
+            ->reject(fn ($item) => $item['type'] != 'file')
             ->pluck('path');
 
         // ensure we have an asset for any paths
@@ -65,7 +65,7 @@ class SyncAssets extends Command
 
             $this->info($file);
 
-            if (! Facades\Asset::find($container->handle() . '::' . $file)) {
+            if (! Facades\Asset::find($container->handle().'::'.$file)) {
                 Facades\Asset::make()
                     ->container($container->handle())
                     ->path($file)
@@ -89,7 +89,7 @@ class SyncAssets extends Command
 
         // delete any sub-folders we have a db entry for that no longer exist
 
-        // folders aren't stored in the database, so we must identify what files 
+        // folders aren't stored in the database, so we must identify what files
         // we still have in the DB that have a folder at this level.
         $assetFolders = AssetModel::query()
             ->where('container', $container->handle())
@@ -97,39 +97,42 @@ class SyncAssets extends Command
             ->distinct()
             ->pluck('folder')
             ->filter(function ($item) use ($folder) {
-                if ($folder === "/") {
+                if ($folder === '/') {
                     return $item;
                 }
-                return Str::startsWith("/" . $item, $folder . "/");
+
+                return Str::startsWith('/'.$item, $folder.'/');
             })
             ->map(function ($item) use ($folder) {
-                if ($folder === "/") {
-                    return explode("/", $item)[0];
+                if ($folder === '/') {
+                    return explode('/', $item)[0];
                 }
-                $item = Str::chopStart("/" . $item, [$folder]);
-                return $folder . "/" . explode("/", $item)[1];
+                $item = Str::chopStart('/'.$item, [$folder]);
+
+                return $folder.'/'.explode('/', $item)[1];
             })
             ->filter()
             ->unique();
 
         // now see what's actually in the file system folder
         $folders = $contents
-            ->reject(fn($item) => $item["type"] != "dir" && $item["path"] != ".meta")
-            ->pluck("path")
+            ->reject(fn ($item) => $item['type'] != 'dir' && $item['path'] != '.meta')
+            ->pluck('path')
             ->map(function ($item) use ($folder) {
-                if ($folder !== "/") {
-                    return "/" . $item;
+                if ($folder !== '/') {
+                    return '/'.$item;
                 }
+
                 return $item;
             });
 
         // now delete any folders we have a db entry for that no longer exist
         $assetFolders
             ->each(function ($path) use ($folders, $container) {
-                if (!$folders->contains($path)) {
+                if (! $folders->contains($path)) {
                     AssetModel::query()
                         ->where('container', $container->handle())
-                        ->where('folder', 'like',  ltrim($path, '/') . '%')
+                        ->where('folder', 'like', ltrim($path, '/').'%')
                         ->get()
                         ->each(function ($asset) {
                             $this->error("Deleting {$asset->path}");
@@ -140,10 +143,10 @@ class SyncAssets extends Command
 
         // process any sub-folders of this folder
         $contents
-            ->reject(fn($item) => $item['type'] != 'dir')
+            ->reject(fn ($item) => $item['type'] != 'dir')
             ->pluck('path')
             ->each(function ($subfolder) use ($container, $folder) {
-                if (str_contains($subfolder . '/', '.meta/')) {
+                if (str_contains($subfolder.'/', '.meta/')) {
                     return;
                 }
 
