@@ -6,6 +6,7 @@ use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Eloquent\Jobs\UpdateCollectionEntryOrder;
 use Statamic\Eloquent\Jobs\UpdateCollectionEntryParent;
+use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\EntryRepository as StacheRepository;
 
@@ -49,6 +50,30 @@ class EntryRepository extends StacheRepository
         }
 
         return $this->substitutionsById[$item->id()] ?? $item;
+    }
+
+    public function whereInId($ids): EntryCollection
+    {
+        $cached = collect($ids)->flip()->map(fn ($_, $id) => Blink::get("eloquent-entry-{$id}"));
+        $missingIds = $cached->reject()->keys();
+
+        $missingById = $this->query()
+            ->whereIn('id', $missingIds)
+            ->get()
+            ->keyBy->id();
+
+        $missingById->each(function ($entry, $id) {
+            Blink::put("eloquent-entry-{$id}", $entry);
+        });
+
+        $items = $cached
+            ->map(fn ($entry, $id) => $entry ?? $missingById->get($id))
+            ->filter()
+            ->values();
+
+        $this->applySubstitutions($items);
+
+        return EntryCollection::make($items);
     }
 
     public function save($entry)
