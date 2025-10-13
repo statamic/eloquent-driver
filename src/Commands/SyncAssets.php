@@ -3,9 +3,9 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
+use Statamic\Assets\AssetContainerContents;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Assets\AssetContainer;
-use Statamic\Eloquent\Assets\AssetContainerContents;
 use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades;
 use Statamic\Support\Str;
@@ -45,6 +45,12 @@ class SyncAssets extends Command
         $this->info("Container: {$container->handle()}");
 
         $this->processFolder($container);
+
+        $contents = app(AssetContainerContents::class);
+
+        $contents->cacheStore()->forget('asset-folder-contents-'.$container->handle());
+
+        $contents->container($container)->directories();
     }
 
     private function processFolder(AssetContainer $container, $folder = '/')
@@ -100,9 +106,9 @@ class SyncAssets extends Command
         AssetModel::query()
             ->where('container', $container->handle())
             ->when(
-                $folder != '/',
-                fn ($query) => $query->where('folder', 'like', $folderNoLeadingSlash.'/%'),
-                fn ($query) => $query->where('folder', 'not like', '%/')
+                $folder == '/',
+                fn ($query) => $query->where('folder', 'not like', '%/'),
+                fn ($query) => $query->where('folder', 'like', $folderNoLeadingSlash.'/%')
             )
             ->select('folder')
             ->distinct()
@@ -142,7 +148,5 @@ class SyncAssets extends Command
                     $this->processFolder($container, $subfolder);
                 }
             });
-
-        app(AssetContainerContents::class)->directories();
     }
 }
