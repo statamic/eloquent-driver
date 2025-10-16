@@ -194,6 +194,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
         });
     }
 
+    public function pluck($column, $key = null)
+    {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        return parent::pluck($column, $key);
+    }
+
     public function count()
     {
         $this->applyCollectionAndTaxonomyWheres();

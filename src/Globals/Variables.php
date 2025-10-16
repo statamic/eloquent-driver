@@ -31,10 +31,6 @@ class Variables extends FileEntry
 
         $data = $source->data();
 
-        if ($source->hasOrigin()) {
-            $data = $source->origin()->data()->merge($data);
-        }
-
         return $class::firstOrNew([
             'handle' => $source->globalSet()->handle(),
             'locale' => $source->locale,
@@ -47,13 +43,6 @@ class Variables extends FileEntry
     protected function getOriginByString($origin)
     {
         return $this->globalSet()->in($origin);
-    }
-
-    public function save()
-    {
-        $this->toModel()->save();
-
-        return $this;
     }
 
     public function model($model = null)

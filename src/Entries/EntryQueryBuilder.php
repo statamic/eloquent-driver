@@ -2,13 +2,17 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Entries\QueryBuilder;
 use Statamic\Eloquent\Entries\Entry as EloquentEntry;
+use Statamic\Eloquent\QueriesJsonColumns;
 use Statamic\Entries\EntryCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Taxonomy;
+use Statamic\Fields\Field;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -16,6 +20,7 @@ use Statamic\Stache\Query\QueriesTaxonomizedEntries;
 class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     use QueriesEntryStatus,
+        QueriesJsonColumns,
         QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
@@ -26,75 +31,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         'id', 'site', 'origin_id', 'published', 'slug', 'uri', 'data',
         'date', 'collection', 'created_at', 'updated_at', 'order', 'blueprint',
     ];
-
-    public function orderBy($column, $direction = 'asc')
-    {
-        $actualColumn = $this->column($column);
-
-        if (Str::contains($actualColumn, 'data->')) {
-            $wheres = collect($this->builder->getQuery()->wheres);
-
-            if ($wheres->where('column', 'collection')->count() == 1) {
-                $collectionWhere = $wheres->firstWhere('column', 'collection');
-                if (isset($collectionWhere['values']) && count($collectionWhere['values']) == 1) {
-                    $collectionWhere['value'] = $collectionWhere['values'][0];
-                }
-
-                if (isset($collectionWhere['value'])) {
-                    if ($collection = Collection::find($collectionWhere['value'])) {
-                        $blueprintField = $collection->entryBlueprints()
-                            ->flatMap(function ($blueprint) {
-                                return $blueprint->fields()
-                                    ->all()
-                                    ->filter(function ($field) {
-                                        return in_array($field->type(), ['float', 'integer', 'date']);
-                                    });
-                            })
-                            ->filter()
-                            ->get($column);
-
-                        if ($blueprintField) {
-                            $castType = '';
-                            $fieldType = $blueprintField->type();
-
-                            $grammar = $this->builder->getConnection()->getQueryGrammar();
-                            $actualColumn = $grammar->wrap($actualColumn);
-
-                            if (in_array($fieldType, ['float'])) {
-                                $castType = 'float';
-                            } elseif (in_array($fieldType, ['integer'])) {
-                                $castType = 'float'; // bit sneaky but mysql doesnt support casting as integer, it wants unsigned
-                            } elseif (in_array($fieldType, ['date'])) {
-                                // Take time into account when enabled
-                                if ($blueprintField->get('time_enabled')) {
-                                    $castType = 'datetime';
-                                } else {
-                                    $castType = 'date';
-                                }
-
-                                // sqlite casts dates to year, which is pretty unhelpful
-                                if (str_contains(get_class($grammar), 'SQLiteGrammar')) {
-                                    $this->builder->orderByRaw("datetime({$actualColumn}) {$direction}");
-
-                                    return $this;
-                                }
-                            }
-
-                            if ($castType) {
-                                $this->builder->orderByRaw("cast({$actualColumn} as {$castType}) {$direction}");
-
-                                return $this;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        parent::orderBy($column, $direction);
-
-        return $this;
-    }
 
     protected function transform($items, $columns = [])
     {
@@ -119,9 +55,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
-
-        if (! in_array($column, $columns)) {
+        if (! in_array($column, $this->entryColumnsAndMappings())) {
             if (! Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }
@@ -209,7 +143,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // If no IDs were queried, fall back to all collections.
         $ids->isEmpty()
             ? $this->whereIn('collection', Collection::handles())
-            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->unique()->values());
+            : $this->whereIn('collection', app('statamic.eloquent.entries.model')::query()->whereIn('id', $ids)->distinct('collection')->pluck('collection')->values());
     }
 
     private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
@@ -221,5 +155,94 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             ->where('column', 'collection')
             ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
             ->map(fn ($handle) => Collection::find($handle));
+    }
+
+    private function getKeysForTaxonomyWhereBasic($where)
+    {
+        $term = $where['value'];
+
+        [$taxonomy, $slug] = explode('::', $term);
+
+        if (! $taxonomy = Taxonomy::find($taxonomy)) {
+            return collect();
+        }
+
+        return app('statamic.eloquent.entries.model')::query()
+            ->select(['id'])
+            ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
+            ->whereJsonContains($this->column($taxonomy->handle()), $slug)
+            ->get()
+            ->pluck('id');
+    }
+
+    private function getKeysForTaxonomyWhereIn($where)
+    {
+        // Get the terms grouped by taxonomy.
+        // [tags::foo, categories::baz, tags::bar]
+        // becomes [tags => [foo, bar], categories => [baz]]
+        $taxonomies = collect($where['values'])
+            ->map(function ($value) {
+                [$taxonomy, $term] = explode('::', $value);
+
+                return compact('taxonomy', 'term');
+            })
+            ->groupBy->taxonomy
+            ->map(function ($group) {
+                return collect($group)->map->term;
+            });
+
+        return $taxonomies->flatMap(function ($terms, $taxonomy) {
+            if (! $taxonomy = Taxonomy::find($taxonomy)) {
+                return collect();
+            }
+
+            return app('statamic.eloquent.entries.model')::query()
+                ->select(['id'])
+                ->whereIn('collection', $taxonomy->collections()->map->handle()->all())
+                ->where(function ($query) use ($taxonomy, $terms) {
+                    foreach ($terms as $term) {
+                        $query->orWhereJsonContains($this->column($taxonomy->handle()), $term);
+                    }
+                })
+                ->get()
+                ->pluck('id');
+        });
+    }
+
+    protected function getJsonCasts(): IlluminateCollection
+    {
+        $wheres = collect($this->builder->getQuery()->wheres);
+        $collectionWhere = $wheres->firstWhere('column', 'collection');
+
+        if (
+            ! $collectionWhere
+            || ! isset($collectionWhere['value'])
+            || ! ($collection = Collection::find($collectionWhere['value']))
+        ) {
+            return collect([]);
+        }
+
+        return $collection->entryBlueprints()
+            ->flatMap(function ($blueprint) {
+                return $blueprint->fields()
+                    ->all()
+                    ->filter(fn ($field) => in_array($field->type(), ['float', 'integer', 'date']))
+                    ->map(fn (Field $field) => $this->toCast($field));
+            })
+            ->filter();
+    }
+
+    public function pluck($column, $key = null)
+    {
+        if (! $key && in_array($column, $this->entryColumnsAndMappings())) {
+            return $this->builder->pluck($column, $key);
+        }
+
+        return parent::pluck($column, $key);
+    }
+
+    private function entryColumnsAndMappings()
+    {
+        return Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
     }
 }

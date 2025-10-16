@@ -11,7 +11,7 @@ class AddIndexToDateOnEntriesTable extends UpdateScript
     {
         return $this->isUpdatingTo('4.22.0')
             && Schema::hasTable(config('statamic.eloquent-driver.table_prefix', '').'entries')
-            && ! Schema::hasIndex(config('statamic.eloquent-driver.table_prefix', '').'entries', 'date');
+            && ! Schema::hasIndex(config('statamic.eloquent-driver.table_prefix', '').'entries', ['date']);
     }
 
     public function update()

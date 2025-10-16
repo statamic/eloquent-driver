@@ -3,8 +3,11 @@
 namespace Tests\Assets;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\AssetContainer;
+use Statamic\Facades\Blink;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -97,5 +100,21 @@ class AssetContainerContentsTest extends TestCase
 
         $this->assertCount(1, $filtered);
         $this->assertSame($filtered->keys()->all(), ['one/two']);
+    }
+
+    #[Test]
+    public function it_includes_empty_folders_in_the_directory_listing()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one-two/file.txt')->upload(UploadedFile::fake()->create('one.txt'));
+
+        $this->assertCount(1, $container->contents()->directories());
+
+        Cache::flush();
+        Blink::flush();
+
+        Storage::disk('test')->makeDirectory('another');
+
+        $this->assertCount(2, $container->contents()->directories());
     }
 }

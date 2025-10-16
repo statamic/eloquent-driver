@@ -122,4 +122,13 @@ class TermRepository extends StacheRepository
             TermContract::class => Term::class,
         ];
     }
+
+    protected function ensureAssociations()
+    {
+        if (config('statamic.eloquent-driver.taxonomies.driver', 'file') === 'eloquent') {
+            return;
+        }
+
+        parent::ensureAssociations();
+    }
 }
