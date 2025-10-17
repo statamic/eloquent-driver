@@ -13,6 +13,7 @@ use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
 use Statamic\Fields\Field;
+use Statamic\Query\Concerns\QueriesRelationships;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Stache\Query\QueriesEntryStatus;
 use Statamic\Stache\Query\QueriesTaxonomizedEntries;
@@ -21,6 +22,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     use QueriesEntryStatus,
         QueriesJsonColumns,
+        QueriesRelationships,
         QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
@@ -244,5 +246,22 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     private function entryColumnsAndMappings()
     {
         return Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
+    }
+
+    protected function getBlueprintsForRelations()
+    {
+        $collections = empty($this->collections)
+            ? Collection::all()
+            : $this->collections;
+
+        return collect($collections)->flatMap(function ($collection) {
+            if (is_string($collection)) {
+                $collection = Collection::find($collection);
+            }
+
+            return $collection ? $collection->entryBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
     }
 }
