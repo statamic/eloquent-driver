@@ -12,11 +12,14 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
+use Statamic\Query\Concerns\QueriesRelationships;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Taxonomies\TermCollection;
 
 class TermQueryBuilder extends EloquentQueryBuilder
 {
+    use QueriesRelationships;
+
     protected $collections = [];
 
     protected $site = null;
@@ -294,5 +297,22 @@ class TermQueryBuilder extends EloquentQueryBuilder
     public function with($relations, $callback = null)
     {
         return $this;
+    }
+
+    protected function getBlueprintsForRelations()
+    {
+        $taxonomies = empty($this->taxonomies)
+            ? Taxonomy::handles()
+            : $this->taxonomies;
+
+        return collect($taxonomies)->flatMap(function ($taxonomy) {
+            if (is_string($taxonomy)) {
+                $taxonomy = Taxonomy::find($taxonomy);
+            }
+
+            return $taxonomy ? $taxonomy->termBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
     }
 }
