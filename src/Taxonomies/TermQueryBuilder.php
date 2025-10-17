@@ -18,8 +18,6 @@ use Statamic\Taxonomies\TermCollection;
 
 class TermQueryBuilder extends EloquentQueryBuilder
 {
-    use QueriesRelationships;
-
     protected $collections = [];
 
     protected $site = null;

@@ -22,7 +22,6 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 {
     use QueriesEntryStatus,
         QueriesJsonColumns,
-        QueriesRelationships,
         QueriesTaxonomizedEntries;
 
     private $selectedQueryColumns;
