@@ -217,9 +217,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         if (! $collectionWhere) {
             return collect([]);
         }
+
         if (isset($collectionWhere['values']) && count($collectionWhere['values']) == 1) {
             $collectionWhere['value'] = $collectionWhere['values'][0];
         }
+
         if (! isset($collectionWhere['value']) || ! $collection = Collection::find($collectionWhere['value'])) {
             return collect([]);
         }
