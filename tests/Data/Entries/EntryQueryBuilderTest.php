@@ -770,11 +770,16 @@ class EntryQueryBuilderTest extends TestCase
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 
         Collection::make('posts')->save();
-        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => 3.3])->create();
-        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => 5.5])->create();
-        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => 1.1])->create();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => '9.5'])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => '10.2'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => '8.7'])->create();
 
         $entries = Entry::query()->where('collection', 'posts')->orderBy('float', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereIn('collection', ['posts'])->orderBy('float', 'asc')->get();
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
