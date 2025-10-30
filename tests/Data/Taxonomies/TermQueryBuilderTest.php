@@ -662,7 +662,7 @@ class TermQueryBuilderTest extends TestCase
     #[Test]
     public function terms_are_found_using_where_relation()
     {
-        $blueprint = Blueprint::makeFromFields(['terms_field' => ['type' => 'terms', 'max_items' => 1, 'taxonomies' => ['tags']]]);
+        $blueprint = Blueprint::makeFromFields(['terms_field' => ['type' => 'terms', 'taxonomies' => ['tags']]]);
         Blueprint::shouldReceive('in')->with('taxonomies/tags')->andReturn(collect(['tags' => $blueprint]));
 
         Taxonomy::make('tags')->save();
