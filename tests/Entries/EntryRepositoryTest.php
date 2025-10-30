@@ -31,6 +31,8 @@ class EntryRepositoryTest extends TestCase
 
         $collection->routes('posts/{slug}')->save();
 
+        Blink::store('entry-uris')->flush();
+
         // Assert that the URIs are unchanged, to make sure that saving
         // the collection isn't what caused the URIs to be updated.
         $this->assertEquals([
@@ -58,6 +60,8 @@ class EntryRepositoryTest extends TestCase
         (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
 
         $collection->routes('posts/{slug}')->save();
+
+        Blink::store('entry-uris')->flush();
 
         // Assert that the URIs are unchanged, to make sure that saving
         // the collection isn't what caused the URIs to be updated.

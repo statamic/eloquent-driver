@@ -249,4 +249,21 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     {
         return Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
     }
+
+    protected function getBlueprintsForRelations()
+    {
+        $collections = empty($this->collections)
+            ? Collection::all()
+            : $this->collections;
+
+        return collect($collections)->flatMap(function ($collection) {
+            if (is_string($collection)) {
+                $collection = Collection::find($collection);
+            }
+
+            return $collection ? $collection->entryBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
+    }
 }
