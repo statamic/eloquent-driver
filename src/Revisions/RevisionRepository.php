@@ -5,27 +5,9 @@ namespace Statamic\Eloquent\Revisions;
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionQueryBuilder as QueryBuilderContract;
 use Statamic\Revisions\RevisionRepository as StacheRepository;
-use Statamic\Revisions\WorkingCopy;
 
 class RevisionRepository extends StacheRepository
 {
-    public function make(): RevisionContract
-    {
-        return new (app('statamic.eloquent.revisions.model'));
-    }
-
-    public function whereKey($key)
-    {
-        return app('statamic.eloquent.revisions.model')::where('key', $key)
-            ->orderBy('created_at')
-            ->get()
-            ->map(function ($revision) use ($key) {
-                return $this->makeRevisionFromFile($key, $revision);
-            })->keyBy(function ($revision) {
-                return $revision->date()->timestamp;
-            });
-    }
-
     public function findWorkingCopyByKey($key)
     {
         $class = app('statamic.eloquent.revisions.model');
@@ -38,7 +20,7 @@ class RevisionRepository extends StacheRepository
 
     public function save(RevisionContract $copy)
     {
-        if ($copy instanceof WorkingCopy) {
+        if ($copy->isWorkingCopy()) {
             app('statamic.eloquent.revisions.model')::where([
                 'key'    => $copy->key(),
                 'action' => 'working',
@@ -53,7 +35,7 @@ class RevisionRepository extends StacheRepository
 
     public function delete(RevisionContract $revision)
     {
-        if ($revision instanceof WorkingCopy) {
+        if ($revision->isWorkingCopy()) {
             $this->findWorkingCopyByKey($revision->key())?->delete();
 
             return;

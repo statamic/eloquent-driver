@@ -33,6 +33,7 @@ use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
 use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
 use Statamic\Eloquent\Globals\GlobalVariablesRepository;
+use Statamic\Eloquent\Revisions\RevisionQueryBuilder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\NavigationRepository;
@@ -464,6 +465,12 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind('statamic.eloquent.revisions.model', function () {
             return config('statamic.eloquent-driver.revisions.model');
+        });
+
+        $this->app->bind(RevisionQueryBuilder::class, function ($app) {
+            return new RevisionQueryBuilder(
+                $app['statamic.eloquent.revisions.model']::query()
+            );
         });
 
         Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);

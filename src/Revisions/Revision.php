@@ -3,11 +3,7 @@
 namespace Statamic\Eloquent\Revisions;
 
 use Illuminate\Database\Eloquent\Model;
-use Statamic\Events\RevisionDeleted;
-use Statamic\Events\RevisionSaved;
-use Statamic\Events\RevisionSaving;
 use Statamic\Revisions\Revision as FileEntry;
-use Statamic\Revisions\WorkingCopy;
 
 class Revision extends FileEntry
 {
@@ -34,7 +30,6 @@ class Revision extends FileEntry
         return (new static)
             ->key($model->key)
             ->action($model->action ?? null)
-            ->id($model->created_at->timestamp)
             ->date($model->created_at)
             ->user($model->user ?? null)
             ->message($model->message ?? null)
@@ -61,7 +56,7 @@ class Revision extends FileEntry
             ->key($item->key())
             ->action($item->isWorkingCopy() ? 'working' : $item->action())
             ->date($item->date())
-            ->user($item->user()?->id() ?? false)
+            ->user($item->user()?->id() ?? null)
             ->message($item->message() ?? null)
             ->attributes($item->attributes() ?? []);
     }
@@ -75,23 +70,5 @@ class Revision extends FileEntry
         $this->model = $model;
 
         return $this;
-    }
-
-    public function save()
-    {
-        if (RevisionSaving::dispatch($this) === false) {
-            return false;
-        }
-
-        $this->model->save();
-
-        RevisionSaved::dispatch($this);
-    }
-
-    public function delete()
-    {
-        $this->model->delete();
-
-        RevisionDeleted::dispatch($this);
     }
 }
