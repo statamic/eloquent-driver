@@ -55,9 +55,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $column = 'origin_id';
         }
 
-        $columns = Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
-
-        if (! in_array($column, $columns)) {
+        if (! in_array($column, $this->entryColumnsAndMappings())) {
             if (! Str::startsWith($column, 'data->')) {
                 $column = 'data->'.$column;
             }
@@ -145,7 +143,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // If no IDs were queried, fall back to all collections.
         $ids->isEmpty()
             ? $this->whereIn('collection', Collection::handles())
-            : $this->whereIn('collection', app(static::class)->whereIn('id', $ids)->pluck('collection')->map(fn ($collection) => $collection?->handle)->filter()->unique()->values());
+            : $this->whereIn('collection', app('statamic.eloquent.entries.model')::query()->whereIn('id', $ids)->distinct('collection')->pluck('collection')->values());
     }
 
     private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
@@ -232,5 +230,19 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                     ->map(fn (Field $field) => $this->toCast($field));
             })
             ->filter();
+    }
+
+    public function pluck($column, $key = null)
+    {
+        if (! $key && in_array($column, $this->entryColumnsAndMappings())) {
+            return $this->builder->pluck($column, $key);
+        }
+
+        return parent::pluck($column, $key);
+    }
+
+    private function entryColumnsAndMappings()
+    {
+        return Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
     }
 }

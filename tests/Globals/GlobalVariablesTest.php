@@ -1,6 +1,6 @@
 <?php
 
-namespace Globals;
+namespace Tests\Globals;
 
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\VariablesModel;
@@ -12,10 +12,10 @@ class GlobalVariablesTest extends TestCase
     #[Test]
     public function does_not_save_synced_origin_data_to_localizations()
     {
-        $global = Facades\Globalset::make('test');
+        $global = Facades\GlobalSet::make('test')->sites(['en' => null, 'fr' => 'en']);
 
-        $global->addLocalization($global->makeLocalization('en')->data(['foo' => 'bar', 'baz' => 'qux']));
-        $global->addLocalization($global->makeLocalization('fr')->origin('en')->data([]));
+        $global->in('en')->data(['foo' => 'bar', 'baz' => 'qux']);
+        $global->in('fr')->data([]);
 
         $global->save();
 

@@ -3,7 +3,6 @@
 namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\Asset as FileAsset;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Data\HasDirtyState;
@@ -206,12 +205,5 @@ class Asset extends FileAsset
             'basename' => $this->basename(),
             'data' => $this->data()->toArray(),
         ]);
-    }
-
-    protected function clearCaches()
-    {
-        $this->meta = null;
-
-        Cache::forget($this->metaCacheKey());
     }
 }
