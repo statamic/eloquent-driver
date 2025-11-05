@@ -33,11 +33,11 @@ class Revision extends FileEntry
     {
         return (new static)
             ->key($model->key)
-            ->action($model->action ?? false)
+            ->action($model->action ?? null)
             ->id($model->created_at->timestamp)
             ->date($model->created_at)
-            ->user($model->user ?? false)
-            ->message($model->message ?? '')
+            ->user($model->user ?? null)
+            ->message($model->message ?? null)
             ->attributes($model->attributes ?? [])
             ->model($model);
     }
@@ -59,10 +59,10 @@ class Revision extends FileEntry
     {
         return (new static)
             ->key($item->key())
-            ->action($item instanceof WorkingCopy ? 'working' : $item->action())
+            ->action($item->isWorkingCopy() ? 'working' : $item->action())
             ->date($item->date())
             ->user($item->user()?->id() ?? false)
-            ->message($item->message() ?? '')
+            ->message($item->message() ?? null)
             ->attributes($item->attributes() ?? []);
     }
 

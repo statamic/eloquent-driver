@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Revisions;
 
 use Statamic\Contracts\Revisions\Revision as RevisionContract;
+use Statamic\Contracts\Revisions\RevisionQueryBuilder as QueryBuilderContract;
 use Statamic\Revisions\RevisionRepository as StacheRepository;
 use Statamic\Revisions\WorkingCopy;
 
@@ -70,6 +71,7 @@ class RevisionRepository extends StacheRepository
     {
         return [
             RevisionContract::class => Revision::class,
+            QueryBuilderContract::class => RevisionQueryBuilder::class,
         ];
     }
 }
