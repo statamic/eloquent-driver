@@ -24,6 +24,9 @@ class RevisionRepositoryTest extends TestCase
         $this->app->instance(Stache::class, $stache);
         $this->repo = new RevisionRepository($stache);
 
+        \Statamic\Facades\User::shouldReceive('find')->andReturnNull();
+        \Statamic\Facades\User::shouldReceive('current')->andReturnNull();
+
         \Statamic\Facades\Revision::make()
             ->key('123')
             ->action('working')
