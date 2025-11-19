@@ -22,10 +22,9 @@ class ImportRevisionsTest extends TestCase
 
         config()->set('statamic.revisions', [
             'enabled' => true,
-            'path' => __DIR__.'/tmp',
         ]);
 
-        mkdir(__DIR__.'/tmp');
+        config()->set('statamic.stache.stores.revisions.directory', __DIR__.'/../__fixtures__/dev-null/storage/statamic/revisions');
 
         Facade::clearResolvedInstance(RevisionRepositoryContract::class);
 
@@ -35,7 +34,7 @@ class ImportRevisionsTest extends TestCase
 
     protected function tearDown(): void
     {
-        app('files')->deleteDirectory(__DIR__.'/tmp');
+        app('files')->deleteDirectory(config('statamic.stache.stores.revisions.directory'));
 
         parent::tearDown();
     }

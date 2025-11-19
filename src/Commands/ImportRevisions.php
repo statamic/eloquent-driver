@@ -45,7 +45,7 @@ class ImportRevisions extends Command
 
     private function importRevisions(): void
     {
-        $this->withProgressBar(File::allFiles(config('statamic.revisions.path')), function ($file) {
+        $this->withProgressBar(File::allFiles(config('statamic.stache.stores.revisions.directory')), function ($file) {
             $yaml = YAML::file($file->getPathname())->parse();
 
             $revision = (new Revision)
