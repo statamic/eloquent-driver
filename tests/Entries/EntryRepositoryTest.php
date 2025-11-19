@@ -4,11 +4,14 @@ namespace Tests\Entries;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryRepository;
+use Statamic\Entries\EntryCollection;
 use Statamic\Events\CollectionTreeSaved;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
@@ -27,6 +30,8 @@ class EntryRepositoryTest extends TestCase
         (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
 
         $collection->routes('posts/{slug}')->save();
+
+        Blink::store('entry-uris')->flush();
 
         // Assert that the URIs are unchanged, to make sure that saving
         // the collection isn't what caused the URIs to be updated.
@@ -55,6 +60,8 @@ class EntryRepositoryTest extends TestCase
         (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
 
         $collection->routes('posts/{slug}')->save();
+
+        Blink::store('entry-uris')->flush();
 
         // Assert that the URIs are unchanged, to make sure that saving
         // the collection isn't what caused the URIs to be updated.
@@ -233,5 +240,74 @@ class EntryRepositoryTest extends TestCase
             3 => 4,
             4 => null,
         ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->data['parent'] ?? null])->all());
+    }
+
+    #[Test, Group('EntryRepository#whereInId')]
+    public function it_gets_entries_by_ids()
+    {
+        $collection = Collection::make('pages')->routes('{slug}')->save();
+        $expected = collect([
+            (new Entry)->collection($collection)->slug('foo'),
+            (new Entry)->collection($collection)->slug('bar'),
+        ])->each->save();
+
+        $actual = (new EntryRepository(new Stache))->whereInId($expected->map->id());
+
+        $this->assertInstanceOf(EntryCollection::class, $actual);
+        $this->assertEquals($expected->map->id()->all(), $actual->map->id()->all());
+    }
+
+    #[Test, Group('EntryRepository#whereInId')]
+    public function it_loads_entries_from_database_given_partial_cache_when_finding_by_ids()
+    {
+        $collection = Collection::make('pages')->routes('{slug}')->save();
+        $expected = collect([
+            (new Entry)->collection($collection)->slug('foo'),
+            (new Entry)->collection($collection)->slug('bar'),
+        ]);
+
+        $expected->first()->save();
+        Blink::flush();
+        $expected->last()->save();
+
+        $actual = (new EntryRepository(new Stache))->whereInId($expected->map->id());
+
+        $this->assertNotNull($expected->first()->id());
+        $this->assertNotSame($expected->first(), $actual->first());
+        $this->assertEquals($expected->first()->id(), $actual->first()->id());
+        $this->assertNotNull($actual->last());
+        $this->assertSame($expected->last(), $actual->last());
+    }
+
+    #[Test, Group('EntryRepository#whereInId')]
+    public function it_returns_entries_in_exact_order_when_finding_by_ids()
+    {
+        $collection = Collection::make('pages')->routes('{slug}')->save();
+        $entries = collect([
+            (new Entry)->collection($collection)->slug('foo'),
+            (new Entry)->collection($collection)->slug('bar'),
+            (new Entry)->collection($collection)->slug('baz'),
+        ])->each->save();
+
+        Blink::flush();
+
+        $expected = collect([2, 0, 1])->map(fn ($index) => $entries[$index]->id())->all();
+        $actual = (new EntryRepository(new Stache))->whereInId($expected);
+
+        $this->assertEquals($expected, $actual->map->id()->all());
+    }
+
+    #[Test, Group('EntryRepository#whereInId')]
+    public function it_skips_missing_entires_when_finding_by_ids()
+    {
+        $collection = Collection::make('pages')->routes('{slug}')->save();
+        $expected = tap((new Entry)->collection($collection)->slug('foo'))->save();
+
+        $actual = (new EntryRepository(new Stache))->whereInId([
+            $expected->id(),
+            'missing',
+        ]);
+
+        $this->assertEquals([$expected->id()], $actual->map->id()->all());
     }
 }

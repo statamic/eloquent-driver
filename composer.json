@@ -25,7 +25,8 @@
     },
     "require": {
         "php": "^8.2",
-        "statamic/cms": "dev-master"
+        "statamic/cms": "^6.0.0-alpha.16",
+        "laravel/framework": "11.*"
     },
     "require-dev": {
         "doctrine/dbal": "^3.8",
@@ -41,6 +42,5 @@
             "pixelfear/composer-dist-plugin": true
         }
     },
-    "minimum-stability": "dev",
     "prefer-stable": true
 }
