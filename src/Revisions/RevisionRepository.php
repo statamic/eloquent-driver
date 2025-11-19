@@ -27,7 +27,7 @@ class RevisionRepository extends StacheRepository
             ])->delete();
         }
 
-        $revision = (new Revision)
+        (new Revision)
             ->fromRevisionOrWorkingCopy($copy)
             ->toModel()
             ->save();
@@ -35,13 +35,7 @@ class RevisionRepository extends StacheRepository
 
     public function delete(RevisionContract $revision)
     {
-        if ($revision->isWorkingCopy()) {
-            $this->findWorkingCopyByKey($revision->key())?->delete();
-
-            return;
-        }
-
-        $revision->model?->delete();
+        $revision->model()?->delete();
     }
 
     protected function makeRevisionFromFile($key, $model)
