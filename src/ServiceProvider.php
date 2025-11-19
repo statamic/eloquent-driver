@@ -41,6 +41,7 @@ use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Tokens\TokenRepository;
+use Statamic\Facades\Stache;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -262,6 +263,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+
+        Stache::exclude('asset-containers');
     }
 
     private function registerAssets()
@@ -289,6 +292,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
+
+        Stache::exclude('assets');
     }
 
     private function registerBlueprints()
@@ -323,6 +328,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+
+        Stache::exclude('collections');
     }
 
     private function registerCollectionTrees()
@@ -346,6 +353,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
+        Stache::exclude('collection-trees');
     }
 
     private function registerEntries()
@@ -369,6 +378,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
+
+        Stache::exclude('entries');
     }
 
     private function registerFieldsets()
@@ -405,6 +416,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+
+        Stache::exclude('forms');
     }
 
     private function registerFormSubmissions()
@@ -426,6 +439,8 @@ class ServiceProvider extends AddonServiceProvider
                 $app['statamic.eloquent.form_submissions.model']::query()
             );
         });
+
+        Stache::exclude('form-submissions');
     }
 
     private function registerGlobals()
@@ -439,6 +454,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+
+        Stache::exclude('globals');
     }
 
     private function registerGlobalVariables()
@@ -454,6 +471,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
+
+        Stache::exclude('global-variables');
     }
 
     private function registerRevisions()
@@ -480,6 +499,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
+
+        Stache::exclude('navigation');
     }
 
     private function registerStructureTrees()
@@ -503,6 +524,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
+
+        Stache::exclude('nav-trees');
     }
 
     public function registerTaxonomies()
@@ -516,6 +539,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+
+        Stache::exclude('taxonomies');
     }
 
     public function registerTerms()
@@ -535,6 +560,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+
+        Stache::exclude('terms');
     }
 
     public function registerTokens()

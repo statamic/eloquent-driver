@@ -295,4 +295,21 @@ class TermQueryBuilder extends EloquentQueryBuilder
     {
         return $this;
     }
+
+    protected function getBlueprintsForRelations()
+    {
+        $taxonomies = empty($this->taxonomies)
+            ? Taxonomy::handles()
+            : $this->taxonomies;
+
+        return collect($taxonomies)->flatMap(function ($taxonomy) {
+            if (is_string($taxonomy)) {
+                $taxonomy = Taxonomy::find($taxonomy);
+            }
+
+            return $taxonomy ? $taxonomy->termBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
+    }
 }

@@ -292,13 +292,13 @@ class EntryTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30)->nullable();
+        });
+
         $collection = Collection::make('blog')->title('blog')->routes([
             'en' => '/blog/{slug}',
         ])->save();
-
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
-            $table->string('foo', 30);
-        });
 
         $entry = (new Entry)
             ->collection('blog')

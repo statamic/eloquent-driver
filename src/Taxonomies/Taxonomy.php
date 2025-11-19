@@ -16,6 +16,7 @@ class Taxonomy extends FileEntry
             ->handle($model->handle)
             ->title($model->title)
             ->sites($model->sites)
+            ->cascade($model->settings['inject'] ?? [])
             ->revisionsEnabled($model->settings['revisions'] ?? false)
             ->previewTargets($model->settings['preview_targets'] ?? [])
             ->searchIndex($model->settings['search_index'] ?? '')
@@ -41,6 +42,7 @@ class Taxonomy extends FileEntry
         ]);
 
         $model->settings = array_merge($model->settings ?? [], [
+            'inject' => $source->cascade->all(),
             'revisions' => $source->revisionsEnabled(),
             'preview_targets' => $source->previewTargets(),
             'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
