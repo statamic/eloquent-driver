@@ -81,10 +81,63 @@ class EntryRepository extends StacheRepository
         $model = $entry->toModel();
         $model->save();
 
+        // Sync taxonomy relationships if we have taxonomy data
+        if (isset($model->_taxonomyData)) {
+            $this->syncTaxonomyRelationships($model, $model->_taxonomyData);
+            unset($model->_taxonomyData);
+        }
+
         $entry->model($model->fresh());
 
         Blink::put("eloquent-entry-{$entry->id()}", $entry);
         Blink::put("eloquent-entry-{$entry->uri()}", $entry);
+    }
+
+    protected function syncTaxonomyRelationships($model, $taxonomyData)
+    {
+        if (empty($taxonomyData)) {
+            return;
+        }
+
+        $termModel = app('statamic.eloquent.terms.model');
+        $relationships = [];
+
+        foreach ($taxonomyData as $field => $termSlugs) {
+            if (empty($termSlugs)) {
+                continue;
+            }
+
+            $termSlugs = is_array($termSlugs) ? $termSlugs : [$termSlugs];
+            
+            foreach ($termSlugs as $slug) {
+                if (empty($slug)) {
+                    continue;
+                }
+
+                // Extract taxonomy from slug if it contains ::
+                if (str_contains($slug, '::')) {
+                    [$taxonomy, $slug] = explode('::', $slug, 2);
+                } else {
+                    $taxonomy = $field; // Assume field name is taxonomy handle
+                }
+
+                $term = $termModel::where('taxonomy', $taxonomy)
+                    ->where('slug', $slug)
+                    ->first();
+
+                if ($term) {
+                    $relationships[$term->id] = [
+                        'taxonomy' => $taxonomy,
+                        'field' => $field,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+        }
+
+        // Sync the relationships (this will remove old ones and add new ones)
+        $model->terms()->sync($relationships);
     }
 
     public function delete($entry)

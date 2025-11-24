@@ -98,6 +98,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportTaxonomies::class,
             Commands\ImportSites::class,
             Commands\SyncAssets::class,
+            Commands\SyncTaxonomyRelationships::class,
         ]);
 
         $this->addAboutCommandInfo();
@@ -199,6 +200,10 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php' => database_path('migrations/2024_03_07_100000_create_entries_table_with_string_ids.php'),
         ], 'statamic-eloquent-entries-table-with-string-ids');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations/2024_11_24_142800_create_entry_term_pivot_table.php' => database_path('migrations/2024_11_24_142800_create_entry_term_pivot_table.php'),
+        ], 'statamic-eloquent-entry-term-pivot');
     }
 
     public function register()

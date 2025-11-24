@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
+use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Entry as EntryFacade;
 
 class Entry extends FileEntry
@@ -140,7 +141,17 @@ class Entry extends FileEntry
             $attributes[$key] = $data->get($key);
         }
 
-        return $class::findOrNew($id)->fill($attributes);
+        $model = $class::findOrNew($id)->fill($attributes);
+        
+        // Store taxonomy data for syncing after save
+        $model->_taxonomyData = $source->data()->only(
+            $source->blueprint()?->fields()->all()
+                ->filter(fn($field) => in_array($field->type(), ['taxonomy', 'terms']))
+                ->map->handle()
+                ->all() ?? []
+        );
+
+        return $model;
     }
 
     public function model($model = null)
@@ -201,6 +212,46 @@ class Entry extends FileEntry
 
         return parent::makeLocalization($site)
             ->data($this->data());
+    }
+
+    public function get($key, $fallback = null)
+    {
+        // Check if this is a taxonomy field and we have relationships loaded
+        if ($this->model && $this->model->relationLoaded('terms')) {
+            $blueprint = $this->blueprint();
+            if ($blueprint && $blueprint->hasField($key)) {
+                $field = $blueprint->field($key);
+                if ($field && in_array($field->type(), ['taxonomy', 'terms'])) {
+                    return $this->getTermsForField($key);
+                }
+            }
+        }
+
+        return parent::get($key, $fallback);
+    }
+
+    protected function getTermsForField($field)
+    {
+        if (!$this->model || !$this->model->relationLoaded('terms')) {
+            return parent::get($field);
+        }
+
+        $terms = $this->model->terms
+            ->where('pivot.field', $field)
+            ->map(function ($termModel) {
+                return app(TermContract::class)::fromModel($termModel);
+            });
+
+        // Return single term if max_items is 1, otherwise return collection
+        $blueprint = $this->blueprint();
+        if ($blueprint && $blueprint->hasField($field)) {
+            $fieldConfig = $blueprint->field($field);
+            if ($fieldConfig && $fieldConfig->get('max_items') === 1) {
+                return $terms->first();
+            }
+        }
+
+        return $terms;
     }
 
     public function getDataColumnMappings(Model $model)

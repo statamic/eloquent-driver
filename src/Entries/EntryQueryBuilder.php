@@ -84,6 +84,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $this->selectedQueryColumns = $columns;
 
         $this->addTaxonomyWheres();
+        $this->autoEagerLoadTaxonomies();
 
         return parent::get();
     }
@@ -91,10 +92,40 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
         $this->addTaxonomyWheres();
+        $this->autoEagerLoadTaxonomies();
 
         $this->selectedQueryColumns = $columns;
 
         return parent::paginate($perPage, ['*'], $pageName, $page);
+    }
+
+    protected function autoEagerLoadTaxonomies()
+    {
+        // Check if we're querying specific collections
+        $wheres = collect($this->builder->getQuery()->wheres);
+        $collectionWheres = $wheres->where('column', 'collection');
+        
+        if ($collectionWheres->isEmpty()) {
+            // If no specific collection, check all collections for taxonomy fields
+            $collections = Collection::all();
+        } else {
+            // Get the specific collections being queried
+            $collectionHandles = $collectionWheres->flatMap(function ($where) {
+                return isset($where['values']) ? $where['values'] : [$where['value']];
+            });
+            $collections = $collectionHandles->map(fn($handle) => Collection::find($handle))->filter();
+        }
+
+        // Check if any of these collections have taxonomy fields
+        $hasTaxonomyFields = $collections->contains(function ($collection) {
+            return $collection->entryBlueprints()
+                ->flatMap(fn($blueprint) => $blueprint->fields()->all())
+                ->contains(fn($field) => in_array($field->type(), ['taxonomy', 'terms']));
+        });
+
+        if ($hasTaxonomyFields) {
+            $this->builder->with('terms');
+        }
     }
 
     public function count()
@@ -106,6 +137,21 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     public function with($relations, $callback = null)
     {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        // Auto-eager load taxonomy relationships when 'terms' is requested
+        if (in_array('terms', $relations) || in_array('taxonomies', $relations)) {
+            $this->builder->with('terms');
+        }
+
+        return $this;
+    }
+
+    public function withTaxonomies()
+    {
+        $this->builder->with('terms');
         return $this;
     }
 

@@ -97,8 +97,15 @@ class TermQueryBuilder extends EloquentQueryBuilder
         if (in_array($column, ['id', 'slug'])) {
             $column = 'slug';
 
+            // Convert Term object to string if needed
+            if (is_object($value) && method_exists($value, 'slug')) {
+                $value = $value->slug();
+            }
+            
+            $value = (string) $value; // Ensure it's a string
+
             if (str_contains($value, '::')) {
-                $taxonomy = Str::before($value.'', '::');
+                $taxonomy = Str::before($value, '::');
 
                 if ($taxonomy) {
                     $this->taxonomies[] = $taxonomy;
@@ -139,14 +146,21 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $column = 'slug';
             $values = collect($values)
                 ->map(function ($value) {
-                    $taxonomy = Str::before($value.'', '::');
+                    // Convert Term object to string if needed
+                    if (is_object($value) && method_exists($value, 'slug')) {
+                        $value = $value->slug();
+                    }
+                    
+                    $value = (string) $value; // Ensure it's a string
+                    
+                    $taxonomy = Str::before($value, '::');
                     if ($taxonomy) {
                         $this->taxonomies[] = $taxonomy;
                     }
 
                     return Str::after($value, '::');
                 })
-                ->all();
+                ->all(); // Convert back to array
         }
 
         parent::whereIn($column, $values, $boolean);

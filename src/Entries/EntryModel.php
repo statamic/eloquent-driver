@@ -4,9 +4,12 @@ namespace Statamic\Eloquent\Entries;
 
 use Illuminate\Support\Arr;
 use Statamic\Eloquent\Database\BaseModel;
+use Statamic\Eloquent\Taxonomies\TermModel;
 
 class EntryModel extends BaseModel
 {
+    use EagerLoadsTaxonomies;
+
     protected $guarded = [];
 
     protected $table = 'entries';
@@ -30,6 +33,20 @@ class EntryModel extends BaseModel
     public function parent()
     {
         return $this->belongsTo(static::class, 'data->parent');
+    }
+
+    public function terms()
+    {
+        $pivotTable = config('statamic.eloquent-driver.table_prefix', '') . 'entry_term';
+        
+        return $this->belongsToMany(TermModel::class, $pivotTable, 'entry_id', 'term_id')
+            ->withPivot(['taxonomy', 'field'])
+            ->withTimestamps();
+    }
+
+    public function termsForField($field)
+    {
+        return $this->terms()->wherePivot('field', $field);
     }
 
     public function getAttribute($key)
