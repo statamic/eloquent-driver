@@ -3,8 +3,6 @@
 namespace Statamic\Eloquent\Commands;
 
 use Illuminate\Console\Command;
-use Statamic\Eloquent\Entries\EntryModel;
-use Statamic\Eloquent\Taxonomies\TermModel;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Taxonomy;
 
@@ -22,8 +20,8 @@ class SyncTaxonomyRelationships extends Command
         $termModel = app('statamic.eloquent.terms.model');
 
         // Check if we should skip if relationships already exist
-        if (!$this->option('force') && $entryModel::has('terms')->exists()) {
-            if (!$this->confirm('Taxonomy relationships already exist. Continue anyway?')) {
+        if (! $this->option('force') && $entryModel::has('terms')->exists()) {
+            if (! $this->confirm('Taxonomy relationships already exist. Continue anyway?')) {
                 return;
             }
         }
@@ -55,14 +53,14 @@ class SyncTaxonomyRelationships extends Command
 
         foreach ($taxonomies as $taxonomy) {
             $handle = $taxonomy->handle();
-            
-            if (!isset($data[$handle])) {
+
+            if (! isset($data[$handle])) {
                 continue;
             }
 
             $termSlugs = is_array($data[$handle]) ? $data[$handle] : [$data[$handle]];
             $termSlugs = array_unique(array_filter($termSlugs)); // Remove duplicates and empty values
-            
+
             foreach ($termSlugs as $slug) {
                 $term = $termModel::where('taxonomy', $handle)
                     ->where('slug', $slug)
@@ -82,12 +80,12 @@ class SyncTaxonomyRelationships extends Command
             }
         }
 
-        if (!empty($relationships)) {
-            $pivotTable = config('statamic.eloquent-driver.table_prefix', '') . 'entry_term';
-            
+        if (! empty($relationships)) {
+            $pivotTable = config('statamic.eloquent-driver.table_prefix', '').'entry_term';
+
             // Remove existing relationships for this entry
             \DB::table($pivotTable)->where('entry_id', $entry->id)->delete();
-            
+
             // Insert new relationships (values only, keys were just for deduplication)
             \DB::table($pivotTable)->insert(array_values($relationships));
         }

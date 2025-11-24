@@ -37,8 +37,8 @@ class EntryModel extends BaseModel
 
     public function terms()
     {
-        $pivotTable = config('statamic.eloquent-driver.table_prefix', '') . 'entry_term';
-        
+        $pivotTable = config('statamic.eloquent-driver.table_prefix', '').'entry_term';
+
         return $this->belongsToMany(TermModel::class, $pivotTable, 'entry_id', 'term_id')
             ->withPivot(['taxonomy', 'field'])
             ->withTimestamps();

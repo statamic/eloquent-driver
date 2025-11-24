@@ -5,9 +5,9 @@ namespace Statamic\Eloquent\Entries;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
+use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
-use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Entry as EntryFacade;
 
 class Entry extends FileEntry
@@ -224,7 +224,7 @@ class Entry extends FileEntry
 
     protected function getTermsForField($field)
     {
-        if (!$this->model || !$this->model->relationLoaded('terms')) {
+        if (! $this->model || ! $this->model->relationLoaded('terms')) {
             return parent::get($field);
         }
 

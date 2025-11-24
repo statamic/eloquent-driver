@@ -130,7 +130,7 @@ class TermRepository extends StacheRepository
             // since associations index is not built
             return \Statamic\Facades\Entry::query()
                 ->whereTaxonomy($term->id())
-                ->when($status, fn($query) => $query->where('status', $status))
+                ->when($status, fn ($query) => $query->where('status', $status))
                 ->count();
         }
 

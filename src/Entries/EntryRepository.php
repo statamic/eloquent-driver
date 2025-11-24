@@ -79,14 +79,14 @@ class EntryRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
-        
+
         // Extract taxonomy data before saving
         $taxonomyData = $this->extractTaxonomyData($entry);
-        
+
         $model->save();
 
         // Sync taxonomy relationships if we have taxonomy data
-        if (!empty($taxonomyData)) {
+        if (! empty($taxonomyData)) {
             $this->syncTaxonomyRelationships($model, $taxonomyData);
         }
 
@@ -98,12 +98,12 @@ class EntryRepository extends StacheRepository
 
     protected function extractTaxonomyData($entry)
     {
-        if (!$entry->blueprint()) {
+        if (! $entry->blueprint()) {
             return [];
         }
 
         $taxonomyFields = $entry->blueprint()->fields()->all()
-            ->filter(fn($field) => in_array($field->type(), ['taxonomy', 'terms']))
+            ->filter(fn ($field) => in_array($field->type(), ['taxonomy', 'terms']))
             ->map->handle()
             ->all();
 
@@ -125,7 +125,7 @@ class EntryRepository extends StacheRepository
             }
 
             $termSlugs = is_array($termSlugs) ? $termSlugs : [$termSlugs];
-            
+
             foreach ($termSlugs as $slug) {
                 if (empty($slug)) {
                     continue;

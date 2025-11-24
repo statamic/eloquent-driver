@@ -14,15 +14,15 @@ trait EagerLoadsTaxonomies
     public function scopeWithTaxonomiesForCollection($query, $collectionHandle)
     {
         $collection = Collection::find($collectionHandle);
-        
-        if (!$collection) {
+
+        if (! $collection) {
             return $query;
         }
 
         // Check if collection has taxonomy fields
         $hasTaxonomyFields = $collection->entryBlueprints()
-            ->flatMap(fn($blueprint) => $blueprint->fields()->all())
-            ->contains(fn($field) => in_array($field->type(), ['taxonomy', 'terms']));
+            ->flatMap(fn ($blueprint) => $blueprint->fields()->all())
+            ->contains(fn ($field) => in_array($field->type(), ['taxonomy', 'terms']));
 
         if ($hasTaxonomyFields) {
             return $query->with('terms');

@@ -104,7 +104,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         // Check if we're querying specific collections
         $wheres = collect($this->builder->getQuery()->wheres);
         $collectionWheres = $wheres->where('column', 'collection');
-        
+
         if ($collectionWheres->isEmpty()) {
             // If no specific collection, check all collections for taxonomy fields
             $collections = Collection::all();
@@ -113,14 +113,14 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             $collectionHandles = $collectionWheres->flatMap(function ($where) {
                 return isset($where['values']) ? $where['values'] : [$where['value']];
             });
-            $collections = $collectionHandles->map(fn($handle) => Collection::find($handle))->filter();
+            $collections = $collectionHandles->map(fn ($handle) => Collection::find($handle))->filter();
         }
 
         // Check if any of these collections have taxonomy fields
         $hasTaxonomyFields = $collections->contains(function ($collection) {
             return $collection->entryBlueprints()
-                ->flatMap(fn($blueprint) => $blueprint->fields()->all())
-                ->contains(fn($field) => in_array($field->type(), ['taxonomy', 'terms']));
+                ->flatMap(fn ($blueprint) => $blueprint->fields()->all())
+                ->contains(fn ($field) => in_array($field->type(), ['taxonomy', 'terms']));
         });
 
         if ($hasTaxonomyFields) {
@@ -152,6 +152,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     public function withTaxonomies()
     {
         $this->builder->with('terms');
+
         return $this;
     }
 

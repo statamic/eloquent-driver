@@ -101,7 +101,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             if (is_object($value) && method_exists($value, 'slug')) {
                 $value = $value->slug();
             }
-            
+
             $value = (string) $value; // Ensure it's a string
 
             if (str_contains($value, '::')) {
@@ -150,9 +150,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
                     if (is_object($value) && method_exists($value, 'slug')) {
                         $value = $value->slug();
                     }
-                    
+
                     $value = (string) $value; // Ensure it's a string
-                    
+
                     $taxonomy = Str::before($value, '::');
                     if ($taxonomy) {
                         $this->taxonomies[] = $taxonomy;
