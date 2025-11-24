@@ -142,14 +142,6 @@ class Entry extends FileEntry
         }
 
         $model = $class::findOrNew($id)->fill($attributes);
-        
-        // Store taxonomy data for syncing after save
-        $model->_taxonomyData = $source->data()->only(
-            $source->blueprint()?->fields()->all()
-                ->filter(fn($field) => in_array($field->type(), ['taxonomy', 'terms']))
-                ->map->handle()
-                ->all() ?? []
-        );
 
         return $model;
     }

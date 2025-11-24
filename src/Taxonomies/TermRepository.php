@@ -123,6 +123,20 @@ class TermRepository extends StacheRepository
         ];
     }
 
+    public function entriesCount(TermContract $term, ?string $status = null): int
+    {
+        if (config('statamic.eloquent-driver.taxonomies.driver', 'file') === 'eloquent') {
+            // For Eloquent-driven taxonomies, we need to count entries directly
+            // since associations index is not built
+            return \Statamic\Facades\Entry::query()
+                ->whereTaxonomy($term->id())
+                ->when($status, fn($query) => $query->where('status', $status))
+                ->count();
+        }
+
+        return parent::entriesCount($term, $status);
+    }
+
     protected function ensureAssociations()
     {
         if (config('statamic.eloquent-driver.taxonomies.driver', 'file') === 'eloquent') {

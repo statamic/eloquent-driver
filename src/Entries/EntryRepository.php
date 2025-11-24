@@ -79,18 +79,35 @@ class EntryRepository extends StacheRepository
     public function save($entry)
     {
         $model = $entry->toModel();
+        
+        // Extract taxonomy data before saving
+        $taxonomyData = $this->extractTaxonomyData($entry);
+        
         $model->save();
 
         // Sync taxonomy relationships if we have taxonomy data
-        if (isset($model->_taxonomyData)) {
-            $this->syncTaxonomyRelationships($model, $model->_taxonomyData);
-            unset($model->_taxonomyData);
+        if (!empty($taxonomyData)) {
+            $this->syncTaxonomyRelationships($model, $taxonomyData);
         }
 
         $entry->model($model->fresh());
 
         Blink::put("eloquent-entry-{$entry->id()}", $entry);
         Blink::put("eloquent-entry-{$entry->uri()}", $entry);
+    }
+
+    protected function extractTaxonomyData($entry)
+    {
+        if (!$entry->blueprint()) {
+            return [];
+        }
+
+        $taxonomyFields = $entry->blueprint()->fields()->all()
+            ->filter(fn($field) => in_array($field->type(), ['taxonomy', 'terms']))
+            ->map->handle()
+            ->all();
+
+        return $entry->data()->only($taxonomyFields)->all();
     }
 
     protected function syncTaxonomyRelationships($model, $taxonomyData)
