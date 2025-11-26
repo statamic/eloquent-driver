@@ -1,12 +1,4 @@
 <!-- statamic:hide -->
-
-<p align="center">
-<picture>
-    <source srcset="https://statamic.com/assets/branding/squircle/statamic-logo-lime-white.svg" media="(prefers-color-scheme: dark)">
-    <img align="center" width="320" alt="Statamic Logo" src="https://statamic.com/assets/branding/squircle/statamic-logo-lime.svg">
-</picture>
-</p>
-
 # Eloquent Driver
 
 > Provides support for storing your Statamic data in a database, rather than flat files.
