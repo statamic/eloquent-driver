@@ -485,7 +485,7 @@ class ServiceProvider extends AddonServiceProvider
         if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
             return;
         }
-        
+
         $this->app->bind(RevisionQueryBuilder::class, function ($app) {
             return new RevisionQueryBuilder(
                 $app['statamic.eloquent.revisions.model']::query()
