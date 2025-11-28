@@ -253,23 +253,19 @@ class ServiceProvider extends AddonServiceProvider
         // lets remove this when we hit 3.0.0
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.assets.container_model');
 
-        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.driver' : 'statamic.eloquent-driver.asset_containers.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.assets.container_model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.container_model' : 'statamic.eloquent-driver.asset_containers.model');
         });
+
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.assets.driver' : 'statamic.eloquent-driver.asset_containers.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
     }
 
     private function registerAssets()
     {
-        if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.assets.model', function () {
             return config('statamic.eloquent-driver.assets.model');
         });
@@ -277,6 +273,10 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.assets.asset', function () {
             return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
         });
+
+        if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         $this->app->bind(AssetQueryBuilder::class, function ($app) {
             return new AssetQueryBuilder(
@@ -293,10 +293,6 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerBlueprints()
     {
-        if (config('statamic.eloquent-driver.blueprints.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.blueprints.model', function () {
             return config('statamic.eloquent-driver.blueprints.model', config('statamic.eloquent-driver.blueprints.blueprint_model'));
         });
@@ -306,6 +302,10 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.blueprints.model', config('statamic.eloquent-driver.blueprints.blueprint_model'));
         });
 
+        if (config('statamic.eloquent-driver.blueprints.driver', 'file') != 'eloquent') {
+            return;
+        }
+
         $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
             return (new \Statamic\Eloquent\Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
@@ -314,13 +314,13 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerCollections()
     {
-        if (config('statamic.eloquent-driver.collections.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.collections.model', function () {
             return config('statamic.eloquent-driver.collections.model');
         });
+
+        if (config('statamic.eloquent-driver.collections.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
     }
@@ -333,10 +333,6 @@ class ServiceProvider extends AddonServiceProvider
         // lets remove this when we hit 3.0.0
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.collections.tree_model');
 
-        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.driver' : 'statamic.eloquent-driver.collection_trees.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.collections.tree', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.tree' : 'statamic.eloquent-driver.collection_trees.tree');
         });
@@ -345,15 +341,15 @@ class ServiceProvider extends AddonServiceProvider
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.tree_model' : 'statamic.eloquent-driver.collection_trees.model');
         });
 
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.collections.driver' : 'statamic.eloquent-driver.collection_trees.driver', 'file') != 'eloquent') {
+            return;
+        }
+
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
     }
 
     private function registerEntries()
     {
-        if (config('statamic.eloquent-driver.entries.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.entries.entry', function () {
             return config('statamic.eloquent-driver.entries.entry');
         });
@@ -361,6 +357,10 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.entries.model', function () {
             return config('statamic.eloquent-driver.entries.model');
         });
+
+        if (config('statamic.eloquent-driver.entries.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         $this->app->bind(EntryQueryBuilder::class, function ($app) {
             return new EntryQueryBuilder(
@@ -375,10 +375,6 @@ class ServiceProvider extends AddonServiceProvider
     {
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.blueprints.fieldset_model');
 
-        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.blueprints.driver' : 'statamic.eloquent-driver.fieldsets.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.fieldsets.model', function () {
             return config('statamic.eloquent-driver.fieldsets.model', config('statamic.eloquent-driver.blueprints.fieldset_model'));
         });
@@ -388,6 +384,10 @@ class ServiceProvider extends AddonServiceProvider
             return config('statamic.eloquent-driver.fieldsets.model', config('statamic.eloquent-driver.blueprints.fieldset_model'));
         });
 
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.blueprints.driver' : 'statamic.eloquent-driver.fieldsets.driver', 'file') != 'eloquent') {
+            return;
+        }
+
         $this->app->singleton(
             'Statamic\Fields\FieldsetRepository',
             'Statamic\Eloquent\Fields\FieldsetRepository'
@@ -396,13 +396,13 @@ class ServiceProvider extends AddonServiceProvider
 
     private function registerForms()
     {
-        if (config('statamic.eloquent-driver.forms.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.forms.model', function () {
             return config('statamic.eloquent-driver.forms.model');
         });
+
+        if (config('statamic.eloquent-driver.forms.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(FormRepositoryContract::class, FormRepository::class);
     }
@@ -411,15 +411,15 @@ class ServiceProvider extends AddonServiceProvider
     {
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.forms.submission_model');
 
+        $this->app->bind('statamic.eloquent.form_submissions.model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.submission_model' : 'statamic.eloquent-driver.form_submissions.model');
+        });
+
         if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.driver' : 'statamic.eloquent-driver.form_submissions.driver', 'file') != 'eloquent') {
             return;
         }
 
         Statamic::repository(FormSubmissionRepositoryContract::class, SubmissionRepository::class);
-
-        $this->app->bind('statamic.eloquent.form_submissions.model', function () use ($usingOldConfigKeys) {
-            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.forms.submission_model' : 'statamic.eloquent-driver.form_submissions.model');
-        });
 
         $this->app->bind(SubmissionQueryBuilder::class, function ($app) {
             return new SubmissionQueryBuilder(
@@ -445,39 +445,39 @@ class ServiceProvider extends AddonServiceProvider
     {
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.global_sets.variables_model');
 
+        $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
+            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
+        });
+
         if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.driver' : 'statamic.eloquent-driver.global_set_variables.driver', 'file') != 'eloquent') {
             return;
         }
 
         Statamic::repository(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
-
-        $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
-            return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
-        });
     }
 
     private function registerRevisions()
     {
-        if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.revisions.model', function () {
             return config('statamic.eloquent-driver.revisions.model');
         });
+
+        if (config('statamic.eloquent-driver.revisions.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(RevisionRepositoryContract::class, RevisionRepository::class);
     }
 
     private function registerStructures()
     {
-        if (config('statamic.eloquent-driver.navigations.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.navigations.model', function () {
             return config('statamic.eloquent-driver.navigations.model');
         });
+
+        if (config('statamic.eloquent-driver.navigations.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
     }
@@ -490,10 +490,6 @@ class ServiceProvider extends AddonServiceProvider
         // lets remove this when we hit 3.0.0
         $usingOldConfigKeys = config()->has('statamic.eloquent-driver.navigations.tree_model');
 
-        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.driver' : 'statamic.eloquent-driver.navigation_trees.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.navigations.tree', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.tree' : 'statamic.eloquent-driver.navigation_trees.tree');
         });
@@ -502,31 +498,35 @@ class ServiceProvider extends AddonServiceProvider
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.tree_model' : 'statamic.eloquent-driver.navigation_trees.model');
         });
 
+        if (config($usingOldConfigKeys ? 'statamic.eloquent-driver.navigations.driver' : 'statamic.eloquent-driver.navigation_trees.driver', 'file') != 'eloquent') {
+            return;
+        }
+
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
     }
 
     public function registerTaxonomies()
     {
-        if (config('statamic.eloquent-driver.taxonomies.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.taxonomies.model', function () {
             return config('statamic.eloquent-driver.taxonomies.model');
         });
+
+        if (config('statamic.eloquent-driver.taxonomies.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
     }
 
     public function registerTerms()
     {
-        if (config('statamic.eloquent-driver.terms.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.terms.model', function () {
             return config('statamic.eloquent-driver.terms.model');
         });
+
+        if (config('statamic.eloquent-driver.terms.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         $this->app->bind(TermQueryBuilder::class, function ($app) {
             return new TermQueryBuilder(
@@ -539,26 +539,26 @@ class ServiceProvider extends AddonServiceProvider
 
     public function registerTokens()
     {
-        if (config('statamic.eloquent-driver.tokens.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.tokens.model', function () {
             return config('statamic.eloquent-driver.tokens.model');
         });
+
+        if (config('statamic.eloquent-driver.tokens.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
     public function registerSites()
     {
-        if (config('statamic.eloquent-driver.sites.driver', 'file') != 'eloquent') {
-            return;
-        }
-
         $this->app->bind('statamic.eloquent.sites.model', function () {
             return config('statamic.eloquent-driver.sites.model');
         });
+
+        if (config('statamic.eloquent-driver.sites.driver', 'file') != 'eloquent') {
+            return;
+        }
 
         $this->app->singleton(\Statamic\Sites\Sites::class, \Statamic\Eloquent\Sites\Sites::class);
     }
