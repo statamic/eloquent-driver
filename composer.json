@@ -24,13 +24,13 @@
         }
     },
     "require": {
-        "php": "^8.2",
-        "statamic/cms": "^6.0"
+        "php": "^8.3",
+        "statamic/cms": "^6.0.0-alpha.16"
     },
     "require-dev": {
         "doctrine/dbal": "^3.8",
         "laravel/pint": "^1.0",
-        "orchestra/testbench": "^9.6.1 || ^10.0",
+        "orchestra/testbench": "^10.0",
         "phpunit/phpunit": "^11.0"
     },
     "scripts": {
@@ -41,6 +41,5 @@
             "pixelfear/composer-dist-plugin": true
         }
     },
-    "minimum-stability": "dev",
     "prefer-stable": true
 }

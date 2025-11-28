@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Revisions\Revision;
+use Statamic\Facades\Stache;
 use Statamic\Facades\YAML;
 
 class ImportRevisions extends Command
@@ -45,7 +46,7 @@ class ImportRevisions extends Command
 
     private function importRevisions(): void
     {
-        $this->withProgressBar(File::allFiles(config('statamic.revisions.path')), function ($file) {
+        $this->withProgressBar(File::allFiles(Stache::store('revisions')->directory()), function ($file) {
             $yaml = YAML::file($file->getPathname())->parse();
 
             $revision = (new Revision)

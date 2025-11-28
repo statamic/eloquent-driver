@@ -214,11 +214,15 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $wheres = collect($this->builder->getQuery()->wheres);
         $collectionWhere = $wheres->firstWhere('column', 'collection');
 
-        if (
-            ! $collectionWhere
-            || ! isset($collectionWhere['value'])
-            || ! ($collection = Collection::find($collectionWhere['value']))
-        ) {
+        if (! $collectionWhere) {
+            return collect([]);
+        }
+
+        if (isset($collectionWhere['values']) && count($collectionWhere['values']) == 1) {
+            $collectionWhere['value'] = $collectionWhere['values'][0];
+        }
+
+        if (! isset($collectionWhere['value']) || ! $collection = Collection::find($collectionWhere['value'])) {
             return collect([]);
         }
 
@@ -244,5 +248,22 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     private function entryColumnsAndMappings()
     {
         return Blink::once('eloquent-entry-data-column-mappings', fn () => array_merge(self::COLUMNS, (new EloquentEntry)->getDataColumnMappings($this->builder->getModel())));
+    }
+
+    protected function getBlueprintsForRelations()
+    {
+        $collections = empty($this->collections)
+            ? Collection::all()
+            : $this->collections;
+
+        return collect($collections)->flatMap(function ($collection) {
+            if (is_string($collection)) {
+                $collection = Collection::find($collection);
+            }
+
+            return $collection ? $collection->entryBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
     }
 }
