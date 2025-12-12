@@ -42,7 +42,7 @@ class ExportEntries extends Command
     public function handle()
     {
         $this->usingDefaultRepositories(function () {
-            $this->importEntries();
+            $this->exportEntries();
         });
 
         return 0;
@@ -61,9 +61,9 @@ class ExportEntries extends Command
         $callback();
     }
 
-    private function importEntries()
+    private function exportEntries()
     {
-        $entries = app('statamic.eloquent.entries.entry')::all();
+        $entries = app('statamic.eloquent.entries.model')::all();
 
         $entriesWithOrigin = $entries->filter(function ($model) {
             return (bool) $model->origin_id;
@@ -73,21 +73,21 @@ class ExportEntries extends Command
             return ! $model->origin_id;
         });
 
-        if ($entriesWithOrigin->count() > 0) {
-            $this->info('Importing origin entries');
+        if ($entriesWithoutOrigin->count() > 0) {
+            $this->info('Exporting origin entries');
         }
 
         $this->withProgressBar($entriesWithoutOrigin, function ($model) {
             $entry = Entry::make()
+                ->collection($model->collection)
                 ->locale($model->site)
                 ->slug($model->slug)
-                ->collection($model->collection)
                 ->data($model->data)
                 ->blueprint($model->blueprint)
                 ->template($model->data['template'] ?? null)
                 ->published($model->published);
 
-            if (in_array(HasUuids::class, class_uses_recursive($model))) {
+            if ($model->getKeyType() == 'string' || in_array(HasUuids::class, class_uses_recursive($model))) {
                 $entry->id($model->getKey());
             }
 
@@ -104,18 +104,23 @@ class ExportEntries extends Command
 
         if ($entriesWithOrigin->count() > 0) {
             $this->newLine();
-            $this->info('Importing localized entries');
+            $this->info('Exporting localized entries');
 
             $this->withProgressBar($entriesWithOrigin, function ($model) {
+
                 $entry = Entry::make()
+                    ->collection($model->collection)
                     ->origin($model->origin_id)
                     ->locale($model->site)
                     ->slug($model->slug)
-                    ->collection($model->collection)
                     ->data($model->data)
                     ->blueprint($model->data['blueprint'] ?? null)
                     ->template($model->data['template'] ?? null)
                     ->published($model->published);
+
+                if ($model->getKeyType() == 'string' || in_array(HasUuids::class, class_uses_recursive($model))) {
+                    $entry->id($model->getKey());
+                }
 
                 if ($model->date && $entry->collection()->dated()) {
                     $entry->date($model->date);
