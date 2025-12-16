@@ -11,8 +11,6 @@ use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
-    protected $model;
-
     use HasDirtyState {
         syncOriginal as traitSyncOriginal;
     }
@@ -26,9 +24,10 @@ class Asset extends FileAsset
     }
 
     protected $existsOnDisk = false;
-    protected $removedData = [];
 
     protected $model;
+
+    protected $removedData = [];
 
     public static function fromModel(Model $model)
     {
