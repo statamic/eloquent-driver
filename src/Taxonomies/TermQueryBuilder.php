@@ -2,7 +2,8 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
-use Illuminate\Support\Arr;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Blink;
@@ -193,6 +194,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
         });
     }
 
+    public function pluck($column, $key = null)
+    {
+        $this->applyCollectionAndTaxonomyWheres();
+
+        return parent::pluck($column, $key);
+    }
+
     public function count()
     {
         $this->applyCollectionAndTaxonomyWheres();
@@ -215,46 +223,60 @@ class TermQueryBuilder extends EloquentQueryBuilder
                     ? Taxonomy::handles()->all()
                     : $this->taxonomies;
 
-                // get entries in each collection that have a value for the taxonomies we are querying
-                // or the ones associated with the collection
-                // what we ultimately want is a subquery for terms in the form:
-                // where('taxonomy', $taxonomy)->whereIn('slug', $slugArray)
-                $collectionTaxonomyHash = md5(collect($this->collections)->merge(collect($taxonomies))->sort()->join('-'));
+                collect($taxonomies)->each(function ($taxonomy) use ($query) {
+                    $collectionTaxonomyHash = md5(collect($this->collections)->merge([$taxonomy])->sort()->join('-'));
 
-                Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomies) {
-                    return Entry::query()
-                        ->whereIn('collection', $this->collections)
-                        ->select($taxonomies)
-                        ->get();
-                })
-                    ->flatMap(function ($entry) use ($taxonomies) {
-                        $slugs = [];
-                        foreach ($entry->collection()->taxonomies()->map->handle() as $taxonomy) {
-                            if (in_array($taxonomy, $taxonomies)) {
-                                foreach (Arr::wrap($entry->get($taxonomy, [])) as $term) {
-                                    $slugs[] = $taxonomy.'::'.$term;
-                                }
-                            }
+                    $terms = Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomy) {
+                        if (! $taxonomy = Taxonomy::find($taxonomy)) {
+                            return [];
                         }
 
-                        return $slugs;
-                    })
-                    ->unique()
-                    ->map(function ($term) {
-                        return [
-                            'taxonomy' => Str::before($term, '::'),
-                            'term'     => Str::after($term, '::'),
-                        ];
-                    })
-                    ->mapToGroups(function ($item) {
-                        return [$item['taxonomy'] => $item['term']];
-                    })
-                    ->each(function ($terms, $taxonomy) use ($query) {
+                        // workaround to handle potential n+1 queries in the database
+                        // if/when Statamic core supports relationships in a meaningful way this should be removed
+                        if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
+                            $entryClass = app('statamic.eloquent.entries.model');
+                            $termClass = app('statamic.eloquent.terms.model');
+
+                            $entriesTable = (new $entryClass)->getTable();
+                            $termsTable = (new $termClass)->getTable();
+
+                            return TermModel::where('taxonomy', $taxonomy)
+                                ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
+                                    $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
+                                    $value = match ($query->getConnection()->getDriverName()) {
+                                        'sqlite' => new Expression($wrappedColumn),
+                                        'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
+                                        default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
+                                    };
+
+                                    $query->select(DB::raw(1))
+                                        ->from($entriesTable)
+                                        ->whereIn('collection', $this->collections)
+                                        ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
+                                })
+                                ->pluck('slug');
+                        }
+
+                        return TermModel::where('taxonomy', $taxonomy)
+                            ->select('slug')
+                            ->get()
+                            ->map(function ($term) use ($taxonomy) {
+                                return Entry::query()
+                                    ->whereIn('collection', $this->collections)
+                                    ->whereJsonContains($taxonomy->handle(), [$term->slug])
+                                    ->count() > 0 ? $term->slug : null;
+                            })
+                            ->filter()
+                            ->values();
+                    });
+
+                    if ($terms->isNotEmpty()) {
                         $query->orWhere(function ($query) use ($terms, $taxonomy) {
                             $query->where('taxonomy', $taxonomy)
-                                ->whereIn('slug', $terms);
+                                ->whereIn('slug', $terms->all());
                         });
-                    });
+                    }
+                });
             });
         }
 
@@ -272,5 +294,22 @@ class TermQueryBuilder extends EloquentQueryBuilder
     public function with($relations, $callback = null)
     {
         return $this;
+    }
+
+    protected function getBlueprintsForRelations()
+    {
+        $taxonomies = empty($this->taxonomies)
+            ? Taxonomy::handles()
+            : $this->taxonomies;
+
+        return collect($taxonomies)->flatMap(function ($taxonomy) {
+            if (is_string($taxonomy)) {
+                $taxonomy = Taxonomy::find($taxonomy);
+            }
+
+            return $taxonomy ? $taxonomy->termBlueprints() : false;
+        })
+            ->filter()
+            ->unique();
     }
 }

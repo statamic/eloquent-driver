@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
+use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as StacheBlueprint;
 use Statamic\Fields\Fieldset as StacheFieldset;
 use Statamic\Support\Arr;
+use Statamic\Support\Str;
 
 class ExportBlueprints extends Command
 {
@@ -70,11 +72,11 @@ class ExportBlueprints extends Command
                 return;
             }
 
-            (new StacheBlueprint())
+            (new StacheBlueprint)
                 ->setHandle($model->handle)
                 ->setHidden(Arr::get($model->data, 'hide'))
                 ->setOrder(Arr::get($model->data, 'order'))
-                ->setNamespace($model->namespace)
+                ->setNamespace($this->getBlueprintNamespace($model->namespace))
                 ->setContents($this->updateOrderFromBlueprintSections($model->data))
                 ->save();
         });
@@ -98,6 +100,18 @@ class ExportBlueprints extends Command
 
         $this->newLine();
         $this->info('Fieldsets exported');
+    }
+
+    private function getBlueprintNamespace(string $namespace): string
+    {
+        $blueprintDirectory = str_replace('\\', '/', BlueprintFacade::directory());
+        $blueprintDirectory = str_replace('/', '.', $blueprintDirectory);
+
+        if (Str::startsWith($namespace, $blueprintDirectory)) {
+            return mb_substr($namespace, mb_strlen($blueprintDirectory));
+        }
+
+        return $namespace;
     }
 
     private function updateOrderFromBlueprintSections($contents)

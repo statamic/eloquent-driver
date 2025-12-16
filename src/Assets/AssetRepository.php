@@ -82,6 +82,10 @@ class AssetRepository extends BaseRepository
 
     public function delete($asset)
     {
+        if ($id = $asset->id()) {
+            Blink::forget("eloquent-asset-{$id}");
+        }
+
         $this->query()
             ->where([
                 'container' => $asset->container(),
@@ -94,6 +98,9 @@ class AssetRepository extends BaseRepository
     public function save($asset)
     {
         $asset->writeMeta($asset->generateMeta());
+
+        $id = $asset->id();
+        Blink::put("eloquent-asset-{$id}", $asset);
     }
 
     public static function bindings(): array

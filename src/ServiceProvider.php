@@ -39,6 +39,7 @@ use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Tokens\TokenRepository;
+use Statamic\Facades\Stache;
 use Statamic\Listeners\UpdateAssetReferences;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
@@ -58,6 +59,8 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
         \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
         \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
+        \Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable::class,
+        \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
     ];
 
     public function boot()
@@ -84,6 +87,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ExportNavs::class,
             Commands\ExportRevisions::class,
             Commands\ExportTaxonomies::class,
+            Commands\ExportSites::class,
             Commands\ImportAssets::class,
             Commands\ImportBlueprints::class,
             Commands\ImportCollections::class,
@@ -93,6 +97,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportNavs::class,
             Commands\ImportRevisions::class,
             Commands\ImportTaxonomies::class,
+            Commands\ImportSites::class,
             Commands\SyncAssets::class,
             Commands\UpdateAssetReferencesToUseModelKeys::class,
         ]);
@@ -163,6 +168,10 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../database/migrations/2024_03_07_100000_create_tokens_table.php' => database_path('migrations/2024_03_07_100000_create_tokens_table.php'),
         ], 'statamic-eloquent-token-migrations');
 
+        $this->publishes($siteMigrations = [
+            __DIR__.'/../database/migrations/2024_07_16_100000_create_sites_table.php' => database_path('migrations/2024_07_16_100000_create_sites_table.php'),
+        ], 'statamic-eloquent-site-migrations');
+
         $this->publishes(
             array_merge(
                 $taxonomyMigrations,
@@ -179,7 +188,8 @@ class ServiceProvider extends AddonServiceProvider
                 $assetContainerMigrations,
                 $assetMigrations,
                 $revisionMigrations,
-                $tokenMigrations
+                $tokenMigrations,
+                $siteMigrations,
             ),
             'migrations'
         );
@@ -212,6 +222,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerTaxonomies();
         $this->registerTerms();
         $this->registerTokens();
+        $this->registerSites();
     }
 
     private function registerAssetContainers()
@@ -231,6 +242,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+
+        Stache::exclude('asset-containers');
     }
 
     private function registerAssets()
@@ -254,7 +267,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind(AssetContainerContents::class, function ($app) {
-            return new EloquentAssetContainerContents();
+            return new EloquentAssetContainerContents;
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
@@ -263,6 +276,8 @@ class ServiceProvider extends AddonServiceProvider
         if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
             UpdateAssetReferences::disable();
         }
+
+        Stache::exclude('assets');
     }
 
     private function registerBlueprints()
@@ -297,6 +312,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
+
+        Stache::exclude('collections');
     }
 
     private function registerCollectionTrees()
@@ -320,6 +337,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
+        Stache::exclude('collection-trees');
     }
 
     private function registerEntries()
@@ -343,6 +362,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(EntryRepositoryContract::class, EntryRepository::class);
+
+        Stache::exclude('entries');
     }
 
     private function registerFieldsets()
@@ -379,6 +400,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(FormRepositoryContract::class, FormRepository::class);
+
+        Stache::exclude('forms');
     }
 
     private function registerFormSubmissions()
@@ -400,6 +423,8 @@ class ServiceProvider extends AddonServiceProvider
                 $app['statamic.eloquent.form_submissions.model']::query()
             );
         });
+
+        Stache::exclude('form-submissions');
     }
 
     private function registerGlobals()
@@ -413,6 +438,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(GlobalRepositoryContract::class, GlobalRepository::class);
+
+        Stache::exclude('globals');
     }
 
     private function registerGlobalVariables()
@@ -428,6 +455,8 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->bind('statamic.eloquent.global_set_variables.model', function () use ($usingOldConfigKeys) {
             return config($usingOldConfigKeys ? 'statamic.eloquent-driver.global_sets.variables_model' : 'statamic.eloquent-driver.global_set_variables.model');
         });
+
+        Stache::exclude('global-variables');
     }
 
     private function registerRevisions()
@@ -454,6 +483,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavigationRepositoryContract::class, NavigationRepository::class);
+
+        Stache::exclude('navigation');
     }
 
     private function registerStructureTrees()
@@ -477,6 +508,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
+
+        Stache::exclude('nav-trees');
     }
 
     public function registerTaxonomies()
@@ -490,6 +523,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+
+        Stache::exclude('taxonomies');
     }
 
     public function registerTerms()
@@ -509,6 +544,8 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
+
+        Stache::exclude('terms');
     }
 
     public function registerTokens()
@@ -524,6 +561,19 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::repository(TokenRepositoryContract::class, TokenRepository::class);
     }
 
+    public function registerSites()
+    {
+        if (config('statamic.eloquent-driver.sites.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        $this->app->bind('statamic.eloquent.sites.model', function () {
+            return config('statamic.eloquent-driver.sites.model');
+        });
+
+        $this->app->singleton(\Statamic\Sites\Sites::class, \Statamic\Eloquent\Sites\Sites::class);
+    }
+
     protected function addAboutCommandInfo()
     {
         if (! class_exists(AboutCommand::class)) {
@@ -537,7 +587,9 @@ class ServiceProvider extends AddonServiceProvider
             'Collections' => config('statamic.eloquent-driver.collections.driver', 'file'),
             'Collection Trees' => config('statamic.eloquent-driver.collection_trees.driver', 'file'),
             'Entries' => config('statamic.eloquent-driver.entries.driver', 'file'),
+            'Fieldsets' => config('statamic.eloquent-driver.fieldsets.driver', 'file'),
             'Forms' => config('statamic.eloquent-driver.forms.driver', 'file'),
+            'Form Submissions' => config('statamic.eloquent-driver.form_submissions.driver', 'file'),
             'Global Sets' => config('statamic.eloquent-driver.global_sets.driver', 'file'),
             'Global Variables' => config('statamic.eloquent-driver.global_set_variables.driver', 'file'),
             'Navigations' => config('statamic.eloquent-driver.navigations.driver', 'file'),
@@ -546,6 +598,7 @@ class ServiceProvider extends AddonServiceProvider
             'Taxonomies' => config('statamic.eloquent-driver.taxonomies.driver', 'file'),
             'Terms' => config('statamic.eloquent-driver.terms.driver', 'file'),
             'Tokens' => config('statamic.eloquent-driver.tokens.driver', 'file'),
+            'Sites' => config('statamic.eloquent-driver.sites.driver', 'file'),
         ])->map(fn ($value) => $this->applyAboutCommandFormatting($value))->all());
     }
 

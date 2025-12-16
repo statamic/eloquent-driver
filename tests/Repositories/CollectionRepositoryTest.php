@@ -15,11 +15,11 @@ class CollectionRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $stache = (new Stache())->sites(['en', 'fr']);
+        $stache = (new Stache)->sites(['en', 'fr']);
         $this->app->instance(Stache::class, $stache);
         $this->repo = new CollectionRepository($stache);
 

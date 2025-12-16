@@ -4,17 +4,25 @@ namespace Tests\Entries;
 
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
+use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Facades;
 use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Facades\Stache;
+use Statamic\Facades\Term as TermFacade;
+use Statamic\Statamic;
+use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class EntryTest extends TestCase
 {
+    use PreventsSavingStacheItemsToDisk;
     use RefreshDatabase;
 
     #[Test]
@@ -30,7 +38,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())->fromModel($model);
+        $entry = (new Entry)->fromModel($model);
 
         $this->assertEquals('the-slug', $entry->slug());
         $this->assertEquals('bar', $entry->data()->get('foo'));
@@ -59,7 +67,7 @@ class EntryTest extends TestCase
             'en' => '/blog/{slug}',
         ])->save();
 
-        $entry = (new Entry())->fromModel($model)->collection($collection);
+        $entry = (new Entry)->fromModel($model)->collection($collection);
 
         $this->assertEquals(collect($model->toArray())->except(['updated_at'])->all(), collect($entry->toModel()->toArray())->except('updated_at')->all());
     }
@@ -82,7 +90,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -112,7 +120,7 @@ class EntryTest extends TestCase
             ],
         ]);
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -243,19 +251,56 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_localizes_null_fields()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+            'es' => ['name' => 'Spanish', 'locale' => 'es_ES', 'url' => 'http://test.com/es/'],
+            'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'text', 'localizable' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'fr', 'es', 'de'])
+            ->save();
+
+        $entry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->data(['foo' => 'bar']);
+
+        $entry->save();
+        $entry->descendants()->get('fr')->data(['foo' => null])->save();
+        $entry->descendants()->get('es')->data(['foo' => 'baz'])->save();
+
+        $this->assertNull($entry->descendants()->get('fr')->foo ?? null);
+        $this->assertEquals('bar', $entry->descendants()->get('de')->foo ?? null);
+        $this->assertEquals('baz', $entry->descendants()->get('es')->foo ?? null);
+    }
+
+    #[Test]
     public function it_stores_and_retrieves_mapped_data_values()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+            $table->string('foo', 30)->nullable();
+        });
 
         $collection = Collection::make('blog')->title('blog')->routes([
             'en' => '/blog/{slug}',
         ])->save();
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
-            $table->string('foo', 30);
-        });
-
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -285,7 +330,7 @@ class EntryTest extends TestCase
             $table->string('foo', 30)->nullable();
         });
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->collection('blog')
             ->slug('the-slug')
             ->data([
@@ -312,7 +357,7 @@ class EntryTest extends TestCase
             ->routes('{parent_uri}/{slug}')
             ->save();
 
-        $entry = (new Entry())
+        $entry = (new Entry)
             ->id('1.0')
             ->collection('blog')
             ->slug('the-slug')
@@ -327,5 +372,66 @@ class EntryTest extends TestCase
 
         $this->assertSame('/the-new-slug', $entry->uri());
         $this->assertSame('/the-new-slug', $entry->model()->uri);
+    }
+
+    #[Test]
+    public function null_values_are_removed_from_data()
+    {
+        Collection::make('blog')->title('blog')
+            ->routes('{parent_uri}/{slug}')
+            ->save();
+
+        $entry = (new Entry)
+            ->id('1.0')
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data(['foo' => 'bar', 'null_value' => null]);
+
+        $entry->save();
+
+        $this->assertArrayNotHasKey('null_value', $entry->model()->data);
+    }
+
+    #[Test]
+    public function it_doesnt_build_stache_associations_when_taxonomy_driver_is_eloquent()
+    {
+        Taxonomy::make('test')->title('test')->save();
+
+        TermFacade::make('test-term')->taxonomy('test')->data([])->save();
+
+        $taxonomyStore = Stache::stores()->get('terms');
+        $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
+
+        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+
+        $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
+    }
+
+    #[Test]
+    public function it_build_stache_associations_when_taxonomy_driver_is_not_eloquent()
+    {
+        config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
+
+        Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
+        Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
+
+        Taxonomy::make('test')->title('test')->save();
+
+        TermFacade::make('test-term')->taxonomy('test')->data([])->save();
+
+        $taxonomyStore = Stache::stores()->get('terms');
+        $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
+
+        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+
+        $this->assertCount(2, $taxonomyStore->store('test')->index('associations')->items());
     }
 }

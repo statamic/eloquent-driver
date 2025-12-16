@@ -19,7 +19,7 @@ class ImportTaxonomiesTest extends TestCase
 {
     use PreventsSavingStacheItemsToDisk;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

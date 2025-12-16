@@ -764,24 +764,29 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function entries_can_be_ordered_by_an_float_json_field()
+    public function entries_can_be_ordered_by_a_float_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['float' => ['type' => 'float']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 
         Collection::make('posts')->save();
-        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => 3.3])->create();
-        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => 5.5])->create();
-        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => 1.1])->create();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'float' => '9.5'])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'float' => '10.2'])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'float' => '8.7'])->create();
 
         $entries = Entry::query()->where('collection', 'posts')->orderBy('float', 'asc')->get();
+
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereIn('collection', ['posts'])->orderBy('float', 'asc')->get();
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
     }
 
     #[Test]
-    public function entries_can_be_ordered_by_an_date_json_field()
+    public function entries_can_be_ordered_by_a_date_json_field()
     {
         $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true]]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
@@ -795,6 +800,41 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_can_be_ordered_by_a_datetime_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => true, 'mode' => 'range']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00']])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04']])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 20:31:04']])->create();
+        EntryFactory::id('4')->slug('post-4')->collection('posts')->data(['title' => 'Post 4', 'date_field' => ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 22:00:00']])->create();
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 4', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_can_be_ordered_by_a_date_range_json_field()
+    {
+        $blueprint = Blueprint::makeFromFields(['date_field' => ['type' => 'date', 'time_enabled' => false, 'mode' => 'range']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'date_field' => ['start' => '2021-06-15', 'end' => '2021-06-15']])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'date_field' => ['start' => '2021-01-13', 'end' => '2021-06-16']])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'date_field' => ['start' => '2021-11-17', 'end' => '2021-11-16']])->create();
+        EntryFactory::id('4')->slug('post-4')->collection('posts')->data(['title' => 'Post 4', 'date_field' => ['start' => '2021-06-15', 'end' => '2021-06-16']])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('date_field', 'asc')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 4', 'Post 3'], $entries->map->title->all());
     }
 
     #[Test]
@@ -850,7 +890,7 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function filtering_using_whereIn_status_column_writes_deprecation_log()
+    public function filtering_using_where_in_status_column_writes_deprecation_log()
     {
         $this->withoutDeprecationHandling();
         $this->expectException(\ErrorException::class);
@@ -932,6 +972,116 @@ class EntryQueryBuilderTest extends TestCase
         $this->createDummyCollectionAndEntries();
 
         $entries = Entry::query()->where('data->title', 'Post 1')->orWhere('data->title', 'Post 3')->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_are_found_using_where_has_when_max_items_1()
+    {
+        $blueprint = Blueprint::makeFromFields(['entries_field' => ['type' => 'entries', 'max_items' => 1]]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        $this->createDummyCollectionAndEntries();
+
+        Entry::find('1')
+            ->merge([
+                'entries_field' => 2,
+            ])
+            ->save();
+
+        Entry::find('3')
+            ->merge([
+                'entries_field' => 1,
+            ])
+            ->save();
+
+        $entries = Entry::query()->whereHas('entries_field')->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereHas('entries_field', function ($subquery) {
+            $subquery->where('title', 'Post 2');
+        })
+            ->get();
+
+        $this->assertCount(1, $entries);
+        $this->assertEquals(['Post 1'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereNull('entries_field')->orWhereDoesntHave('entries_field', function ($subquery) {
+            $subquery->where('title', 'Post 2');
+        })
+            ->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_are_found_using_where_has_when_max_items_not_1()
+    {
+        $blueprint = Blueprint::makeFromFields(['entries_field' => ['type' => 'entries']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        $this->createDummyCollectionAndEntries();
+
+        Entry::find('1')
+            ->merge([
+                'entries_field' => [2, 1],
+            ])
+            ->save();
+
+        Entry::find('3')
+            ->merge([
+                'entries_field' => [1, 2],
+            ])
+            ->save();
+
+        $entries = Entry::query()->whereHas('entries_field')->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereHas('entries_field', function ($subquery) {
+            $subquery->where('title', 'Post 2');
+        })
+            ->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->whereDoesntHave('entries_field', function ($subquery) {
+            $subquery->where('title', 'Post 2');
+        })
+            ->get();
+
+        $this->assertCount(1, $entries);
+        $this->assertEquals(['Post 2'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_are_found_using_where_relation()
+    {
+        $blueprint = Blueprint::makeFromFields(['entries_field' => ['type' => 'entries']]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        $this->createDummyCollectionAndEntries();
+
+        Entry::find('1')
+            ->merge([
+                'entries_field' => [2, 1],
+            ])
+            ->save();
+
+        Entry::find('3')
+            ->merge([
+                'entries_field' => [1, 2],
+            ])
+            ->save();
+
+        $entries = Entry::query()->whereRelation('entries_field', 'title', 'Post 2')->get();
 
         $this->assertCount(2, $entries);
         $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());

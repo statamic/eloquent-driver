@@ -12,7 +12,7 @@ class Variables extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->globalSet($model->handle)
             ->locale($model->locale)
             ->data($model->data)
@@ -31,15 +31,11 @@ class Variables extends FileEntry
 
         $data = $source->data();
 
-        if ($source->hasOrigin()) {
-            $data = $source->origin()->data()->merge($data);
-        }
-
         return $class::firstOrNew([
             'handle' => $source->globalSet()->handle(),
             'locale' => $source->locale,
         ])->fill([
-            'data'   => $data,
+            'data'   => $data->filter(fn ($v) => $v !== null),
             'origin' => $source->hasOrigin() ? $source->origin()->locale() : null,
         ]);
     }
@@ -47,13 +43,6 @@ class Variables extends FileEntry
     protected function getOriginByString($origin)
     {
         return $this->globalSet()->in($origin);
-    }
-
-    public function save()
-    {
-        $this->toModel()->save();
-
-        return $this;
     }
 
     public function model($model = null)

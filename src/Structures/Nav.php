@@ -12,12 +12,13 @@ class Nav extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->handle($model->handle)
             ->title($model->title)
             ->collections($model->settings['collections'] ?? null)
             ->maxDepth($model->settings['max_depth'] ?? null)
             ->expectsRoot($model->settings['expects_root'] ?? false)
+            ->canSelectAcrossSites($model->settings['select_across_sites'] ?? false)
             ->model($model);
     }
 
@@ -35,14 +36,19 @@ class Nav extends FileEntry
     {
         $class = app('statamic.eloquent.navigations.model');
 
-        return $class::firstOrNew(['handle' => $source->handle()])->fill([
+        $model = $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title'    => $source->title(),
-            'settings' => [
-                'collections'  => $source->collections()->map->handle(),
-                'max_depth'    => $source->maxDepth(),
-                'expects_root' => $source->expectsRoot(),
-            ],
+            'settings' => [],
         ]);
+
+        $model->settings = array_merge($model->settings ?? [], [
+            'collections'  => $source->collections()->map->handle(),
+            'select_across_sites' => $source->canSelectAcrossSites(),
+            'max_depth'    => $source->maxDepth(),
+            'expects_root' => $source->expectsRoot(),
+        ]);
+
+        return $model;
     }
 
     public function model($model = null)

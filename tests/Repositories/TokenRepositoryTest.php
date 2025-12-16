@@ -13,11 +13,11 @@ class TokenRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repo = new TokenRepository();
+        $this->repo = new TokenRepository;
 
         $this->repo->make('abc', 'ExampleHandler', ['foo' => 'bar'])->save();
     }

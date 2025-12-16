@@ -16,7 +16,7 @@ class Term extends FileEntry
         $data = $model->data;
 
         /** @var Term $term */
-        $term = (new static())
+        $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
             ->model($model)
@@ -38,7 +38,9 @@ class Term extends FileEntry
         $term->data($data);
 
         if (config('statamic.system.track_last_update')) {
-            $term->set('updated_at', $model->updated_at ?? $model->created_at);
+            $updatedAt = ($model->updated_at ?? $model->created_at);
+
+            $term->set('updated_at', $updatedAt instanceof Carbon ? $updatedAt->timestamp : $updatedAt);
         }
 
         return $term->syncOriginal();
@@ -74,12 +76,13 @@ class Term extends FileEntry
         }
 
         return $class::firstOrNew([
-            'slug'     => $source->slug(),
+            'slug'     => $source->getOriginal('slug', $source->slug()),
             'taxonomy' => $source->taxonomy(),
             'site'     => $source->locale(),
         ])->fill([
+            'slug'       => $source->slug(),
             'uri'        => $source->uri(),
-            'data'       => $data,
+            'data'       => collect($data)->filter(fn ($v) => $v !== null),
             'updated_at' => $source->lastModified(),
         ]);
     }

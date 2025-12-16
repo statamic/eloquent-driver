@@ -25,7 +25,8 @@ class ImportBlueprints extends Command
     protected $signature = 'statamic:eloquent:import-blueprints
         {--force : Force the import to run, with all prompts answered "yes"}
         {--only-blueprints : Only import blueprints}
-        {--only-fieldsets : Only import fieldsets}';
+        {--only-fieldsets : Only import fieldsets}
+        {--all-blueprints : Import all blueprints, regardless of configured namespaces}';
 
     /**
      * The console command description.
@@ -69,7 +70,7 @@ class ImportBlueprints extends Command
             return;
         }
 
-        $directory = resource_path('blueprints');
+        $directory = str_replace('\\', '/', resource_path('blueprints'));
 
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
@@ -78,6 +79,10 @@ class ImportBlueprints extends Command
             [$namespace, $handle] = $this->getNamespaceAndHandle(
                 Str::after(Str::before($path, '.yaml'), $directory.'/')
             );
+
+            if (! $this->shouldImportBlueprint($namespace)) {
+                return;
+            }
 
             $contents = YAML::file($path)->parse();
             // Ensure sections are ordered correctly.
@@ -129,7 +134,7 @@ class ImportBlueprints extends Command
             return;
         }
 
-        $directory = resource_path('fieldsets');
+        $directory = str_replace('\\', '/', resource_path('fieldsets'));
 
         $files = File::withAbsolutePaths()
             ->getFilesByTypeRecursively($directory, 'yaml');
@@ -171,6 +176,16 @@ class ImportBlueprints extends Command
         }
 
         return [$namespace, $handle];
+    }
+
+    private function shouldImportBlueprint($namespace = null): bool
+    {
+        $eloquentNamespaces = config('statamic.eloquent-driver.blueprints.namespaces', 'all');
+        if ($this->option('all-blueprints') || $eloquentNamespaces === 'all') {
+            return true;
+        }
+
+        return in_array($namespace, $eloquentNamespaces);
     }
 
     private function shouldImportBlueprints(): bool

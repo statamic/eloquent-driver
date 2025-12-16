@@ -98,4 +98,9 @@ return [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Tokens\TokenModel::class,
     ],
+
+    'sites' => [
+        'driver' => 'file',
+        'model' => \Statamic\Eloquent\Sites\SiteModel::class,
+    ],
 ];

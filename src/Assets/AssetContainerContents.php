@@ -2,7 +2,6 @@
 
 namespace Statamic\Eloquent\Assets;
 
-use Illuminate\Support\Facades\Cache;
 use Statamic\Assets\AssetContainerContents as CoreAssetContainerContents;
 use Statamic\Statamic;
 use Statamic\Support\Str;
@@ -39,11 +38,21 @@ class AssetContainerContents extends CoreAssetContainerContents
             return $this->folders;
         }
 
-        $this->folders = Cache::remember($this->key(), $this->ttl(), function () {
-            return $this->query()->select(['folder'])
-                ->distinct()
-                ->get()
-                ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir']);
+        $this->folders = $this->cacheStore()->remember($this->key(), $this->ttl(), function () {
+            return
+                collect(
+                    $this->query()->select(['folder'])
+                        ->distinct()
+                        ->get()
+                        ->map(fn ($model) => ['path' => $model->folder, 'type' => 'dir'])
+                )
+                    ->merge(
+                        collect($this->container->disk()->getFolders('/', true)
+                            ->filter(fn ($folder) => ! Str::startsWith($folder, '.'))
+                        )
+                            ->map(fn ($folder) => ['path' => $folder, 'type' => 'dir'])
+                    )
+                    ->unique();
         });
 
         return $this->folders;
@@ -71,7 +80,7 @@ class AssetContainerContents extends CoreAssetContainerContents
 
         return $this->directories()
             ->filter(function ($dir) use ($folder) {
-                if ($folder && ! Str::startsWith($dir['path'], $folder)) {
+                if ($folder && ! Str::startsWith($dir['path'], Str::finish($folder, '/'))) {
                     return false;
                 }
 
@@ -115,7 +124,7 @@ class AssetContainerContents extends CoreAssetContainerContents
 
     public function save()
     {
-        Cache::put($this->key(), $this->folders, $this->ttl());
+        $this->cacheStore()->put($this->key(), $this->folders, $this->ttl());
     }
 
     public function forget($path)
@@ -136,7 +145,7 @@ class AssetContainerContents extends CoreAssetContainerContents
             $this->add($dir);
         }
 
-        $this->folders->push(['path' => $path]);
+        $this->folders->push(['path' => $path, 'type' => 'dir']);
 
         return $this;
     }

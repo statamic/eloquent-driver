@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Forms\Form as Contract;
 use Statamic\Events\FormDeleted;
 use Statamic\Events\FormSaved;
+use Statamic\Facades\Blink;
 use Statamic\Forms\Form as FileEntry;
 
 class Form extends FileEntry
@@ -14,12 +15,13 @@ class Form extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static())
+        return (new static)
             ->title($model->title)
             ->handle($model->handle)
             ->store($model->settings['store'] ?? null)
             ->email($model->settings['email'] ?? null)
             ->honeypot($model->settings['honeypot'] ?? null)
+            ->data($model->settings['data'] ?? [])
             ->model($model);
     }
 
@@ -38,6 +40,7 @@ class Form extends FileEntry
                 'store'    => $source->store(),
                 'email'    => $source->email(),
                 'honeypot' => $source->honeypot(),
+                'data' => $source->data()->filter(fn ($v) => $v !== null),
             ],
         ]);
     }
@@ -60,6 +63,9 @@ class Form extends FileEntry
 
         $this->model($model->fresh());
 
+        Blink::forget("eloquent-forms-{$this->handle()}");
+        Blink::forget('eloquent-forms');
+
         FormSaved::dispatch($this);
     }
 
@@ -67,6 +73,9 @@ class Form extends FileEntry
     {
         $this->submissions()->each->delete();
         $this->model()->delete();
+
+        Blink::forget("eloquent-forms-{$this->handle()}");
+        Blink::forget('eloquent-forms');
 
         FormDeleted::dispatch($this);
     }
