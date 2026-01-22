@@ -4,8 +4,10 @@ namespace Statamic\Eloquent\Assets;
 
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Assets\Asset as FileAsset;
+use Statamic\Assets\AssetUploader as Uploader;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Data\HasDirtyState;
+use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
@@ -205,5 +207,26 @@ class Asset extends FileAsset
             'basename' => $this->basename(),
             'data' => $this->data()->toArray(),
         ]);
+    }
+
+    /**
+     * Move the asset to a different location.
+     *
+     * @param  string  $folder  The folder relative to the container.
+     * @param  string|null  $filename  The new filename, if renaming.
+     * @return $this
+     */
+    public function move($folder, $filename = null)
+    {
+        $filename = Uploader::getSafeFilename($filename ?: $this->filename());
+        $oldPath = $this->path();
+        $newPath = Str::removeLeft(Path::tidy($folder.'/'.$filename.'.'.pathinfo($oldPath, PATHINFO_EXTENSION)), '/');
+
+        $this->hydrate();
+        $this->disk()->rename($oldPath, $newPath);
+        $this->path($newPath);
+        $this->save();
+
+        return $this;
     }
 }
