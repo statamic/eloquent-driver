@@ -43,6 +43,7 @@ use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
 use Statamic\Eloquent\Tokens\TokenRepository;
 use Statamic\Facades\Stache;
+use Statamic\Listeners\UpdateAssetReferences;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
@@ -103,6 +104,7 @@ class ServiceProvider extends AddonServiceProvider
             Commands\ImportTaxonomies::class,
             Commands\ImportSites::class,
             Commands\SyncAssets::class,
+            Commands\UpdateAssetReferencesToUseModelKeys::class,
         ]);
 
         $this->addAboutCommandInfo();
@@ -293,6 +295,11 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         Statamic::repository(AssetRepositoryContract::class, AssetRepository::class);
+
+        // we dont need asset references to run on asset save if we are linking by id, as the references dont update
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            UpdateAssetReferences::disable();
+        }
 
         Stache::exclude('assets');
     }

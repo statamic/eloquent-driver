@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Assets\Asset;
 use Statamic\Eloquent\Assets\AssetModel;
@@ -255,5 +256,54 @@ class AssetTest extends TestCase
         Event::assertDispatched(AssetSaved::class, fn ($event) => $event->asset === $asset);
 
         $this->assertCount(6, AssetModel::all());
+    }
+
+    #[Test]
+    public function not_referencing_by_id_gives_a_container_and_path_id()
+    {
+        $asset = Facades\Asset::find('test::f.jpg');
+
+        $this->assertNotSame($asset->id(), $asset->model()->getKey());
+        $this->assertStringContainsString('::', $asset->id());
+    }
+
+    #[Test]
+    #[DefineEnvironment('setUseModelKeysConfig')]
+    public function referencing_by_id_gives_a_model_id()
+    {
+        $asset = Facades\Asset::find('test::f.jpg');
+
+        $this->assertSame($asset->id(), $asset->model()->getKey());
+    }
+
+    #[Test]
+    #[DefineEnvironment('setUseModelKeysConfig')]
+    public function an_error_is_thrown_when_getting_id_before_asset_is_saved()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('ID is not available until asset is saved');
+
+        Storage::disk('test')->put('new.jpg', '');
+        Facades\Asset::make()->container('test')->path('new.jpg')->id();
+    }
+
+    #[Test]
+    #[DefineEnvironment('setUseModelKeysConfig')]
+    public function using_find_with_an_id_returns_an_asset()
+    {
+        $asset = Facades\Asset::find('test::6');
+
+        $this->assertInstanceOf(Asset::class, $asset);
+        $this->assertSame('f.jpg', $asset->basename());
+
+        $asset = Facades\Asset::find('6');
+
+        $this->assertInstanceOf(Asset::class, $asset);
+        $this->assertSame('f.jpg', $asset->basename());
+    }
+
+    protected function setUseModelKeysConfig($app)
+    {
+        $app['config']->set('statamic.eloquent-driver.assets.use_model_keys_for_ids', true);
     }
 }
