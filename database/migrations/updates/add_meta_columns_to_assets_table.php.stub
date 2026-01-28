@@ -1,0 +1,69 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Arr;
+use Statamic\Eloquent\Assets\AssetModel;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
+
+return new class extends Migration {
+    public function up()
+    {
+        if (Schema::hasColumn($this->prefix('assets_meta', 'size')) {
+            return;
+        }
+
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->integer('duration')->nullable()->default(null);
+            $table->integer('height')->nullable()->default(null);
+            $table->integer('last_modified')->default(0);
+            $table->string('mime_type')->default('');
+            $table->integer('size')->default(0)->index();
+            $table->integer('width')->nullable()->default(null);
+        });
+
+        AssetModel::query()
+            ->lazy()
+            ->each(function ($model) {
+                $meta = $model->meta;
+
+                $model->duration = Arr::pull($meta, 'duration', null);
+                $model->height = Arr::pull($meta, 'height', null);
+                $model->last_modified = Arr::pull($meta, 'last_modified', time());
+                $model->mime_type = Arr::pull($meta, 'mime_type', '');
+                $model->size = Arr::pull($meta, 'size', 0);
+                $model->width = Arr::pull($meta, 'height', null);
+
+                $model->meta = $meta['data'];
+                $model->saveQuietly();
+            });
+    }
+
+    public function down()
+    {
+        if (! Schema::hasColumn($this->prefix('assets_meta', 'size')) {
+            return;
+        }
+
+        AssetModel::query()
+            ->lazy()
+            ->each(function ($model) {
+                $meta = $model->meta;
+
+                $meta['duration'] = $model->duration;
+                $meta['height'] = $model->height;
+                $meta['last_modified'] = $model->last_modified;
+                $meta['mime_type'] = $model->mime_type;
+                $meta['size'] = $model->size;
+                $meta['width'] = $model->width;
+
+                $model->meta = $meta;
+
+                $model->saveQuietly();
+            });
+
+        Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
+            $table->dropColumn(['duration', 'height', 'last_modified', 'mime_type', 'size', 'width']);
+        });
+    }
+};

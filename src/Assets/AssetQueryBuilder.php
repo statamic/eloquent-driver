@@ -16,19 +16,13 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     use QueriesJsonColumns;
 
     const COLUMNS = [
-        'id', 'container', 'folder', 'basename', 'filename', 'extension', 'path', 'created_at', 'updated_at',
-    ];
-
-    const META_COLUMNS = [
-        'size', 'width', 'height', 'duration', 'mime_type', 'last_modified',
+        'id', 'container', 'folder', 'basename', 'filename', 'extension', 'path', 'size', 'width', 'height', 'duration', 'mime_type', 'last_modified', 'created_at', 'updated_at',
     ];
 
     protected function column($column)
     {
-        if (in_array($column, self::META_COLUMNS)) {
+        if (! in_array($column, self::COLUMNS)) {
             $column = 'meta->'.$column;
-        } elseif (! in_array($column, self::COLUMNS)) {
-            $column = 'meta->data->'.$column;
         }
 
         return $column;
