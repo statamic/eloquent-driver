@@ -174,6 +174,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
     {
         $this->applyCollectionAndTaxonomyWheres();
 
+        // Ensure 'taxonomy' is always selected as it's required for Term::fromModel().
+        if (! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
+            $columns[] = 'taxonomy';
+        }
+
         $items = parent::get($columns);
 
         // If a single collection has been queried, we'll supply it to the terms so
@@ -211,6 +216,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
     public function paginate($perPage = null, $columns = [], $pageName = 'page', $page = null)
     {
         $this->applyCollectionAndTaxonomyWheres();
+
+        // Ensure 'taxonomy' is always selected as it's required for Term::fromModel().
+        if (! empty($columns) && ! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
+            $columns[] = 'taxonomy';
+        }
 
         return parent::paginate($perPage, $columns, $pageName, $page);
     }
