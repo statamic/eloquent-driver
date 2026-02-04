@@ -40,18 +40,11 @@ class TaxonomyRepository extends StacheRepository
 
     public function findByHandle($handle): ?TaxonomyContract
     {
-        $blinkKey = "eloquent-taxonomies-{$handle}";
-        $taxonomyModel = Blink::once($blinkKey, function () use ($handle) {
+        $taxonomyModel = Blink::once("eloquent-taxonomies-{$handle}", function () use ($handle) {
             return app('statamic.eloquent.taxonomies.model')::whereHandle($handle)->first();
         });
 
-        if (! $taxonomyModel instanceof Model) {
-            Blink::forget($blinkKey);
-
-            return null;
-        }
-
-        return app(TaxonomyContract::class)->fromModel($taxonomyModel);
+        return $taxonomyModel instanceof Model ? app(TaxonomyContract::class)->fromModel($taxonomyModel) : null;
     }
 
     public function findByUri(string $uri, ?string $site = null): ?Taxonomy
