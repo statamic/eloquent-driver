@@ -9,8 +9,10 @@ use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContra
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TermModel;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Stache;
+use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Statamic;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
@@ -116,5 +118,42 @@ class TermTest extends TestCase
         $this->assertSame(1, $taxonomy->queryTerms()->pluck('slug')->unique()->count());
         $this->assertSame(1, $taxonomy->queryTerms()->count());
         $this->assertSame($term->slug(), $taxonomy->queryTerms()->get()->pluck('slug')->first());
+    }
+
+    #[Test]
+    public function it_does_not_cache_null_taxonomy_lookups()
+    {
+        $taxonomy = TaxonomyFacade::findByHandle('future');
+        $this->assertNull($taxonomy);
+
+        // Create taxonomy directly in DB, bypassing TaxonomyRepository::save().
+        $modelClass = app('statamic.eloquent.taxonomies.model');
+        $modelClass::create([
+            'handle' => 'future',
+            'title' => 'Future Taxonomy',
+            'sites' => ['en'],
+            'settings' => [],
+        ]);
+
+        $taxonomy = TaxonomyFacade::findByHandle('future');
+
+        $this->assertNotNull($taxonomy);
+        $this->assertEquals('future', $taxonomy->handle());
+    }
+
+    #[Test]
+    public function it_queries_terms_with_taxonomy_available()
+    {
+        Taxonomy::make('tags')->title('Tags')->save();
+        TermFacade::make('test-tag')->taxonomy('tags')->data(['title' => 'Test Tag'])->save();
+
+        Blink::flush();
+
+        $terms = TermFacade::query()->get();
+
+        $this->assertCount(1, $terms);
+        $this->assertEquals('test-tag', $terms->first()->slug());
+        $this->assertNotNull($terms->first()->taxonomy());
+        $this->assertEquals('tags', $terms->first()->taxonomy()->handle());
     }
 }
