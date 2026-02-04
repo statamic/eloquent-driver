@@ -9,8 +9,10 @@ use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContra
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TermModel;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Stache;
+use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Statamic;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
