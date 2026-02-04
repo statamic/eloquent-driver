@@ -175,7 +175,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         $this->applyCollectionAndTaxonomyWheres();
 
         // Ensure 'taxonomy' is always selected as it's required for Term::fromModel().
-        if (! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
+        if (! empty($columns) && ! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
             $columns[] = 'taxonomy';
         }
 
@@ -218,7 +218,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
         $this->applyCollectionAndTaxonomyWheres();
 
         // Ensure 'taxonomy' is always selected as it's required for Term::fromModel().
-        if (! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
+        if (! empty($columns) && ! in_array('*', $columns) && ! in_array('taxonomy', $columns)) {
             $columns[] = 'taxonomy';
         }
 

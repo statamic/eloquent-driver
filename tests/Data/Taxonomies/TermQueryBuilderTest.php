@@ -675,4 +675,61 @@ class TermQueryBuilderTest extends TestCase
         $this->assertCount(1, $terms);
         $this->assertEquals(['c'], $terms->map->slug->all());
     }
+
+    #[Test]
+    public function it_ensures_taxonomy_column_is_selected_when_columns_are_specified()
+    {
+        Taxonomy::make('tags')->save();
+        Term::make('a')->taxonomy('tags')->data(['title' => 'Term A', 'description' => 'Description A'])->save();
+        Term::make('b')->taxonomy('tags')->data(['title' => 'Term B', 'description' => 'Description B'])->save();
+
+        // When specific columns are requested (not including taxonomy), taxonomy should be auto-added
+        $terms = Term::query()->get(['slug', 'data']);
+        $this->assertCount(2, $terms);
+        $this->assertEquals(['a', 'b'], $terms->map->slug()->all());
+
+        // When empty array is passed, should not add taxonomy column
+        $terms = Term::query()->get([]);
+        $this->assertCount(2, $terms);
+        $this->assertEquals(['a', 'b'], $terms->map->slug()->all());
+
+        // When * is requested, taxonomy is included automatically
+        $terms = Term::query()->get(['*']);
+        $this->assertCount(2, $terms);
+        $this->assertEquals(['a', 'b'], $terms->map->slug()->all());
+
+        // When taxonomy is already included, should not be duplicated
+        $terms = Term::query()->get(['slug', 'taxonomy', 'data']);
+        $this->assertCount(2, $terms);
+        $this->assertEquals(['a', 'b'], $terms->map->slug()->all());
+    }
+
+    #[Test]
+    public function it_ensures_taxonomy_column_is_selected_when_paginating_with_columns()
+    {
+        Taxonomy::make('tags')->save();
+        Term::make('a')->taxonomy('tags')->data(['title' => 'Term A'])->save();
+        Term::make('b')->taxonomy('tags')->data(['title' => 'Term B'])->save();
+        Term::make('c')->taxonomy('tags')->data(['title' => 'Term C'])->save();
+
+        // When specific columns are requested in paginate (not including taxonomy), taxonomy should be auto-added
+        $paginated = Term::query()->paginate(2, ['slug', 'data']);
+        $this->assertCount(2, $paginated);
+        $this->assertEquals(['a', 'b'], $paginated->getCollection()->map->slug()->all());
+
+        // When empty array is passed to paginate, should not add taxonomy column
+        $paginated = Term::query()->paginate(2, []);
+        $this->assertCount(2, $paginated);
+        $this->assertEquals(['a', 'b'], $paginated->getCollection()->map->slug()->all());
+
+        // When * is requested in paginate, taxonomy is included automatically
+        $paginated = Term::query()->paginate(2, ['*']);
+        $this->assertCount(2, $paginated);
+        $this->assertEquals(['a', 'b'], $paginated->getCollection()->map->slug()->all());
+
+        // When taxonomy is already included in paginate, should not be duplicated
+        $paginated = Term::query()->paginate(2, ['slug', 'taxonomy', 'data']);
+        $this->assertCount(2, $paginated);
+        $this->assertEquals(['a', 'b'], $paginated->getCollection()->map->slug()->all());
+    }
 }
