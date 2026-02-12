@@ -84,6 +84,7 @@ class FormSubmissionTest extends TestCase
             'data' => [
                 'name' => 'Billy Doe',
             ],
+            'created_at' => now()->addMicrosecond(),
         ]);
 
         $this->assertCount(2, SubmissionModel::all());
