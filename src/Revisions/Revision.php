@@ -71,4 +71,9 @@ class Revision extends FileEntry
 
         return $this;
     }
+
+    public function toWorkingCopy(): FileEntry
+    {
+        return parent::toWorkingCopy()->model($this->model);
+    }
 }
