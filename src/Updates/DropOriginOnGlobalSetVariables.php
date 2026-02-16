@@ -2,13 +2,17 @@
 
 namespace Statamic\Eloquent\Updates;
 
+use Illuminate\Support\Facades\Schema;
 use Statamic\UpdateScripts\UpdateScript;
 
 class DropOriginOnGlobalSetVariables extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return $this->isUpdatingTo('5.0.0');
+        $globalSetVariablesTable = config('statamic.eloquent-driver.table_prefix', '').'global_set_variables';
+
+        return $this->isUpdatingTo('5.0.0')
+            && Schema::hasTable($globalSetVariablesTable) && Schema::hasColumn($globalSetVariablesTable, 'origin');
     }
 
     public function update()
