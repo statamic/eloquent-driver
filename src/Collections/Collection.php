@@ -36,6 +36,7 @@ class Collection extends FileEntry
             ->futureDateBehavior($model->settings['future_date_behavior'] ?? null)
             ->pastDateBehavior($model->settings['past_date_behavior'] ?? null)
             ->previewTargets($model->settings['preview_targets'] ?? [])
+            ->entryClass($model->settings['entry_class'] ?? null)
             ->handle($model->handle)
             ->model($model);
     }
@@ -76,6 +77,7 @@ class Collection extends FileEntry
             'future_date_behavior' => $source->futureDateBehavior(),
             'preview_targets'      => $source->previewTargets(),
             'origin_behavior'      => $source->originBehavior(),
+            'entry_class'          => $source->entryClass(),
         ]);
 
         return $model;
