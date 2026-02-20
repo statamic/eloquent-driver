@@ -29,7 +29,10 @@ class ExportCollections extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-collections {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-collections
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-collections : Only export collections}
+        {--only-collection-trees : Only export collection trees}';
 
     /**
      * The console command description.
@@ -40,10 +43,8 @@ class ExportCollections extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->usingDefaultRepositories(function () {
             $this->exportCollections();
@@ -53,10 +54,10 @@ class ExportCollections extends Command
         $this->newLine();
         $this->info('Collections exported');
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
+    private function usingDefaultRepositories(Closure $callback): void
     {
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
         Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
@@ -68,9 +69,9 @@ class ExportCollections extends Command
         $callback();
     }
 
-    private function exportCollections()
+    private function exportCollections(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export collections?')) {
+        if (! $this->shouldExportCollections()) {
             return;
         }
 
@@ -109,9 +110,9 @@ class ExportCollections extends Command
         $this->info('Collections exported');
     }
 
-    private function exportCollectionTrees()
+    private function exportCollectionTrees(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export collection trees?')) {
+        if (! $this->shouldExportCollectionTrees()) {
             return;
         }
 
@@ -129,5 +130,19 @@ class ExportCollections extends Command
 
         $this->newLine();
         $this->info('Collection trees exported');
+    }
+
+    private function shouldExportCollections(): bool
+    {
+        return $this->option('only-collections')
+            || ! $this->option('only-collection-trees')
+            && ($this->option('force') || $this->confirm('Do you want to export collections?'));
+    }
+
+    private function shouldExportCollectionTrees(): bool
+    {
+        return $this->option('only-collection-trees')
+            || ! $this->option('only-collections')
+            && ($this->option('force') || $this->confirm('Do you want to export collections trees?'));
     }
 }
