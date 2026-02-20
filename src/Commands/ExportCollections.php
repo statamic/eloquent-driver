@@ -46,8 +46,11 @@ class ExportCollections extends Command
      */
     public function handle(): int
     {
-        $this->usingDefaultRepositories(function () {
+        $this->usingDefaultCollectionRepositories(function () {
             $this->exportCollections();
+        });
+
+        $this->usingDefaultCollectionTreeRepositories(function () {
             $this->exportCollectionTrees();
         });
 
@@ -57,16 +60,37 @@ class ExportCollections extends Command
         return self::SUCCESS;
     }
 
-    private function usingDefaultRepositories(Closure $callback): void
+    private function usingDefaultCollectionRepositories(Closure $callback): void
     {
+        $originalRepo = get_class(app()->make(CollectionRepositoryContract::class));
+        $originalCollection = get_class(app()->make(CollectionContract::class));
+
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
-        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
         app()->bind(CollectionContract::class, EloquentCollection::class);
 
         $callback();
+
+        Statamic::repository(CollectionRepositoryContract::class, $originalRepo);
+        app()->bind(CollectionContract::class, $originalCollection);
+
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
+    }
+
+    private function usingDefaultCollectionTreeRepositories(Closure $callback): void
+    {
+        $originalTreeRepo = get_class(app()->make(CollectionTreeRepositoryContract::class));
+
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
+
+        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
+        $callback();
+
+        Statamic::repository(CollectionTreeRepositoryContract::class, $originalTreeRepo);
+
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
     }
 
     private function exportCollections(): void
