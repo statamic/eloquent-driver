@@ -5,7 +5,6 @@ namespace Statamic\Eloquent\Commands;
 use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Str;
 use Statamic\Assets\Asset;
 use Statamic\Assets\AssetContainer;
 use Statamic\Assets\AssetRepository;
@@ -45,20 +44,18 @@ class ExportAssets extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->usingDefaultRepositories(function () {
             $this->exportAssetContainers();
             $this->exportAssets();
         });
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
+    private function usingDefaultRepositories(Closure $callback): void
     {
         Facade::clearResolvedInstance(AssetContainerRepositoryContract::class);
         Facade::clearResolvedInstance(AssetRepositoryContract::class);
@@ -102,13 +99,10 @@ class ExportAssets extends Command
         $assets = AssetModel::all();
 
         $this->withProgressBar($assets, function ($model) {
-            $container = Str::before($model->handle, '::');
-            $path = Str::after($model->handle, '::');
-
             AssetFacade::make()
-                ->container($container)
-                ->path($path)
-                ->writeMeta($model->data);
+                ->container($model->container)
+                ->path($model->path)
+                ->writeMeta($model->meta);
         });
 
         $this->newLine();
