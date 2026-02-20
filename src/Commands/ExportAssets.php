@@ -83,6 +83,7 @@ class ExportAssets extends Command
                 ->handle($model->handle)
                 ->disk($model->disk ?? config('filesystems.default'))
                 ->searchIndex($model->settings['search_index'] ?? null)
+                ->sourcePreset($model->settings['source_preset'] ?? null)
                 ->save();
         });
 
