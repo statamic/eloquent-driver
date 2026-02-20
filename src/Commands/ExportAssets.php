@@ -30,7 +30,11 @@ class ExportAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-assets {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-assets
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-asset-containers : Only export asset containers}
+        {--only-assets : Only export assets}
+    ';
 
     /**
      * The console command description.
@@ -68,9 +72,9 @@ class ExportAssets extends Command
         $callback();
     }
 
-    private function exportAssetContainers()
+    private function exportAssetContainers(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export asset containers?')) {
+        if (! $this->shouldExportAssetContainers()) {
             return;
         }
 
@@ -89,9 +93,9 @@ class ExportAssets extends Command
         $this->info('Asset containers imported');
     }
 
-    private function exportAssets()
+    private function exportAssets(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export assets?')) {
+        if (! $this->shouldExportAssets()) {
             return;
         }
 
@@ -109,5 +113,19 @@ class ExportAssets extends Command
 
         $this->newLine();
         $this->info('Assets imported');
+    }
+
+    private function shouldExportAssetContainers(): bool
+    {
+        return $this->option('only-asset-containers')
+            || ! $this->option('only-assets')
+            && ($this->option('force') || $this->confirm('Do you want to export asset containers?'));
+    }
+
+    private function shouldExportAssets(): bool
+    {
+        return $this->option('only-assets')
+            || ! $this->option('only-asset-containers')
+            && ($this->option('force') || $this->confirm('Do you want to export assets?'));
     }
 }
