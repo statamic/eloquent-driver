@@ -8,8 +8,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\GlobalSetModel;
 use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Eloquent\Updates\UpdateGlobalVariables;
+use Statamic\Testing\Concerns\RunsUpdateScripts;
 use Tests\TestCase;
-use Tests\UpdateScripts\Concerns\RunsUpdateScripts;
 
 class UpdateGlobalVariablesTest extends TestCase
 {
