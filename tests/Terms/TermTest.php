@@ -156,4 +156,47 @@ class TermTest extends TestCase
         $this->assertNotNull($terms->first()->taxonomy());
         $this->assertEquals('tags', $terms->first()->taxonomy()->handle());
     }
+
+    #[Test]
+    public function it_stores_localizations_in_the_model_when_saving()
+    {
+        $this->setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Taxonomy::make('tags')->title('Tags')->sites(['en', 'fr'])->save();
+
+        $term = TermFacade::make('test-tag')->taxonomy('tags')->data(['title' => 'Test Tag']);
+        $term->dataForLocale('fr', ['title' => 'Tag de test']);
+        $term->save();
+
+        $model = TermModel::first();
+
+        $this->assertArrayHasKey('localizations', $model->data);
+        $this->assertArrayHasKey('fr', $model->data['localizations']);
+        $this->assertEquals('Tag de test', $model->data['localizations']['fr']['title']);
+    }
+
+    #[Test]
+    public function localized_data_is_preserved_after_saving_and_reloading()
+    {
+        $this->setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Taxonomy::make('tags')->title('Tags')->sites(['en', 'fr'])->save();
+
+        $term = TermFacade::make('test-tag')->taxonomy('tags')->data(['title' => 'Test Tag']);
+        $term->dataForLocale('fr', ['title' => 'Tag de test']);
+        $term->save();
+
+        Blink::flush();
+
+        $retrieved = TermFacade::find('tags::test-tag');
+
+        $this->assertEquals('Test Tag', $retrieved->in('en')->get('title'));
+        $this->assertEquals('Tag de test', $retrieved->in('fr')->get('title'));
+    }
 }
