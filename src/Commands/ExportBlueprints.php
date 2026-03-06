@@ -124,7 +124,7 @@ class ExportBlueprints extends Command
                 if (isset($tab['sections']) && is_array($tab['sections'])) {
                     $tab['sections'] = collect($tab['sections'])
                         ->sortBy('__count')
-                        ->map(function ($section) use (&$sectionCount) {
+                        ->map(function ($section) {
                             unset($section['__count']);
 
                             return $section;
