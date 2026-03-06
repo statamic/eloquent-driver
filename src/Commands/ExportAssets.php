@@ -88,7 +88,7 @@ class ExportAssets extends Command
         });
 
         $this->newLine();
-        $this->info('Asset containers imported');
+        $this->info('Asset containers exported');
     }
 
     private function exportAssets(): void
@@ -107,7 +107,7 @@ class ExportAssets extends Command
         });
 
         $this->newLine();
-        $this->info('Assets imported');
+        $this->info('Assets exported');
     }
 
     private function shouldExportAssetContainers(): bool
