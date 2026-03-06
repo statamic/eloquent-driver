@@ -50,6 +50,10 @@ class ExportEntries extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
+        $originalEntryRepo = get_class(app()->make(EntryRepositoryContract::class));
+        $originalCollectionRepo = get_class(app()->make(CollectionRepositoryContract::class));
+        $originalEntry = get_class(app()->make(EntryContract::class));
+
         Facade::clearResolvedInstance(EntryRepositoryContract::class);
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
 
@@ -59,6 +63,13 @@ class ExportEntries extends Command
         app()->bind(EntryContract::class, StacheEntry::class);
 
         $callback();
+
+        Statamic::repository(EntryRepositoryContract::class, $originalEntryRepo);
+        Statamic::repository(CollectionRepositoryContract::class, $originalCollectionRepo);
+        app()->bind(EntryContract::class, $originalEntry);
+
+        Facade::clearResolvedInstance(EntryRepositoryContract::class);
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
     }
 
     private function exportEntries()
