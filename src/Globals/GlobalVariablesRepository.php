@@ -13,7 +13,7 @@ class GlobalVariablesRepository extends StacheRepository
     {
         return VariablesCollection::make(
             app('statamic.eloquent.global_set_variables.model')::all()
-                ->each(function ($model) {
+                ->map(function ($model) {
                     return app(Variables::class)::fromModel($model);
                 })
         );
