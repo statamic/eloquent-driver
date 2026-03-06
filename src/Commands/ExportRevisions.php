@@ -50,7 +50,6 @@ class ExportRevisions extends Command
             $revision = (new $class)
                 ->key($model->key)
                 ->action($model->action ?? false)
-                ->id($model->created_at->timestamp)
                 ->date($model->created_at)
                 ->user($model->user ?? false)
                 ->message($model->message ?? '')
