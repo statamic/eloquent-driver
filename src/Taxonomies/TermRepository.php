@@ -105,7 +105,7 @@ class TermRepository extends StacheRepository
         $entry->model($model->fresh());
 
         Blink::put("eloquent-term-{$entry->id()}", $entry);
-        Blink::put("eloquent-entry-{$entry->uri()}", $entry);
+        Blink::put("eloquent-term-{$entry->uri()}", $entry);
     }
 
     public function delete($entry)
@@ -113,7 +113,7 @@ class TermRepository extends StacheRepository
         $entry->model()->delete();
 
         Blink::forget("eloquent-term-{$entry->id()}");
-        Blink::forget("eloquent-entry-{$entry->uri()}");
+        Blink::forget("eloquent-term-{$entry->uri()}");
     }
 
     public static function bindings(): array
