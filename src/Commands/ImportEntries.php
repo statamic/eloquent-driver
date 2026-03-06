@@ -56,7 +56,7 @@ class ImportEntries extends Command
             return ! $entry->hasOrigin();
         });
 
-        if ($entriesWithOrigin->count() > 0) {
+        if ($entriesWithoutOrigin->count() > 0) {
             $this->components->info('Importing origin entries...');
         }
 
