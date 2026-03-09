@@ -5,3 +5,4 @@ vendor
 .nova/*
 .phpunit.cache
 .idea
+.claude
