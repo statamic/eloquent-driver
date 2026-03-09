@@ -29,7 +29,10 @@ class ExportCollections extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-collections {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-collections
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-collections : Only export collections}
+        {--only-collection-trees : Only export collection trees}';
 
     /**
      * The console command description.
@@ -40,37 +43,59 @@ class ExportCollections extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
-        $this->usingDefaultRepositories(function () {
+        $this->usingDefaultCollectionRepositories(function () {
             $this->exportCollections();
+        });
+
+        $this->usingDefaultCollectionTreeRepositories(function () {
             $this->exportCollectionTrees();
         });
 
         $this->newLine();
         $this->info('Collections exported');
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
+    private function usingDefaultCollectionRepositories(Closure $callback): void
     {
+        $originalRepo = get_class(app()->make(CollectionRepositoryContract::class));
+        $originalCollection = get_class(app()->make(CollectionContract::class));
+
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
-        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
 
         Statamic::repository(CollectionRepositoryContract::class, CollectionRepository::class);
-        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
         app()->bind(CollectionContract::class, EloquentCollection::class);
 
         $callback();
+
+        Statamic::repository(CollectionRepositoryContract::class, $originalRepo);
+        app()->bind(CollectionContract::class, $originalCollection);
+
+        Facade::clearResolvedInstance(CollectionRepositoryContract::class);
     }
 
-    private function exportCollections()
+    private function usingDefaultCollectionTreeRepositories(Closure $callback): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export collections?')) {
+        $originalTreeRepo = get_class(app()->make(CollectionTreeRepositoryContract::class));
+
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
+
+        Statamic::repository(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
+
+        $callback();
+
+        Statamic::repository(CollectionTreeRepositoryContract::class, $originalTreeRepo);
+
+        Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
+    }
+
+    private function exportCollections(): void
+    {
+        if (! $this->shouldExportCollections()) {
             return;
         }
 
@@ -109,9 +134,9 @@ class ExportCollections extends Command
         $this->info('Collections exported');
     }
 
-    private function exportCollectionTrees()
+    private function exportCollectionTrees(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export collection trees?')) {
+        if (! $this->shouldExportCollectionTrees()) {
             return;
         }
 
@@ -129,5 +154,19 @@ class ExportCollections extends Command
 
         $this->newLine();
         $this->info('Collection trees exported');
+    }
+
+    private function shouldExportCollections(): bool
+    {
+        return $this->option('only-collections')
+            || ! $this->option('only-collection-trees')
+            && ($this->option('force') || $this->confirm('Do you want to export collections?'));
+    }
+
+    private function shouldExportCollectionTrees(): bool
+    {
+        return $this->option('only-collection-trees')
+            || ! $this->option('only-collections')
+            && ($this->option('force') || $this->confirm('Do you want to export collections trees?'));
     }
 }

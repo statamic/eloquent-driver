@@ -28,7 +28,10 @@ class ExportNavs extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-navs {--force : Force the export to run, with all prompts answered "yes"}';
+    protected $signature = 'statamic:eloquent:export-navs
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-navs : Only export navigations}
+        {--only-nav-trees : Only export navigation trees}';
 
     /**
      * The console command description.
@@ -39,20 +42,18 @@ class ExportNavs extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->usingDefaultRepositories(function () {
             $this->exportNavs();
             $this->exportNavTrees();
         });
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    private function usingDefaultRepositories(Closure $callback)
+    private function usingDefaultRepositories(Closure $callback): void
     {
         Facade::clearResolvedInstance(NavigationRepositoryContract::class);
         Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
@@ -66,16 +67,16 @@ class ExportNavs extends Command
         $callback();
     }
 
-    private function exportNavs()
+    private function exportNavs(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export navs?')) {
+        if (! $this->shouldExportNavigations()) {
             return;
         }
 
         $navs = NavModel::all();
 
         $this->withProgressBar($navs, function ($model) {
-            $nav = NavFacade::make()
+            NavFacade::make()
                 ->handle($model->handle)
                 ->title($model->title)
                 ->collections($model->settings['collections'] ?? null)
@@ -88,9 +89,9 @@ class ExportNavs extends Command
         $this->info('Navs exported');
     }
 
-    private function exportNavTrees()
+    private function exportNavTrees(): void
     {
-        if (! $this->option('force') && ! $this->confirm('Do you want to export nav trees?')) {
+        if (! $this->shouldExportNavigationTrees()) {
             return;
         }
 
@@ -112,5 +113,19 @@ class ExportNavs extends Command
 
         $this->newLine();
         $this->info('Nav trees exported');
+    }
+
+    private function shouldExportNavigations(): bool
+    {
+        return $this->option('only-navs')
+            || ! $this->option('only-nav-trees')
+            && ($this->option('force') || $this->confirm('Do you want to export navs?'));
+    }
+
+    private function shouldExportNavigationTrees(): bool
+    {
+        return $this->option('only-nav-trees')
+            || ! $this->option('only-navs')
+            && ($this->option('force') || $this->confirm('Do you want to export nav trees?'));
     }
 }
