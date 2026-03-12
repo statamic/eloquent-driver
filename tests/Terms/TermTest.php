@@ -15,6 +15,7 @@ use Statamic\Facades\Stache;
 use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Statamic;
+use Statamic\Taxonomies\Term;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -82,6 +83,63 @@ class TermTest extends TestCase
         (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
 
         $this->assertEquals(2, TermFacade::entriesCount($term));
+    }
+
+    #[Test]
+    public function it_gets_entry_count_for_term_filtered_by_status()
+    {
+        Taxonomy::make('test')->title('test')->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        $collection = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->published(true)->save();
+        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->published(false)->save();
+        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3', 'test' => ['test-term']])->slug('charlie')->published(false)->save();
+
+        $this->assertEquals(1, TermFacade::entriesCount($term, 'published'));
+        $this->assertEquals(2, TermFacade::entriesCount($term, 'draft'));
+    }
+
+    #[Test]
+    public function it_gets_entry_count_for_term_scoped_to_collection()
+    {
+        Taxonomy::make('test')->title('test')->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        $blog = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+        $news = Collection::make('news')->routes('news/{slug}')->taxonomies(['test'])->save();
+
+        (new Entry)->id(1)->collection($blog)->data(['title' => 'Blog 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($blog)->data(['title' => 'Blog 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($news)->data(['title' => 'News 1', 'test' => ['test-term']])->slug('charlie')->save();
+
+        $this->assertEquals(2, TermFacade::entriesCount(TermFacade::find('test::test-term')->collection($blog)));
+        $this->assertEquals(1, TermFacade::entriesCount(TermFacade::find('test::test-term')->collection($news)));
+    }
+
+    #[Test]
+    public function it_gets_entry_count_for_term_filtered_by_site()
+    {
+        $this->setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Taxonomy::make('test')->title('test')->sites(['en', 'fr'])->save();
+
+        $term = tap(TermFacade::make('test-term')->taxonomy('test')->data([]))->save();
+
+        $collection = Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->sites(['en', 'fr'])->save();
+
+        (new Entry)->id(1)->collection($collection)->locale('en')->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id(2)->collection($collection)->locale('en')->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id(3)->collection($collection)->locale('fr')->data(['title' => 'Post 3', 'test' => ['test-term']])->slug('charlie')->save();
+
+        $this->assertEquals(2, TermFacade::entriesCount($term->in('en')));
+        $this->assertEquals(1, TermFacade::entriesCount($term->in('fr')));
     }
 
     #[Test]

@@ -3,11 +3,14 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Eloquent\Taxonomies\Term;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
+use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
 use Statamic\Stache\Repositories\TermRepository as StacheRepository;
 use Statamic\Support\Str;
+use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
 {
@@ -130,5 +133,29 @@ class TermRepository extends StacheRepository
         }
 
         parent::ensureAssociations();
+    }
+
+    public function entriesCount(TermContract $term, ?string $status = null): int
+    {
+        if (config('statamic.eloquent-driver.entries.driver', 'file') !== 'eloquent') {
+            return parent::entriesCount($term, $status);
+        }
+
+        $query = Entry::query()
+            ->whereTaxonomy($term->taxonomyHandle().'::'.$term->inDefaultLocale()->slug());
+
+        if ($term instanceof LocalizedTerm) {
+            $query->where('site', $term->locale());
+        }
+
+        if ($collection = $term->collection()) {
+            $query->where('collection', $collection->handle());
+        }
+
+        if ($status) {
+            $query->whereStatus($status);
+        }
+
+        return $query->count();
     }
 }
