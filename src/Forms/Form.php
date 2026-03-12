@@ -35,7 +35,7 @@ class Form extends FileEntry
         $class = app('statamic.eloquent.forms.model');
 
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
-            'title'    => $source->title(),
+            'title'    => $source->title() ?? $source->handle(),
             'settings' => [
                 'store'    => $source->store(),
                 'email'    => $source->email(),
