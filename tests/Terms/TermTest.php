@@ -15,7 +15,6 @@ use Statamic\Facades\Stache;
 use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Statamic;
-use Statamic\Taxonomies\Term;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
