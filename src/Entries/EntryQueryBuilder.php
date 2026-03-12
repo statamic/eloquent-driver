@@ -266,4 +266,43 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             ->filter()
             ->unique();
     }
+
+    protected function addTaxonomyWheres()
+    {
+        if (empty($this->taxonomyWheres)) {
+            return;
+        }
+
+        collect($this->taxonomyWheres)
+            ->each(function ($where) {
+                if ($where['type'] === 'Basic') {
+                    [$taxonomy, $term] = explode('::', $where['value']);
+
+                    $this->whereJsonContains($this->column($taxonomy), $term);
+
+                    return;
+                }
+
+                if ($where['type'] === 'In') {
+                    $this->where(function ($query) use ($where) {
+                        foreach ($where['values'] as $value) {
+                            [$taxonomy, $term] = explode('::', $value);
+
+                            $query->orWhereJsonContains($this->column($taxonomy), $term);
+                        }
+                    });
+
+                    return;
+                }
+
+                $this->where(function ($query) use ($where) {
+                    foreach ($where['values'] as $value) {
+                        [$taxonomy, $term] = explode('::', $value);
+
+                        $query->orWhereJsonDoesntContain($this->column($taxonomy), $term);
+                    }
+                });
+
+            });
+    }
 }
