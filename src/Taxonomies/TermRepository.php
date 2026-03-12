@@ -140,8 +140,7 @@ class TermRepository extends StacheRepository
             return parent::entriesCount($term, $status);
         }
 
-        $query = Entry::query()
-            ->whereTaxonomy($term->taxonomyHandle().'::'.$term->inDefaultLocale()->slug());
+        $query = Entry::query()->whereTaxonomy($term->inDefaultLocale()->reference());
 
         if ($term instanceof LocalizedTerm) {
             $query->where('site', $term->locale());
