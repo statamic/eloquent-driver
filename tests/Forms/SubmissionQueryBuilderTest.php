@@ -7,7 +7,6 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
-use Tests\PreventSavingStacheItemsToDisk;
 use Tests\TestCase;
 
 class SubmissionQueryBuilderTest extends TestCase
