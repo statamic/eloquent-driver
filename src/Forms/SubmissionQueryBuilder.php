@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Forms;
 
 use Statamic\Contracts\Forms\SubmissionQueryBuilder as BuilderContract;
 use Statamic\Data\DataCollection;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Form;
 use Statamic\Query\EloquentQueryBuilder;
 use Statamic\Support\Str;
@@ -37,7 +38,7 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
     {
         return DataCollection::make($items)->map(function ($model) {
             return Submission::fromModel($model)
-                ->form(Form::find($model->form));
+                ->form(Blink::once("eloquent-forms-{$model->form}", fn () => Form::find($model->form)));
         });
     }
 

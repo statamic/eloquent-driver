@@ -154,7 +154,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return collect($this->builder->getQuery()->wheres)
             ->where('column', 'collection')
             ->flatMap(fn ($where) => $where['values'] ?? [$where['value']])
-            ->map(fn ($handle) => Collection::find($handle));
+            ->map(fn ($handle) => Blink::once("eloquent-collection-{$handle}", fn () => Collection::find($handle)));
     }
 
     private function getKeysForTaxonomyWhereBasic($where)
