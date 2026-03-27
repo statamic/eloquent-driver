@@ -69,6 +69,10 @@ trait QueriesJsonColumns
             default => null,
         };
 
+        if ($cast === 'datetime' && str_contains(get_class($this->builder->getConnection()->getQueryGrammar()), 'PostgresGrammar')) {
+            $cast = 'timestamp';
+        }
+
         // Date Ranges are dealt with a little bit differently.
         if ($field->type() === 'date' && $field->get('mode') === 'range') {
             $cast = "range_{$cast}";
