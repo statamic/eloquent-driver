@@ -4,9 +4,14 @@ namespace Statamic\Eloquent\Forms;
 
 use Illuminate\Database\Eloquent\Model;
 use Statamic\Contracts\Forms\Form as Contract;
+use Statamic\Events\FormCreated;
+use Statamic\Events\FormCreating;
 use Statamic\Events\FormDeleted;
+use Statamic\Events\FormDeleting;
 use Statamic\Events\FormSaved;
+use Statamic\Events\FormSaving;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Form as FormFacade;
 use Statamic\Forms\Form as FileEntry;
 
 class Form extends FileEntry
@@ -58,6 +63,24 @@ class Form extends FileEntry
 
     public function save()
     {
+        $isNew = is_null(FormFacade::find($this->handle()));
+
+        $withEvents = $this->withEvents;
+        $this->withEvents = true;
+
+        $afterSaveCallbacks = $this->afterSaveCallbacks;
+        $this->afterSaveCallbacks = [];
+
+        if ($withEvents) {
+            if ($isNew && FormCreating::dispatch($this) === false) {
+                return false;
+            }
+
+            if (FormSaving::dispatch($this) === false) {
+                return false;
+            }
+        }
+
         $model = $this->toModel();
         $model->save();
 
@@ -66,17 +89,38 @@ class Form extends FileEntry
         Blink::forget("eloquent-forms-{$this->handle()}");
         Blink::forget('eloquent-forms');
 
-        FormSaved::dispatch($this);
+        foreach ($afterSaveCallbacks as $callback) {
+            $callback($this);
+        }
+
+        if ($withEvents) {
+            if ($isNew) {
+                FormCreated::dispatch($this);
+            }
+
+            FormSaved::dispatch($this);
+        }
     }
 
     public function delete()
     {
+        $withEvents = $this->withEvents;
+        $this->withEvents = true;
+
+        if ($withEvents && FormDeleting::dispatch($this) === false) {
+            return false;
+        }
+
         $this->submissions()->each->delete();
         $this->model()->delete();
 
         Blink::forget("eloquent-forms-{$this->handle()}");
         Blink::forget('eloquent-forms');
 
-        FormDeleted::dispatch($this);
+        if ($withEvents) {
+            FormDeleted::dispatch($this);
+        }
+
+        return true;
     }
 }
