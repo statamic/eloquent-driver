@@ -232,6 +232,28 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerTerms();
         $this->registerTokens();
         $this->registerSites();
+
+        $this->registerSerializableClasses([
+            \Statamic\Eloquent\Assets\Asset::class,
+            \Statamic\Eloquent\Assets\AssetModel::class,
+            \Statamic\Eloquent\Collections\Collection::class,
+            \Statamic\Eloquent\Collections\CollectionModel::class,
+            \Statamic\Eloquent\Entries\Entry::class,
+            \Statamic\Eloquent\Entries\EntryModel::class,
+            \Statamic\Eloquent\Entries\UuidEntryModel::class,
+            \Statamic\Eloquent\Forms\Form::class,
+            \Statamic\Eloquent\Forms\FormModel::class,
+            \Statamic\Eloquent\Forms\Submission::class,
+            \Statamic\Eloquent\Forms\SubmissionModel::class,
+            \Statamic\Eloquent\Globals\GlobalSet::class,
+            \Statamic\Eloquent\Globals\GlobalSetModel::class,
+            \Statamic\Eloquent\Globals\Variables::class,
+            \Statamic\Eloquent\Globals\VariablesModel::class,
+            \Statamic\Eloquent\Taxonomies\Taxonomy::class,
+            \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
+            \Statamic\Eloquent\Taxonomies\Term::class,
+            \Statamic\Eloquent\Taxonomies\TermModel::class,
+        ]);
     }
 
     private function registerAddonSettings()
