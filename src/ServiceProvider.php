@@ -248,10 +248,14 @@ class ServiceProvider extends AddonServiceProvider
             config('statamic.eloquent-driver.global_sets.model'),
             \Statamic\Eloquent\Globals\Variables::class,
             config('statamic.eloquent-driver.global_set_variables.model'),
+            \Statamic\Eloquent\Revisions\Revision::class,
+            config('statamic.eloquent-driver.revisions.model'),
             \Statamic\Eloquent\Taxonomies\Taxonomy::class,
             config('statamic.eloquent-driver.taxonomies.model'),
             \Statamic\Eloquent\Taxonomies\Term::class,
             config('statamic.eloquent-driver.terms.model'),
+            \Statamic\Eloquent\Tokens\Token::class,
+            config('statamic.eloquent-driver.tokens.model'),
         ]));
     }
 
