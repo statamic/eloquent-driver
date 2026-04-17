@@ -36,6 +36,7 @@ use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Revisions\RevisionQueryBuilder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
+use Statamic\Eloquent\Structures\Nav;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
@@ -234,10 +235,16 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerSites();
 
         $this->registerSerializableClasses(array_filter([
+            \Statamic\Eloquent\AddonSettings\AddonSettings::class,
+            config('statamic.eloquent-driver.addon_settings.model'),
+            \Statamic\Eloquent\Assets\AssetContainer::class,
+            config('statamic.eloquent-driver.asset_containers.model'),
             config('statamic.eloquent-driver.assets.asset'),
             config('statamic.eloquent-driver.assets.model'),
             \Statamic\Eloquent\Collections\Collection::class,
             config('statamic.eloquent-driver.collections.model'),
+            config('statamic.eloquent-driver.collection_trees.tree'),
+            config('statamic.eloquent-driver.collection_trees.model'),
             config('statamic.eloquent-driver.entries.entry'),
             config('statamic.eloquent-driver.entries.model'),
             \Statamic\Eloquent\Forms\Form::class,
@@ -248,6 +255,10 @@ class ServiceProvider extends AddonServiceProvider
             config('statamic.eloquent-driver.global_sets.model'),
             \Statamic\Eloquent\Globals\Variables::class,
             config('statamic.eloquent-driver.global_set_variables.model'),
+            \Statamic\Eloquent\Structures\Nav::class,
+            config('statamic.eloquent-driver.navigations.model'),
+            config('statamic.eloquent-driver.navigation_trees.tree'),
+            config('statamic.eloquent-driver.navigation_trees.model'),
             \Statamic\Eloquent\Revisions\Revision::class,
             config('statamic.eloquent-driver.revisions.model'),
             \Statamic\Eloquent\Taxonomies\Taxonomy::class,
