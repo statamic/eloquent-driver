@@ -36,7 +36,6 @@ use Statamic\Eloquent\Globals\GlobalVariablesRepository;
 use Statamic\Eloquent\Revisions\RevisionQueryBuilder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
-use Statamic\Eloquent\Structures\Nav;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
