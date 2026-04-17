@@ -99,7 +99,7 @@ class ExportEntries extends Command
                 $entry->set('updated_at', $model->updated_at ?? $model->created_at);
             }
 
-            $entry->save();
+            $entry->saveQuietly();
         });
 
         if ($entriesWithOrigin->count() > 0) {
@@ -130,7 +130,7 @@ class ExportEntries extends Command
                     $entry->set('updated_at', $model->updated_at ?? $model->created_at);
                 }
 
-                $entry->save();
+                $entry->saveQuietly();
             });
         }
 
