@@ -59,7 +59,7 @@ class AssetContainer extends FileEntry
         ]);
 
         $model->settings = array_merge($model->settings ?? [], [
-            'search_index'      => $source->searchIndex(),
+            'search_index'      => $source->searchIndex()?->name(),
             'source_preset'     => $source->sourcePreset,
             'warm_presets'      => $source->warmPresets,
             'validation_rules'  => $source->validationRules(),
