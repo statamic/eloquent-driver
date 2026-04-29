@@ -412,6 +412,109 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_stores_template_in_model_data_for_non_localized_entry()
+    {
+        Collection::make('blog')->title('blog')->save();
+
+        $entry = (new Entry)
+            ->id(1)
+            ->collection('blog')
+            ->slug('test')
+            ->locale('en')
+            ->template('my-template');
+
+        $entry->save();
+
+        $this->assertEquals('my-template', $entry->model()->data['template']);
+    }
+
+    #[Test]
+    public function it_does_not_track_template_as_localized_field_when_template_is_not_localizable()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields([
+            'foo' => ['type' => 'text', 'localizable' => true],
+        ])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->sites(['en', 'fr'])
+            ->save();
+
+        // Use set() so template is in the data collection (accessible via data(), not just the property)
+        $entry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->slug('origin')
+            ->set('template', 'origin-template');
+
+        $entry->save();
+
+        // Localized entry with a different template — simulating a stale/overridden value
+        $localized = (new Entry)
+            ->id(2)
+            ->locale('fr')
+            ->origin($entry)
+            ->collection($collection)
+            ->blueprint('test')
+            ->slug('origin')
+            ->set('template', 'stale-template');
+
+        $localized->save();
+
+        // Template is non-localizable, so it should not be tracked as a localized field
+        $this->assertNotContains('template', $localized->model()->data['__localized_fields'] ?? []);
+        // Template should resolve to the origin's value (stale-template overwrite is discarded)
+        $this->assertEquals('origin-template', $localized->model()->data['template']);
+    }
+
+    #[Test]
+    public function it_tracks_template_as_localized_field_when_template_is_localizable()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields([
+            'template' => ['type' => 'text', 'localizable' => true],
+        ])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'fr'])
+            ->save();
+
+        $entry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->template('origin-template');
+
+        $entry->save();
+
+        $localized = $entry->descendants()->get('fr');
+        $localized->set('template', 'fr-template')->save();
+
+        $this->assertContains('template', $localized->model()->data['__localized_fields'] ?? []);
+        $this->assertEquals('fr-template', $localized->model()->data['template']);
+    }
+
+    #[Test]
     public function it_build_stache_associations_when_taxonomy_driver_is_not_eloquent()
     {
         config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');

@@ -8,6 +8,7 @@ use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Support\Arr;
 
 class Entry extends FileEntry
 {
@@ -77,7 +78,7 @@ class Entry extends FileEntry
                     ->handle()
                     ->all();
 
-                if (! $localizedBlueprintFields->has('template')) {
+                if (! Arr::has($localizedBlueprintFields, 'template')) {
                     $data->forget('template');
                 }
 
