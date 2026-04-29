@@ -63,6 +63,10 @@ class Entry extends FileEntry
 
         $origin = $source->origin();
 
+        if ($template = $source->get('template', $source->template)) {
+            $data->put('template', $template);
+        }
+
         if ($source->hasOrigin()) {
             if ($blueprint = $source->blueprint()) {
                 $localizedBlueprintFields = $blueprint
@@ -73,9 +77,13 @@ class Entry extends FileEntry
                     ->handle()
                     ->all();
 
+                if (! $localizedBlueprintFields->has('template')) {
+                    $data->forget('template');
+                }
+
                 $originData = $origin->data();
 
-                // remove any fields in entry data that are marked as localized but value is present, and does not match origin
+                // remove any fields in entry data that are marked as localized but value is present, and matches origin
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
                     if ($data->has($blueprintField)) {
@@ -129,10 +137,6 @@ class Entry extends FileEntry
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
-
-        if ($template = $source->get('template', $source->template)) {
-            $attributes['data']->put('template', $template);
-        }
 
         $attributes['data'] = $attributes['data']->filter(fn ($v) => $v !== null);
 
