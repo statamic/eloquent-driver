@@ -24,6 +24,8 @@ class ImportCollectionsTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->shouldUseStringEntryIds = true;
+
         parent::setUp();
 
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
