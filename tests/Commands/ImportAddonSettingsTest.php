@@ -55,12 +55,12 @@ class ImportAddonSettingsTest extends TestCase
 
         $this->assertDatabaseHas('addon_settings', [
             'addon' => 'statamic/seo-pro',
-            'settings' => json_encode(['title' => 'SEO Title', 'description' => 'SEO Description']),
+            'settings' => $this->castAsJson(['title' => 'SEO Title', 'description' => 'SEO Description']),
         ]);
 
         $this->assertDatabaseHas('addon_settings', [
             'addon' => 'statamic/importer',
-            'settings' => json_encode(['chunk_size' => 100]),
+            'settings' => $this->castAsJson(['chunk_size' => 100]),
         ]);
     }
 
@@ -86,7 +86,7 @@ class ImportAddonSettingsTest extends TestCase
 
         $this->assertDatabaseHas('addon_settings', [
             'addon' => 'statamic/seo-pro',
-            'settings' => json_encode(['title' => 'SEO Title', 'description' => 'SEO Description']),
+            'settings' => $this->castAsJson(['title' => 'SEO Title', 'description' => 'SEO Description']),
         ]);
 
         $this->assertDatabaseMissing('addon_settings', [
