@@ -103,7 +103,7 @@ class FormSubmissionTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $submission->date());
         $this->assertArrayNotHasKey('date', $submission->model()->data);
 
-        $fresh = \Statamic\Eloquent\Forms\Submission::fromModel($submission->model()->fresh());
+        $fresh = Submission::fromModel($submission->model()->fresh());
 
         $this->assertInstanceOf(Carbon::class, $fresh->date());
         $this->assertSame($fresh->date()->format('u'), $submission->date()->format('u'));
@@ -171,6 +171,52 @@ class FormSubmissionTest extends TestCase
 
         Event::assertDispatched(SubmissionDeleted::class);
         $this->assertSame($result, true);
+    }
+
+    #[Test]
+    public function date_falls_back_to_id_derived_timestamp_when_unset(): void
+    {
+        $submission = (new Submission)->id('1635238840.6895');
+
+        $this->assertEquals('2021-10-26 09:00:40', $submission->date()->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function saving_uses_id_derived_timestamp_when_date_is_unset(): void
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = $form->makeSubmission()
+            ->id('1635238840.6895')
+            ->data(['name' => 'John Doe']);
+
+        $submission->save();
+
+        $this->assertSame('2021-10-26 09:00:40.689500', $submission->model()->created_at->format('Y-m-d H:i:s.u'));
+    }
+
+    #[Test]
+    public function explicit_date_wins_over_id_derived_fallback(): void
+    {
+        $explicit = Carbon::parse('2024-01-15 10:00:00');
+
+        $submission = (new Submission)->id('1635238840.6895')->date($explicit);
+
+        $this->assertEquals($explicit, $submission->date());
+    }
+
+    #[Test]
+    public function date_falls_back_to_now_when_neither_id_nor_date_is_set(): void
+    {
+        Carbon::setTestNow('2026-04-30 12:00:00');
+
+        try {
+            $submission = new Submission;
+
+            $this->assertEquals('2026-04-30 12:00:00', $submission->date()->format('Y-m-d H:i:s'));
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     #[Test]
