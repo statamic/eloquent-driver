@@ -22,6 +22,8 @@ use Tests\TestCase;
 
 class EntryTest extends TestCase
 {
+    protected $shouldUseStringEntryIds = true;
+
     use PreventsSavingStacheItemsToDisk;
     use RefreshDatabase;
 
@@ -153,7 +155,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
+            ->id('10000000-0000-0000-0000-000000000001')
             ->locale('en')
             ->collection($collection);
 
@@ -186,7 +188,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
+            ->id('10000000-0000-0000-0000-000000000001')
             ->locale('en')
             ->collection($collection)
             ->blueprint('test')
@@ -232,7 +234,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
+            ->id('10000000-0000-0000-0000-000000000001')
             ->collection($collection)
             ->date('2023-01-01')
             ->locale('en')
@@ -272,7 +274,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
+            ->id('10000000-0000-0000-0000-000000000001')
             ->locale('en')
             ->collection($collection)
             ->blueprint('test')
@@ -358,7 +360,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id('1.0')
+            ->id('10000000-0000-0000-0000-000000000001')
             ->collection('blog')
             ->slug('the-slug')
             ->data(['foo' => 'bar']);
@@ -382,7 +384,7 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id('1.0')
+            ->id('10000000-0000-0000-0000-000000000001')
             ->collection('blog')
             ->slug('the-slug')
             ->data(['foo' => 'bar', 'null_value' => null]);
@@ -404,9 +406,9 @@ class EntryTest extends TestCase
 
         $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
-        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
-        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
-        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000001')->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000002')->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000003')->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
 
         $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
     }
@@ -428,9 +430,9 @@ class EntryTest extends TestCase
 
         $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
-        (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
-        (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
-        (new Entry)->id(3)->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000004')->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000005')->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
+        (new Entry)->id('10000000-0000-0000-0000-000000000006')->collection($collection)->data(['title' => 'Post 3'])->slug('charlie')->save();
 
         $this->assertCount(2, $taxonomyStore->store('test')->index('associations')->items());
     }
