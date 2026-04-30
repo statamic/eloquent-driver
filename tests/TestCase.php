@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\ServiceProvider;
 use Statamic\Facades\Site;
 use Statamic\Testing\AddonTestCase;
@@ -101,9 +102,21 @@ abstract class TestCase extends AddonTestCase
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        $this->shouldUseStringEntryIds
-            ? $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php')
-            : $this->loadMigrationsFrom(__DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php');
+        $entryMigration = $this->shouldUseStringEntryIds
+            ? __DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table_with_string_ids.php'
+            : __DIR__.'/../database/migrations/entries/2024_03_07_100000_create_entries_table.php';
+
+        // On MySQL/Postgres with RefreshDatabase, the entries table may persist from a previous
+        // test class using a different ID variant (integer vs string). Drop the table and clear
+        // the migration record so the correct variant can be applied cleanly.
+        if (Schema::hasTable('entries')) {
+            Schema::drop('entries');
+            $this->app['db']->table('migrations')
+                ->where('migration', 'like', '%create_entries_table%')
+                ->delete();
+        }
+
+        $this->loadMigrationsFrom($entryMigration);
     }
 
     protected function setSites($sites)
