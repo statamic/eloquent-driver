@@ -93,6 +93,13 @@ abstract class TestCase extends AddonTestCase
         return config("database.connections.{$connection}.driver") === 'sqlite';
     }
 
+    protected function isUsingPostgres()
+    {
+        $connection = config('database.default');
+
+        return config("database.connections.{$connection}.driver") === 'pgsql';
+    }
+
     /**
      * Define database migrations.
      *
