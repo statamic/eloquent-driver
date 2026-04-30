@@ -305,7 +305,7 @@ class EntryRepositoryTest extends TestCase
 
         $actual = (new EntryRepository(new Stache))->whereInId([
             $expected->id(),
-            'missing',
+            99999,
         ]);
 
         $this->assertEquals([$expected->id()], $actual->map->id()->all());
