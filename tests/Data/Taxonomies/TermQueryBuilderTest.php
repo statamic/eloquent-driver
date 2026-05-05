@@ -155,6 +155,30 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_by_site()
+    {
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
+            'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
+        ]);
+
+        // Tags has 'en' as its primary site, so terms are stored with site='en'.
+        Taxonomy::make('tags')->sites(['en', 'fr'])->save();
+        Term::make('en-1')->taxonomy('tags')->data([])->save();
+        Term::make('en-2')->taxonomy('tags')->data([])->save();
+
+        // Categories has 'fr' as its primary site, so terms are stored with site='fr'.
+        Taxonomy::make('categories')->sites(['fr', 'en'])->save();
+        Term::make('fr-1')->taxonomy('categories')->data([])->save();
+
+        $enTerms = Term::query()->where('site', 'en')->get();
+        $this->assertEquals(['en-1', 'en-2'], $enTerms->map->slug()->sort()->values()->all());
+
+        $frTerms = Term::query()->where('site', 'fr')->get();
+        $this->assertEquals(['fr-1'], $frTerms->map->slug()->sort()->values()->all());
+    }
+
+    #[Test]
     public function it_filters_by_taxonomy()
     {
         Taxonomy::make('tags')->save();
