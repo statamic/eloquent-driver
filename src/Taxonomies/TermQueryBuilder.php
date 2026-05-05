@@ -29,18 +29,17 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function transform($items, $columns = [])
     {
-        // Preload all locale rows in a single query to avoid N+1 when fromModel()
-        // loads siblings for each term.
+        // Preload all locale rows in a single query and cache them in Blink so
+        // fromModel() can avoid N+1 without needing an extra parameter.
         $modelClass = app('statamic.eloquent.terms.model');
-        $preloaded = $modelClass::whereIn('slug', collect($items)->pluck('slug'))
+        $modelClass::whereIn('slug', collect($items)->pluck('slug'))
             ->whereIn('taxonomy', collect($items)->pluck('taxonomy')->unique()->values())
             ->get()
-            ->groupBy(fn ($m) => $m->taxonomy.'::'.$m->slug);
+            ->groupBy(fn ($m) => $m->taxonomy.'::'.$m->slug)
+            ->each(fn ($rows, $key) => Blink::put("eloquent-term-locale-rows-{$key}", $rows));
 
-        return TermCollection::make($items)->map(function ($model) use ($preloaded) {
-            $siblings = $preloaded->get($model->taxonomy.'::'.$model->slug, collect());
-
-            return app(TermContract::class)::fromModel($model, $siblings)
+        return TermCollection::make($items)->map(function ($model) {
+            return app(TermContract::class)::fromModel($model)
                 ->in($model->site ?? Site::default()->handle());
         });
     }

@@ -5,37 +5,38 @@ namespace Statamic\Eloquent\Taxonomies;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Taxonomies\Term as Contract;
+use Statamic\Facades\Blink;
 use Statamic\Taxonomies\Term as FileEntry;
 
 class Term extends FileEntry
 {
     protected $model;
 
-    public static function fromModel(Model $model, $preloadedLocaleModels = null)
+    public static function fromModel(Model $model)
     {
         $modelClass = app('statamic.eloquent.terms.model');
+
+        // Locale rows preloaded by TermQueryBuilder::transform() are cached in
+        // Blink to avoid N+1. Fall back to a direct DB query when not present
+        // (e.g. when fromModel() is called outside of a query builder context).
+        $blinkKey = "eloquent-term-locale-rows-{$model->taxonomy}::{$model->slug}";
+        $allRows = Blink::has($blinkKey)
+            ? Blink::get($blinkKey)
+            : $modelClass::where('slug', $model->slug)->where('taxonomy', $model->taxonomy)->get();
 
         // Non-canonical rows (origin set) don't carry term-level attributes like
         // blueprint or collection, so we always read those from the canonical row.
         $canonicalModel = $model->origin
-            ? ($preloadedLocaleModels?->firstWhere('origin', null) ?? $modelClass::find($model->origin) ?? $model)
+            ? ($allRows->firstWhere('origin', null) ?? $modelClass::find($model->origin) ?? $model)
             : $model;
 
         $data = $canonicalModel->data;
 
-        /** @var Term $term */
         $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
             ->model($canonicalModel)
             ->blueprint($data['blueprint'] ?? null);
-
-        // Load every locale row for this term into the Term object. When called
-        // from transform() the rows are preloaded in one query to avoid N+1.
-        $allRows = $preloadedLocaleModels
-            ?? $modelClass::where('slug', $model->slug)
-                ->where('taxonomy', $model->taxonomy)
-                ->get();
 
         $allRows->each(function ($localeModel) use ($term) {
             $term->dataForLocale($localeModel->site, $localeModel->data ?? []);
