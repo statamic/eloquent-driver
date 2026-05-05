@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('key');
             $table->string('action')->index();
             $table->string('user')->nullable();
-            $table->string('message')->nullable();
+            $table->text('message')->nullable();
             $table->jsonb('attributes')->nullable();
             $table->timestamps();
 
