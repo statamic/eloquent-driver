@@ -11,31 +11,46 @@ class Term extends FileEntry
 {
     protected $model;
 
-    public static function fromModel(Model $model)
+    public static function fromModel(Model $model, $preloadedLocaleModels = null)
     {
-        $data = $model->data;
+        $modelClass = app('statamic.eloquent.terms.model');
+
+        // Non-canonical rows (origin set) don't carry term-level attributes like
+        // blueprint or collection, so we always read those from the canonical row.
+        $canonicalModel = $model->origin
+            ? ($preloadedLocaleModels?->firstWhere('origin', null) ?? $modelClass::find($model->origin) ?? $model)
+            : $model;
+
+        $data = $canonicalModel->data;
 
         /** @var Term $term */
         $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
-            ->model($model)
-            ->blueprint($model->data['blueprint'] ?? null);
+            ->model($canonicalModel)
+            ->blueprint($data['blueprint'] ?? null);
 
+        // Load every locale row for this term into the Term object. When called
+        // from transform() the rows are preloaded in one query to avoid N+1.
+        $allRows = $preloadedLocaleModels
+            ?? $modelClass::where('slug', $model->slug)
+                ->where('taxonomy', $model->taxonomy)
+                ->get();
+
+        $allRows->each(function ($localeModel) use ($term) {
+            $term->dataForLocale($localeModel->site, $localeModel->data ?? []);
+        });
+
+        // Backward compat: terms saved before the per-row migration may still
+        // carry localizations embedded in the data JSON column.
         collect($data['localizations'] ?? [])
-            ->except($term->defaultLocale())
             ->each(function ($localeData, $locale) use ($term) {
                 $term->dataForLocale($locale, $localeData);
             });
 
-        unset($data['localizations']);
-
         if (isset($data['collection'])) {
             $term->collection($data['collection']);
-            unset($data['collection']);
         }
-
-        $term->data($data);
 
         if (config('statamic.system.track_last_update')) {
             $updatedAt = ($model->updated_at ?? $model->created_at);
@@ -65,11 +80,8 @@ class Term extends FileEntry
             $data['blueprint'] = $source->blueprint;
         }
 
-        $data['localizations'] = $source->localizations()->keys()->reduce(function ($carry, $locale) use ($source) {
-            $carry[$locale] = $source->dataForLocale($locale)->toArray();
-
-            return $carry;
-        }, []);
+        // Localizations are now stored as separate rows; remove from the data column.
+        unset($data['localizations']);
 
         if ($collection = $source->collection()) {
             $data['collection'] = $collection;
@@ -82,6 +94,7 @@ class Term extends FileEntry
         ])->fill([
             'slug'       => $source->slug(),
             'uri'        => $source->uri(),
+            'origin'     => null,
             'data'       => collect($data)->filter(fn ($v) => $v !== null),
             'updated_at' => $source->lastModified(),
         ]);

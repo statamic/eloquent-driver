@@ -162,20 +162,37 @@ class TermQueryBuilderTest extends TestCase
             'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
         ]);
 
-        // Tags has 'en' as its primary site, so terms are stored with site='en'.
         Taxonomy::make('tags')->sites(['en', 'fr'])->save();
-        Term::make('en-1')->taxonomy('tags')->data([])->save();
-        Term::make('en-2')->taxonomy('tags')->data([])->save();
 
-        // Categories has 'fr' as its primary site, so terms are stored with site='fr'.
-        Taxonomy::make('categories')->sites(['fr', 'en'])->save();
-        Term::make('fr-1')->taxonomy('categories')->data([])->save();
+        Term::make('a')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'Term A'])
+            ->dataForLocale('fr', ['title' => 'Terme A'])
+            ->save();
 
+        Term::make('b')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'Term B'])
+            ->save();
+
+        // No site filter: returns canonical (origin IS NULL) rows only, each in its own locale.
+        $terms = Term::query()->get();
+        $this->assertCount(2, $terms);
+        $this->assertTrue($terms->every(fn ($t) => $t->locale() === 'en'));
+
+        // where('site', 'en') filters to the canonical en rows.
         $enTerms = Term::query()->where('site', 'en')->get();
-        $this->assertEquals(['en-1', 'en-2'], $enTerms->map->slug()->sort()->values()->all());
+        $this->assertCount(2, $enTerms);
+        $this->assertEquals(['a', 'b'], $enTerms->map->slug()->sort()->values()->all());
+        $this->assertTrue($enTerms->every(fn ($t) => $t->locale() === 'en'));
 
+        // where('site', 'fr') returns the fr locale row for every term in the taxonomy.
         $frTerms = Term::query()->where('site', 'fr')->get();
-        $this->assertEquals(['fr-1'], $frTerms->map->slug()->sort()->values()->all());
+        $this->assertCount(2, $frTerms);
+        $this->assertEquals(['a', 'b'], $frTerms->map->slug()->sort()->values()->all());
+        $this->assertTrue($frTerms->every(fn ($t) => $t->locale() === 'fr'));
+
+        // French-specific data is accessible on the fr LocalizedTerm.
+        $frTermA = $frTerms->first(fn ($t) => $t->slug() === 'a');
+        $this->assertEquals('Terme A', $frTermA->get('title'));
     }
 
     #[Test]
