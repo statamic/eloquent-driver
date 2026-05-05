@@ -26,8 +26,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected $collectionContext = null;
 
-    protected $site = null;
-
     protected $taxonomies = [];
 
     protected $columns = [
@@ -36,13 +34,8 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected function transform($items, $columns = [])
     {
-        $site = $this->site;
-        if (! $site) {
-            $site = Site::default()->handle();
-        }
-
-        return TermCollection::make($items)->map(function ($model) use ($site) {
-            return app(TermContract::class)::fromModel($model)->in($site);
+        return TermCollection::make($items)->map(function ($model) {
+            return app(TermContract::class)::fromModel($model)->in($model->site ?? Site::default()->handle());
         });
     }
 
@@ -63,12 +56,6 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
-        if ($column === 'site') {
-            $this->site = $operator;
-
-            return $this;
-        }
-
         if (func_num_args() === 2) {
             [$value, $operator] = [$operator, '='];
         }
@@ -182,13 +169,8 @@ class TermQueryBuilder extends EloquentQueryBuilder
         $model = parent::find($id, $columns);
 
         if ($model) {
-            $site = $this->site;
-            if (! $site) {
-                $site = Site::default()->handle();
-            }
-
             return app(TermContract::class)::fromModel($model)
-                ->in($site)
+                ->in($model->site ?? Site::default()->handle())
                 ->selectedQueryColumns($columns);
         }
     }
@@ -218,15 +200,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $items->each->collection(Collection::findByHandle($collection));
         }
 
-        $items = Term::applySubstitutions($items);
-
-        return $items->map(function ($term) {
-            if ($this->site) {
-                return $term->in($this->site);
-            }
-
-            return $term->inDefaultLocale();
-        });
+        return Term::applySubstitutions($items);
     }
 
     public function pluck($column, $key = null)
