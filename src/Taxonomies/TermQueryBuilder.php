@@ -28,14 +28,27 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     protected $taxonomies = [];
 
+    protected $siteFilterApplied = false;
+
     protected $columns = [
-        'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
+        'id', 'data', 'site', 'origin', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
     ];
 
     protected function transform($items, $columns = [])
     {
-        return TermCollection::make($items)->map(function ($model) {
-            return app(TermContract::class)::fromModel($model)->in($model->site ?? Site::default()->handle());
+        // Preload all locale rows in a single query to avoid N+1 when fromModel()
+        // loads siblings for each term.
+        $modelClass = app('statamic.eloquent.terms.model');
+        $preloaded = $modelClass::whereIn('slug', collect($items)->pluck('slug'))
+            ->whereIn('taxonomy', collect($items)->pluck('taxonomy')->unique()->values())
+            ->get()
+            ->groupBy(fn ($m) => $m->taxonomy.'::'.$m->slug);
+
+        return TermCollection::make($items)->map(function ($model) use ($preloaded) {
+            $siblings = $preloaded->get($model->taxonomy.'::'.$model->slug, collect());
+
+            return app(TermContract::class)::fromModel($model, $siblings)
+                ->in($model->site ?? Site::default()->handle());
         });
     }
 
@@ -56,6 +69,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
+        if ($column === 'site') {
+            $this->siteFilterApplied = true;
+        }
+
         if (func_num_args() === 2) {
             [$value, $operator] = [$operator, '='];
         }
@@ -109,6 +126,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function whereIn($column, $values, $boolean = 'and')
     {
+        if ($column === 'site') {
+            $this->siteFilterApplied = true;
+        }
+
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $values) {
                 return $this;
@@ -231,8 +252,17 @@ class TermQueryBuilder extends EloquentQueryBuilder
         return $paginator->setCollection($this->prepareTerms($paginator->getCollection()));
     }
 
+    private function applyOriginFilter()
+    {
+        if (! $this->siteFilterApplied) {
+            $this->builder->whereNull('origin');
+        }
+    }
+
     private function applyCollectionAndTaxonomyWheres()
     {
+        $this->applyOriginFilter();
+
         if (! empty($this->collections) && ! $this->hasEmptyWhereIn()) {
             $taxonomies = collect(empty($this->taxonomies) ? Taxonomy::handles()->all() : $this->taxonomies)
                 ->unique()
