@@ -56,14 +56,14 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
-        if ($column === 'site') {
-            $this->site = $operator;
-
-            return $this;
-        }
-
         if (func_num_args() === 2) {
             [$value, $operator] = [$operator, '='];
+        }
+
+        if ($column === 'site') {
+            $this->site = $value;
+
+            return $this;
         }
 
         if (in_array($column, ['taxonomy', 'taxonomies'])) {

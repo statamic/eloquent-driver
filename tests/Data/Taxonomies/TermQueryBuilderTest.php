@@ -40,6 +40,46 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_by_site_using_two_arg_where(): void
+    {
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
+            'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
+        ]);
+
+        Taxonomy::make('tags')->sites(['en', 'fr'])->save();
+        Term::make('a')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'A-en'])
+            ->dataForLocale('fr', ['title' => 'A-fr'])
+            ->save();
+
+        $terms = Term::query()->where('site', 'fr')->get();
+
+        $this->assertCount(1, $terms);
+        $this->assertEquals('fr', $terms->first()->locale());
+    }
+
+    #[Test]
+    public function it_filters_by_site_using_three_arg_where(): void
+    {
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
+            'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
+        ]);
+
+        Taxonomy::make('tags')->sites(['en', 'fr'])->save();
+        Term::make('a')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'A-en'])
+            ->dataForLocale('fr', ['title' => 'A-fr'])
+            ->save();
+
+        $terms = Term::query()->where('site', '=', 'fr')->get();
+
+        $this->assertCount(1, $terms);
+        $this->assertEquals('fr', $terms->first()->locale());
+    }
+
+    #[Test]
     public function it_filters_using_or_wheres()
     {
         Taxonomy::make('tags')->save();
