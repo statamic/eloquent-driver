@@ -73,4 +73,17 @@ class AssetContainerRepositoryTest extends TestCase
         $this->assertNotNull($item = $this->repo->findByHandle('new'));
         $this->assertEquals($container, $item);
     }
+
+    #[Test]
+    public function saving_a_container_invalidates_the_cached_all_list()
+    {
+        // Warm the Blink cache by reading all() before the new container exists.
+        $this->assertCount(2, $this->repo->all());
+
+        $this->repo->save(Facades\AssetContainer::make('new')->disk('local'));
+
+        $handles = $this->repo->all()->map->handle()->all();
+        $this->assertCount(3, $handles);
+        $this->assertContains('new', $handles);
+    }
 }
