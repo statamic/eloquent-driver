@@ -347,9 +347,23 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
-            return (new \Statamic\Eloquent\Fields\BlueprintRepository)
+        // Capture fallbacks (e.g. Statamic core's 'default' fallback) before replacing the singleton
+        // so non-eloquent-driven namespace lookups continue to work the same as the file driver.
+        $fallbacks = [];
+        if ($this->app->bound(\Statamic\Fields\BlueprintRepository::class)) {
+            $previous = $this->app->make(\Statamic\Fields\BlueprintRepository::class);
+            $fallbacks = (new \ReflectionProperty($previous, 'fallbacks'))->getValue($previous);
+        }
+
+        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () use ($fallbacks) {
+            $repo = (new \Statamic\Eloquent\Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
+
+            foreach ($fallbacks as $handle => $fallback) {
+                $repo->setFallback($handle, $fallback);
+            }
+
+            return $repo;
         });
     }
 

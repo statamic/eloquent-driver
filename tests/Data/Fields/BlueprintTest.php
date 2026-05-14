@@ -88,4 +88,29 @@ class BlueprintTest extends TestCase
 
         $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
     }
+
+    #[Test]
+    public function it_returns_fallback_for_default_blueprint_when_namespace_is_restricted()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        app(\Statamic\Fields\BlueprintRepository::class)->setFallback('default', function () {
+            return \Statamic\Facades\Blueprint::make()->setContents([
+                'tabs' => ['main' => ['sections' => [['fields' => [['handle' => 'content', 'field' => ['type' => 'markdown', 'localizable' => true]]]]]]],
+            ]);
+        });
+
+        $blueprint = Blueprint::find('default');
+
+        $this->assertNotNull($blueprint);
+        $this->assertInstanceOf(\Statamic\Fields\Blueprint::class, $blueprint);
+    }
+
+    #[Test]
+    public function it_returns_null_for_default_blueprint_when_namespace_is_restricted_and_no_fallback_is_set()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        $this->assertNull(Blueprint::find('default'));
+    }
 }
