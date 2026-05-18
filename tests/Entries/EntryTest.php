@@ -288,6 +288,54 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_localizes_null_values_for_non_direct_descendants()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'nl' => ['name' => 'Dutch', 'locale' => 'nl_NL', 'url' => 'http://nl.test.com/'],
+            'nl-BE' => ['name' => 'Flemish', 'locale' => 'nl_BE', 'url' => 'http://test.com/nl-be/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'text', 'localizable' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'nl', 'nl-BE'])
+            ->save();
+
+        /** @var Entry $originEntry */
+        $originEntry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->data(['foo' => 'bar']);
+        $originEntry->save();
+
+        /** @var Entry $directLocalizationEntry */
+        $directLocalizationEntry = $originEntry->in('nl');
+        $directLocalizationEntry->toModel()->save();
+        $indirectLocalizationEntry = $directLocalizationEntry->in('nl-BE');
+        $indirectLocalizationEntry->origin($directLocalizationEntry);
+
+        $this->assertSame($originEntry, $directLocalizationEntry->origin());
+        $this->assertSame($directLocalizationEntry, $indirectLocalizationEntry->origin());
+
+        $indirectLocalizationEntry->data(['foo' => null]);
+        $indirectLocalizationEntry->toModel()->save();
+
+        $directLocalizationEntry = Entry::fromModel($directLocalizationEntry->model()->fresh());
+        $indirectLocalizationEntry = Entry::fromModel($indirectLocalizationEntry->model()->fresh());
+
+        $this->assertEquals('bar', $directLocalizationEntry->value('foo'));
+        $this->assertEquals(null, $indirectLocalizationEntry->value('foo'));
+    }
+
+    #[Test]
     public function it_stores_and_retrieves_mapped_data_values()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
