@@ -23,7 +23,10 @@ class ExportBlueprints extends Command
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-blueprints';
+    protected $signature = 'statamic:eloquent:export-blueprints
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-blueprints : Only export blueprints}
+        {--only-fieldsets : Only export fieldsets}';
 
     /**
      * The console command description.
@@ -67,6 +70,10 @@ class ExportBlueprints extends Command
 
     private function exportBlueprints()
     {
+        if (! $this->shouldExportBlueprints()) {
+            return;
+        }
+
         $this->withProgressBar(BlueprintModel::all(), function ($model) {
             if (! $model->namespace) {
                 return;
@@ -87,6 +94,10 @@ class ExportBlueprints extends Command
 
     private function exportFieldsets()
     {
+        if (! $this->shouldExportFieldsets()) {
+            return;
+        }
+
         $this->withProgressBar(FieldsetModel::all(), function ($model) {
             if (! $model->handle) {
                 return;
@@ -137,5 +148,19 @@ class ExportBlueprints extends Command
             ->toArray();
 
         return $contents;
+    }
+
+    private function shouldExportBlueprints(): bool
+    {
+        return $this->option('only-blueprints')
+            || ! $this->option('only-fieldsets')
+            && ($this->option('force') || $this->confirm('Do you want to export blueprints?'));
+    }
+
+    private function shouldExportFieldsets(): bool
+    {
+        return $this->option('only-fieldsets')
+            || ! $this->option('only-blueprints')
+            && ($this->option('force') || $this->confirm('Do you want to export fieldsets?'));
     }
 }
