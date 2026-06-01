@@ -46,7 +46,7 @@ use Statamic\Facades\Stache;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 
-class ServiceProvider extends AddonServiceProvider //
+class ServiceProvider extends AddonServiceProvider
 {
     protected $config = false;
 
