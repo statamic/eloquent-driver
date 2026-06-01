@@ -51,6 +51,15 @@ abstract class TestCase extends AddonTestCase
         ]);
     }
 
+    protected function normalizeYaml(string $yaml): string
+    {
+        // Normalize formatting changes introduced in symfony/yaml 8.1
+        $yaml = str_replace('{  }', '{}', $yaml);
+        $yaml = preg_replace('/^( *)-\n\1  (\S)/m', '$1- $2', $yaml);
+
+        return $yaml;
+    }
+
     protected function assertEveryItem($items, $callback)
     {
         if ($items instanceof \Illuminate\Support\Collection) {
