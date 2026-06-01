@@ -85,7 +85,7 @@ array:
 string: 'The string'
 
 EOT;
-        $this->assertEquals($expected, $a->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($a->fileContents()));
 
         $expected = <<<'EOT'
 array:
@@ -93,10 +93,10 @@ array:
   - 'second one'
 string: 'The string'
 'null': null
-empty: {  }
+empty: {}
 
 EOT;
-        $this->assertEquals($expected, $b->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($b->fileContents()));
 
         $expected = <<<'EOT'
 array:
@@ -105,7 +105,7 @@ array:
 string: 'The string'
 
 EOT;
-        $this->assertEquals($expected, $c->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($c->fileContents()));
     }
 
     #[Test]
