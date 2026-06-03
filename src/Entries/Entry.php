@@ -62,7 +62,7 @@ class Entry extends FileEntry
 
         $date = $source->hasDate() ? $source->date() : null;
 
-        $origin = $source->origin();
+        $directOrigin = $source->origin();
 
         if ($template = $source->get('template', $source->template)) {
             $data->put('template', $template);
@@ -82,13 +82,23 @@ class Entry extends FileEntry
                     $data->forget('template');
                 }
 
-                $originData = $origin->data();
+                $directOriginData = $directOrigin->data();
 
-                // remove any fields in entry data that are marked as localized but value is present, and matches origin
+                // remove any fields in entry data that are marked as localized but value is present, and does not match origin
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
                     if ($data->has($blueprintField)) {
-                        if ($data->get($blueprintField) === $originData->get($blueprintField)) {
+                        $fieldOrigin = $directOrigin;
+                        $fieldOriginData = $directOriginData;
+                        while (
+                            $fieldOrigin->hasOrigin()
+                            && ! in_array($blueprintField, $fieldOriginData->get('__localized_fields') ?? [])
+                        ) {
+                            $fieldOrigin = $fieldOrigin->origin();
+                            $fieldOriginData = $fieldOrigin->data();
+                        }
+
+                        if ($data->get($blueprintField) === $fieldOriginData->get($blueprintField)) {
                             $data->forget($blueprintField);
                         } else {
                             $localizedFields[] = $blueprintField;
@@ -96,12 +106,12 @@ class Entry extends FileEntry
                     }
                 }
 
-                $data = $originData->merge($data);
+                $data = $directOrigin->data()->merge($data);
 
                 $data->put('__localized_fields', $localizedFields);
 
                 if (! in_array('date', $localizedFields)) {
-                    $date = $origin->hasDate() ? $origin->date() : null;
+                    $date = $directOrigin->hasDate() ? $directOrigin->date() : null;
                 }
             }
         }
@@ -126,7 +136,7 @@ class Entry extends FileEntry
 
         $attributes = [
             ...$attributes,
-            'origin_id' => $origin?->id(),
+            'origin_id' => $directOrigin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
             'uri' => $source->uri() ?? $source->routableUri(),
