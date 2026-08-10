@@ -5,6 +5,7 @@ namespace Tests\Data\Fields;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
 use Tests\TestCase;
 
@@ -71,6 +72,58 @@ class BlueprintTest extends TestCase
         $model = Blueprint::getModel($blueprint);
 
         $this->assertNull($model);
+    }
+
+    #[Test]
+    public function it_preserves_the_order_of_sets()
+    {
+        $blueprint = Blueprint::make()
+            ->setNamespace('collections.pages')
+            ->setHandle('test')
+            ->setContents([
+                'tabs' => [
+                    'main' => [
+                        'sections' => [
+                            [
+                                'fields' => [
+                                    [
+                                        'handle' => 'content',
+                                        'field' => [
+                                            'type' => 'bard',
+                                            'sets' => [
+                                                'main' => [
+                                                    'sets' => [
+                                                        'zebra' => ['fields' => []],
+                                                        'apple' => ['fields' => []],
+                                                        'mango' => ['fields' => []],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $blueprint->save();
+
+        // MySQL reorders the keys of a JSON object when it stores it, so we do the same here.
+        $model = Blueprint::getModel($blueprint);
+        $data = $model->data;
+        $sets = &$data['tabs']['main']['sections'][0]['fields'][0]['field']['sets']['main']['sets'];
+        ksort($sets);
+        $model->update(['data' => $data]);
+
+        Blink::flush();
+
+        $contents = Blueprint::find('collections.pages.test')->contents();
+        $sets = $contents['tabs']['main']['sections'][0]['fields'][0]['field']['sets']['main']['sets'];
+
+        $this->assertSame(['zebra', 'apple', 'mango'], array_keys($sets));
+        $this->assertSame([['fields' => []], ['fields' => []], ['fields' => []]], array_values($sets));
     }
 
     #[Test]

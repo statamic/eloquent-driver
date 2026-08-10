@@ -9,6 +9,8 @@ use Statamic\Support\Arr;
 
 class BlueprintRepository extends StacheRepository
 {
+    use PreservesSetOrder;
+
     protected const BLINK_FOUND = 'blueprints.found';
     protected const BLINK_FROM_FILE = 'blueprints.from-file';
     protected const BLINK_NAMESPACE_PATHS = 'blueprints.paths-in-namespace';
@@ -187,6 +189,10 @@ class BlueprintRepository extends StacheRepository
                         ->map(function ($section) use (&$sectionCount) {
                             $section['__count'] = $sectionCount++;
 
+                            if (isset($section['fields']) && is_array($section['fields'])) {
+                                $section['fields'] = $this->addOrderToSets($section['fields']);
+                            }
+
                             return $section;
                         });
                 }
@@ -210,6 +216,10 @@ class BlueprintRepository extends StacheRepository
                         ->sortBy('__count')
                         ->map(function ($section) use (&$sectionCount) {
                             unset($section['__count']);
+
+                            if (isset($section['fields']) && is_array($section['fields'])) {
+                                $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                            }
 
                             return $section;
                         })

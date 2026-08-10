@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
+use Statamic\Eloquent\Fields\PreservesSetOrder;
 use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as StacheBlueprint;
 use Statamic\Fields\Fieldset as StacheFieldset;
@@ -16,7 +17,7 @@ use Statamic\Support\Str;
 
 class ExportBlueprints extends Command
 {
-    use RunsInPlease;
+    use PreservesSetOrder, RunsInPlease;
 
     /**
      * The name and signature of the console command.
@@ -137,6 +138,10 @@ class ExportBlueprints extends Command
                         ->sortBy('__count')
                         ->map(function ($section) {
                             unset($section['__count']);
+
+                            if (isset($section['fields']) && is_array($section['fields'])) {
+                                $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                            }
 
                             return $section;
                         })
