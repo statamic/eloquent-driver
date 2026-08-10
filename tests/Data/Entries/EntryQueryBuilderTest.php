@@ -54,36 +54,6 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
-    public function entries_without_the_field_are_found_using_where_not_equals()
-    {
-        Collection::make('posts')->save();
-
-        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
-        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'archived' => false])->create();
-        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'archived' => true])->create();
-
-        $entries = Entry::query()->where('archived', '!=', true)->get();
-
-        $this->assertCount(2, $entries);
-        $this->assertEquals(['Post 1', 'Post 2'], $entries->map->title->all());
-    }
-
-    #[Test]
-    public function entries_with_a_null_column_are_not_found_using_where_not_equals()
-    {
-        Collection::make('posts')->save();
-        Collection::make('events')->dated(true)->save();
-
-        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
-        EntryFactory::id('2')->slug('event-1')->collection('events')->date('2024-01-01')->data(['title' => 'Event 1'])->create();
-
-        $entries = Entry::query()->where('date', '!=', '2023-01-01')->get();
-
-        $this->assertCount(1, $entries);
-        $this->assertEquals(['Event 1'], $entries->map->title->all());
-    }
-
-    #[Test]
     public function entries_are_found_using_or_where()
     {
         $this->createDummyCollectionAndEntries();
@@ -559,6 +529,38 @@ class EntryQueryBuilderTest extends TestCase
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 2', 'Post 3', 'Post 4'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_without_the_field_are_found_using_where_not_equals()
+    {
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'archived' => false])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'archived' => true])->create();
+
+        $entries = Entry::query()->where('archived', '!=', true)->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 1', 'Post 2'], $entries->map->title->all());
+
+        $entries = Entry::query()->where('archived', false)->orWhere('archived', true)->get();
+
+        $this->assertCount(2, $entries);
+        $this->assertEquals(['Post 2', 'Post 3'], $entries->map->title->all());
+    }
+
+    #[Test]
+    public function entries_with_a_null_column_are_not_found_using_where_not_equals()
+    {
+        Collection::make('events')->dated(true)->save();
+
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1'])->create();
+        EntryFactory::id('2')->slug('event-1')->collection('events')->date('2024-01-01')->data(['title' => 'Event 1'])->create();
+
+        $entries = Entry::query()->where('date', '!=', '2023-01-01')->get();
+
+        $this->assertCount(1, $entries);
+        $this->assertEquals(['Event 1'], $entries->map->title->all());
     }
 
     #[Test]
