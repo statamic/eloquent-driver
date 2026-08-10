@@ -115,6 +115,18 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
         }
 
+        if (
+            func_num_args() > 2
+            && in_array($operator, ['!=', '<>'], true)
+            && $this->isFieldColumn($actualColumn = $this->column($column))
+        ) {
+            $this->builder->where(function ($query) use ($actualColumn, $operator, $value) {
+                $query->whereNull($actualColumn)->orWhere($actualColumn, $operator, $value);
+            }, null, null, $boolean);
+
+            return $this;
+        }
+
         return parent::where(...func_get_args());
     }
 
@@ -125,6 +137,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         }
 
         return parent::whereIn(...func_get_args());
+    }
+
+    private function isFieldColumn($column)
+    {
+        return Str::contains($column, 'data->') && ! Str::contains(Str::after($column, 'data->'), '->');
     }
 
     private function ensureCollectionsAreQueriedForStatusQuery(): void
