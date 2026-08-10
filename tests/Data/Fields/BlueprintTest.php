@@ -82,14 +82,31 @@ class BlueprintTest extends TestCase
             ->setNamespace('collections.pages')
             ->setHandle('test')
             ->setContents([
-                'tabs' => ['main' => ['sections' => [['fields' => [['handle' => 'content', 'field' => [
-                    'type' => 'bard',
-                    'sets' => ['main' => ['sets' => [
-                        'zebra' => ['fields' => []],
-                        'apple' => ['fields' => []],
-                        'mango' => ['fields' => []],
-                    ]]],
-                ]]]]]]],
+                'tabs' => [
+                    'main' => [
+                        'sections' => [
+                            [
+                                'fields' => [
+                                    [
+                                        'handle' => 'content',
+                                        'field' => [
+                                            'type' => 'bard',
+                                            'sets' => [
+                                                'main' => [
+                                                    'sets' => [
+                                                        'zebra' => ['fields' => []],
+                                                        'apple' => ['fields' => []],
+                                                        'mango' => ['fields' => []],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ]);
 
         $blueprint->save();
