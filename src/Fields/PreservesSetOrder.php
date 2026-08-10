@@ -8,8 +8,14 @@ trait PreservesSetOrder
     {
         return collect($fields)
             ->map(function ($field) {
-                if (isset($field['field']['sets']) && is_array($field['field']['sets'])) {
-                    $field['field']['sets'] = $this->addOrderToSetGroups($field['field']['sets']);
+                foreach (['field', 'config'] as $key) {
+                    if (isset($field[$key]['sets']) && is_array($field[$key]['sets'])) {
+                        $field[$key]['sets'] = $this->addOrderToSetGroups($field[$key]['sets']);
+                    }
+
+                    if (isset($field[$key]['fields']) && is_array($field[$key]['fields'])) {
+                        $field[$key]['fields'] = $this->addOrderToSets($field[$key]['fields']);
+                    }
                 }
 
                 return $field;
@@ -42,8 +48,14 @@ trait PreservesSetOrder
     {
         return collect($fields)
             ->map(function ($field) {
-                if (isset($field['field']['sets']) && is_array($field['field']['sets'])) {
-                    $field['field']['sets'] = $this->updateOrderFromSetGroups($field['field']['sets']);
+                foreach (['field', 'config'] as $key) {
+                    if (isset($field[$key]['sets']) && is_array($field[$key]['sets'])) {
+                        $field[$key]['sets'] = $this->updateOrderFromSetGroups($field[$key]['sets']);
+                    }
+
+                    if (isset($field[$key]['fields']) && is_array($field[$key]['fields'])) {
+                        $field[$key]['fields'] = $this->updateOrderFromSets($field[$key]['fields']);
+                    }
                 }
 
                 return $field;

@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
+use Statamic\Eloquent\Fields\PreservesSetOrder;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\File;
@@ -15,7 +16,7 @@ use Statamic\Support\Str;
 
 class ImportBlueprints extends Command
 {
-    use RunsInPlease;
+    use PreservesSetOrder, RunsInPlease;
 
     /**
      * The name and signature of the console command.
@@ -97,6 +98,10 @@ class ImportBlueprints extends Command
                             $tab['sections'] = collect($tab['sections'])
                                 ->map(function ($section) use (&$sectionCount) {
                                     $section['__count'] = $sectionCount++;
+
+                                    if (isset($section['fields']) && is_array($section['fields'])) {
+                                        $section['fields'] = $this->addOrderToSets($section['fields']);
+                                    }
 
                                     return $section;
                                 });
