@@ -154,7 +154,23 @@ class ImportBlueprints extends Command
                 $handle = Str::of($handle)->after('vendor.')->replaceFirst('.', '::');
             }
 
-            $fieldset = Fieldset::make($handle)->setContents(YAML::file($path)->parse());
+            $contents = YAML::file($path)->parse();
+
+            if (isset($contents['sections']) && is_array($contents['sections'])) {
+                $contents['sections'] = collect($contents['sections'])
+                    ->map(function ($section) {
+                        if (isset($section['fields']) && is_array($section['fields'])) {
+                            $section['fields'] = $this->addOrderToSets($section['fields']);
+                        }
+
+                        return $section;
+                    })
+                    ->toArray();
+            } elseif (isset($contents['fields']) && is_array($contents['fields'])) {
+                $contents['fields'] = $this->addOrderToSets($contents['fields']);
+            }
+
+            $fieldset = Fieldset::make($handle)->setContents($contents);
 
             $lastModified = Carbon::createFromTimestamp(File::lastModified($path));
 

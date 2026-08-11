@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
 use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\File;
+use Statamic\Facades\YAML;
 use Tests\TestCase;
 
 class ExportBlueprintsTest extends TestCase
@@ -48,6 +49,42 @@ class ExportBlueprintsTest extends TestCase
 
         $this->assertFileExists(resource_path('blueprints/collections/blog/article.yaml'));
         $this->assertFileExists(resource_path('fieldsets/seo.yaml'));
+    }
+
+    #[Test]
+    public function it_preserves_the_order_of_sets_when_exporting_fieldsets()
+    {
+        FieldsetModel::create([
+            'handle' => 'seo',
+            'data' => [
+                'fields' => [
+                    [
+                        'handle' => 'content',
+                        'field' => [
+                            'type' => 'bard',
+                            'sets' => [
+                                'main' => [
+                                    'sets' => [
+                                        'zebra' => ['fields' => [], '__count' => 2],
+                                        'apple' => ['fields' => [], '__count' => 0],
+                                        'mango' => ['fields' => [], '__count' => 1],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->artisan('statamic:eloquent:export-blueprints', ['--force' => true])
+            ->assertExitCode(0);
+
+        $exported = YAML::file(resource_path('fieldsets/seo.yaml'))->parse();
+        $sets = $exported['fields'][0]['field']['sets']['main']['sets'];
+
+        $this->assertSame(['apple', 'mango', 'zebra'], array_keys($sets));
+        $this->assertArrayNotHasKey('__count', $sets['apple']);
     }
 
     #[Test]

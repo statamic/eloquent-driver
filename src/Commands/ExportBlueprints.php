@@ -106,7 +106,7 @@ class ExportBlueprints extends Command
 
             (new StacheFieldset)
                 ->setHandle($model->handle)
-                ->setContents($model->data)
+                ->setContents($this->updateOrderFromFieldsetContents($model->data))
                 ->save();
         });
 
@@ -124,6 +124,29 @@ class ExportBlueprints extends Command
         }
 
         return $namespace;
+    }
+
+    private function updateOrderFromFieldsetContents($contents)
+    {
+        if (isset($contents['sections']) && is_array($contents['sections'])) {
+            $contents['sections'] = collect($contents['sections'])
+                ->map(function ($section) {
+                    if (isset($section['fields']) && is_array($section['fields'])) {
+                        $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                    }
+
+                    return $section;
+                })
+                ->toArray();
+
+            return $contents;
+        }
+
+        if (isset($contents['fields']) && is_array($contents['fields'])) {
+            $contents['fields'] = $this->updateOrderFromSets($contents['fields']);
+        }
+
+        return $contents;
     }
 
     private function updateOrderFromBlueprintSections($contents)

@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Fields;
 
 use Illuminate\Support\Collection;
+use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Facades\Blink;
 use Statamic\Fields\Fieldset;
 use Statamic\Fields\FieldsetRepository as StacheRepository;
@@ -10,6 +11,8 @@ use Statamic\Support\Str;
 
 class FieldsetRepository extends StacheRepository
 {
+    use PreservesSetOrder;
+
     public function all(): Collection
     {
         return Blink::once('eloquent-fieldsets', function () {
@@ -27,7 +30,7 @@ class FieldsetRepository extends StacheRepository
 
                     return (new Fieldset)
                         ->setHandle($handle)
-                        ->setContents($model->data);
+                        ->setContents($this->updateOrderFromFieldsetContents($model->data));
                 });
             });
         })
@@ -63,10 +66,56 @@ class FieldsetRepository extends StacheRepository
             'handle' => $fieldset->handle(),
         ]);
 
-        $model->data = $fieldset->contents();
+        $model->data = $this->addOrderToFieldsetContents($fieldset->contents());
         $model->save();
 
         Blink::forget("eloquent-fieldset-{$model->handle}");
+    }
+
+    private function addOrderToFieldsetContents($contents)
+    {
+        if (isset($contents['sections']) && is_array($contents['sections'])) {
+            $contents['sections'] = collect($contents['sections'])
+                ->map(function ($section) {
+                    if (isset($section['fields']) && is_array($section['fields'])) {
+                        $section['fields'] = $this->addOrderToSets($section['fields']);
+                    }
+
+                    return $section;
+                })
+                ->toArray();
+
+            return $contents;
+        }
+
+        if (isset($contents['fields']) && is_array($contents['fields'])) {
+            $contents['fields'] = $this->addOrderToSets($contents['fields']);
+        }
+
+        return $contents;
+    }
+
+    private function updateOrderFromFieldsetContents($contents)
+    {
+        if (isset($contents['sections']) && is_array($contents['sections'])) {
+            $contents['sections'] = collect($contents['sections'])
+                ->map(function ($section) {
+                    if (isset($section['fields']) && is_array($section['fields'])) {
+                        $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                    }
+
+                    return $section;
+                })
+                ->toArray();
+
+            return $contents;
+        }
+
+        if (isset($contents['fields']) && is_array($contents['fields'])) {
+            $contents['fields'] = $this->updateOrderFromSets($contents['fields']);
+        }
+
+        return $contents;
     }
 
     public function deleteModel($fieldset)
