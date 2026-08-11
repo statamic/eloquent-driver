@@ -90,10 +90,32 @@ class ImportTaxonomies extends Command
 
         $this->withProgressBar(TermFacade::all()->map->term()->unique(), function ($term) {
             $lastModified = $term->fileLastModified();
+            $defaultLocale = $term->defaultLocale();
 
-            EloquentTerm::makeModelFromContract($term)
-                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified])
-                ->save();
+            $canonicalModel = EloquentTerm::makeModelFromContract($term)
+                ->fill(['created_at' => $lastModified, 'updated_at' => $lastModified]);
+            $canonicalModel->save();
+
+            $class = app('statamic.eloquent.terms.model');
+
+            foreach ($term->localizations() as $locale => $localizedTerm) {
+                if ($locale === $defaultLocale) {
+                    continue;
+                }
+
+                $class::firstOrNew([
+                    'slug'     => $term->getOriginal('slug', $term->slug()),
+                    'taxonomy' => $term->taxonomyHandle(),
+                    'site'     => $locale,
+                ])->fill([
+                    'slug'       => $term->slug(),
+                    'uri'        => $localizedTerm->uri(),
+                    'origin'     => $canonicalModel->id,
+                    'data'       => $term->dataForLocale($locale)->toArray(),
+                    'created_at' => $lastModified,
+                    'updated_at' => $lastModified,
+                ])->save();
+            }
         });
 
         $this->components->info('Terms imported successfully.');

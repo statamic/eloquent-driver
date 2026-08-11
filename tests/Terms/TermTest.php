@@ -215,7 +215,7 @@ class TermTest extends TestCase
     }
 
     #[Test]
-    public function it_stores_localizations_in_the_model_when_saving()
+    public function it_stores_localizations_as_separate_rows_when_saving()
     {
         $this->setSites([
             'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
@@ -228,11 +228,16 @@ class TermTest extends TestCase
         $term->dataForLocale('fr', ['title' => 'Tag de test']);
         $term->save();
 
-        $model = TermModel::first();
+        $this->assertEquals(2, TermModel::count());
 
-        $this->assertArrayHasKey('localizations', $model->data);
-        $this->assertArrayHasKey('fr', $model->data['localizations']);
-        $this->assertEquals('Tag de test', $model->data['localizations']['fr']['title']);
+        $canonical = TermModel::whereNull('origin')->first();
+        $this->assertArrayNotHasKey('localizations', $canonical->data);
+        $this->assertEquals('Test Tag', $canonical->data['title']);
+
+        $frRow = TermModel::whereNotNull('origin')->first();
+        $this->assertEquals($canonical->id, $frRow->origin);
+        $this->assertEquals('fr', $frRow->site);
+        $this->assertEquals('Tag de test', $frRow->data['title']);
     }
 
     #[Test]
