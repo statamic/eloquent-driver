@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Fields;
 
+use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Facades\Blink;
 use Statamic\Fields\Blueprint;
 use Statamic\Fields\BlueprintRepository as StacheRepository;

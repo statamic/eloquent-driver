@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
-use Statamic\Eloquent\Fields\PreservesSetOrder;
+use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\File;

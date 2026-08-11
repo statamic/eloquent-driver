@@ -1,6 +1,6 @@
 <?php
 
-namespace Statamic\Eloquent\Fields;
+namespace Statamic\Eloquent\Fields\Concerns;
 
 trait PreservesSetOrder
 {
