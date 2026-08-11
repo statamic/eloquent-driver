@@ -5,7 +5,9 @@ namespace Tests\Data\Fields;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
+use Statamic\Support\Arr;
 use Tests\TestCase;
 
 class BlueprintTest extends TestCase
@@ -71,6 +73,59 @@ class BlueprintTest extends TestCase
         $model = Blueprint::getModel($blueprint);
 
         $this->assertNull($model);
+    }
+
+    #[Test]
+    public function it_preserves_the_order_of_sets()
+    {
+        $blueprint = Blueprint::make()
+            ->setNamespace('collections.pages')
+            ->setHandle('test')
+            ->setContents([
+                'tabs' => [
+                    'main' => [
+                        'sections' => [
+                            [
+                                'fields' => [
+                                    [
+                                        'handle' => 'content',
+                                        'field' => [
+                                            'type' => 'bard',
+                                            'sets' => [
+                                                'main' => [
+                                                    'sets' => [
+                                                        'zebra' => ['fields' => []],
+                                                        'apple' => ['fields' => []],
+                                                        'mango' => ['fields' => []],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $blueprint->save();
+
+        // MySQL reorders the keys of a JSON object when it stores it, so we do the same here.
+        $path = 'tabs.main.sections.0.fields.0.field.sets.main.sets';
+        $model = Blueprint::getModel($blueprint);
+        $data = $model->data;
+        $sets = Arr::get($data, $path);
+        ksort($sets);
+        Arr::set($data, $path, $sets);
+        $model->update(['data' => $data]);
+
+        Blink::flush();
+
+        $sets = Arr::get(Blueprint::find('collections.pages.test')->contents(), $path);
+
+        $this->assertSame(['zebra', 'apple', 'mango'], array_keys($sets));
+        $this->assertArrayNotHasKey('__count', $sets['zebra']);
     }
 
     #[Test]
