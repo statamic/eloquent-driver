@@ -13,8 +13,6 @@ use Statamic\Support\Str;
 
 class Asset extends FileAsset
 {
-    protected $model;
-
     use HasDirtyState {
         syncOriginal as traitSyncOriginal;
     }
@@ -28,6 +26,9 @@ class Asset extends FileAsset
     }
 
     protected $existsOnDisk = false;
+
+    protected $model;
+
     protected $removedData = [];
 
     public static function fromModel(Model $model)
@@ -59,6 +60,20 @@ class Asset extends FileAsset
                 ->merge($this->data->all())
                 ->except($this->removedData)
                 ->all();
+
+            return $meta;
+        }
+
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            if ($this->model) {
+                return $this->model->meta;
+            }
+
+            $meta = $this->generateMeta();
+
+            if (! $meta['data']) {
+                $meta['data'] = [];
+            }
 
             return $meta;
         }
@@ -141,7 +156,7 @@ class Asset extends FileAsset
 
         $model = false;
 
-        if (method_exists($source, 'model')) {
+        if (config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false) || method_exists($source, 'model')) {
             $model = $source->model();
         }
 
@@ -197,6 +212,19 @@ class Asset extends FileAsset
     public function metaPath()
     {
         return $this->path();
+    }
+
+    public function id($id = null)
+    {
+        if ($id || ! config('statamic.eloquent-driver.assets.use_model_keys_for_ids', false)) {
+            return parent::id($id);
+        }
+
+        if (! $this->model) {
+            throw new \Exception('ID is not available until asset is saved');
+        }
+
+        return $this->model->getKey();
     }
 
     public function getCurrentDirtyStateAttributes(): array
