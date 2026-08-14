@@ -93,6 +93,12 @@ return [
         'model' => \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
     ],
 
+    'taxonomy_trees' => [
+        'driver' => 'file',
+        'model' => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree' => \Statamic\Eloquent\Structures\TaxonomyTree::class,
+    ],
+
     'terms' => [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Taxonomies\TermModel::class,
