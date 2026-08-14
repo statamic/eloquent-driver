@@ -67,6 +67,7 @@ class ServiceProvider extends AddonServiceProvider
         \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
         \Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables::class,
         \Statamic\Eloquent\Updates\UpdateGlobalVariables::class,
+        \Statamic\Eloquent\Updates\AddOrderToTermsTable::class,
     ];
 
     public function boot()

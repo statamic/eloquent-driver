@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Eloquent\Jobs\UpdateTaxonomyTermOrder;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -166,5 +167,22 @@ class TermRepository extends StacheRepository
         }
 
         return $query->count();
+    }
+
+    public function updateOrders($taxonomy)
+    {
+        $taxonomy->queryTerms()
+            ->get()
+            ->each(function ($term) {
+                $dispatch = UpdateTaxonomyTermOrder::dispatch($term->id());
+
+                $connection = config('statamic.eloquent-driver.terms.update_term_order_connection', 'default');
+
+                if ($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+
+                $dispatch->onQueue(config('statamic.eloquent-driver.terms.update_term_order_queue', 'default'));
+            });
     }
 }
