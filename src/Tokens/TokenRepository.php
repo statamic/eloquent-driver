@@ -2,11 +2,21 @@
 
 namespace Statamic\Eloquent\Tokens;
 
+use Illuminate\Support\Collection;
 use Statamic\Contracts\Tokens\Token as TokenContract;
 use Statamic\Tokens\TokenRepository as Repository;
 
 class TokenRepository extends Repository
 {
+    public function all(): Collection
+    {
+        return app('statamic.eloquent.tokens.model')::query()
+            ->where('expire_at', '>', now())
+            ->get()
+            ->map(fn ($model) => Token::fromModel($model))
+            ->values();
+    }
+
     public function find(string $token): ?Token
     {
         $model = app('statamic.eloquent.tokens.model')::whereToken($token)->first();

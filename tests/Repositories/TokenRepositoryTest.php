@@ -37,6 +37,18 @@ class TokenRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function it_gets_all_non_expired_tokens()
+    {
+        $this->repo->make('expired', 'ExampleHandler')->expireAt(now()->subMinute())->save();
+        $this->repo->make('fresh', 'ExampleHandler')->expireAt(now()->addHour())->save();
+
+        $this->assertEquals(
+            ['abc', 'fresh'],
+            $this->repo->all()->map->token()->sort()->values()->all()
+        );
+    }
+
+    #[Test]
     public function it_saves_a_token_to_the_database()
     {
         $token = $this->repo->make('new', 'ExampleHandler', ['foo' => 'bar']);
