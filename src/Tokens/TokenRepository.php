@@ -11,7 +11,6 @@ class TokenRepository extends Repository
     public function all(): Collection
     {
         return app('statamic.eloquent.tokens.model')::query()
-            ->where('expire_at', '>', now())
             ->get()
             ->map(fn ($model) => Token::fromModel($model))
             ->values();

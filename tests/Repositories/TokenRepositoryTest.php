@@ -37,13 +37,13 @@ class TokenRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function it_gets_all_non_expired_tokens()
+    public function it_gets_all_tokens()
     {
         $this->repo->make('expired', 'ExampleHandler')->expireAt(now()->subMinute())->save();
         $this->repo->make('fresh', 'ExampleHandler')->expireAt(now()->addHour())->save();
 
         $this->assertEquals(
-            ['abc', 'fresh'],
+            ['abc', 'expired', 'fresh'],
             $this->repo->all()->map->token()->sort()->values()->all()
         );
     }
