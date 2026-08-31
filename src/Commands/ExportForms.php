@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Commands;
 
 use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
@@ -78,15 +79,27 @@ class ExportForms extends Command
 
         $forms = FormModel::all();
 
-        $this->withProgressBar($forms, function ($form) {
-            Form::make()
-                ->handle($form->handle)
-                ->title($form->title)
-                ->store($form->settings['store'] ?? null)
-                ->email($form->settings['email'] ?? null)
-                ->honeypot($form->settings['honeypot'] ?? null)
-                ->data($form->settings['data'] ?? [])
-                ->save();
+        $this->withProgressBar($forms, function ($model) {
+            $settings = collect($model->settings);
+
+            $form = Form::make()
+                ->handle($model->handle)
+                ->title($model->title)
+                ->store($settings->get('store'))
+                ->charts($settings->get('charts'))
+                ->honeypot($settings->get('honeypot'))
+                ->connections($settings->get('connections'))
+                ->data($settings->get('data') ?? []);
+
+            if (! is_null($emails = Arr::get($settings, 'connections.email', $settings->get('email')))) {
+                $form->email($emails);
+            }
+
+            if ($fields = $settings->get('fields')) {
+                $form->formFields($fields);
+            }
+
+            $form->save();
         });
 
         $this->newLine();
