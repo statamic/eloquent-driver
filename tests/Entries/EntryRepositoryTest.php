@@ -94,6 +94,8 @@ class EntryRepositoryTest extends TestCase
         (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
         (new Entry)->id(4)->collection($collection)->slug('delta')->save();
 
+        $orderBeforeStructureSave = EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all();
+
         $collection->structure()->in('en')->tree([
             ['entry' => 4],
             ['entry' => 2],
@@ -103,12 +105,10 @@ class EntryRepositoryTest extends TestCase
 
         // Assert that the order is unchanged, to make sure that saving
         // the structure isn't what caused the order to be updated.
-        $this->assertEquals([
-            1 => 1,
-            2 => 2,
-            3 => 3,
-            4 => 4,
-        ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
+        $this->assertEquals(
+            $orderBeforeStructureSave,
+            EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all()
+        );
 
         (new EntryRepository(new Stache))->updateOrders($collection);
 
@@ -134,6 +134,8 @@ class EntryRepositoryTest extends TestCase
         (new Entry)->id(3)->collection($collection)->slug('charlie')->save();
         (new Entry)->id(4)->collection($collection)->slug('delta')->save();
 
+        $orderBeforeStructureSave = EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all();
+
         $collection->structure()->in('en')->tree([
             ['entry' => 4],
             ['entry' => 2],
@@ -143,21 +145,17 @@ class EntryRepositoryTest extends TestCase
 
         // Assert that the order is unchanged, to make sure that saving
         // the structure isn't what caused the order to be updated.
-        $this->assertEquals([
-            1 => 1,
-            2 => 2,
-            3 => 3,
-            4 => 4,
-        ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
+        $this->assertEquals(
+            $orderBeforeStructureSave,
+            EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all()
+        );
 
         (new EntryRepository(new Stache))->updateOrders($collection, [2, 3]);
 
-        $this->assertEquals([
-            1 => 1,
-            2 => 2,
-            3 => 4,
-            4 => 4,
-        ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
+        $this->assertEquals(
+            [2 => 2, 3 => 4] + $orderBeforeStructureSave,
+            EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all()
+        );
     }
 
     #[Test]
