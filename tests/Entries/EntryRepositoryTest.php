@@ -105,9 +105,9 @@ class EntryRepositoryTest extends TestCase
         // the structure isn't what caused the order to be updated.
         $this->assertEquals([
             1 => 1,
-            2 => 1,
-            3 => 1,
-            4 => 1,
+            2 => 2,
+            3 => 3,
+            4 => 4,
         ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
 
         (new EntryRepository(new Stache))->updateOrders($collection);
@@ -145,9 +145,9 @@ class EntryRepositoryTest extends TestCase
         // the structure isn't what caused the order to be updated.
         $this->assertEquals([
             1 => 1,
-            2 => 1,
-            3 => 1,
-            4 => 1,
+            2 => 2,
+            3 => 3,
+            4 => 4,
         ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
 
         (new EntryRepository(new Stache))->updateOrders($collection, [2, 3]);
@@ -156,7 +156,7 @@ class EntryRepositoryTest extends TestCase
             1 => 1,
             2 => 2,
             3 => 4,
-            4 => 1,
+            4 => 4,
         ], EntryModel::all()->mapWithKeys(fn ($e) => [$e->id => $e->order])->all());
     }
 
