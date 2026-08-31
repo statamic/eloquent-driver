@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as StacheBlueprint;
@@ -16,7 +17,7 @@ use Statamic\Support\Str;
 
 class ExportBlueprints extends Command
 {
-    use RunsInPlease;
+    use PreservesSetOrder, RunsInPlease;
 
     /**
      * The name and signature of the console command.
@@ -105,7 +106,7 @@ class ExportBlueprints extends Command
 
             (new StacheFieldset)
                 ->setHandle($model->handle)
-                ->setContents($model->data)
+                ->setContents($this->updateOrderFromFieldsetContents($model->data))
                 ->save();
         });
 
@@ -125,6 +126,29 @@ class ExportBlueprints extends Command
         return $namespace;
     }
 
+    private function updateOrderFromFieldsetContents($contents)
+    {
+        if (isset($contents['sections']) && is_array($contents['sections'])) {
+            $contents['sections'] = collect($contents['sections'])
+                ->map(function ($section) {
+                    if (isset($section['fields']) && is_array($section['fields'])) {
+                        $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                    }
+
+                    return $section;
+                })
+                ->toArray();
+
+            return $contents;
+        }
+
+        if (isset($contents['fields']) && is_array($contents['fields'])) {
+            $contents['fields'] = $this->updateOrderFromSets($contents['fields']);
+        }
+
+        return $contents;
+    }
+
     private function updateOrderFromBlueprintSections($contents)
     {
         $contents['tabs'] = collect($contents['tabs'] ?? [])
@@ -137,6 +161,10 @@ class ExportBlueprints extends Command
                         ->sortBy('__count')
                         ->map(function ($section) {
                             unset($section['__count']);
+
+                            if (isset($section['fields']) && is_array($section['fields'])) {
+                                $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                            }
 
                             return $section;
                         })
