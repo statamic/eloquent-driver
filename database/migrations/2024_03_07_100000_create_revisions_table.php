@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('action')->index();
             $table->string('user')->nullable();
             $table->text('message')->nullable();
+            $table->timestamp('publish_at')->nullable();
             $table->jsonb('attributes')->nullable();
             $table->timestamps();
 

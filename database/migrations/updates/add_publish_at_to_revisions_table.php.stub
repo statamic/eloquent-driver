@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::table($this->prefix('revisions'), function (Blueprint $table) {
+            $table->timestamp('publish_at')->after('message')->nullable();
+        });
+    }
+
+    public function down()
+    {
+        Schema::table($this->prefix('revisions'), function (Blueprint $table) {
+            $table->dropColumn('publish_at');
+        });
+    }
+};
