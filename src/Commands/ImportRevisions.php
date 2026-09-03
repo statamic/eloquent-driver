@@ -55,6 +55,7 @@ class ImportRevisions extends Command
                 ->date(Carbon::parse($yaml['date']))
                 ->user($yaml['user'] ?? false)
                 ->message($yaml['message'] ?? '')
+                ->publishAt(($publishAt = $yaml['publish_at'] ?? null) ? Carbon::createFromTimestamp($publishAt, config('app.timezone')) : null)
                 ->attributes($yaml['attributes'] ?? []);
 
             if ($file->getBasename('.yaml') === 'working') {
