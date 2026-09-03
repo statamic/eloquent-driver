@@ -24,6 +24,8 @@ class ImportCollectionsTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->shouldUseStringEntryIds = true;
+
         parent::setUp();
 
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
@@ -74,12 +76,12 @@ class ImportCollectionsTest extends TestCase
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        Entry::make()->collection($collection)->id('d0d0d0d0-1111-2222-3333-444444444444')->save();
+        Entry::make()->collection($collection)->id('e0e0e0e0-5555-6666-7777-888888888888')->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => 'd0d0d0d0-1111-2222-3333-444444444444'],
+            ['entry' => 'e0e0e0e0-5555-6666-7777-888888888888'],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());
@@ -102,12 +104,12 @@ class ImportCollectionsTest extends TestCase
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        Entry::make()->collection($collection)->id('d0d0d0d0-1111-2222-3333-444444444444')->save();
+        Entry::make()->collection($collection)->id('e0e0e0e0-5555-6666-7777-888888888888')->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => 'd0d0d0d0-1111-2222-3333-444444444444'],
+            ['entry' => 'e0e0e0e0-5555-6666-7777-888888888888'],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());
@@ -132,12 +134,12 @@ class ImportCollectionsTest extends TestCase
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        Entry::make()->collection($collection)->id('d0d0d0d0-1111-2222-3333-444444444444')->save();
+        Entry::make()->collection($collection)->id('e0e0e0e0-5555-6666-7777-888888888888')->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => 'd0d0d0d0-1111-2222-3333-444444444444'],
+            ['entry' => 'e0e0e0e0-5555-6666-7777-888888888888'],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());
@@ -160,12 +162,12 @@ class ImportCollectionsTest extends TestCase
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        Entry::make()->collection($collection)->id('d0d0d0d0-1111-2222-3333-444444444444')->save();
+        Entry::make()->collection($collection)->id('e0e0e0e0-5555-6666-7777-888888888888')->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => 'd0d0d0d0-1111-2222-3333-444444444444'],
+            ['entry' => 'e0e0e0e0-5555-6666-7777-888888888888'],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());
@@ -190,12 +192,12 @@ class ImportCollectionsTest extends TestCase
         $collection = tap(Collection::make('pages')->title('Pages'))->save();
         $collection->structure(new CollectionStructure)->save();
 
-        Entry::make()->collection($collection)->id('foo')->save();
-        Entry::make()->collection($collection)->id('bar')->save();
+        Entry::make()->collection($collection)->id('d0d0d0d0-1111-2222-3333-444444444444')->save();
+        Entry::make()->collection($collection)->id('e0e0e0e0-5555-6666-7777-888888888888')->save();
 
         $collection->structure()->in('en')->tree([
-            ['entry' => 'foo'],
-            ['entry' => 'bar'],
+            ['entry' => 'd0d0d0d0-1111-2222-3333-444444444444'],
+            ['entry' => 'e0e0e0e0-5555-6666-7777-888888888888'],
         ])->save();
 
         $this->assertCount(0, CollectionModel::all());

@@ -45,7 +45,7 @@ class ExportEntriesTest extends TestCase
     {
         Collection::make('pages')->title('Pages')->save();
         EntryModel::create([
-            'id' => 'abc-123',
+            'id' => 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
             'collection' => 'pages',
             'slug' => 'foo',
             'site' => 'en',
@@ -68,7 +68,7 @@ class ExportEntriesTest extends TestCase
 
         Collection::make('pages')->title('Pages')->save();
         EntryModel::create([
-            'id' => 'origin-id',
+            'id' => 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
             'collection' => 'pages',
             'slug' => 'foo',
             'site' => 'en',
@@ -76,8 +76,8 @@ class ExportEntriesTest extends TestCase
             'published' => true,
         ]);
         EntryModel::create([
-            'id' => 'localized-id',
-            'origin_id' => 'origin-id',
+            'id' => 'c3d4e5f6-a7b8-9012-cdef-123456789012',
+            'origin_id' => 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
             'collection' => 'pages',
             'slug' => 'foo',
             'site' => 'fr',
