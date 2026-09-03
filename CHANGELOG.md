@@ -1,5 +1,13 @@
 # Release Notes
 
+## 5.11.1 (2026-09-03)
+
+### What's fixed
+- Fix entry order test expectations [#611](https://github.com/statamic/eloquent-driver/issues/611) by @duncanmcclean
+- Add release workflow [#614](https://github.com/statamic/eloquent-driver/issues/614) by @duncanmcclean
+
+
+
 ## 5.11.0 (2026-08-11)
 
 ### What's fixed
