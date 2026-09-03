@@ -2,6 +2,7 @@
 
 namespace Tests\Commands;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Form as FormContract;
@@ -10,7 +11,11 @@ use Statamic\Contracts\Forms\Submission as SubmissionContract;
 use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
 use Statamic\Facades\Form;
+use Statamic\Forms\FormRepository;
+use Statamic\Forms\Submission;
+use Statamic\Stache\Repositories\SubmissionRepository;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -26,10 +31,10 @@ class ImportFormsTest extends TestCase
         Facade::clearResolvedInstance(SubmissionRepositoryContract::class);
 
         app()->bind(FormContract::class, \Statamic\Forms\Form::class);
-        app()->bind(SubmissionContract::class, \Statamic\Forms\Submission::class);
-        app()->bind(FormRepositoryContract::class, \Statamic\Forms\FormRepository::class);
-        app()->bind(SubmissionRepositoryContract::class, \Statamic\Stache\Repositories\SubmissionRepository::class);
-        app()->bind(\Statamic\Eloquent\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
+        app()->bind(SubmissionContract::class, Submission::class);
+        app()->bind(FormRepositoryContract::class, FormRepository::class);
+        app()->bind(SubmissionRepositoryContract::class, SubmissionRepository::class);
+        app()->bind(SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
     #[Test]
@@ -56,6 +61,45 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+    }
+
+    #[Test]
+    public function it_imports_form_fields_connections_and_charts()
+    {
+        $fields = [
+            'sections' => [
+                [
+                    'fields' => [
+                        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+                    ],
+                ],
+            ],
+        ];
+
+        $connections = [
+            'email' => [
+                ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
+            ],
+            'webhook' => [
+                ['url' => 'https://example.com/webhook'],
+            ],
+        ];
+
+        $charts = [
+            ['field' => 'name', 'chart' => 'popular_answers'],
+        ];
+
+        tap(Form::make('contact')->title('Contact')->formFields($fields)->connections($connections)->charts($charts))->save();
+
+        $this->artisan('statamic:eloquent:import-forms', ['--force' => true])
+            ->expectsOutputToContain('Forms imported successfully.')
+            ->assertExitCode(0);
+
+        $model = FormModel::where('handle', 'contact')->first();
+
+        $this->assertSame($fields, Arr::get($model->settings, 'fields'));
+        $this->assertSame($connections, Arr::get($model->settings, 'connections'));
+        $this->assertSame($charts, Arr::get($model->settings, 'charts'));
     }
 
     #[Test]
@@ -109,7 +153,7 @@ class ImportFormsTest extends TestCase
     #[Test]
     public function it_imports_only_forms_with_console_question()
     {
-        $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
+        $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
         $form->makeSubmission()->data(['name' => 'Jack'])->save();
         $form->makeSubmission()->data(['name' => 'Jason'])->save();
         $form->makeSubmission()->data(['name' => 'Jesse'])->save();
@@ -159,7 +203,7 @@ class ImportFormsTest extends TestCase
     #[Test]
     public function it_imports_only_form_submissions_with_console_question()
     {
-        $form = tap(\Statamic\Facades\Form::make('contact')->title('Contact')->store(true))->save();
+        $form = tap(Form::make('contact')->title('Contact')->store(true))->save();
         $form->makeSubmission()->data(['name' => 'Jack'])->save();
         $form->makeSubmission()->data(['name' => 'Jason'])->save();
         $form->makeSubmission()->data(['name' => 'Jesse'])->save();

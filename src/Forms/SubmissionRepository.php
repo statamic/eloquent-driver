@@ -13,12 +13,16 @@ class SubmissionRepository extends StacheRepository
         $model = $submission->toModel();
         $model->save();
 
-        $submission->model($submission->fresh());
+        $submission->model($model->fresh());
     }
 
     public function delete($submission)
     {
-        $submission->model()->delete();
+        if (! $model = $submission->model()) {
+            $model = app('statamic.eloquent.form_submissions.model')::find($submission->id());
+        }
+
+        $model?->delete();
     }
 
     public static function bindings(): array

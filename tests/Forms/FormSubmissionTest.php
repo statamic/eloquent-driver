@@ -10,6 +10,7 @@ use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\Submission;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Events\SubmissionCreated;
+use Statamic\Events\SubmissionCreating;
 use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;
 use Statamic\Facades;
@@ -121,6 +122,37 @@ class FormSubmissionTest extends TestCase
         ]))->save();
 
         $this->assertArrayNotHasKey('null_value', $submission->model()->data);
+    }
+
+    #[Test]
+    public function it_dispatches_submission_creating_on_first_save()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        tap($form->makeSubmission()->data([
+            'name' => 'John Doe',
+        ]))->save();
+
+        Event::assertDispatched(SubmissionCreating::class);
+    }
+
+    #[Test]
+    public function partial_submissions_keep_their_lifecycle_keys()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        $submission = tap($form->makeSubmission()->data([
+            'name' => 'John Doe',
+        ])->asPartial())->save();
+
+        $fresh = Submission::fromModel($submission->model()->fresh());
+
+        $this->assertTrue($fresh->isPartial());
+        $this->assertSame('partial', $fresh->status());
     }
 
     #[Test]
