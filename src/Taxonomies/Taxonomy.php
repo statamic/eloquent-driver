@@ -23,6 +23,8 @@ class Taxonomy extends FileEntry
             ->termTemplate($model->settings['term_template'] ?? null)
             ->template($model->settings['template'] ?? null)
             ->layout($model->settings['layout'] ?? null)
+            ->routes($model->settings['routes'] ?? null)
+            ->structureContents($model->settings['structure'] ?? null)
             ->model($model);
     }
 
@@ -48,6 +50,8 @@ class Taxonomy extends FileEntry
             'term_template' => $source->hasCustomTermTemplate() ? $source->termTemplate() : null,
             'template' => $source->hasCustomTemplate() ? $source->template() : null,
             'layout' => $source->layout,
+            'routes' => $source->routes,
+            'structure' => $source->structureContents(),
         ]);
 
         return $model;

@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Eloquent\Jobs\UpdateTaxonomyTermOrder;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -39,7 +40,10 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        return $term;
+        // A term saved earlier in the request is cached here in its raw, locale-less
+        // form (see save()). Resolve it the same way the freshly-queried path does,
+        // since some Term methods only behave correctly on a LocalizedTerm.
+        return $term instanceof LocalizedTerm ? $term : $term->inDefaultLocale();
     }
 
     public function findByUri(string $uri, ?string $site = null): ?TermContract
@@ -106,6 +110,13 @@ class TermRepository extends StacheRepository
 
         $entry->model($model->fresh());
 
+        // Building the model (e.g. resolving a hierarchical term's URI) may have
+        // queried and cached the taxonomy's existing term slugs before this term
+        // was persisted. Forget it so the next read reflects the saved term.
+        if (($taxonomy = $entry->taxonomy()) && $taxonomy->hasStructure()) {
+            Blink::forget('taxonomy-structure-term-slugs-'.$taxonomy->handle());
+        }
+
         Blink::put("eloquent-term-{$entry->id()}", $entry);
         Blink::put("eloquent-term-{$entry->uri()}", $entry);
     }
@@ -156,5 +167,22 @@ class TermRepository extends StacheRepository
         }
 
         return $query->count();
+    }
+
+    public function updateOrders($taxonomy)
+    {
+        $taxonomy->queryTerms()
+            ->get()
+            ->each(function ($term) {
+                $dispatch = UpdateTaxonomyTermOrder::dispatch($term->id());
+
+                $connection = config('statamic.eloquent-driver.terms.update_term_order_connection', 'default');
+
+                if ($connection != 'default') {
+                    $dispatch->onConnection($connection);
+                }
+
+                $dispatch->onQueue(config('statamic.eloquent-driver.terms.update_term_order_queue', 'default'));
+            });
     }
 }

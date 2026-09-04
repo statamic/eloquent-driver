@@ -25,7 +25,7 @@
     },
     "require": {
         "php": "^8.3",
-        "statamic/cms": "^6.10"
+        "statamic/cms": "dev-feature/hierarchical-taxonomies"
     },
     "require-dev": {
         "doctrine/dbal": "^3.8",
