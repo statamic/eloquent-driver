@@ -19,23 +19,28 @@ class TermQueryBuilder extends EloquentQueryBuilder
 {
     protected $collections = [];
 
-    protected $site = null;
-
     protected $taxonomies = [];
 
+    protected $siteFilterApplied = false;
+
     protected $columns = [
-        'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
+        'id', 'data', 'site', 'origin', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
     ];
 
     protected function transform($items, $columns = [])
     {
-        $site = $this->site;
-        if (! $site) {
-            $site = Site::default()->handle();
-        }
+        // Preload all locale rows in a single query and cache them in Blink so
+        // fromModel() can avoid N+1 without needing an extra parameter.
+        $modelClass = app('statamic.eloquent.terms.model');
+        $modelClass::whereIn('slug', collect($items)->pluck('slug'))
+            ->whereIn('taxonomy', collect($items)->pluck('taxonomy')->unique()->values())
+            ->get()
+            ->groupBy(fn ($m) => $m->taxonomy.'::'.$m->slug)
+            ->each(fn ($rows, $key) => Blink::put("eloquent-term-locale-rows-{$key}", $rows));
 
-        return TermCollection::make($items)->map(function ($model) use ($site) {
-            return app(TermContract::class)::fromModel($model)->in($site);
+        return TermCollection::make($items)->map(function ($model) {
+            return app(TermContract::class)::fromModel($model)
+                ->in($model->site ?? Site::default()->handle());
         });
     }
 
@@ -57,9 +62,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
         if ($column === 'site') {
-            $this->site = $operator;
-
-            return $this;
+            $this->siteFilterApplied = true;
         }
 
         if (func_num_args() === 2) {
@@ -115,6 +118,10 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     public function whereIn($column, $values, $boolean = 'and')
     {
+        if ($column === 'site') {
+            $this->siteFilterApplied = true;
+        }
+
         if (in_array($column, ['taxonomy', 'taxonomies'])) {
             if (! $values) {
                 return $this;
@@ -159,13 +166,8 @@ class TermQueryBuilder extends EloquentQueryBuilder
         $model = parent::find($id, $columns);
 
         if ($model) {
-            $site = $this->site;
-            if (! $site) {
-                $site = Site::default()->handle();
-            }
-
             return app(TermContract::class)::fromModel($model)
-                ->in($site)
+                ->in($model->site ?? Site::default()->handle())
                 ->selectedQueryColumns($columns);
         }
     }
@@ -188,15 +190,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $items->each->collection(Collection::findByHandle($this->collections[0]));
         }
 
-        $items = Term::applySubstitutions($items);
-
-        return $items->map(function ($term) {
-            if ($this->site) {
-                return $term->in($this->site);
-            }
-
-            return $term->inDefaultLocale();
-        });
+        return Term::applySubstitutions($items);
     }
 
     public function pluck($column, $key = null)
@@ -225,8 +219,17 @@ class TermQueryBuilder extends EloquentQueryBuilder
         return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
+    private function applyOriginFilter()
+    {
+        if (! $this->siteFilterApplied) {
+            $this->builder->whereNull('origin');
+        }
+    }
+
     private function applyCollectionAndTaxonomyWheres()
     {
+        $this->applyOriginFilter();
+
         if (! empty($this->collections)) {
             $this->builder->where(function ($query) {
                 $taxonomies = empty($this->taxonomies)
@@ -251,6 +254,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                             $termsTable = (new $termClass)->getTable();
 
                             return TermModel::where('taxonomy', $taxonomy)
+                                ->whereNull('origin')
                                 ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
                                     $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
                                     $value = match ($query->getConnection()->getDriverName()) {
@@ -268,6 +272,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
                         }
 
                         return TermModel::where('taxonomy', $taxonomy)
+                            ->whereNull('origin')
                             ->select('slug')
                             ->get()
                             ->map(function ($term) use ($taxonomy) {
