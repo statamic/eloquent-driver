@@ -585,4 +585,110 @@ class EntryTest extends TestCase
         $this->assertEquals('bar', $directLocalizationEntry->value('foo'));
         $this->assertEquals(null, $indirectLocalizationEntry->value('foo'));
     }
+
+    #[Test]
+    public function it_keeps_a_localized_value_when_the_direct_origin_localizes_null()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'nl' => ['name' => 'Dutch', 'locale' => 'nl_NL', 'url' => 'http://nl.test.com/'],
+            'nl-BE' => ['name' => 'Flemish', 'locale' => 'nl_BE', 'url' => 'http://test.com/nl-be/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'text', 'localizable' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'nl', 'nl-BE'])
+            ->save();
+
+        $originEntry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->data(['foo' => 'bar']);
+        $originEntry->save();
+
+        $directLocalizationEntry = $originEntry->in('nl');
+        $directLocalizationEntry->data(['foo' => null])->toModel()->save();
+
+        // Reload the direct origin from the database so it carries only its own (localized) data, like at runtime.
+        Facades\Blink::flush();
+        $directLocalizationEntry = Entry::fromModel($directLocalizationEntry->model()->fresh());
+        $this->assertTrue($directLocalizationEntry->has('foo'));
+        $this->assertNull($directLocalizationEntry->get('foo'));
+
+        $indirectLocalizationEntry = $originEntry->in('nl-BE');
+        $indirectLocalizationEntry->origin($directLocalizationEntry);
+
+        // nl-BE wants the root value back, which differs from the localized null it would inherit from nl.
+        $indirectLocalizationEntry->data(['foo' => 'bar']);
+        $indirectLocalizationEntry->toModel()->save();
+
+        // Forget the in-memory origins so the reloaded entries resolve their origins from the database.
+        Facades\Blink::flush();
+
+        $directLocalizationEntry = Entry::fromModel($directLocalizationEntry->model()->fresh());
+        $indirectLocalizationEntry = Entry::fromModel($indirectLocalizationEntry->model()->fresh());
+
+        $this->assertNull($directLocalizationEntry->value('foo'));
+        $this->assertEquals(['foo'], $directLocalizationEntry->model()->data['__localized_fields']);
+        $this->assertEquals('bar', $indirectLocalizationEntry->value('foo'));
+        $this->assertEquals(['foo'], $indirectLocalizationEntry->model()->data['__localized_fields']);
+    }
+
+    #[Test]
+    public function it_stores_a_copy_of_the_direct_origin_value_as_synced_even_when_the_root_differs()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'nl' => ['name' => 'Dutch', 'locale' => 'nl_NL', 'url' => 'http://nl.test.com/'],
+            'nl-BE' => ['name' => 'Flemish', 'locale' => 'nl_BE', 'url' => 'http://test.com/nl-be/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'text', 'localizable' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->propagate(true)
+            ->sites(['en', 'nl', 'nl-BE'])
+            ->save();
+
+        $originEntry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->data(['foo' => 'bar']);
+        $originEntry->save();
+
+        $directLocalizationEntry = $originEntry->in('nl');
+        $directLocalizationEntry->data(['foo' => 'baz'])->toModel()->save();
+
+        Facades\Blink::flush();
+        $directLocalizationEntry = Entry::fromModel($directLocalizationEntry->model()->fresh());
+
+        $indirectLocalizationEntry = $originEntry->in('nl-BE');
+        $indirectLocalizationEntry->origin($directLocalizationEntry);
+
+        // nl-BE holds a plain copy of what it inherits from nl; it must not be pinned just because the root differs.
+        $indirectLocalizationEntry->data(['foo' => 'baz']);
+        $indirectLocalizationEntry->toModel()->save();
+
+        Facades\Blink::flush();
+
+        $indirectLocalizationEntry = Entry::fromModel($indirectLocalizationEntry->model()->fresh());
+
+        $this->assertEquals([], $indirectLocalizationEntry->model()->data['__localized_fields']);
+        $this->assertFalse($indirectLocalizationEntry->has('foo'));
+        $this->assertEquals('baz', $indirectLocalizationEntry->value('foo'));
+    }
 }

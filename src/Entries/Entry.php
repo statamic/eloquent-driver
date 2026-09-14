@@ -84,16 +84,14 @@ class Entry extends FileEntry
 
                 $directOriginData = $directOrigin->data();
 
-                // remove any fields in entry data that are marked as localized but value is present, and matches origin value
+                // remove any fields in entry data that are marked as localized but value is present, and matches the
+                // value inherited from the closest origin that carries the field (a localized null included)
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
                     if ($data->has($blueprintField)) {
                         $fieldOrigin = $directOrigin;
                         $fieldOriginData = $directOriginData;
-                        while (
-                            $fieldOrigin->hasOrigin()
-                            && ! in_array($blueprintField, $fieldOriginData->get('__localized_fields') ?? [])
-                        ) {
+                        while ($fieldOrigin->hasOrigin() && ! $fieldOriginData->has($blueprintField)) {
                             $fieldOrigin = $fieldOrigin->origin();
                             $fieldOriginData = $fieldOrigin->data();
                         }
