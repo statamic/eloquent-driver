@@ -53,7 +53,7 @@ class AssetRepository extends BaseRepository
             $url = $siteUrl.$url;
         }
 
-        $path = Str::after($url, $containerUrl);
+        $path = rawurldecode(Str::after($url, $containerUrl));
 
         if (Str::startsWith($path, '/')) {
             $path = substr($path, 1);
