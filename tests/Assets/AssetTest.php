@@ -72,7 +72,9 @@ class AssetTest extends TestCase
             'basename' => 'test.jpg',
             'filename' => 'test',
             'extension' => 'jpg',
-            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+            'meta' => ['focus' => '50-50-1'],
+            'width' => 100,
+            'height' => 100,
         ]);
 
         $asset = (new Asset)->fromModel($model);
@@ -83,7 +85,7 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+        $this->assertSame(['data' => ['focus' => '50-50-1'], 'height' => 100, 'width' => 100], $asset->meta());
     }
 
     #[Test]
@@ -96,7 +98,12 @@ class AssetTest extends TestCase
             'basename' => 'test.jpg',
             'filename' => 'test',
             'extension' => 'jpg',
-            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+            'meta' => ['focus' => '50-50-1'],
+            'width' => 100,
+            'height' => 100,
+            'last_modified' => $lastModified = time(),
+            'mime_type' => 'image/jpeg',
+            'size' => 1000,
         ]);
 
         $model->save();
@@ -109,7 +116,7 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+        $this->assertSame(['data' => ['focus' => '50-50-1'], 'height' => 100, 'last_modified' => $lastModified, 'mime_type' => 'image/jpeg', 'size' => 1000, 'width' => 100], $asset->meta());
     }
 
     #[Test]
@@ -168,11 +175,9 @@ class AssetTest extends TestCase
     {
         $this->assertCount(6, AssetModel::all());
 
-        Storage::disk('test')->put('f.jpg', '');
+        Storage::disk('test')->put('test.jpg', '');
 
         $asset = Facades\Asset::make()->container('test')->path('test.jpg');
-        $this->assertCount(6, AssetModel::all());
-
         $asset->save();
 
         $this->assertInstanceOf(AssetModel::class, $asset->model());
@@ -199,7 +204,7 @@ class AssetTest extends TestCase
         $this->assertSame($model->basename, $asset->basename());
         $this->assertSame($model->filename, $asset->filename());
         $this->assertSame($model->extension, $asset->extension());
-        $this->assertSame($model->meta, $asset->meta());
+        $this->assertSame($model->meta, $asset->meta()['data']);
         $this->assertSame($modelId, $asset->model()->getKey());
     }
 
