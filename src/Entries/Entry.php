@@ -16,8 +16,10 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = isset($model->data['__localized_fields'])
-            ? collect($model->data['__localized_fields'])->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
+        $localizedFields = $model->data['__localized_fields'] ?? null;
+
+        $data = $localizedFields !== null
+            ? collect($localizedFields)->reject(fn ($field) => $field === 'date')->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
             : $model->data;
 
         foreach ((new self)->getDataColumnMappings($model) as $key) {
@@ -35,7 +37,10 @@ class Entry extends FileEntry
             ->published($model->published)
             ->model($model);
 
-        if ($model->date && $entry->collection()->dated()) {
+        // a localization owns its date only when its marker lists it; roots and rows without a marker keep the column date
+        $ownsDate = ! $model->origin_id || $localizedFields === null || in_array('date', $localizedFields, true);
+
+        if ($model->date && $ownsDate && $entry->collection()->dated()) {
             $entry->date($model->date);
         }
 
@@ -106,11 +111,16 @@ class Entry extends FileEntry
 
                 $data = $directOrigin->data()->merge($data);
 
-                $data->put('__localized_fields', $localizedFields);
+                $originDate = $directOrigin->hasDate() ? $directOrigin->date() : null;
 
-                if (! in_array('date', $localizedFields)) {
-                    $date = $directOrigin->hasDate() ? $directOrigin->date() : null;
+                // the date is localized like any other field: when the blueprint allows it and the own date differs from the origin's
+                if (in_array('date', $localizedBlueprintFields, true) && $source->hasExplicitDate() && ! $date->equalTo($originDate)) {
+                    $localizedFields[] = 'date';
+                } else {
+                    $date = $originDate;
                 }
+
+                $data->put('__localized_fields', $localizedFields);
             }
         }
 

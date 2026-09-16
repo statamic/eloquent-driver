@@ -691,4 +691,106 @@ class EntryTest extends TestCase
         $this->assertFalse($indirectLocalizationEntry->has('foo'));
         $this->assertEquals('baz', $indirectLocalizationEntry->value('foo'));
     }
+
+    #[Test]
+    public function it_stores_a_localized_date_when_the_blueprint_allows_it()
+    {
+        [, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: true);
+
+        $localizedEntry->date('2024-02-02')->toModel()->save();
+
+        Facades\Blink::flush();
+        $localizedEntry = Entry::fromModel($localizedEntry->model()->fresh());
+
+        $this->assertEquals('2024-02-02', $localizedEntry->date()->format('Y-m-d'));
+        $this->assertTrue($localizedEntry->hasExplicitDate());
+        $this->assertFalse($localizedEntry->data()->has('date'));
+        $this->assertEquals(['date'], $localizedEntry->model()->data['__localized_fields']);
+    }
+
+    #[Test]
+    public function it_stores_a_date_equal_to_the_origin_as_inherited_and_follows_the_origin()
+    {
+        [$originEntry, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: true);
+
+        $localizedEntry->date('2023-01-01')->toModel()->save();
+
+        Facades\Blink::flush();
+        $localizedEntry = Entry::fromModel($localizedEntry->model()->fresh());
+
+        $this->assertFalse($localizedEntry->hasExplicitDate());
+        $this->assertEquals([], $localizedEntry->model()->data['__localized_fields']);
+        $this->assertEquals('2023-01-01 00:00:00', $localizedEntry->model()->date);
+
+        $originEntry->date('2025-05-05')->save();
+
+        Facades\Blink::flush();
+        $localizedEntry = Entry::fromModel($localizedEntry->model()->fresh());
+
+        $this->assertEquals('2025-05-05', $localizedEntry->date()->format('Y-m-d'));
+        $this->assertEquals('2025-05-05 00:00:00', $localizedEntry->model()->date);
+    }
+
+    #[Test]
+    public function it_keeps_the_origin_date_when_the_date_field_is_not_localizable()
+    {
+        [, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: false);
+
+        $localizedEntry->date('2024-02-02')->toModel()->save();
+
+        Facades\Blink::flush();
+        $localizedEntry = Entry::fromModel($localizedEntry->model()->fresh());
+
+        $this->assertEquals('2023-01-01', $localizedEntry->date()->format('Y-m-d'));
+        $this->assertEquals([], $localizedEntry->model()->data['__localized_fields']);
+    }
+
+    #[Test]
+    public function it_keeps_the_column_date_of_a_localization_stored_without_a_marker()
+    {
+        [, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: true);
+
+        $model = $localizedEntry->model();
+        $model->data = ['title' => 'Old format copy'];
+        $model->date = '2024-02-02 00:00:00';
+        $model->save();
+
+        Facades\Blink::flush();
+        $localizedEntry = Entry::fromModel($model->fresh());
+
+        $this->assertTrue($localizedEntry->hasExplicitDate());
+        $this->assertEquals('2024-02-02', $localizedEntry->date()->format('Y-m-d'));
+    }
+
+    private function makeDatedOriginAndLocalization(bool $localizable): array
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+        ]);
+
+        $blueprint = Facades\Blueprint::makeFromFields(['date' => ['type' => 'date', 'localizable' => $localizable]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/pages')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)
+            ->handle('pages')
+            ->dated(true)
+            ->propagate(true)
+            ->sites(['en', 'fr'])
+            ->save();
+
+        $originEntry = (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->date('2023-01-01');
+        $originEntry->save();
+
+        Facades\Blink::flush();
+
+        return [$originEntry, Entry::fromModel($originEntry->in('fr')->model()->fresh())];
+    }
 }
