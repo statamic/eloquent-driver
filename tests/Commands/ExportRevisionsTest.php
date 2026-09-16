@@ -48,6 +48,7 @@ class ExportRevisionsTest extends TestCase
             'user' => 'abc',
             'message' => 'Initial revision',
             'attributes' => ['foo' => 'bar'],
+            'publish_at' => $publishAt = Carbon::parse('2030-01-01 10:00'),
             'created_at' => Carbon::now(),
         ]);
 
@@ -55,7 +56,9 @@ class ExportRevisionsTest extends TestCase
             ->expectsOutputToContain('Revisions exported')
             ->assertExitCode(0);
 
-        $this->assertCount(1, app('files')->allFiles($this->revisionsDir));
+        $files = app('files')->allFiles($this->revisionsDir);
+        $this->assertCount(1, $files);
+        $this->assertStringContainsString('publish_at: '.$publishAt->timestamp, $files[0]->getContents());
     }
 
     #[Test]

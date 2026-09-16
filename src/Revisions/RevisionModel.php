@@ -14,6 +14,7 @@ class RevisionModel extends BaseModel
     {
         return [
             'attributes' => 'json',
+            'publish_at' => 'datetime',
         ];
     }
 }

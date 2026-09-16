@@ -19,6 +19,8 @@ class Revision extends FileEntry
 
     protected $message;
 
+    protected $publishAt;
+
     protected $action = 'revision';
 
     protected $attributes = [];
@@ -33,6 +35,7 @@ class Revision extends FileEntry
             ->date($model->created_at)
             ->user($model->user ?? null)
             ->message($model->message ?? null)
+            ->publishAt($model->publish_at)
             ->attributes($model->attributes ?? [])
             ->model($model);
     }
@@ -45,6 +48,7 @@ class Revision extends FileEntry
             'action' => $this->action(),
             'user' => $this->user()?->id(),
             'message' => with($this->message(), fn ($msg) => $msg == '0' ? '' : $msg),
+            'publish_at' => $this->publishAt(),
             'attributes' => $this->attributes(),
             'updated_at' => $this->date(),
         ]);
@@ -58,6 +62,7 @@ class Revision extends FileEntry
             ->date($item->date())
             ->user($item->user()?->id() ?? null)
             ->message($item->message() ?? null)
+            ->publishAt($item->publishAt())
             ->attributes($item->attributes() ?? []);
     }
 
