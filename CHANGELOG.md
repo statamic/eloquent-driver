@@ -1,5 +1,14 @@
 # Release Notes
 
+## 5.12.0 (2026-09-22)
+
+### What's fixed
+- Decode percent-encoded paths in AssetRepository::findByUrl() [#610](https://github.com/statamic/eloquent-driver/pull/610) by @DonnyOexman
+- Compare localized fields with the closest origin that carries the key [#617](https://github.com/statamic/eloquent-driver/pull/617) by @SUXUMI
+- Store a localized date when the blueprint date field is localizable [#619](https://github.com/statamic/eloquent-driver/pull/619) by @SUXUMI
+
+
+
 ## 5.11.1 (2026-09-03)
 
 ### What's fixed
