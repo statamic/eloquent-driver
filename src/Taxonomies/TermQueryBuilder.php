@@ -24,7 +24,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
     protected $taxonomies = [];
 
     protected $columns = [
-        'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at',
+        'id', 'data', 'site', 'slug', 'uri', 'taxonomy', 'created_at', 'updated_at', 'order',
     ];
 
     protected function transform($items, $columns = [])

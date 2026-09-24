@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('uri')->nullable()->index();
             $table->string('taxonomy')->index();
             $table->jsonb('data');
+            $table->integer('order')->nullable()->index();
             $table->timestamps();
 
             $table->unique(['slug', 'taxonomy', 'site']);
