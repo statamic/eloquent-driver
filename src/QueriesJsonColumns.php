@@ -58,6 +58,95 @@ trait QueriesJsonColumns
         return $this;
     }
 
+    public function whereDate($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            $grammar = $this->builder->getConnection()->getQueryGrammar();
+            $wrappedColumn = $grammar->wrap($actualColumn);
+
+            $this->builder->whereRaw(
+                "({$wrappedColumn})::timestamp::date {$operator} ?",
+                [$value],
+                $boolean
+            );
+
+            return $this;
+        }
+
+        return parent::whereDate($column, $operator, $value, $boolean);
+    }
+
+    public function whereMonth($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('month', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereMonth($column, $operator, $value, $boolean);
+    }
+
+    public function whereDay($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('day', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereDay($column, $operator, $value, $boolean);
+    }
+
+    public function whereYear($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('year', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereYear($column, $operator, $value, $boolean);
+    }
+
+    private function isJsonColumnOnPostgres(string $column): bool
+    {
+        return Str::contains($column, ['data->', 'meta->'])
+            && str_contains(get_class($this->builder->getConnection()->getQueryGrammar()), 'PostgresGrammar');
+    }
+
+    private function dateBasedWhereJsonPostgres(string $type, string $column, string $operator, $value, string $boolean): static
+    {
+        $grammar = $this->builder->getConnection()->getQueryGrammar();
+        $wrappedColumn = $grammar->wrap($column);
+
+        $this->builder->whereRaw(
+            "extract({$type} from ({$wrappedColumn})::timestamp) {$operator} ?",
+            [$value],
+            $boolean
+        );
+
+        return $this;
+    }
+
     abstract protected function getJsonCasts(): Collection;
 
     protected function toCast(Field $field): string
