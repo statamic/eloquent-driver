@@ -155,6 +155,47 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_by_site()
+    {
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
+            'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
+        ]);
+
+        Taxonomy::make('tags')->sites(['en', 'fr'])->save();
+
+        Term::make('a')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'Term A'])
+            ->dataForLocale('fr', ['title' => 'Terme A'])
+            ->save();
+
+        Term::make('b')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'Term B'])
+            ->save();
+
+        // No site filter: returns canonical (origin IS NULL) rows only, each in its own locale.
+        $terms = Term::query()->get();
+        $this->assertCount(2, $terms);
+        $this->assertTrue($terms->every(fn ($t) => $t->locale() === 'en'));
+
+        // where('site', 'en') filters to the canonical en rows.
+        $enTerms = Term::query()->where('site', 'en')->get();
+        $this->assertCount(2, $enTerms);
+        $this->assertEquals(['a', 'b'], $enTerms->map->slug()->sort()->values()->all());
+        $this->assertTrue($enTerms->every(fn ($t) => $t->locale() === 'en'));
+
+        // where('site', 'fr') returns the fr locale row for every term in the taxonomy.
+        $frTerms = Term::query()->where('site', 'fr')->get();
+        $this->assertCount(2, $frTerms);
+        $this->assertEquals(['a', 'b'], $frTerms->map->slug()->sort()->values()->all());
+        $this->assertTrue($frTerms->every(fn ($t) => $t->locale() === 'fr'));
+
+        // French-specific data is accessible on the fr LocalizedTerm.
+        $frTermA = $frTerms->first(fn ($t) => $t->slug() === 'a');
+        $this->assertEquals('Terme A', $frTermA->get('title'));
+    }
+
+    #[Test]
     public function it_filters_by_taxonomy()
     {
         Taxonomy::make('tags')->save();
