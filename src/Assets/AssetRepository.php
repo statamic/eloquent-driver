@@ -83,6 +83,10 @@ class AssetRepository extends BaseRepository
 
         $id = $asset->id();
         Blink::put("eloquent-asset-{$id}", $asset);
+
+        if ($asset->folder() !== '/') {
+            $asset->container()->contents()->add($asset->folder())->save();
+        }
     }
 
     public static function bindings(): array
