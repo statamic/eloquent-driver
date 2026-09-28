@@ -13,7 +13,7 @@ class RevisionQueryBuilder extends EloquentQueryBuilder implements QueryBuilderC
     private $selectedQueryColumns;
 
     const COLUMNS = [
-        'id', 'key', 'action', 'user', 'message', 'attributes',
+        'id', 'key', 'action', 'user', 'message', 'publish_at', 'attributes',
     ];
 
     protected function transform($items, $columns = [])

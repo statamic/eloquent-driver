@@ -53,6 +53,7 @@ class ExportRevisions extends Command
                 ->date($model->created_at)
                 ->user($model->user ?? false)
                 ->message($model->message ?? '')
+                ->publishAt($model->publish_at)
                 ->attributes($model->attributes ?? [])
                 ->save();
         });
