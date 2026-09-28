@@ -50,7 +50,9 @@ class AssetContainerTest extends TestCase
 
         $queryExecuted = false;
         \DB::listen(function (QueryExecuted $query) use (&$queryExecuted) {
-            $queryExecuted = str_contains($query->sql, 'select distinct "folder" from "assets_meta"');
+            if (str_contains($query->sql, 'select distinct') && str_contains($query->sql, 'folder') && str_contains($query->sql, 'assets_meta')) {
+                $queryExecuted = true;
+            }
         });
 
         $this->container->folders();

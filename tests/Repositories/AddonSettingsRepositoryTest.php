@@ -55,7 +55,7 @@ class AddonSettingsRepositoryTest extends TestCase
 
         $this->assertDatabaseHas('addon_settings', [
             'addon' => 'vendor/test-addon',
-            'settings' => json_encode(['foo' => 'bar', 'baz' => 'qux']),
+            'settings' => $this->castAsJson(['foo' => 'bar', 'baz' => 'qux']),
         ]);
     }
 

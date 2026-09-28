@@ -56,9 +56,7 @@ class FormSubmissionTest extends TestCase
         $this->assertDatabaseHas('form_submissions', [
             'id' => $submission->id,
             'form' => $form->handle,
-            'data' => json_encode([
-                'name' => 'John Doe',
-            ]),
+            'data' => $this->castAsJson(['name' => 'John Doe']),
         ]);
     }
 
