@@ -1,5 +1,12 @@
 # Release Notes
 
+## 5.12.1 (2026-09-28)
+
+### What's fixed
+- Update folder list when uploading a folder [#623](https://github.com/statamic/eloquent-driver/pull/623) by @daun
+
+
+
 ## 5.12.0 (2026-09-22)
 
 ### What's fixed
