@@ -17,6 +17,14 @@ return new class extends Migration
             $table->char('extension', 10)->index();
             $table->string('path')->index();
             $table->jsonb('meta')->nullable();
+
+            $table->integer('duration')->nullable()->default(null);
+            $table->integer('height')->nullable()->default(null);
+            $table->integer('last_modified');
+            $table->string('mime_type');
+            $table->integer('size')->index();
+            $table->integer('width')->nullable()->default(null);
+
             $table->timestamps();
 
             $table->unique(['container', 'folder', 'basename']);
