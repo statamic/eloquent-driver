@@ -3,6 +3,7 @@
 namespace Tests\Data\Entries;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Blueprint;
@@ -839,11 +840,79 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('jsonCastFieldProvider')]
+    public function entries_json_field_order_by_throws_exception_for_invalid_direction($field)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Order direction must be "asc" or "desc".');
+
+        Entry::query()->where('collection', 'posts')->orderBy('field', 'asc, (select 1)')->get();
+    }
+
+    public static function jsonCastFieldProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer']],
+            'float' => [['type' => 'float']],
+            'date' => [['type' => 'date']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true]],
+            'date range' => [['type' => 'date', 'mode' => 'range']],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range']],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('uppercaseDirectionProvider')]
+    public function entries_can_be_ordered_by_a_json_field_with_uppercase_direction($field, $values)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'field' => $values[0]])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'field' => $values[1]])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'field' => $values[2]])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('field', 'ASC')->get();
+
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('field', 'DESC')->get();
+
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    public static function uppercaseDirectionProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer'], [5, 3, 20]],
+            'float' => [['type' => 'float'], [5.5, 3.3, 20.2]],
+            'date' => [['type' => 'date'], ['2021-06-15', '2021-01-13', '2021-11-17']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true], ['2021-06-15 20:31:04', '2021-01-13 20:31:04', '2021-11-17 20:31:04']],
+            'date range' => [['type' => 'date', 'mode' => 'range'], [
+                ['start' => '2021-06-15', 'end' => '2021-06-16'],
+                ['start' => '2021-01-13', 'end' => '2021-06-16'],
+                ['start' => '2021-11-17', 'end' => '2021-11-18'],
+            ]],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range'], [
+                ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00'],
+                ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04'],
+                ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 21:00:00'],
+            ]],
+        ];
+    }
+
+    #[Test]
     public function entries_can_be_ordered_by_a_mapped_data_column()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
 
@@ -863,7 +932,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
 
