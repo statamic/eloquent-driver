@@ -4,6 +4,7 @@ namespace Tests\Data\Assets;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Asset;
 use Statamic\Facades\AssetContainer;
@@ -601,6 +602,71 @@ class AssetQueryBuilderTest extends TestCase
 
         $this->assertCount(6, $assets);
         $this->assertEquals(['b', 'a', 'd', 'c', 'e', 'f'], $assets->map->filename()->all());
+    }
+
+    #[Test]
+    #[DataProvider('jsonCastFieldProvider')]
+    public function assets_json_field_order_by_throws_exception_for_invalid_direction($field)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Order direction must be "asc" or "desc".');
+
+        Asset::query()->where('container', 'test')->orderBy('field', 'asc, (select 1)')->get();
+    }
+
+    public static function jsonCastFieldProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer']],
+            'float' => [['type' => 'float']],
+            'date' => [['type' => 'date']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true]],
+            'date range' => [['type' => 'date', 'mode' => 'range']],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range']],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('uppercaseDirectionProvider')]
+    public function assets_can_be_ordered_by_a_json_field_with_uppercase_direction($field, $values)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('find')->with('assets/test')->andReturn($blueprint);
+
+        Asset::find('test::a.jpg')->data(['field' => $values[0]])->save();
+        Asset::find('test::b.txt')->data(['field' => $values[1]])->save();
+        Asset::find('test::c.txt')->data(['field' => $values[2]])->save();
+
+        $assets = Asset::query()->where('container', 'test')->whereIn('filename', ['a', 'b', 'c'])->orderBy('field', 'ASC')->get();
+
+        $this->assertEquals(['b', 'a', 'c'], $assets->map->filename()->all());
+
+        $assets = Asset::query()->where('container', 'test')->whereIn('filename', ['a', 'b', 'c'])->orderBy('field', 'DESC')->get();
+
+        $this->assertEquals(['c', 'a', 'b'], $assets->map->filename()->all());
+    }
+
+    public static function uppercaseDirectionProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer'], [5, 3, 20]],
+            'float' => [['type' => 'float'], [5.5, 3.3, 20.2]],
+            'date' => [['type' => 'date'], ['2021-06-15', '2021-01-13', '2021-11-17']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true], ['2021-06-15 20:31:04', '2021-01-13 20:31:04', '2021-11-17 20:31:04']],
+            'date range' => [['type' => 'date', 'mode' => 'range'], [
+                ['start' => '2021-06-15', 'end' => '2021-06-16'],
+                ['start' => '2021-01-13', 'end' => '2021-06-16'],
+                ['start' => '2021-11-17', 'end' => '2021-11-18'],
+            ]],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range'], [
+                ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00'],
+                ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04'],
+                ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 21:00:00'],
+            ]],
+        ];
     }
 
     #[Test]
