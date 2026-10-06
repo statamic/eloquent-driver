@@ -1,5 +1,12 @@
 # Release Notes
 
+## 4.36.3 (2026-10-05)
+
+### What's changed
+- [4.x] Improve ordering [#626](https://github.com/statamic/eloquent-driver/pull/626) by @jasonvarga
+
+
+
 ## 4.36.2 (2026-06-03)
 
 ### What's changed
