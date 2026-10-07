@@ -375,6 +375,30 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_keeps_the_order_of_an_entry_in_an_unstructured_collection()
+    {
+        Collection::make('blog')->title('blog')->save();
+
+        $entry = (new Entry)
+            ->id('1.0')
+            ->collection('blog')
+            ->slug('the-slug')
+            ->data(['order' => 4]);
+
+        $entry->save();
+
+        $this->assertSame(4, $entry->model()->order);
+
+        $entry = Entry::fromModel($entry->model()->fresh());
+
+        $this->assertSame(4, $entry->order());
+
+        $entry->set('title', 'Edited')->save();
+
+        $this->assertSame(4, $entry->model()->fresh()->order);
+    }
+
+    #[Test]
     public function null_values_are_removed_from_data()
     {
         Collection::make('blog')->title('blog')

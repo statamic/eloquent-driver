@@ -44,6 +44,13 @@ class Entry extends FileEntry
             $entry->date($model->date);
         }
 
+        // a localization owns its order only when its marker lists it; otherwise it inherits the origin's order
+        $ownsOrder = ! $model->origin_id || in_array('order', $localizedFields ?? [], true);
+
+        if ($model->order !== null && $ownsOrder && ! $entry->hasStructure()) {
+            $entry->set('order', $model->order);
+        }
+
         if (config('statamic.system.track_last_update')) {
             if ($updatedAt = $model->updated_at ?? $model->created_at) {
                 $entry->set('updated_at', $updatedAt->timestamp);
