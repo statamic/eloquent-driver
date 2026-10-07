@@ -44,6 +44,12 @@ class Entry extends FileEntry
             $entry->date($model->date);
         }
 
+        $ownsOrder = ! $model->origin_id || in_array('order', $localizedFields ?? [], true);
+
+        if ($model->order !== null && $ownsOrder && ! $entry->hasStructure()) {
+            $entry->set('order', $model->order);
+        }
+
         if (config('statamic.system.track_last_update')) {
             if ($updatedAt = $model->updated_at ?? $model->created_at) {
                 $entry->set('updated_at', $updatedAt->timestamp);
