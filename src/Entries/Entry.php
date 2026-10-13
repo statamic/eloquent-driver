@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Support\Arr;
 
@@ -26,7 +27,7 @@ class Entry extends FileEntry
             $data[$key] = $model->$key;
         }
 
-        $entry = (new static)
+        $entry = static::newInstanceForCollection($model->collection)
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
@@ -58,6 +59,17 @@ class Entry extends FileEntry
         }
 
         return $entry->syncOriginal();
+    }
+
+    /**
+     * Start with the collection's entry class if it extends the Eloquent entry. Otherwise collection()
+     * swaps it in by copying a throwaway entry, which resolves that entry's blueprint and date.
+     */
+    protected static function newInstanceForCollection($handle)
+    {
+        $class = Blink::once("collection-{$handle}", fn () => CollectionFacade::findByHandle($handle))?->entryClass();
+
+        return $class && is_subclass_of($class, self::class) ? app($class) : new static;
     }
 
     public function toModel()
