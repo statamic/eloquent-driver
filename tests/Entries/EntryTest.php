@@ -7,6 +7,7 @@ use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Eloquent\Collections\Collection;
@@ -20,6 +21,7 @@ use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Facades\Stache;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Fields\Blueprint;
+use Statamic\Stache\Repositories\TaxonomyRepository;
 use Statamic\Statamic;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
@@ -296,7 +298,7 @@ class EntryTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30)->nullable();
         });
 
@@ -330,7 +332,7 @@ class EntryTest extends TestCase
             'en' => '/blog/{slug}',
         ])->save();
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30)->nullable();
         });
 
@@ -430,7 +432,7 @@ class EntryTest extends TestCase
         $taxonomyStore = Stache::stores()->get('terms');
         $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
 
-        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+        $collection = CollectionFacade::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
         (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
         (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
@@ -548,7 +550,7 @@ class EntryTest extends TestCase
         config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
 
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
-        Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
+        Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
 
         Taxonomy::make('test')->title('test')->save();
 
@@ -557,7 +559,7 @@ class EntryTest extends TestCase
         $taxonomyStore = Stache::stores()->get('terms');
         $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
 
-        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+        $collection = CollectionFacade::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
         (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
         (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
@@ -915,10 +917,6 @@ class EntryTest extends TestCase
     }
 }
 
-class CustomEntry extends Entry
-{
-}
+class CustomEntry extends Entry {}
 
-class CustomCoreEntry extends \Statamic\Entries\Entry
-{
-}
+class CustomCoreEntry extends \Statamic\Entries\Entry {}
