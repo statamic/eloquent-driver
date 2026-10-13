@@ -62,8 +62,7 @@ class Entry extends FileEntry
     }
 
     /**
-     * Start with the collection's entry class if it extends the Eloquent entry. Otherwise collection()
-     * swaps it in by copying a throwaway entry, which resolves that entry's blueprint and date.
+     * Performance optimization: start with the collection's entry class if it extends the Eloquent entry
      */
     protected static function newInstanceForCollection($handle)
     {
