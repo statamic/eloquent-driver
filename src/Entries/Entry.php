@@ -72,7 +72,7 @@ class Entry extends FileEntry
         $data = $source->data()
             ->merge(method_exists($source, 'computedData') ? $source->computedData() : []);
 
-        $date = $source->hasDate() ? $source->date() : null;
+        $date = $source->hasDate() ? $source->date()->copy()->setTimezone(config('app.timezone')) : null;
 
         $directOrigin = $source->origin();
 
