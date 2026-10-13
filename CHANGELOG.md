@@ -1,5 +1,14 @@
 # Release Notes
 
+## 5.12.3 (2026-10-13)
+
+### What's fixed
+- Load the entry order from the order column [#631](https://github.com/statamic/eloquent-driver/pull/631) by @lazerg
+- Fix slow hydration of dated entries with a custom entry class [#633](https://github.com/statamic/eloquent-driver/pull/633) by @daun
+- Fix timezone shift on save [#632](https://github.com/statamic/eloquent-driver/pull/632) by @Jade-GG
+
+
+
 ## 5.12.2 (2026-10-05)
 
 ### What's fixed
