@@ -83,7 +83,7 @@ class Entry extends FileEntry
         $data = $source->data()
             ->merge(method_exists($source, 'computedData') ? $source->computedData() : []);
 
-        $date = $source->hasDate() ? $source->date() : null;
+        $date = $source->hasDate() ? $source->date()->copy()->setTimezone(config('app.timezone')) : null;
 
         $directOrigin = $source->origin();
 
@@ -129,7 +129,7 @@ class Entry extends FileEntry
 
                 $data = $directOrigin->data()->merge($data);
 
-                $originDate = $directOrigin->hasDate() ? $directOrigin->date() : null;
+                $originDate = $directOrigin->hasDate() ? $directOrigin->date()?->copy()->setTimezone(config('app.timezone')) : null;
 
                 // the date is localized like any other field: when the blueprint allows it and the own date differs from the origin's
                 if (in_array('date', $localizedBlueprintFields, true) && $source->hasExplicitDate() && ! $date->equalTo($originDate)) {

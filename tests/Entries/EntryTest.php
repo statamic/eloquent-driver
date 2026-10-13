@@ -5,9 +5,11 @@ namespace Tests\Entries;
 use BadMethodCallException;
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Schema;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Eloquent\Collections\Collection;
@@ -790,6 +792,144 @@ class EntryTest extends TestCase
 
         $this->assertTrue($localizedEntry->hasExplicitDate());
         $this->assertEquals('2024-02-02', $localizedEntry->date()->format('Y-m-d'));
+    }
+
+    #[Test]
+    #[DataProvider('timezoneProvider')]
+    public function it_stores_the_date_in_the_app_timezone($timezone, $expected)
+    {
+        $this->setAppTimezone($timezone);
+
+        $entry = $this->makeDatedEntry()->date(Carbon::parse('2026-10-13 12:00:00', 'UTC'));
+        $entry->save();
+
+        $this->assertSame($expected, $entry->model()->fresh()->getRawOriginal('date'));
+    }
+
+    #[Test]
+    #[DataProvider('timezoneProvider')]
+    public function it_does_not_shift_the_date_when_saved_repeatedly($timezone, $expected)
+    {
+        $this->setAppTimezone($timezone);
+
+        $entry = $this->makeDatedEntry()->date(Carbon::parse('2026-10-13 12:00:00', 'UTC'));
+        $entry->save();
+
+        foreach (range(1, 3) as $i) {
+            Facades\Blink::flush();
+            $entry = Entry::fromModel($entry->model()->fresh());
+
+            $this->assertSame('2026-10-13 12:00:00', $entry->date()->utc()->format('Y-m-d H:i:s'));
+
+            $entry->save();
+
+            $this->assertSame($expected, $entry->model()->fresh()->getRawOriginal('date'));
+        }
+    }
+
+    #[Test]
+    public function it_keeps_the_day_of_a_date_picked_at_midnight_in_the_app_timezone()
+    {
+        $this->setAppTimezone('Europe/Berlin');
+
+        // the control panel submits the picked day as midnight in the user's timezone, converted to UTC
+        $entry = $this->makeDatedEntry()->date(Carbon::parse('2026-10-13 00:00:00', 'Europe/Berlin')->utc());
+        $entry->save();
+
+        Facades\Blink::flush();
+        $entry = Entry::fromModel($entry->model()->fresh());
+        $entry->save();
+
+        Facades\Blink::flush();
+        $entry = Entry::fromModel($entry->model()->fresh());
+
+        $this->assertSame('2026-10-13 00:00:00', $entry->model()->getRawOriginal('date'));
+        $this->assertSame('2026-10-13', $entry->date()->setTimezone('Europe/Berlin')->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function it_does_not_change_the_date_of_the_entry_when_making_the_model()
+    {
+        $this->setAppTimezone('Europe/Berlin');
+
+        $entry = $this->makeDatedEntry()->date(Carbon::parse('2026-10-13 12:00:00', 'UTC'));
+
+        $entry->toModel();
+
+        $this->assertSame('UTC', $entry->date()->timezoneName);
+        $this->assertSame('2026-10-13 12:00:00', $entry->date()->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function it_stores_the_inherited_origin_date_in_the_app_timezone()
+    {
+        $this->setAppTimezone('Europe/Berlin');
+
+        [$originEntry, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: true);
+
+        Facades\Blink::flush();
+        $originEntry->date(Carbon::parse('2026-10-13 12:00:00', 'UTC'))->save();
+
+        $this->assertSame('2026-10-13 14:00:00', $originEntry->model()->fresh()->getRawOriginal('date'));
+        $this->assertSame('2026-10-13 14:00:00', $localizedEntry->model()->fresh()->getRawOriginal('date'));
+    }
+
+    #[Test]
+    public function it_stores_a_localized_date_in_the_app_timezone()
+    {
+        $this->setAppTimezone('Europe/Berlin');
+
+        [, $localizedEntry] = $this->makeDatedOriginAndLocalization(localizable: true);
+
+        $localizedEntry->date(Carbon::parse('2026-10-13 12:00:00', 'UTC'))->save();
+
+        foreach (range(1, 2) as $i) {
+            Facades\Blink::flush();
+            $localizedEntry = Entry::fromModel($localizedEntry->model()->fresh());
+
+            $this->assertSame(['date'], $localizedEntry->model()->data['__localized_fields']);
+            $this->assertSame('2026-10-13 14:00:00', $localizedEntry->model()->getRawOriginal('date'));
+            $this->assertSame('2026-10-13 12:00:00', $localizedEntry->date()->utc()->format('Y-m-d H:i:s'));
+
+            $localizedEntry->save();
+        }
+    }
+
+    public static function timezoneProvider()
+    {
+        return [
+            'utc' => ['UTC', '2026-10-13 12:00:00'],
+            'ahead of utc' => ['Europe/Berlin', '2026-10-13 14:00:00'],
+            'behind utc' => ['America/New_York', '2026-10-13 08:00:00'],
+            'ahead of utc across midnight' => ['Pacific/Auckland', '2026-10-14 01:00:00'],
+        ];
+    }
+
+    private function setAppTimezone(string $timezone): void
+    {
+        $original = date_default_timezone_get();
+
+        config(['app.timezone' => $timezone]);
+        date_default_timezone_set($timezone);
+
+        $this->beforeApplicationDestroyed(fn () => date_default_timezone_set($original));
+    }
+
+    private function makeDatedEntry(): Entry
+    {
+        $blueprint = Facades\Blueprint::makeFromFields(['date' => ['type' => 'date', 'time_enabled' => true]])->setHandle('test');
+        $blueprint->save();
+
+        BlueprintRepository::shouldReceive('in')->with('collections/blog')->andReturn(collect(['test' => $blueprint]));
+
+        $collection = (new Collection)->handle('blog')->dated(true)->save();
+
+        return (new Entry)
+            ->id(1)
+            ->locale('en')
+            ->collection($collection)
+            ->blueprint('test')
+            ->slug('the-slug');
     }
 
     private function makeDatedOriginAndLocalization(bool $localizable): array
