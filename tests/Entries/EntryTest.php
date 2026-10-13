@@ -1057,6 +1057,10 @@ class EntryTest extends TestCase
     }
 }
 
-class CustomEntry extends Entry {}
+class CustomEntry extends Entry
+{
+}
 
-class CustomCoreEntry extends \Statamic\Entries\Entry {}
+class CustomCoreEntry extends \Statamic\Entries\Entry
+{
+}
