@@ -2,22 +2,24 @@
 
 namespace Tests\Entries;
 
+use BadMethodCallException;
 use Facades\Statamic\Fields\BlueprintRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Entries\Entry;
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
+use Statamic\Events\EntryBlueprintFound;
 use Statamic\Facades;
 use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Facades\Stache;
 use Statamic\Facades\Term as TermFacade;
-use Statamic\Stache\Repositories\TaxonomyRepository;
+use Statamic\Fields\Blueprint;
 use Statamic\Statamic;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
@@ -294,7 +296,7 @@ class EntryTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        Schema::table('entries', function ($table) {
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30)->nullable();
         });
 
@@ -328,7 +330,7 @@ class EntryTest extends TestCase
             'en' => '/blog/{slug}',
         ])->save();
 
-        Schema::table('entries', function ($table) {
+        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
             $table->string('foo', 30)->nullable();
         });
 
@@ -428,7 +430,7 @@ class EntryTest extends TestCase
         $taxonomyStore = Stache::stores()->get('terms');
         $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
 
-        $collection = CollectionFacade::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
         (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
         (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
@@ -546,7 +548,7 @@ class EntryTest extends TestCase
         config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
 
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
-        Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+        Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
 
         Taxonomy::make('test')->title('test')->save();
 
@@ -555,7 +557,7 @@ class EntryTest extends TestCase
         $taxonomyStore = Stache::stores()->get('terms');
         $this->assertCount(0, $taxonomyStore->store('test')->index('associations')->items());
 
-        $collection = CollectionFacade::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
+        $collection = \Statamic\Facades\Collection::make('blog')->routes('blog/{slug}')->taxonomies(['test'])->save();
 
         (new Entry)->id(1)->collection($collection)->data(['title' => 'Post 1', 'test' => ['test-term']])->slug('alfa')->save();
         (new Entry)->id(2)->collection($collection)->data(['title' => 'Post 2', 'test' => ['test-term']])->slug('bravo')->save();
@@ -819,4 +821,104 @@ class EntryTest extends TestCase
 
         return [$originEntry, Entry::fromModel($originEntry->in('fr')->model()->fresh())];
     }
+
+    #[Test]
+    public function it_hydrates_entries_with_the_collections_entry_class_directly()
+    {
+        $this->makeCollectionWithEntries(entryClass: CustomEntry::class);
+
+        $entriesWithBlueprint = [];
+        Event::listen(EntryBlueprintFound::class, function ($event) use (&$entriesWithBlueprint) {
+            $entriesWithBlueprint[] = $event->entry;
+        });
+
+        $entries = EntryFacade::query()->where('collection', 'blog')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertEveryItemIsInstanceOf(CustomEntry::class, $entries);
+        // Before, every row was hydrated as a base entry first and then copied into the custom class,
+        // which resolved the blueprint (and the date) of that throwaway base entry.
+        $this->assertNotEmpty($entriesWithBlueprint);
+        $this->assertEveryItemIsInstanceOf(CustomEntry::class, $entriesWithBlueprint);
+    }
+
+    #[Test]
+    public function it_hydrates_entries_with_a_custom_entry_class_like_entries_without_one()
+    {
+        $hydrate = function (?string $entryClass) {
+            $this->makeCollectionWithEntries($entryClass);
+
+            return EntryFacade::query()->where('collection', 'blog')->orderBy('id')->get()->map(fn ($entry) => [
+                'id' => $entry->id(),
+                'model' => $entry->model()->id,
+                'site' => $entry->locale(),
+                'slug' => $entry->slug(),
+                'origin' => $entry->origin()?->id(),
+                'blueprint' => $entry->blueprint()->handle(),
+                'published' => $entry->published(),
+                'date' => $entry->date()->toDateTimeString(),
+                'has_explicit_date' => $entry->hasExplicitDate(),
+                'title' => $entry->value('title'),
+            ])->all();
+        };
+
+        $withoutEntryClass = $hydrate(null);
+        $withEntryClass = $hydrate(CustomEntry::class);
+
+        $this->assertEquals($withoutEntryClass, $withEntryClass);
+        $this->assertEquals('2024-01-01 00:00:00', $withEntryClass[2]['date']);
+        $this->assertFalse($withEntryClass[2]['has_explicit_date']);
+    }
+
+    #[Test]
+    public function it_still_requires_a_custom_entry_class_to_extend_the_eloquent_entry()
+    {
+        $this->makeCollectionWithEntries(entryClass: CustomCoreEntry::class);
+
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage('Call to undefined method '.CustomCoreEntry::class.'::model()');
+
+        Entry::fromModel(EntryModel::find(1));
+    }
+
+    private function makeCollectionWithEntries(?string $entryClass): void
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
+        ]);
+
+        $blueprint = (new Blueprint)->setHandle('article')->setContents(['fields' => [['handle' => 'title', 'field' => ['type' => 'text']]]]);
+        BlueprintRepository::shouldReceive('in')->with('collections/blog')->andReturn(collect(['article' => $blueprint]));
+
+        (new Collection)
+            ->handle('blog')
+            ->dated(true)
+            ->sites(['en', 'fr'])
+            ->entryClass($entryClass)
+            ->save();
+
+        EntryModel::query()->delete();
+
+        foreach ([1 => '2024-01-01', 2 => '2024-01-02'] as $id => $date) {
+            EntryModel::create([
+                'id' => $id, 'site' => 'en', 'origin_id' => null, 'slug' => "entry-{$id}", 'collection' => 'blog',
+                'blueprint' => 'article', 'date' => "{$date} 00:00:00", 'published' => true, 'data' => ['title' => "Entry {$id}"],
+            ]);
+            EntryModel::create([
+                'id' => $id + 2, 'site' => 'fr', 'origin_id' => $id, 'slug' => "entry-{$id}", 'collection' => 'blog',
+                'blueprint' => 'article', 'date' => null, 'published' => true, 'data' => ['__localized_fields' => []],
+            ]);
+        }
+
+        Facades\Blink::flush();
+    }
+}
+
+class CustomEntry extends Entry
+{
+}
+
+class CustomCoreEntry extends \Statamic\Entries\Entry
+{
 }
