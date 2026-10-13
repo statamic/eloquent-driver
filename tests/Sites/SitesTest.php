@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Sites\SiteModel;
 use Statamic\Facades\Site;
+use Statamic\Sites\Sites;
 use Tests\TestCase;
 
 class SitesTest extends TestCase
@@ -26,7 +27,7 @@ class SitesTest extends TestCase
             'Statamic\Eloquent\Sites\Sites'
         );
 
-        Facade::clearResolvedInstance(\Statamic\Sites\Sites::class);
+        Facade::clearResolvedInstance(Sites::class);
     }
 
     #[Test]

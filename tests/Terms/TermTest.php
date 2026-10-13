@@ -14,6 +14,7 @@ use Statamic\Facades\Collection;
 use Statamic\Facades\Stache;
 use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
+use Statamic\Stache\Repositories\TaxonomyRepository;
 use Statamic\Statamic;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
@@ -147,7 +148,7 @@ class TermTest extends TestCase
         config()->set('statamic.eloquent-driver.taxonomies.driver', 'file');
 
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
-        Statamic::repository(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
+        Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
 
         Taxonomy::make('test')->title('test')->save();
 

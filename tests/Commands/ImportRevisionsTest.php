@@ -9,6 +9,7 @@ use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Eloquent\Revisions\RevisionModel;
 use Statamic\Facades\Revision;
+use Statamic\Revisions\RevisionRepository;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -28,7 +29,7 @@ class ImportRevisionsTest extends TestCase
 
         Facade::clearResolvedInstance(RevisionRepositoryContract::class);
 
-        app()->bind(RevisionRepositoryContract::class, \Statamic\Revisions\RevisionRepository::class);
+        app()->bind(RevisionRepositoryContract::class, RevisionRepository::class);
         app()->bind(RevisionContract::class, \Statamic\Revisions\Revision::class);
     }
 

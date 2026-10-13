@@ -11,6 +11,8 @@ use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\File;
 use Statamic\Facades\YAML;
+use Statamic\Fields\BlueprintRepository;
+use Statamic\Fields\FieldsetRepository;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
@@ -51,8 +53,8 @@ class ImportBlueprints extends Command
 
     private function useDefaultRepositories(): void
     {
-        Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
-        Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
+        Facade::clearResolvedInstance(BlueprintRepository::class);
+        Facade::clearResolvedInstance(FieldsetRepository::class);
 
         app()->singleton(
             'Statamic\Fields\BlueprintRepository',
