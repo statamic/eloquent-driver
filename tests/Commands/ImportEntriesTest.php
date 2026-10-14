@@ -53,7 +53,7 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(1, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -79,8 +79,8 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(2, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => '{"foo":"bar"}']);
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => '{"foo":"bar","baz":"qux","__localized_fields":[]}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar'])]);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar', 'baz' => 'qux', '__localized_fields' => []])]);
     }
 
     #[Test]
@@ -97,6 +97,6 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(1, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'template-test', 'data' => '{"foo":"bar","template":"some.template"}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'template-test', 'data' => $this->castAsJson(['foo' => 'bar', 'template' => 'some.template'])]);
     }
 }

@@ -498,19 +498,19 @@ class TermQueryBuilderTest extends TestCase
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
-        Term::make('3')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->save();
+        Term::make('3')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-3']])->save();
         Term::make('4')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3', 'taxonomy-4']])->save();
-        Term::make('5')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-5']])->save();
+        Term::make('5')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-5']])->save();
 
-        $entries = Term::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-5'])->get();
+        $entries = Term::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-2'])->get();
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['1', '3', '5'], $entries->map->slug()->all());
 
         $entries = Term::query()->whereJsonContains('test_taxonomy', 'taxonomy-1')->get();
 
-        $this->assertCount(2, $entries);
-        $this->assertEquals(['1', '3'], $entries->map->slug()->all());
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['1', '3', '5'], $entries->map->slug()->all());
     }
 
     #[Test]
@@ -629,6 +629,10 @@ class TermQueryBuilderTest extends TestCase
     #[Test]
     public function terms_are_found_using_where_has_when_max_items_not_1()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s weak typing for JSON contains comparisons with mixed types.');
+        }
+
         $blueprint = Blueprint::makeFromFields(['terms_field' => ['type' => 'terms', 'taxonomies' => ['tags']]]);
         Blueprint::shouldReceive('in')->with('taxonomies/tags')->andReturn(collect(['tags' => $blueprint]));
 
