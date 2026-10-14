@@ -56,6 +56,7 @@ class ImportRevisionsTest extends TestCase
             ->action('revision')
             ->date(Carbon::now())
             ->message('Initial revision')
+            ->publishAt($publishAt = Carbon::parse('2030-01-01 10:00'))
             ->attributes(['foo' => 'bar'])
             ->save();
 
@@ -71,6 +72,7 @@ class ImportRevisionsTest extends TestCase
             'key' => 'collections/pages/en/foo',
             'action' => 'revision',
             'message' => 'Initial revision',
+            'publish_at' => $publishAt,
             'attributes' => '{"foo":"bar"}',
         ]);
     }

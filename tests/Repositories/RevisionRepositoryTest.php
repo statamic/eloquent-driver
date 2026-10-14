@@ -55,6 +55,7 @@ class RevisionRepositoryTest extends TestCase
             ->key('456')
             ->action('other')
             ->date(now()->subHour())
+            ->publishAt(now()->addHour())
             ->save();
     }
 
@@ -109,5 +110,32 @@ class RevisionRepositoryTest extends TestCase
         $revisions = $builder->where('key', '1234')->get();
         $this->assertInstanceOf(Collection::class, $revisions);
         $this->assertCount(0, $revisions);
+    }
+
+    #[Test]
+    public function it_stores_and_retrieves_publish_at()
+    {
+        $revision = $this->repo->whereKey('456')->first();
+
+        $this->assertEquals(now()->addHour()->timestamp, $revision->publishAt()->timestamp);
+        $this->assertNull($this->repo->whereKey('123')->first()->publishAt());
+    }
+
+    #[Test]
+    public function it_queries_by_publish_at()
+    {
+        $this->assertCount(1, $this->repo->query()->whereNotNull('publish_at')->get());
+        $this->assertCount(0, $this->repo->query()->where('publish_at', '<=', now())->get());
+        $this->assertCount(1, $this->repo->query()->where('publish_at', '<=', now()->addHours(2))->get());
+    }
+
+    #[Test]
+    public function it_clears_publish_at()
+    {
+        $revision = $this->repo->whereKey('456')->first();
+
+        $revision->publishAt(null)->save();
+
+        $this->assertNull($this->repo->whereKey('456')->first()->publishAt());
     }
 }
