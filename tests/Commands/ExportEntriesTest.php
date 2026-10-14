@@ -10,6 +10,7 @@ use Statamic\Contracts\Entries\CollectionRepository as CollectionRepositoryContr
 use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Stache;
+use Statamic\Stache\Repositories\CollectionRepository;
 use Tests\TestCase;
 
 class ExportEntriesTest extends TestCase
@@ -29,7 +30,7 @@ class ExportEntriesTest extends TestCase
         Stache::store('entries')->directory($this->entriesDir);
 
         Facade::clearResolvedInstance(CollectionRepositoryContract::class);
-        app()->bind(CollectionRepositoryContract::class, \Statamic\Stache\Repositories\CollectionRepository::class);
+        app()->bind(CollectionRepositoryContract::class, CollectionRepository::class);
         app()->bind(CollectionContract::class, \Statamic\Entries\Collection::class);
     }
 

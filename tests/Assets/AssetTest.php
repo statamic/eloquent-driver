@@ -207,7 +207,7 @@ class AssetTest extends TestCase
     public function uploads_a_file()
     {
         Event::fake();
-        $asset = (new \Statamic\Eloquent\Assets\Asset)->container($this->container)->path('path/to/asset.jpg')->syncOriginal();
+        $asset = (new Asset)->container($this->container)->path('path/to/asset.jpg')->syncOriginal();
 
         Facades\AssetContainer::shouldReceive('findByHandle')->with('test_container')->andReturn($this->container);
         Storage::disk('test')->assertMissing('path/to/asset.jpg');

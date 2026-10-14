@@ -3,8 +3,10 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Statamic\Eloquent\ServiceProvider;
 use Statamic\Facades\Site;
+use Statamic\Stache\Stores\UsersStore;
 use Statamic\Testing\AddonTestCase;
 
 abstract class TestCase extends AddonTestCase
@@ -39,7 +41,7 @@ abstract class TestCase extends AddonTestCase
         $app['config']->set('auth.providers.users.driver', 'statamic');
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.stache.stores.users', [
-            'class' => \Statamic\Stache\Stores\UsersStore::class,
+            'class' => UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
@@ -62,7 +64,7 @@ abstract class TestCase extends AddonTestCase
 
     protected function assertEveryItem($items, $callback)
     {
-        if ($items instanceof \Illuminate\Support\Collection) {
+        if ($items instanceof Collection) {
             $items = $items->all();
         }
 
@@ -79,7 +81,7 @@ abstract class TestCase extends AddonTestCase
 
     protected function assertEveryItemIsInstanceOf($class, $items)
     {
-        if ($items instanceof \Illuminate\Support\Collection) {
+        if ($items instanceof Collection) {
             $items = $items->all();
         }
 

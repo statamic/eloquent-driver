@@ -42,7 +42,7 @@ return new class extends Migration
                     ],
                 ],
             ]);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             $config = '[]';
         }
 

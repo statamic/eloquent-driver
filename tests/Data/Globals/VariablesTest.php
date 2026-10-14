@@ -9,11 +9,11 @@ use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\Variables;
-use Statamic\Facades;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\GlobalSet;
 use Statamic\Fields\Fieldtype;
 use Statamic\Fields\Value;
+use Statamic\Query\Builder;
 use Statamic\Support\Arr;
 use Tests\TestCase;
 
@@ -236,7 +236,7 @@ EOT;
             }
         })::register();
 
-        $blueprint = Facades\Blueprint::makeFromFields(['charlie' => ['type' => 'test']]);
+        $blueprint = Blueprint::makeFromFields(['charlie' => ['type' => 'test']]);
         BlueprintRepository::shouldReceive('find')->with('globals.settings')->andReturn($blueprint);
         $global = GlobalSet::make('settings');
         $variables = $global->makeLocalization('en');
@@ -266,7 +266,7 @@ EOT;
             }
         })::register();
 
-        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'test']]);
+        $blueprint = Blueprint::makeFromFields(['foo' => ['type' => 'test']]);
         BlueprintRepository::shouldReceive('find')->with('globals.settings')->andReturn($blueprint);
         $global = GlobalSet::make('settings');
         $variables = $global->makeLocalization('en');
@@ -280,7 +280,7 @@ EOT;
     public static function queryBuilderProvider()
     {
         return [
-            'statamic' => [Mockery::mock(\Statamic\Query\Builder::class)],
+            'statamic' => [Mockery::mock(Builder::class)],
             'database' => [Mockery::mock(\Illuminate\Database\Query\Builder::class)],
             'eloquent' => [Mockery::mock(\Illuminate\Database\Eloquent\Builder::class)],
         ];
