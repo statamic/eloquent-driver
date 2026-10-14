@@ -93,9 +93,17 @@ return [
         'model' => \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
     ],
 
+    'taxonomy_trees' => [
+        'driver' => 'file',
+        'model' => \Statamic\Eloquent\Structures\TreeModel::class,
+        'tree' => \Statamic\Eloquent\Structures\TaxonomyTree::class,
+    ],
+
     'terms' => [
         'driver' => 'file',
         'model' => \Statamic\Eloquent\Taxonomies\TermModel::class,
+        'update_term_order_queue' => 'default',
+        'update_term_order_connection' => 'default',
     ],
 
     'tokens' => [

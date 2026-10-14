@@ -84,6 +84,10 @@ class Term extends FileEntry
             'uri'        => $source->uri(),
             'data'       => collect($data)->filter(fn ($v) => $v !== null),
             'updated_at' => $source->lastModified(),
+            // Calling ->order() through Term's __call proxy compares the return
+            // value against a LocalizedTerm instance, which throws for scalars.
+            // Go straight through inDefaultLocale() to avoid it.
+            'order'      => $source->inDefaultLocale()->order(),
         ]);
     }
 
