@@ -34,6 +34,24 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
         return $column;
     }
 
+    public function whereStatus(string $status)
+    {
+        return match ($status) {
+            'any' => $this,
+            'finalized' => $this->whereNotTrue('partial')->whereNotTrue('spam'),
+            'partial' => $this->where('partial', true)->whereNotTrue('spam'),
+            'spam' => $this->where('spam', true),
+            default => throw new \Exception("Invalid status [$status]"),
+        };
+    }
+
+    private function whereNotTrue(string $column)
+    {
+        return $this->where(
+            fn ($query) => $query->whereNull($column)->orWhere($column, '!=', true)
+        );
+    }
+
     protected function transform($items, $columns = [])
     {
         return DataCollection::make($items)->map(function ($model) {

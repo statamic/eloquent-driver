@@ -2,6 +2,7 @@
 
 namespace Tests\Commands;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Form as FormContract;
@@ -60,6 +61,45 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+    }
+
+    #[Test]
+    public function it_imports_form_fields_connections_and_charts()
+    {
+        $fields = [
+            'sections' => [
+                [
+                    'fields' => [
+                        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+                    ],
+                ],
+            ],
+        ];
+
+        $connections = [
+            'email' => [
+                ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
+            ],
+            'webhook' => [
+                ['url' => 'https://example.com/webhook'],
+            ],
+        ];
+
+        $charts = [
+            ['field' => 'name', 'chart' => 'popular_answers'],
+        ];
+
+        tap(Form::make('contact')->title('Contact')->formFields($fields)->connections($connections)->charts($charts))->save();
+
+        $this->artisan('statamic:eloquent:import-forms', ['--force' => true])
+            ->expectsOutputToContain('Forms imported successfully.')
+            ->assertExitCode(0);
+
+        $model = FormModel::where('handle', 'contact')->first();
+
+        $this->assertSame($fields, Arr::get($model->settings, 'fields'));
+        $this->assertSame($connections, Arr::get($model->settings, 'connections'));
+        $this->assertSame($charts, Arr::get($model->settings, 'charts'));
     }
 
     #[Test]
