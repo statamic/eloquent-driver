@@ -54,6 +54,29 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function its_dirty_state_matches_core_except_for_the_path()
+    {
+        CollectionFacade::make('blog')->title('blog')->dated(true)->save();
+
+        $origin = tap(EntryFacade::make()->collection('blog')->slug('origin')->date('2024-01-01'))->save();
+
+        $build = fn ($entry) => $entry
+            ->collection('blog')
+            ->locale('en')
+            ->origin($origin->id())
+            ->slug('the-slug')
+            ->date(Carbon::parse('2024-03-05 14:30'))
+            ->published(false)
+            ->data(['title' => 'Hello', 'nested' => ['foo' => 'bar'], 'updated_at' => 123]);
+
+        $core = $build(new \Statamic\Entries\Entry)->getCurrentDirtyStateAttributes();
+        $eloquent = $build(new Entry)->getCurrentDirtyStateAttributes();
+
+        $this->assertArrayHasKey('path', $core);
+        $this->assertSame(collect($core)->except('path')->all(), $eloquent);
+    }
+
+    #[Test]
     public function it_saves_to_entry_model()
     {
         $model = new EntryModel([
