@@ -77,6 +77,23 @@ class EntryTest extends TestCase
     }
 
     #[Test]
+    public function it_does_not_resolve_blueprints_when_hydrating_dated_entries()
+    {
+        $this->makeCollectionWithEntries(null);
+
+        $resolved = 0;
+        Event::listen(EntryBlueprintFound::class, function () use (&$resolved) {
+            $resolved++;
+        });
+
+        $entries = EntryFacade::query()->where('collection', 'blog')->get();
+
+        $this->assertCount(4, $entries);
+        $this->assertSame(0, $resolved);
+        $this->assertArrayNotHasKey('path', $entries->first()->getOriginal());
+    }
+
+    #[Test]
     public function it_saves_to_entry_model()
     {
         $model = new EntryModel([
