@@ -1009,19 +1009,15 @@ class EntryTest extends TestCase
     {
         $this->makeCollectionWithEntries(entryClass: CustomEntry::class);
 
-        $entriesWithBlueprint = [];
-        Event::listen(EntryBlueprintFound::class, function ($event) use (&$entriesWithBlueprint) {
-            $entriesWithBlueprint[] = $event->entry;
-        });
+        config(['statamic.eloquent-driver.entries.entry' => BaseEntryWithCounter::class]);
+        BaseEntryWithCounter::$instances = 0;
 
         $entries = EntryFacade::query()->where('collection', 'blog')->get();
 
         $this->assertCount(4, $entries);
         $this->assertEveryItemIsInstanceOf(CustomEntry::class, $entries);
-        // Before, every row was hydrated as a base entry first and then copied into the custom class,
-        // which resolved the blueprint (and the date) of that throwaway base entry.
-        $this->assertNotEmpty($entriesWithBlueprint);
-        $this->assertEveryItemIsInstanceOf(CustomEntry::class, $entriesWithBlueprint);
+        // Before, every row was hydrated as a base entry first and then copied into the custom class.
+        $this->assertSame(0, BaseEntryWithCounter::$instances);
     }
 
     #[Test]
@@ -1098,5 +1094,17 @@ class EntryTest extends TestCase
 }
 
 class CustomEntry extends Entry {}
+
+class BaseEntryWithCounter extends Entry
+{
+    public static int $instances = 0;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        static::$instances++;
+    }
+}
 
 class CustomCoreEntry extends \Statamic\Entries\Entry {}
