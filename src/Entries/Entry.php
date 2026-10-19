@@ -199,6 +199,21 @@ class Entry extends FileEntry
         return $this;
     }
 
+    /**
+     * Same dirty state attributes as Statamic itself, minus `path` which eloquent entries don't have.
+     */
+    public function getCurrentDirtyStateAttributes(): array
+    {
+        return array_merge([
+            'collection' => $this->collectionHandle(),
+            'locale' => $this->locale(),
+            'origin' => $this->hasOrigin() ? $this->origin()->id() : null,
+            'slug' => $this->slug(),
+            'date' => optional($this->date())->format('Y-m-d-Hi'),
+            'published' => $this->published(),
+        ], $this->data()->except(['updated_at'])->toArray());
+    }
+
     public function fileLastModified()
     {
         return $this->model?->updated_at ?? Carbon::now();
