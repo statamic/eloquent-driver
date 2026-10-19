@@ -1,5 +1,13 @@
 # Release Notes
 
+## 5.12.4 (2026-10-19)
+
+### What's fixed
+- Skip building file path when hydrating entries [#637](https://github.com/statamic/eloquent-driver/pull/637) by @daun
+- Bump shivammathur/setup-php from 2.37.2 to 2.40.0 in the github-actions group [#636](https://github.com/statamic/eloquent-driver/pull/636) by @dependabot
+
+
+
 ## 5.12.3 (2026-10-13)
 
 ### What's fixed
