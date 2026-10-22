@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Facades\File;
+use Statamic\Facades\YAML;
 use Tests\TestCase;
 
 class ExportFormsTest extends TestCase
@@ -42,6 +44,82 @@ class ExportFormsTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertFileExists($this->formsDir.'/contact.yaml');
+    }
+
+    #[Test]
+    public function it_exports_form_fields_connections_and_charts()
+    {
+        $fields = [
+            'sections' => [
+                [
+                    'fields' => [
+                        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+                    ],
+                ],
+            ],
+        ];
+
+        $connections = [
+            'email' => [
+                ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
+            ],
+            'webhook' => [
+                ['url' => 'https://example.com/webhook'],
+            ],
+        ];
+
+        $charts = [
+            ['field' => 'name', 'chart' => 'popular_answers'],
+        ];
+
+        FormModel::create([
+            'handle' => 'contact',
+            'title' => 'Contact',
+            'settings' => [
+                'fields' => $fields,
+                'charts' => $charts,
+                'honeypot' => 'winnie',
+                'connections' => $connections,
+                'store' => true,
+            ],
+        ]);
+
+        $this->artisan('statamic:eloquent:export-forms', ['--only-forms' => true])
+            ->expectsOutputToContain('Forms exported')
+            ->assertExitCode(0);
+
+        $contents = YAML::parse(File::get($this->formsDir.'/contact.yaml'));
+
+        $this->assertSame($fields, $contents['fields']);
+        $this->assertSame($connections, $contents['connections']);
+        $this->assertSame($charts, $contents['charts']);
+        $this->assertSame('winnie', $contents['honeypot']);
+    }
+
+    #[Test]
+    public function it_converts_legacy_email_settings_when_exporting()
+    {
+        FormModel::create([
+            'handle' => 'contact',
+            'title' => 'Contact',
+            'settings' => [
+                'store' => true,
+                'email' => [
+                    ['to' => 'foo@bar.com', 'subject' => 'Feedback'],
+                ],
+            ],
+        ]);
+
+        $this->artisan('statamic:eloquent:export-forms', ['--only-forms' => true])
+            ->expectsOutputToContain('Forms exported')
+            ->assertExitCode(0);
+
+        $contents = YAML::parse(File::get($this->formsDir.'/contact.yaml'));
+
+        $this->assertArrayNotHasKey('email', $contents);
+        $this->assertSame('foo@bar.com', $contents['connections']['email'][0]['to']);
+        $this->assertSame('Feedback', $contents['connections']['email'][0]['subject']);
+        $this->assertNotNull($contents['connections']['email'][0]['id']);
     }
 
     #[Test]

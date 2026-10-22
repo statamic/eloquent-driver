@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Forms;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Statamic\Contracts\Forms\Form as Contract;
 use Statamic\Events\FormCreated;
 use Statamic\Events\FormCreating;
@@ -11,6 +12,7 @@ use Statamic\Events\FormDeleting;
 use Statamic\Events\FormSaved;
 use Statamic\Events\FormSaving;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Blueprint;
 use Statamic\Facades\Form as FormFacade;
 use Statamic\Forms\Form as FileEntry;
 
@@ -20,14 +22,27 @@ class Form extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        return (new static)
+        $settings = collect($model->settings);
+
+        $form = (new static)
             ->title($model->title)
             ->handle($model->handle)
-            ->store($model->settings['store'] ?? null)
-            ->email($model->settings['email'] ?? null)
-            ->honeypot($model->settings['honeypot'] ?? null)
-            ->data($model->settings['data'] ?? [])
+            ->store($settings->get('store'))
+            ->charts($settings->get('charts'))
+            ->honeypot($settings->get('honeypot'))
+            ->connections($settings->get('connections'))
+            ->data($settings->get('data') ?? [])
             ->model($model);
+
+        if (! is_null($emails = Arr::get($settings, 'connections.email', $settings->get('email')))) {
+            $form->email($emails);
+        }
+
+        if ($fields = $settings->get('fields')) {
+            $form->formFields($fields);
+        }
+
+        return $form;
     }
 
     public function toModel()
@@ -42,10 +57,12 @@ class Form extends FileEntry
         return $class::firstOrNew(['handle' => $source->handle()])->fill([
             'title'    => $source->title() ?? $source->handle(),
             'settings' => [
-                'store'    => $source->store(),
-                'email'    => $source->email(),
-                'honeypot' => $source->honeypot(),
-                'data' => $source->data()->filter(fn ($v) => $v !== null),
+                'fields'      => $source->formFields()->contents(),
+                'charts'      => $source->charts(),
+                'honeypot'    => $source->honeypot(),
+                'connections' => $source->connections()->all(),
+                'store'       => $source->store(),
+                'data'        => $source->data()->filter(fn ($v) => $v !== null),
             ],
         ]);
     }
@@ -88,6 +105,10 @@ class Form extends FileEntry
 
         Blink::forget("eloquent-forms-{$this->handle()}");
         Blink::forget('eloquent-forms');
+
+        if ($blueprint = Blueprint::find("forms.{$this->handle()}")) {
+            $blueprint->delete();
+        }
 
         foreach ($afterSaveCallbacks as $callback) {
             $callback($this);
