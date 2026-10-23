@@ -115,6 +115,23 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             trigger_error('Filtering by status is deprecated. Use whereStatus() instead.', E_USER_DEPRECATED);
         }
 
+        $actualColumn = $this->column($column);
+
+        // A field that was never set isn't in the data column at all, so json_extract gives
+        // us null and the entry falls out of the results. The Stache matches it, so we do too.
+        if (
+            func_num_args() > 2
+            && ! is_null($value)
+            && in_array($operator, ['!=', '<>'], true)
+            && $this->isTopLevelDataColumn($actualColumn)
+        ) {
+            $this->builder->where(function ($query) use ($actualColumn, $operator, $value) {
+                $query->whereNull($actualColumn)->orWhere($actualColumn, $operator, $value);
+            }, null, null, $boolean);
+
+            return $this;
+        }
+
         return parent::where(...func_get_args());
     }
 
@@ -125,6 +142,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         }
 
         return parent::whereIn(...func_get_args());
+    }
+
+    private function isTopLevelDataColumn($column)
+    {
+        return Str::contains($column, 'data->') && ! Str::contains(Str::after($column, 'data->'), '->');
     }
 
     private function ensureCollectionsAreQueriedForStatusQuery(): void
