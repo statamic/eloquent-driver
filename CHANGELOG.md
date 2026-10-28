@@ -1,5 +1,13 @@
 # Release Notes
 
+## 5.12.5 (2026-10-28)
+
+### What's fixed
+- Create a new model when an upload changes the asset path [#641](https://github.com/statamic/eloquent-driver/pull/641) by @lazerg
+- Bump actions/create-github-app-token from 3.2.0 to 3.3.0 in the github-actions group [#639](https://github.com/statamic/eloquent-driver/pull/639) by @dependabot
+
+
+
 ## 5.12.4 (2026-10-19)
 
 ### What's fixed
