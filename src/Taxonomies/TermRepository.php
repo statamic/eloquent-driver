@@ -101,10 +101,31 @@ class TermRepository extends StacheRepository
 
     public function save($entry)
     {
-        $model = $entry->toModel();
-        $model->save();
+        $canonicalModel = $entry->toModel();
+        $canonicalModel->save();
 
-        $entry->model($model->fresh());
+        $entry->model($canonicalModel->fresh());
+
+        $class = app('statamic.eloquent.terms.model');
+        $defaultLocale = $entry->defaultLocale();
+
+        foreach ($entry->localizations() as $locale => $localizedTerm) {
+            if ($locale === $defaultLocale) {
+                continue;
+            }
+
+            $class::firstOrNew([
+                'slug'     => $entry->getOriginal('slug', $entry->slug()),
+                'taxonomy' => $entry->taxonomyHandle(),
+                'site'     => $locale,
+            ])->fill([
+                'slug'       => $entry->slug(),
+                'uri'        => $localizedTerm->uri(),
+                'origin'     => $canonicalModel->id,
+                'data'       => $entry->dataForLocale($locale)->toArray(),
+                'updated_at' => $entry->lastModified(),
+            ])->save();
+        }
 
         Blink::put("eloquent-term-{$entry->id()}", $entry);
         Blink::put("eloquent-term-{$entry->uri()}", $entry);
@@ -112,7 +133,11 @@ class TermRepository extends StacheRepository
 
     public function delete($entry)
     {
-        $entry->model()->delete();
+        $class = app('statamic.eloquent.terms.model');
+
+        $class::where('slug', $entry->slug())
+            ->where('taxonomy', $entry->taxonomyHandle())
+            ->delete();
 
         Blink::forget("eloquent-term-{$entry->id()}");
         Blink::forget("eloquent-term-{$entry->uri()}");

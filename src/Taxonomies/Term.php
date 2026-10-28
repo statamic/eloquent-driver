@@ -5,6 +5,7 @@ namespace Statamic\Eloquent\Taxonomies;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Taxonomies\Term as Contract;
+use Statamic\Facades\Blink;
 use Statamic\Taxonomies\Term as FileEntry;
 
 class Term extends FileEntry
@@ -13,29 +14,44 @@ class Term extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = $model->data;
+        $modelClass = app('statamic.eloquent.terms.model');
 
-        /** @var Term $term */
+        // Locale rows preloaded by TermQueryBuilder::transform() are cached in
+        // Blink to avoid N+1. Fall back to a direct DB query when not present
+        // (e.g. when fromModel() is called outside of a query builder context).
+        $blinkKey = "eloquent-term-locale-rows-{$model->taxonomy}::{$model->slug}";
+        $allRows = Blink::has($blinkKey)
+            ? Blink::get($blinkKey)
+            : $modelClass::where('slug', $model->slug)->where('taxonomy', $model->taxonomy)->get();
+
+        // Non-canonical rows (origin set) don't carry term-level attributes like
+        // blueprint or collection, so we always read those from the canonical row.
+        $canonicalModel = $model->origin
+            ? ($allRows->firstWhere('origin', null) ?? $modelClass::find($model->origin) ?? $model)
+            : $model;
+
+        $data = $canonicalModel->data;
+
         $term = (new static)
             ->slug($model->slug)
             ->taxonomy($model->taxonomy)
-            ->model($model)
-            ->blueprint($model->data['blueprint'] ?? null);
+            ->model($canonicalModel)
+            ->blueprint($data['blueprint'] ?? null);
 
+        $allRows->each(function ($localeModel) use ($term) {
+            $term->dataForLocale($localeModel->site, $localeModel->data ?? []);
+        });
+
+        // Backward compat: terms saved before the per-row migration may still
+        // carry localizations embedded in the data JSON column.
         collect($data['localizations'] ?? [])
-            ->except($term->defaultLocale())
             ->each(function ($localeData, $locale) use ($term) {
                 $term->dataForLocale($locale, $localeData);
             });
 
-        unset($data['localizations']);
-
         if (isset($data['collection'])) {
             $term->collection($data['collection']);
-            unset($data['collection']);
         }
-
-        $term->data($data);
 
         if (config('statamic.system.track_last_update')) {
             $updatedAt = ($model->updated_at ?? $model->created_at);
@@ -65,11 +81,8 @@ class Term extends FileEntry
             $data['blueprint'] = $source->blueprint;
         }
 
-        $data['localizations'] = $source->localizations()->keys()->reduce(function ($carry, $locale) use ($source) {
-            $carry[$locale] = $source->dataForLocale($locale)->toArray();
-
-            return $carry;
-        }, []);
+        // Localizations are now stored as separate rows; remove from the data column.
+        unset($data['localizations']);
 
         if ($collection = $source->collection()) {
             $data['collection'] = $collection;
@@ -82,6 +95,7 @@ class Term extends FileEntry
         ])->fill([
             'slug'       => $source->slug(),
             'uri'        => $source->uri(),
+            'origin'     => null,
             'data'       => collect($data)->filter(fn ($v) => $v !== null),
             'updated_at' => $source->lastModified(),
         ]);
