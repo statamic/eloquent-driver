@@ -10,6 +10,7 @@ use Statamic\Data\HasDirtyState;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Asset extends FileAsset
 {
@@ -192,6 +193,13 @@ class Asset extends FileAsset
         $this->model = $model;
 
         return $this;
+    }
+
+    public function upload(UploadedFile $file)
+    {
+        $this->model = null;
+
+        return parent::upload($file);
     }
 
     public function metaPath()

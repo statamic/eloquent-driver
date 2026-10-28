@@ -256,4 +256,20 @@ class AssetTest extends TestCase
 
         $this->assertCount(6, AssetModel::all());
     }
+
+    #[Test]
+    public function uploading_to_the_path_of_an_existing_asset_creates_a_new_model()
+    {
+        $this->assertCount(6, AssetModel::all());
+
+        $asset = $this->container->makeAsset('a.jpg');
+        $model = $asset->model();
+
+        $asset->upload(UploadedFile::fake()->image('a.jpg', 13, 15));
+
+        $this->assertNotSame('a.jpg', $asset->path());
+        $this->assertNotSame($model->getKey(), $asset->model()->getKey());
+        $this->assertSame('a.jpg', $model->fresh()->path);
+        $this->assertCount(7, AssetModel::all());
+    }
 }
