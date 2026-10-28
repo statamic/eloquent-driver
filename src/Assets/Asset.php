@@ -10,7 +10,6 @@ use Statamic\Data\HasDirtyState;
 use Statamic\Facades\Path;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Asset extends FileAsset
 {
@@ -144,6 +143,16 @@ class Asset extends FileAsset
 
         if (method_exists($source, 'model')) {
             $model = $source->model();
+
+            // The model may have been loaded for a different path than the one the asset
+            // was synced with, e.g. an upload that appended a timestamp to the filename.
+            // In that case the model belongs to another asset, so we shouldn't reuse it.
+            if ($model && $source->getOriginal('basename') && (
+                $model->folder !== $source->getOriginal('folder') ||
+                $model->basename !== $source->getOriginal('basename')
+            )) {
+                $model = false;
+            }
         }
 
         if (! $model) {
@@ -193,13 +202,6 @@ class Asset extends FileAsset
         $this->model = $model;
 
         return $this;
-    }
-
-    public function upload(UploadedFile $file)
-    {
-        $this->model = null;
-
-        return parent::upload($file);
     }
 
     public function metaPath()
