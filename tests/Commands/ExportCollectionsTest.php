@@ -15,17 +15,23 @@ class ExportCollectionsTest extends TestCase
 
     private string $collectionsDir;
 
+    private string $treesDir;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->collectionsDir = __DIR__.'/../__fixtures__/dev-null/content/collections';
         Stache::store('collections')->directory($this->collectionsDir);
+
+        $this->treesDir = __DIR__.'/../__fixtures__/dev-null/content/trees/collections';
+        Stache::store('collection-trees')->directory($this->treesDir);
     }
 
     protected function tearDown(): void
     {
         app('files')->deleteDirectory($this->collectionsDir);
+        app('files')->deleteDirectory($this->treesDir);
 
         parent::tearDown();
     }
@@ -77,6 +83,8 @@ class ExportCollectionsTest extends TestCase
         $this->artisan('statamic:eloquent:export-collections', ['--force' => true])
             ->expectsOutputToContain('Collections exported')
             ->assertExitCode(0);
+
+        $this->assertFileExists($this->treesDir.'/pages.yaml');
     }
 
     #[Test]
@@ -87,5 +95,7 @@ class ExportCollectionsTest extends TestCase
 
         $this->artisan('statamic:eloquent:export-collections', ['--only-collection-trees' => true])
             ->assertExitCode(0);
+
+        $this->assertFileExists($this->treesDir.'/pages.yaml');
     }
 }
