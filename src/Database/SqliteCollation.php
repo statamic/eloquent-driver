@@ -3,7 +3,7 @@
 namespace Statamic\Eloquent\Database;
 
 use Collator;
-use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Connection;
 use PDO;
 use Pdo\Sqlite;
 use Statamic\Facades\Site;
@@ -19,7 +19,7 @@ class SqliteCollation
 
     private static ?WeakMap $registered = null;
 
-    public static function for(ConnectionInterface $connection): ?string
+    public static function for(Connection $connection): ?string
     {
         if (! config('statamic.eloquent-driver.sqlite_collation', false) || $connection->getDriverName() !== 'sqlite') {
             return null;
