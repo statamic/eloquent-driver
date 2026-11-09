@@ -106,7 +106,18 @@ class SqliteCollationTest extends TestCase
     #[Test]
     public function it_does_not_collate_uncollated_columns()
     {
-        $this->assertEquals('select * from "entries" order by "date" asc, "entries"."id" asc', Entry::query()->orderBy('date')->orderBy('entries.id')->toSql());
+        $columns = ['id', 'date', 'published', 'order', 'origin_id', 'created_at', 'updated_at'];
+        $query = Entry::query();
+        foreach ($columns as $column) {
+            $query->orderBy($column);
+        }
+        $this->assertStringNotContainsString('collate', $query->toSql());
+
+        $this->assertStringNotContainsString('collate', Entry::query()->orderBy('entries.id')->toSql());
+        $this->assertStringNotContainsString('collate', FormSubmission::query()->orderBy('id')->orderBy('date')->toSql());
+        $this->assertStringNotContainsString('collate', Term::query()->orderBy('id')->orderBy('updated_at')->toSql());
+
+        $this->assertStringContainsString('"slug" collate', Entry::query()->orderBy('slug')->toSql());
     }
 
     #[Test]

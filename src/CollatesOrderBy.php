@@ -60,6 +60,18 @@ trait CollatesOrderBy
 
     protected function uncollatedColumns(): array
     {
-        return ['id', 'created_at', 'updated_at'];
+        return $this->modelUncollatedColumns();
+    }
+
+    protected function modelUncollatedColumns(): array
+    {
+        $model = $this->builder->getModel();
+
+        return [
+            $model->getKeyName(),
+            $model->getCreatedAtColumn(),
+            $model->getUpdatedAtColumn(),
+            ...array_keys($model->getCasts()),
+        ];
     }
 }

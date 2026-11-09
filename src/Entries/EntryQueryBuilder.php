@@ -66,7 +66,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     protected function uncollatedColumns(): array
     {
-        return ['id', 'origin_id', 'published', 'date', 'order', 'created_at', 'updated_at'];
+        return [...$this->modelUncollatedColumns(), 'order', 'origin_id'];
     }
 
     public function find($id, $columns = ['*'])
