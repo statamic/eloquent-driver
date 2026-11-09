@@ -27,8 +27,6 @@ return [
 
     'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
     'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
-
-    // Sort text on SQLite like flat files do (locale-aware, case-insensitive). Requires the intl extension.
     'sqlite_collation' => env('STATAMIC_ELOQUENT_SQLITE_COLLATION', false),
 
     'addon_settings' => [
