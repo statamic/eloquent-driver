@@ -53,12 +53,12 @@ class AssetQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         $containerWhere = $wheres->firstWhere('column', 'container');
 
         if (! $containerWhere || ! isset($containerWhere['value'])) {
-            return [
+            return collect([
                 'size' => 'float',
                 'width' => 'float',
                 'height' => 'float',
                 'duration' => 'float',
-            ];
+            ]);
         }
 
         $container = $containerWhere['value'] instanceof AssetContainer

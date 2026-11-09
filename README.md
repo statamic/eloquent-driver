@@ -166,6 +166,22 @@ By default, setting the driver for blueprints to `eloquent` will apply to *all* 
 
 The above example will set all forms and navigation blueprints to use eloquent, while keeping the rest as files.
 
+### Sorting text on SQLite
+
+SQLite compares text byte by byte, so sorting by a title puts `Zebra` before `apple` and `Äpfel` after `zoo`. Flat files sort the same content alphabetically, ignoring case, with numbers in natural order (`2` before `10`).
+
+To get the flat-file order on SQLite, enable the `sqlite_collation` option:
+
+```php
+// config/statamic/eloquent-driver.php
+
+'sqlite_collation' => true,
+```
+
+The driver then sorts entries, terms, assets and form submissions by text fields using the current site's locale, the same way Statamic sorts flat files. It requires PHP's `intl` extension; without it, the driver falls back to SQLite's ASCII-only `NOCASE` collation.
+
+The collation is only applied in queries, never on columns, so tools like the `sqlite3` CLI can still read the database. MySQL and PostgreSQL already sort text based on the database's collation, so they ignore this option.
+
 ## Upgrading
 
 After updating to a new version of the Eloquent Driver, please ensure you run `php artisan migrate` to update your database to the latest schema.

@@ -64,6 +64,11 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
         return ($table ? $table.'.' : '').$column;
     }
 
+    protected function uncollatedColumns(): array
+    {
+        return ['id', 'origin_id', 'published', 'date', 'order', 'created_at', 'updated_at'];
+    }
+
     public function find($id, $columns = ['*'])
     {
         $model = parent::find($id, $columns);

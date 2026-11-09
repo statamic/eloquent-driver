@@ -6,6 +6,7 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
+use Statamic\Eloquent\CollatesOrderBy;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -17,6 +18,8 @@ use Statamic\Taxonomies\TermCollection;
 
 class TermQueryBuilder extends EloquentQueryBuilder
 {
+    use CollatesOrderBy;
+
     protected $collections = [];
 
     protected $site = null;
