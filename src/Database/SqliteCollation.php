@@ -29,7 +29,6 @@ class SqliteCollation
             return 'NOCASE';
         }
 
-        // Same locale source as Statamic\Support\Comparator.
         $locale = (string) Site::current()->locale();
 
         static::register($connection->getPdo(), $locale);
@@ -56,15 +55,15 @@ class SqliteCollation
 
         $collator = new Collator($locale);
         $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
-        // Ignores case like Comparator's mb_strtolower(), without its per-comparison cost.
+
+        // Match how Comparator ignores case without the cost of running mb_strtolower()
         $collator->setStrength(Collator::SECONDARY);
 
-        // Like Comparator::values(): ICU's numeric mode reads "1.25" as 1, ".", 25 and ignores signs.
+        // Match how Comparator sorts numeric values
         $compare = fn (string $a, string $b): int => is_numeric($a) && is_numeric($b)
             ? $a <=> $b
             : (int) $collator->compare($a, $b);
 
-        // PHP 8.5 deprecates the driver-specific methods on the generic PDO class.
         $pdo instanceof Sqlite
             ? $pdo->createCollation($name, $compare)
             : $pdo->sqliteCreateCollation($name, $compare);
