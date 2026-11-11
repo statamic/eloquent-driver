@@ -3,8 +3,11 @@
 namespace Tests\Data;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Database\SqliteCollation;
 use Statamic\Facades\Asset;
 use Statamic\Facades\AssetContainer;
 use Statamic\Facades\Blueprint;
@@ -166,6 +169,56 @@ class SqliteCollationTest extends TestCase
         }
 
         $this->assertSame(['-10', '-5', '1.25', '1.5', '2', '10'], FormSubmission::query()->orderBy('value')->get()->map->get('value')->all());
+    }
+
+    #[Test]
+    public function it_falls_back_to_a_case_insensitive_natural_sort_without_intl()
+    {
+        $names = self::NAMES;
+        usort($names, SqliteCollation::comparator(null));
+
+        // Matches Comparator::strings() without intl: strnatcmp() on lowercased values
+        $this->assertSame(['2', '10', 'a', 'b', 'C', 'Ä'], $names);
+    }
+
+    #[Test]
+    public function it_registers_the_fallback_collation_on_the_connection()
+    {
+        $pdo = DB::connection()->getPdo();
+        SqliteCollation::register($pdo, null);
+
+        DB::statement('create table collation_test (name text)');
+        foreach (self::NAMES as $name) {
+            DB::table('collation_test')->insert(['name' => $name]);
+        }
+
+        $sorted = DB::table('collation_test')->orderByRaw('name collate '.SqliteCollation::NATURAL)->pluck('name')->all();
+
+        $this->assertSame(['2', '10', 'a', 'b', 'C', 'Ä'], $sorted);
+    }
+
+    #[Test]
+    public function it_only_collates_mapped_entry_columns_that_hold_text()
+    {
+        config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
+
+        Schema::table('entries', function ($table) {
+            $table->string('subtitle')->nullable();
+            $table->integer('rating')->nullable();
+            $table->dateTime('published_on')->nullable();
+        });
+
+        $this->assertStringContainsString('"subtitle" collate', Entry::query()->orderBy('subtitle')->toSql());
+        $this->assertStringNotContainsString('collate', Entry::query()->orderBy('rating')->orderBy('published_on')->toSql());
+
+        Collection::make('posts')->save();
+
+        foreach (self::NAMES as $i => $name) {
+            EntryFactory::id((string) ($i + 1))->slug("post-{$i}")->collection('posts')->data(['title' => $name, 'subtitle' => $name, 'rating' => count(self::NAMES) - $i])->create();
+        }
+
+        $this->assertEquals(self::UNICODE_ORDER, Entry::query()->where('collection', 'posts')->orderBy('subtitle')->get()->map->get('subtitle')->all());
+        $this->assertEquals(array_reverse(self::NAMES), Entry::query()->where('collection', 'posts')->orderBy('rating')->get()->map->get('subtitle')->all());
     }
 
     private function createAssets(?callable $callback = null): void

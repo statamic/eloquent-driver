@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Database;
 
+use Closure;
 use Collator;
 use Illuminate\Database\Connection;
 use PDO;
@@ -10,12 +11,15 @@ use Statamic\Facades\Site;
 use WeakMap;
 
 /**
- * SQLite only ships the BINARY, NOCASE and RTRIM collations, so this registers an intl-backed
- * collation per locale on the PDO handle to sort text like Statamic's Comparator does for flat files.
+ * SQLite only ships the BINARY, NOCASE and RTRIM collations, so this registers a collation
+ * on the PDO handle to sort text like Statamic's Comparator does for flat files: per locale
+ * when the intl extension is available, otherwise a locale-independent natural sort.
  */
 class SqliteCollation
 {
     const PREFIX = 'STATAMIC_UNICODE';
+
+    const NATURAL = 'STATAMIC_NATURAL';
 
     private static ?WeakMap $registered = null;
 
@@ -25,11 +29,7 @@ class SqliteCollation
             return null;
         }
 
-        if (! class_exists(Collator::class)) {
-            return 'NOCASE';
-        }
-
-        $locale = (string) Site::current()->locale();
+        $locale = class_exists(Collator::class) ? (string) Site::current()->locale() : null;
 
         static::register($connection->getPdo(), $locale);
         static::register($connection->getReadPdo(), $locale);
@@ -37,12 +37,16 @@ class SqliteCollation
         return static::name($locale);
     }
 
-    public static function name(string $locale): string
+    public static function name(?string $locale): string
     {
+        if ($locale === null) {
+            return static::NATURAL;
+        }
+
         return static::PREFIX.'_'.strtoupper(preg_replace('/[^A-Za-z0-9]+/', '_', $locale));
     }
 
-    public static function register(PDO $pdo, string $locale): void
+    public static function register(PDO $pdo, ?string $locale): void
     {
         self::$registered ??= new WeakMap;
 
@@ -53,16 +57,7 @@ class SqliteCollation
             return;
         }
 
-        $collator = new Collator($locale);
-        $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
-
-        // Match how Comparator ignores case without the cost of running mb_strtolower()
-        $collator->setStrength(Collator::SECONDARY);
-
-        // Match how Comparator sorts numeric values
-        $compare = fn (string $a, string $b): int => is_numeric($a) && is_numeric($b)
-            ? $a <=> $b
-            : (int) $collator->compare($a, $b);
+        $compare = static::comparator($locale);
 
         $pdo instanceof Sqlite
             ? $pdo->createCollation($name, $compare)
@@ -70,5 +65,29 @@ class SqliteCollation
 
         $names[$name] = true;
         self::$registered[$pdo] = $names;
+    }
+
+    /**
+     * Build the comparison callback. A null locale gives the fallback Comparator
+     * uses when intl is missing: a case-insensitive natural sort.
+     */
+    public static function comparator(?string $locale): Closure
+    {
+        if ($locale === null) {
+            $strings = fn (string $a, string $b): int => strnatcmp(mb_strtolower($a), mb_strtolower($b));
+        } else {
+            $collator = new Collator($locale);
+            $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
+
+            // Match how Comparator ignores case without the cost of running mb_strtolower()
+            $collator->setStrength(Collator::SECONDARY);
+
+            $strings = fn (string $a, string $b): int => (int) $collator->compare($a, $b);
+        }
+
+        // Match how Comparator sorts numeric values
+        return fn (string $a, string $b): int => is_numeric($a) && is_numeric($b)
+            ? $a <=> $b
+            : $strings($a, $b);
     }
 }

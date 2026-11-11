@@ -66,7 +66,29 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
 
     protected function uncollatedColumns(): array
     {
-        return [...$this->modelUncollatedColumns(), 'order', 'origin_id'];
+        return [...$this->modelUncollatedColumns(), 'order', 'origin_id', ...$this->nonTextMappedColumns()];
+    }
+
+    /**
+     * Mapped data columns that don't hold text (integers, dates, etc.) sort correctly
+     * without a collation, and collating them would stop SQLite using their indexes.
+     */
+    private function nonTextMappedColumns(): array
+    {
+        $model = $this->builder->getModel();
+
+        if (! $mappings = (new EloquentEntry)->getDataColumnMappings($model)) {
+            return [];
+        }
+
+        return Blink::once("eloquent-entry-non-text-columns-{$model->getTable()}", function () use ($model, $mappings) {
+            return collect($model->getConnection()->getSchemaBuilder()->getColumns($model->getTable()))
+                ->whereIn('name', $mappings)
+                // SQLite gives a column text affinity when its type contains CHAR, CLOB or TEXT
+                ->reject(fn ($column) => Str::contains(strtolower($column['type_name'] ?? $column['type'] ?? ''), ['char', 'clob', 'text']))
+                ->pluck('name')
+                ->all();
+        });
     }
 
     public function find($id, $columns = ['*'])
