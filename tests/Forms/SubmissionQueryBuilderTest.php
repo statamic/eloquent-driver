@@ -3,6 +3,7 @@
 namespace Forms;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
@@ -22,6 +23,22 @@ class SubmissionQueryBuilderTest extends TestCase
         $submissions = FormSubmission::whereForm('test');
         $this->assertInstanceOf(Collection::class, $submissions);
         $this->assertEveryItemIsInstanceOf(Submission::class, $submissions);
+    }
+
+    #[Test]
+    public function it_only_selects_one_row_when_getting_the_first_submission()
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'a', 'test' => 'foo'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'b', 'test' => 'foo'])->save();
+
+        DB::enableQueryLog();
+
+        $submission = FormSubmission::query()->where('test', 'foo')->orderBy('id', 'desc')->first();
+
+        $this->assertInstanceOf(Submission::class, $submission);
+        $query = collect(DB::getQueryLog())->pluck('query')->first(fn ($query) => str_contains($query, 'form_submissions'));
+        $this->assertStringContainsString('limit 1', $query);
     }
 
     #[Test]
