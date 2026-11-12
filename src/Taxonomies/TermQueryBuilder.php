@@ -2,7 +2,9 @@
 
 namespace Statamic\Eloquent\Taxonomies;
 
+use DateTimeInterface;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
@@ -316,9 +318,13 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $grammar = $this->builder->getConnection()->getQueryGrammar();
             $wrappedColumn = $grammar->wrap($actualColumn);
 
+            if (! ($value instanceof DateTimeInterface)) {
+                $value = Carbon::parse($value);
+            }
+
             $this->builder->whereRaw(
                 "({$wrappedColumn})::timestamp::date {$operator} ?",
-                [$value],
+                [$value->format('Y-m-d')],
                 $boolean
             );
 

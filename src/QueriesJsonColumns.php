@@ -2,6 +2,8 @@
 
 namespace Statamic\Eloquent;
 
+use DateTimeInterface;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -77,9 +79,13 @@ trait QueriesJsonColumns
             $grammar = $this->builder->getConnection()->getQueryGrammar();
             $wrappedColumn = $grammar->wrap($actualColumn);
 
+            if (! ($value instanceof DateTimeInterface)) {
+                $value = Carbon::parse($value);
+            }
+
             $this->builder->whereRaw(
                 "({$wrappedColumn})::timestamp::date {$operator} ?",
-                [$value],
+                [$value->format('Y-m-d')],
                 $boolean
             );
 
