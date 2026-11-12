@@ -376,39 +376,142 @@ class TermQueryBuilder extends EloquentQueryBuilder
     }
 
     /**
-     * Limit to terms used by entries in the queried collections, using a correlated
-     * subquery on this query rather than working out every used term up front.
-     * That way the database only checks usage for rows matching the other
-     * wheres, e.g. the handful of ids being augmented for a Terms field.
+     * Limit to terms used by entries in the queried collections.
+     *
+     * When the query targets specific terms (e.g. the handful of ids being augmented
+     * for a Terms field) usage is checked with a correlated EXISTS, so the database
+     * only checks those rows and can stop at the first matching entry. Otherwise
+     * every used slug is gathered in a single pass over the collection's entries,
+     * rather than checking each term in the taxonomy against every entry.
      */
     private function whereUsedInCollections($taxonomies)
     {
-        $entryClass = app('statamic.eloquent.entries.model');
-        $termClass = app('statamic.eloquent.terms.model');
+        $entriesTable = (new (app('statamic.eloquent.entries.model')))->getTable();
+        $termsTable = (new (app('statamic.eloquent.terms.model')))->getTable();
 
-        $entriesTable = (new $entryClass)->getTable();
-        $termsTable = (new $termClass)->getTable();
+        $narrowed = $this->isNarrowedToSpecificTerms();
 
-        $this->builder->where(function ($query) use ($taxonomies, $entriesTable, $termsTable) {
-            $taxonomies->each(function ($taxonomy) use ($query, $entriesTable, $termsTable) {
-                $query->orWhere(function ($query) use ($taxonomy, $entriesTable, $termsTable) {
-                    $query->where("{$termsTable}.taxonomy", $taxonomy->handle())
-                        ->whereExists(function ($query) use ($taxonomy, $entriesTable, $termsTable) {
-                            $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
-                            $value = match ($query->getConnection()->getDriverName()) {
-                                'sqlite' => new Expression($wrappedColumn),
-                                'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
-                                default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
-                            };
+        $this->builder->where(function ($query) use ($taxonomies, $entriesTable, $termsTable, $narrowed) {
+            $taxonomies->each(function ($taxonomy) use ($query, $entriesTable, $termsTable, $narrowed) {
+                $query->orWhere(function ($query) use ($taxonomy, $entriesTable, $termsTable, $narrowed) {
+                    $query->where("{$termsTable}.taxonomy", $taxonomy->handle());
 
-                            $query->select(DB::raw(1))
-                                ->from($entriesTable)
-                                ->whereIn("{$entriesTable}.collection", $this->collections)
-                                ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
-                        });
+                    if (! $narrowed && $usedSlugs = $this->usedSlugsQuery($taxonomy, $entriesTable)) {
+                        $query->whereIn("{$termsTable}.slug", $usedSlugs);
+
+                        return;
+                    }
+
+                    $query->whereExists(function ($query) use ($taxonomy, $entriesTable, $termsTable) {
+                        $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
+                        $value = match ($query->getConnection()->getDriverName()) {
+                            'sqlite' => new Expression($wrappedColumn),
+                            'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
+                            default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
+                        };
+
+                        $query->select(DB::raw(1))
+                            ->from($entriesTable)
+                            ->whereIn("{$entriesTable}.collection", $this->collections)
+                            ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
+                    });
                 });
             });
         });
+    }
+
+    /**
+     * A subquery selecting every distinct term slug stored in the taxonomy's field on
+     * entries in the queried collections, or null when the database can't unnest JSON
+     * arrays (MySQL < 8.0.4, MariaDB < 10.6, SQL Server), so EXISTS is used instead.
+     * Single values (e.g. from max_items: 1 fields) are treated as one item arrays.
+     */
+    private function usedSlugsQuery($taxonomy, string $entriesTable)
+    {
+        $connection = $this->builder->getConnection();
+
+        [$field, $path] = $this->jsonFieldAndPath(Entry::query()->column($taxonomy->handle()));
+
+        $field = $connection->getQueryGrammar()->wrap("{$entriesTable}.{$field}");
+
+        $query = $connection->query()
+            ->from($entriesTable)
+            ->whereIn("{$entriesTable}.collection", $this->collections)
+            ->distinct();
+
+        switch ($connection->getDriverName()) {
+            case 'sqlite':
+                $query
+                    ->crossJoin(new Expression("json_each({$field}, '{$this->jsonPathString($path)}') as used_terms"))
+                    ->select('used_terms.value as slug');
+                break;
+
+            case 'mysql':
+            case 'mariadb':
+                $minimum = $connection->isMaria() ? '10.6.0' : '8.0.4';
+
+                if (version_compare($connection->getServerVersion(), $minimum, '<')) {
+                    return null;
+                }
+
+                // A binary column matches slugs exactly, like JSON_CONTAINS does, and
+                // avoids collation mismatches between the connection and the table.
+                $value = "json_extract({$field}, '{$this->jsonPathString($path)}')";
+
+                $query
+                    ->crossJoin(new Expression("json_table(if(json_type({$value}) = 'ARRAY', {$value}, json_array({$value})), '\$[*]' columns (slug varchar(255) character set binary path '\$')) as used_terms"))
+                    ->select('used_terms.slug');
+                break;
+
+            case 'pgsql':
+                $value = $path
+                    ? "({$field})::jsonb #> '{".collect($path)->map(fn ($key) => '"'.str_replace(['\\', '"', "'"], ['\\\\', '\\"', "''"], $key).'"')->join(',')."}'"
+                    : "({$field})::jsonb";
+
+                $query->select(new Expression(
+                    "jsonb_array_elements_text(case when jsonb_typeof({$value}) = 'array' then {$value} else jsonb_build_array({$value}) end) as slug"
+                ));
+                break;
+
+            default:
+                return null;
+        }
+
+        // Selecting from a derived table makes the database work out the used slugs
+        // once. Otherwise MySQL can turn the IN into a semi-join that unnests every
+        // entry again for each term.
+        return $connection->query()->fromSub($query, 'used_slugs')->select('used_slugs.slug');
+    }
+
+    /**
+     * Split a column like "data->seo->tags" into its field ("data") and path (["seo", "tags"]).
+     */
+    private function jsonFieldAndPath(string $column): array
+    {
+        $parts = explode('->', $column);
+
+        return [array_shift($parts), $parts];
+    }
+
+    private function jsonPathString(array $path): string
+    {
+        return collect($path)
+            ->map(fn ($key) => '."'.str_replace(['\\', '"', "'"], ['\\\\', '\\"', "''"], $key).'"')
+            ->prepend('$')
+            ->join('');
+    }
+
+    /**
+     * Whether the query is limited to specific terms, i.e. every top level where is an
+     * "and" and one of them matches slugs (or ids) exactly.
+     */
+    private function isNarrowedToSpecificTerms(): bool
+    {
+        $wheres = collect($this->builder->getQuery()->wheres);
+
+        return $wheres->every(fn ($where) => $where['boolean'] === 'and')
+            && $wheres->contains(fn ($where) => in_array($where['column'] ?? null, ['slug', 'id'])
+                && ($where['type'] === 'In' || ($where['type'] === 'Basic' && $where['operator'] === '=')));
     }
 
     private function whereUsedInFileCollections($taxonomies)

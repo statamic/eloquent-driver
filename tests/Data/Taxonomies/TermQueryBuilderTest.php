@@ -343,6 +343,55 @@ class TermQueryBuilderTest extends TestCase
         $this->assertStringContainsString('exists', strtolower($termQueries->first()));
     }
 
+    #[Test]
+    public function it_gathers_used_terms_in_a_single_pass_when_not_querying_specific_terms()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+        Collection::make('news')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a', 'b']])->create();
+        EntryFactory::collection('blog')->data(['tags' => ['b']])->create();
+        EntryFactory::collection('news')->data(['tags' => ['c']])->create();
+
+        foreach (['a', 'b', 'c', 'd'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()->where('taxonomy', 'tags')->where('collection', 'blog')->get();
+
+        $this->assertEquals(['tags::a', 'tags::b'], $terms->map->id()->sort()->values()->all());
+
+        $termQueries = collect(DB::getQueryLog())->pluck('query')->filter(fn ($query) => str_contains($query, 'taxonomy_terms'));
+        $this->assertCount(1, $termQueries);
+        $this->assertStringNotContainsString('exists', strtolower($termQueries->first()));
+    }
+
+    #[Test]
+    public function it_filters_usage_in_collections_with_single_values()
+    {
+        // e.g. a terms field with max_items: 1 stores a string rather than an array
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => 'a'])->create();
+        EntryFactory::collection('blog')->data(['tags' => ['b']])->create();
+
+        foreach (['a', 'b', 'c'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        $this->assertEquals(['tags::a', 'tags::b'],
+            Term::query()->where('taxonomy', 'tags')->where('collection', 'blog')->get()->map->id()->sort()->values()->all()
+        );
+
+        $this->assertEquals(['tags::a'],
+            Term::query()->whereIn('id', ['tags::a', 'tags::c'])->where('collection', 'blog')->get()->map->id()->all()
+        );
+    }
+
     private function assertNoEntriesTableQueries()
     {
         $entriesTable = (new (app('statamic.eloquent.entries.model')))->getTable();
