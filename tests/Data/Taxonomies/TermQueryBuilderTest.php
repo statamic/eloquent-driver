@@ -3,6 +3,7 @@
 namespace Tests\Data\Taxonomies;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
@@ -229,6 +230,85 @@ class TermQueryBuilderTest extends TestCase
 
         $this->assertEquals(['cats::c', 'tags::a'], Term::query()->whereIn('slug', ['a', 'c'])->get()->map->id()->sort()->values()->all());
         $this->assertEquals(['tags::a'], Term::query()->whereIn('id', ['tags::a', 'c'])->get()->map->id()->all());
+    }
+
+    #[Test]
+    public function it_supplies_collection_context_without_filtering_usage()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()
+            ->whereIn('id', ['tags::a', 'tags::b'])
+            ->withCollectionContext('blog')
+            ->get();
+
+        $this->assertEquals(['tags::a', 'tags::b'], $terms->map->id()->sort()->values()->all());
+        $this->assertEquals(['blog', 'blog'], $terms->map(fn ($term) => $term->collection()->handle())->all());
+
+        $this->assertEquals('blog', Term::query()
+            ->whereIn('id', ['tags::b'])
+            ->withCollectionContext('blog')
+            ->first()
+            ->collection()
+            ->handle());
+
+        $this->assertNoEntriesTableQueries();
+    }
+
+    #[Test]
+    public function it_doesnt_check_usage_in_collections_when_querying_an_empty_list_of_ids()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+
+        DB::enableQueryLog();
+
+        $this->assertCount(0, Term::query()->whereIn('id', [])->where('collection', 'blog')->get());
+
+        $this->assertNoEntriesTableQueries();
+    }
+
+    #[Test]
+    public function it_still_checks_usage_in_collections_when_an_empty_list_of_ids_is_combined_with_or_wheres()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        $terms = Term::query()
+            ->whereIn('id', [])
+            ->orWhereIn('id', ['tags::a', 'tags::b'])
+            ->where('collection', 'blog')
+            ->get();
+
+        $this->assertEquals(['tags::a'], $terms->map->id()->all());
+    }
+
+    private function assertNoEntriesTableQueries()
+    {
+        $entriesTable = (new (app('statamic.eloquent.entries.model')))->getTable();
+
+        $queries = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn ($query) => str_contains($query, $entriesTable));
+
+        $this->assertCount(0, $queries, 'Unexpected queries against the entries table: '.$queries->implode(PHP_EOL));
     }
 
     #[Test]

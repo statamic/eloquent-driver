@@ -21,6 +21,8 @@ class TermQueryBuilder extends EloquentQueryBuilder
 {
     protected $collections = [];
 
+    protected $collectionContext = null;
+
     protected $site = null;
 
     protected $taxonomies = [];
@@ -159,6 +161,19 @@ class TermQueryBuilder extends EloquentQueryBuilder
         return $this;
     }
 
+    /**
+     * Supply a collection to the resulting terms, so things like URLs will be
+     * scoped to it, without limiting results to terms used in that collection
+     * the way where('collection', ...) does. That usage filter needs a scan of
+     * the entries table, which the Terms fieldtype doesn't need.
+     */
+    public function withCollectionContext($collection)
+    {
+        $this->collectionContext = $collection;
+
+        return $this;
+    }
+
     public function find($id, $columns = ['*'])
     {
         $model = parent::find($id, $columns);
@@ -189,8 +204,12 @@ class TermQueryBuilder extends EloquentQueryBuilder
         // If a single collection has been queried, we'll supply it to the terms so
         // things like URLs will be scoped to the collection. We can't do it when
         // multiple collections are queried because it would be ambiguous.
-        if ($this->collections && count($this->collections) == 1) {
-            $items->each->collection(Collection::findByHandle($this->collections[0]));
+        $collection = $this->collections && count($this->collections) == 1
+            ? $this->collections[0]
+            : $this->collectionContext;
+
+        if ($collection) {
+            $items->each->collection(Collection::findByHandle($collection));
         }
 
         $items = Term::applySubstitutions($items);
@@ -232,7 +251,7 @@ class TermQueryBuilder extends EloquentQueryBuilder
 
     private function applyCollectionAndTaxonomyWheres()
     {
-        if (! empty($this->collections)) {
+        if (! empty($this->collections) && ! $this->hasEmptyWhereIn()) {
             $this->builder->where(function ($query) {
                 $taxonomies = empty($this->taxonomies)
                     ? Taxonomy::handles()->all()
@@ -397,6 +416,19 @@ class TermQueryBuilder extends EloquentQueryBuilder
         );
 
         return $this;
+    }
+
+    /**
+     * Whether the query can't return anything because every top level where is
+     * an "and" and one of them is a whereIn with no values, e.g. augmenting an
+     * empty Terms field. There's no point checking usage within collections.
+     */
+    private function hasEmptyWhereIn(): bool
+    {
+        $wheres = collect($this->builder->getQuery()->wheres);
+
+        return $wheres->every(fn ($where) => $where['boolean'] === 'and')
+            && $wheres->contains(fn ($where) => $where['type'] === 'In' && empty($where['values']));
     }
 
     public function with($relations, $callback = null)
