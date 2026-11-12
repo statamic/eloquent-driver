@@ -252,66 +252,18 @@ class TermQueryBuilder extends EloquentQueryBuilder
     private function applyCollectionAndTaxonomyWheres()
     {
         if (! empty($this->collections) && ! $this->hasEmptyWhereIn()) {
-            $this->builder->where(function ($query) {
-                $taxonomies = empty($this->taxonomies)
-                    ? Taxonomy::handles()->all()
-                    : $this->taxonomies;
+            $taxonomies = collect(empty($this->taxonomies) ? Taxonomy::handles()->all() : $this->taxonomies)
+                ->unique()
+                ->map(fn ($taxonomy) => Taxonomy::find($taxonomy))
+                ->filter();
 
-                collect($taxonomies)->each(function ($taxonomy) use ($query) {
-                    $collectionTaxonomyHash = md5(collect($this->collections)->merge([$taxonomy])->sort()->join('-'));
-
-                    $terms = Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomy) {
-                        if (! $taxonomy = Taxonomy::find($taxonomy)) {
-                            return [];
-                        }
-
-                        // workaround to handle potential n+1 queries in the database
-                        // if/when Statamic core supports relationships in a meaningful way this should be removed
-                        if (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
-                            $entryClass = app('statamic.eloquent.entries.model');
-                            $termClass = app('statamic.eloquent.terms.model');
-
-                            $entriesTable = (new $entryClass)->getTable();
-                            $termsTable = (new $termClass)->getTable();
-
-                            return TermModel::where('taxonomy', $taxonomy)
-                                ->whereExists(function ($query) use ($entriesTable, $taxonomy, $termsTable) {
-                                    $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
-                                    $value = match ($query->getConnection()->getDriverName()) {
-                                        'sqlite' => new Expression($wrappedColumn),
-                                        'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
-                                        default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
-                                    };
-
-                                    $query->select(DB::raw(1))
-                                        ->from($entriesTable)
-                                        ->whereIn('collection', $this->collections)
-                                        ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
-                                })
-                                ->pluck('slug');
-                        }
-
-                        return TermModel::where('taxonomy', $taxonomy)
-                            ->select('slug')
-                            ->get()
-                            ->map(function ($term) use ($taxonomy) {
-                                return Entry::query()
-                                    ->whereIn('collection', $this->collections)
-                                    ->whereJsonContains($taxonomy->handle(), [$term->slug])
-                                    ->count() > 0 ? $term->slug : null;
-                            })
-                            ->filter()
-                            ->values();
-                    });
-
-                    if ($terms->isNotEmpty()) {
-                        $query->orWhere(function ($query) use ($terms, $taxonomy) {
-                            $query->where('taxonomy', $taxonomy)
-                                ->whereIn('slug', $terms->all());
-                        });
-                    }
-                });
-            });
+            if ($taxonomies->isEmpty()) {
+                $this->builder->whereRaw('1 = 0');
+            } elseif (config('statamic.eloquent-driver.entries.driver', 'file') == 'eloquent') {
+                $this->whereUsedInCollections($taxonomies);
+            } else {
+                $this->whereUsedInFileCollections($taxonomies);
+            }
         }
 
         if (! empty($this->taxonomies)) {
@@ -416,6 +368,70 @@ class TermQueryBuilder extends EloquentQueryBuilder
         );
 
         return $this;
+    }
+
+    /**
+     * Limit to terms used by entries in the queried collections, using a correlated
+     * subquery on this query rather than working out every used term up front.
+     * That way the database only checks usage for rows matching the other
+     * wheres, e.g. the handful of ids being augmented for a Terms field.
+     */
+    private function whereUsedInCollections($taxonomies)
+    {
+        $entryClass = app('statamic.eloquent.entries.model');
+        $termClass = app('statamic.eloquent.terms.model');
+
+        $entriesTable = (new $entryClass)->getTable();
+        $termsTable = (new $termClass)->getTable();
+
+        $this->builder->where(function ($query) use ($taxonomies, $entriesTable, $termsTable) {
+            $taxonomies->each(function ($taxonomy) use ($query, $entriesTable, $termsTable) {
+                $query->orWhere(function ($query) use ($taxonomy, $entriesTable, $termsTable) {
+                    $query->where("{$termsTable}.taxonomy", $taxonomy->handle())
+                        ->whereExists(function ($query) use ($taxonomy, $entriesTable, $termsTable) {
+                            $wrappedColumn = $query->getGrammar()->wrap("{$termsTable}.slug");
+                            $value = match ($query->getConnection()->getDriverName()) {
+                                'sqlite' => new Expression($wrappedColumn),
+                                'pgsql' => new Expression("to_jsonb({$wrappedColumn}::text)"),
+                                default => DB::raw("concat('\"', {$wrappedColumn}, '\"')"),
+                            };
+
+                            $query->select(DB::raw(1))
+                                ->from($entriesTable)
+                                ->whereIn("{$entriesTable}.collection", $this->collections)
+                                ->whereJsonContains(Entry::query()->column($taxonomy->handle()), $value);
+                        });
+                });
+            });
+        });
+    }
+
+    private function whereUsedInFileCollections($taxonomies)
+    {
+        $this->builder->where(function ($query) use ($taxonomies) {
+            $taxonomies->each(function ($taxonomy) use ($query) {
+                $collectionTaxonomyHash = md5(collect($this->collections)->merge([$taxonomy->handle()])->sort()->join('-'));
+
+                $terms = Blink::once("eloquent-taxonomy-hash-{$collectionTaxonomyHash}", function () use ($taxonomy) {
+                    return TermModel::where('taxonomy', $taxonomy->handle())
+                        ->select('slug')
+                        ->get()
+                        ->map(function ($term) use ($taxonomy) {
+                            return Entry::query()
+                                ->whereIn('collection', $this->collections)
+                                ->whereJsonContains($taxonomy->handle(), [$term->slug])
+                                ->count() > 0 ? $term->slug : null;
+                        })
+                        ->filter()
+                        ->values();
+                });
+
+                $query->orWhere(function ($query) use ($terms, $taxonomy) {
+                    $query->where('taxonomy', $taxonomy->handle())
+                        ->whereIn('slug', $terms->all());
+                });
+            });
+        });
     }
 
     /**

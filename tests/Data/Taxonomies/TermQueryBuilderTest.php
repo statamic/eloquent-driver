@@ -300,6 +300,49 @@ class TermQueryBuilderTest extends TestCase
         $this->assertEquals(['tags::a'], $terms->map->id()->all());
     }
 
+    #[Test]
+    public function it_returns_no_terms_when_none_are_used_in_the_collection()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['title' => 'No tags'])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        $this->assertCount(0, Term::query()->where('collection', 'blog')->get());
+        $this->assertCount(0, Term::query()->where('collection', 'blog')->where('taxonomy', 'tags')->get());
+    }
+
+    #[Test]
+    public function it_only_checks_usage_for_terms_matching_the_other_wheres()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a', 'c']])->create();
+
+        foreach (['a', 'b', 'c', 'd'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()
+            ->whereIn('id', ['tags::a', 'tags::b'])
+            ->where('collection', 'blog')
+            ->get();
+
+        $this->assertEquals(['tags::a'], $terms->map->id()->all());
+        $this->assertEquals('blog', $terms->first()->collection()->handle());
+
+        // A single query, with usage checked as part of it, rather than working out every used term first.
+        $termQueries = collect(DB::getQueryLog())->pluck('query')->filter(fn ($query) => str_contains($query, 'taxonomy_terms'));
+        $this->assertCount(1, $termQueries);
+        $this->assertStringContainsString('exists', strtolower($termQueries->first()));
+    }
+
     private function assertNoEntriesTableQueries()
     {
         $entriesTable = (new (app('statamic.eloquent.entries.model')))->getTable();
