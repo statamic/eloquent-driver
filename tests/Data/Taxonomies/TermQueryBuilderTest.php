@@ -218,6 +218,20 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_gets_terms_by_slugs_without_a_taxonomy_prefix()
+    {
+        Taxonomy::make('tags')->save();
+        Taxonomy::make('cats')->save();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+        Term::make('c')->taxonomy('cats')->data([])->save();
+
+        $this->assertEquals(['cats::c', 'tags::a'], Term::query()->whereIn('slug', ['a', 'c'])->get()->map->id()->sort()->values()->all());
+        $this->assertEquals(['tags::a'], Term::query()->whereIn('id', ['tags::a', 'c'])->get()->map->id()->all());
+    }
+
+    #[Test]
     public function it_filters_usage_in_collections()
     {
         Taxonomy::make('tags')->save();
