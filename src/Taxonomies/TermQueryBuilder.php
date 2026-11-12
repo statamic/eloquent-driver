@@ -199,8 +199,11 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $columns[] = 'taxonomy';
         }
 
-        $items = parent::get($columns);
+        return $this->prepareTerms(parent::get($columns));
+    }
 
+    private function prepareTerms($items)
+    {
         // If a single collection has been queried, we'll supply it to the terms so
         // things like URLs will be scoped to the collection. We can't do it when
         // multiple collections are queried because it would be ambiguous.
@@ -246,7 +249,9 @@ class TermQueryBuilder extends EloquentQueryBuilder
             $columns[] = 'taxonomy';
         }
 
-        return parent::paginate($perPage, $columns, $pageName, $page);
+        $paginator = parent::paginate($perPage, $columns, $pageName, $page);
+
+        return $paginator->setCollection($this->prepareTerms($paginator->getCollection()));
     }
 
     private function applyCollectionAndTaxonomyWheres()

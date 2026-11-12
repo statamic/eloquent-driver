@@ -355,6 +355,26 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_supplies_the_queried_collection_to_paginated_terms()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+
+        $paginator = Term::query()->where('collection', 'blog')->paginate(10);
+
+        $this->assertCount(1, $paginator->items());
+        $this->assertEquals('blog', $paginator->items()[0]->collection()?->handle());
+
+        $paginator = Term::query()->whereIn('id', ['tags::a'])->withCollectionContext('blog')->paginate(10);
+
+        $this->assertEquals('blog', $paginator->items()[0]->collection()?->handle());
+    }
+
+    #[Test]
     public function it_filters_usage_in_collections()
     {
         Taxonomy::make('tags')->save();
