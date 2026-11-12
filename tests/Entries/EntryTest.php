@@ -187,10 +187,6 @@ class EntryTest extends TestCase
     #[Test]
     public function it_propagates_entry_if_configured()
     {
-        if ($this->isUsingPostgres()) {
-            $this->markTestSkipped('Postgres sequences do not advance when IDs are explicitly inserted, causing conflicts during propagation.');
-        }
-
         $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
@@ -218,10 +214,6 @@ class EntryTest extends TestCase
     #[Test]
     public function it_propagates_updating_origin_data_to_descendent_models()
     {
-        if ($this->isUsingPostgres()) {
-            $this->markTestSkipped('Postgres sequences do not advance when IDs are explicitly inserted, causing conflicts during propagation.');
-        }
-
         $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
@@ -266,10 +258,6 @@ class EntryTest extends TestCase
     #[Test]
     public function it_propagates_origin_date_to_descendent_models()
     {
-        if ($this->isUsingPostgres()) {
-            $this->markTestSkipped('Postgres sequences do not advance when IDs are explicitly inserted, causing conflicts during propagation.');
-        }
-
         $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
@@ -311,10 +299,6 @@ class EntryTest extends TestCase
     #[Test]
     public function it_localizes_null_fields()
     {
-        if ($this->isUsingPostgres()) {
-            $this->markTestSkipped('Postgres sequences do not advance when IDs are explicitly inserted, causing conflicts during propagation.');
-        }
-
         $this->setSites([
             'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
             'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://fr.test.com/'],
@@ -440,7 +424,7 @@ class EntryTest extends TestCase
         Collection::make('blog')->title('blog')->save();
 
         $entry = (new Entry)
-            ->id('1.0')
+            ->id(1)
             ->collection('blog')
             ->slug('the-slug')
             ->data(['order' => 4]);

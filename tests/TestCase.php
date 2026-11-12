@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\ServiceProvider;
 use Statamic\Facades\Site;
@@ -102,6 +103,30 @@ abstract class TestCase extends AddonTestCase
         $connection = config('database.default');
 
         return config("database.connections.{$connection}.driver") === 'sqlite';
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->advancePostgresEntrySequence();
+    }
+
+    /**
+     * Postgres sequences don't advance when rows are inserted with explicit ids, which
+     * many tests do, so ids generated later (e.g. when propagating entries) collide.
+     * Start the sequence well above any id a test sets explicitly. This runs after
+     * setUp, as the entries table can be recreated while migrations are defined.
+     */
+    private function advancePostgresEntrySequence(): void
+    {
+        if (! $this->isUsingPostgres() || $this->shouldUseStringEntryIds) {
+            return;
+        }
+
+        $table = (new (app('statamic.eloquent.entries.model')))->getTable();
+
+        DB::statement("select setval(pg_get_serial_sequence('{$table}', 'id'), 1000000, false)");
     }
 
     protected function isUsingPostgres()
