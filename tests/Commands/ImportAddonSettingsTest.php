@@ -53,15 +53,9 @@ class ImportAddonSettingsTest extends TestCase
 
         $this->assertCount(2, AddonSettingsModel::all());
 
-        $this->assertDatabaseHas('addon_settings', [
-            'addon' => 'statamic/seo-pro',
-            'settings' => $this->castAsJson(['title' => 'SEO Title', 'description' => 'SEO Description']),
-        ]);
+        $this->assertEquals(['title' => 'SEO Title', 'description' => 'SEO Description'], AddonSettingsModel::where('addon', 'statamic/seo-pro')->first()?->settings);
 
-        $this->assertDatabaseHas('addon_settings', [
-            'addon' => 'statamic/importer',
-            'settings' => $this->castAsJson(['chunk_size' => 100]),
-        ]);
+        $this->assertEquals(['chunk_size' => 100], AddonSettingsModel::where('addon', 'statamic/importer')->first()?->settings);
     }
 
     #[Test]
@@ -84,10 +78,7 @@ class ImportAddonSettingsTest extends TestCase
 
         $this->assertCount(1, AddonSettingsModel::all());
 
-        $this->assertDatabaseHas('addon_settings', [
-            'addon' => 'statamic/seo-pro',
-            'settings' => $this->castAsJson(['title' => 'SEO Title', 'description' => 'SEO Description']),
-        ]);
+        $this->assertEquals(['title' => 'SEO Title', 'description' => 'SEO Description'], AddonSettingsModel::where('addon', 'statamic/seo-pro')->first()?->settings);
 
         $this->assertDatabaseMissing('addon_settings', [
             'addon' => 'statamic/importer',
