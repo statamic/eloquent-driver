@@ -54,6 +54,7 @@ class GlobalRepository extends StacheRepository
         $entry->model($model->fresh());
 
         Blink::forget("eloquent-globalsets-{$model->handle}");
+        Blink::forget('eloquent-globalsets');
     }
 
     public function delete($entry)

@@ -7,23 +7,29 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as StacheBlueprint;
+use Statamic\Fields\BlueprintRepository;
 use Statamic\Fields\Fieldset as StacheFieldset;
+use Statamic\Fields\FieldsetRepository;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
 class ExportBlueprints extends Command
 {
-    use RunsInPlease;
+    use PreservesSetOrder, RunsInPlease;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'statamic:eloquent:export-blueprints';
+    protected $signature = 'statamic:eloquent:export-blueprints
+        {--force : Force the export to run, with all prompts answered "yes"}
+        {--only-blueprints : Only export blueprints}
+        {--only-fieldsets : Only export fieldsets}';
 
     /**
      * The console command description.
@@ -49,16 +55,16 @@ class ExportBlueprints extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
-        Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
-        Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
+        Facade::clearResolvedInstance(BlueprintRepository::class);
+        Facade::clearResolvedInstance(FieldsetRepository::class);
 
-        app()->bind(\Statamic\Fields\BlueprintRepository::class, function () {
-            return (new \Statamic\Fields\BlueprintRepository)
+        app()->bind(BlueprintRepository::class, function () {
+            return (new BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
         });
 
-        app()->singleton(\Statamic\Fields\FieldsetRepository::class, function () {
-            return (new \Statamic\Fields\FieldsetRepository)
+        app()->singleton(FieldsetRepository::class, function () {
+            return (new FieldsetRepository)
                 ->setDirectory(resource_path('fieldsets'));
         });
 
@@ -67,6 +73,10 @@ class ExportBlueprints extends Command
 
     private function exportBlueprints()
     {
+        if (! $this->shouldExportBlueprints()) {
+            return;
+        }
+
         $this->withProgressBar(BlueprintModel::all(), function ($model) {
             if (! $model->namespace) {
                 return;
@@ -87,6 +97,10 @@ class ExportBlueprints extends Command
 
     private function exportFieldsets()
     {
+        if (! $this->shouldExportFieldsets()) {
+            return;
+        }
+
         $this->withProgressBar(FieldsetModel::all(), function ($model) {
             if (! $model->handle) {
                 return;
@@ -94,7 +108,7 @@ class ExportBlueprints extends Command
 
             (new StacheFieldset)
                 ->setHandle($model->handle)
-                ->setContents($model->data)
+                ->setContents($this->updateOrderFromFieldsetContents($model->data))
                 ->save();
         });
 
@@ -114,6 +128,29 @@ class ExportBlueprints extends Command
         return $namespace;
     }
 
+    private function updateOrderFromFieldsetContents($contents)
+    {
+        if (isset($contents['sections']) && is_array($contents['sections'])) {
+            $contents['sections'] = collect($contents['sections'])
+                ->map(function ($section) {
+                    if (isset($section['fields']) && is_array($section['fields'])) {
+                        $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                    }
+
+                    return $section;
+                })
+                ->toArray();
+
+            return $contents;
+        }
+
+        if (isset($contents['fields']) && is_array($contents['fields'])) {
+            $contents['fields'] = $this->updateOrderFromSets($contents['fields']);
+        }
+
+        return $contents;
+    }
+
     private function updateOrderFromBlueprintSections($contents)
     {
         $contents['tabs'] = collect($contents['tabs'] ?? [])
@@ -127,6 +164,10 @@ class ExportBlueprints extends Command
                         ->map(function ($section) {
                             unset($section['__count']);
 
+                            if (isset($section['fields']) && is_array($section['fields'])) {
+                                $section['fields'] = $this->updateOrderFromSets($section['fields']);
+                            }
+
                             return $section;
                         })
                         ->toArray();
@@ -137,5 +178,19 @@ class ExportBlueprints extends Command
             ->toArray();
 
         return $contents;
+    }
+
+    private function shouldExportBlueprints(): bool
+    {
+        return $this->option('only-blueprints')
+            || ! $this->option('only-fieldsets')
+            && ($this->option('force') || $this->confirm('Do you want to export blueprints?'));
+    }
+
+    private function shouldExportFieldsets(): bool
+    {
+        return $this->option('only-fieldsets')
+            || ! $this->option('only-blueprints')
+            && ($this->option('force') || $this->confirm('Do you want to export fieldsets?'));
     }
 }

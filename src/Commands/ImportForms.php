@@ -9,6 +9,7 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Contracts\Forms\Form as FormContract;
 use Statamic\Contracts\Forms\FormRepository as FormRepositoryContract;
 use Statamic\Contracts\Forms\Submission as SubmissionContract;
+use Statamic\Contracts\Forms\SubmissionQueryBuilder;
 use Statamic\Contracts\Forms\SubmissionRepository as SubmissionRepositoryContract;
 use Statamic\Eloquent\Forms\Form;
 use Statamic\Facades\File;
@@ -61,7 +62,7 @@ class ImportForms extends Command
         app()->bind(FormRepositoryContract::class, FormRepository::class);
         app()->bind(SubmissionContract::class, StacheSubmission::class);
         app()->bind(SubmissionRepositoryContract::class, SubmissionRepository::class);
-        app()->bind(\Statamic\Contracts\Forms\SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
+        app()->bind(SubmissionQueryBuilder::class, \Statamic\Stache\Query\SubmissionQueryBuilder::class);
     }
 
     private function importForms(): void

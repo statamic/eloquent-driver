@@ -7,7 +7,9 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Support\Arr;
 
 class Entry extends FileEntry
 {
@@ -15,15 +17,17 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = isset($model->data['__localized_fields'])
-            ? collect($model->data['__localized_fields'])->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
+        $localizedFields = $model->data['__localized_fields'] ?? null;
+
+        $data = $localizedFields !== null
+            ? collect($localizedFields)->reject(fn ($field) => $field === 'date')->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
             : $model->data;
 
         foreach ((new self)->getDataColumnMappings($model) as $key) {
             $data[$key] = $model->$key;
         }
 
-        $entry = (new static)
+        $entry = static::newInstanceForCollection($model->collection)
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
@@ -34,8 +38,18 @@ class Entry extends FileEntry
             ->published($model->published)
             ->model($model);
 
-        if ($model->date && $entry->collection()->dated()) {
+        // a localization owns its date only when its marker lists it; roots and rows without a marker keep the column date
+        $ownsDate = ! $model->origin_id || $localizedFields === null || in_array('date', $localizedFields, true);
+
+        if ($model->date && $ownsDate && $entry->collection()->dated()) {
             $entry->date($model->date);
+        }
+
+        // a localization owns its order only when its marker lists it; otherwise it inherits the origin's order
+        $ownsOrder = ! $model->origin_id || in_array('order', $localizedFields ?? [], true);
+
+        if ($model->order !== null && $ownsOrder && ! $entry->hasStructure()) {
+            $entry->set('order', $model->order);
         }
 
         if (config('statamic.system.track_last_update')) {
@@ -45,6 +59,16 @@ class Entry extends FileEntry
         }
 
         return $entry->syncOriginal();
+    }
+
+    /**
+     * Performance optimization: start with the collection's entry class if it extends the Eloquent entry
+     */
+    protected static function newInstanceForCollection($handle)
+    {
+        $class = Blink::once("collection-{$handle}", fn () => CollectionFacade::findByHandle($handle))?->entryClass();
+
+        return $class && is_subclass_of($class, self::class) ? app($class) : new static;
     }
 
     public function toModel()
@@ -59,9 +83,13 @@ class Entry extends FileEntry
         $data = $source->data()
             ->merge(method_exists($source, 'computedData') ? $source->computedData() : []);
 
-        $date = $source->hasDate() ? $source->date() : null;
+        $date = $source->hasDate() ? $source->date()->copy()->setTimezone(config('app.timezone')) : null;
 
-        $origin = $source->origin();
+        $directOrigin = $source->origin();
+
+        if ($template = $source->get('template', $source->template)) {
+            $data->put('template', $template);
+        }
 
         if ($source->hasOrigin()) {
             if ($blueprint = $source->blueprint()) {
@@ -73,13 +101,25 @@ class Entry extends FileEntry
                     ->handle()
                     ->all();
 
-                $originData = $origin->data();
+                if (! Arr::has($localizedBlueprintFields, 'template')) {
+                    $data->forget('template');
+                }
 
-                // remove any fields in entry data that are marked as localized but value is present, and does not match origin
+                $directOriginData = $directOrigin->data();
+
+                // remove any fields in entry data that are marked as localized but value is present, and matches the
+                // value inherited from the closest origin that carries the field (a localized null included)
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
                     if ($data->has($blueprintField)) {
-                        if ($data->get($blueprintField) === $originData->get($blueprintField)) {
+                        $fieldOrigin = $directOrigin;
+                        $fieldOriginData = $directOriginData;
+                        while ($fieldOrigin->hasOrigin() && ! $fieldOriginData->has($blueprintField)) {
+                            $fieldOrigin = $fieldOrigin->origin();
+                            $fieldOriginData = $fieldOrigin->data();
+                        }
+
+                        if ($data->get($blueprintField) === $fieldOriginData->get($blueprintField)) {
                             $data->forget($blueprintField);
                         } else {
                             $localizedFields[] = $blueprintField;
@@ -87,13 +127,18 @@ class Entry extends FileEntry
                     }
                 }
 
-                $data = $originData->merge($data);
+                $data = $directOrigin->data()->merge($data);
+
+                $originDate = $directOrigin->hasDate() ? $directOrigin->date()?->copy()->setTimezone(config('app.timezone')) : null;
+
+                // the date is localized like any other field: when the blueprint allows it and the own date differs from the origin's
+                if (in_array('date', $localizedBlueprintFields, true) && $source->hasExplicitDate() && ! $date->equalTo($originDate)) {
+                    $localizedFields[] = 'date';
+                } else {
+                    $date = $originDate;
+                }
 
                 $data->put('__localized_fields', $localizedFields);
-
-                if (! in_array('date', $localizedFields)) {
-                    $date = $origin->hasDate() ? $origin->date() : null;
-                }
             }
         }
 
@@ -117,7 +162,7 @@ class Entry extends FileEntry
 
         $attributes = [
             ...$attributes,
-            'origin_id' => $origin?->id(),
+            'origin_id' => $directOrigin?->id(),
             'site' => $source->locale(),
             'slug' => $source->slug(),
             'uri' => $source->uri() ?? $source->routableUri(),
@@ -129,10 +174,6 @@ class Entry extends FileEntry
             'updated_at' => $source->lastModified(),
             'order' => $source->order(),
         ];
-
-        if ($template = $source->get('template', $source->template)) {
-            $attributes['data']->put('template', $template);
-        }
 
         $attributes['data'] = $attributes['data']->filter(fn ($v) => $v !== null);
 
@@ -156,6 +197,21 @@ class Entry extends FileEntry
         }
 
         return $this;
+    }
+
+    /**
+     * Same dirty state attributes as Statamic itself, minus `path` which eloquent entries don't have.
+     */
+    public function getCurrentDirtyStateAttributes(): array
+    {
+        return array_merge([
+            'collection' => $this->collectionHandle(),
+            'locale' => $this->locale(),
+            'origin' => $this->hasOrigin() ? $this->origin()->id() : null,
+            'slug' => $this->slug(),
+            'date' => optional($this->date())->format('Y-m-d-Hi'),
+            'published' => $this->published(),
+        ], $this->data()->except(['updated_at'])->toArray());
     }
 
     public function fileLastModified()

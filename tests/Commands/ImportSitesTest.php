@@ -4,6 +4,7 @@ namespace Commands;
 
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Sites\SiteModel;
+use Statamic\Facades\Site;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ class ImportSitesTest extends TestCase
             'de' => ['name' => 'German', 'locale' => 'de_DE', 'url' => 'http://test.com/de/'],
         ]);
 
-        \Statamic\Facades\Site::save();
+        Site::save();
 
         $this->artisan('statamic:eloquent:import-sites')
             ->expectsOutputToContain('Sites imported successfully.')

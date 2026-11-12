@@ -77,6 +77,40 @@ class ImportBlueprintsTest extends TestCase
     }
 
     #[Test]
+    public function it_records_set_order_when_importing_fieldsets()
+    {
+        FieldsetFacade::make('test')->setContents([
+            'fields' => [
+                [
+                    'handle' => 'content',
+                    'field' => [
+                        'type' => 'bard',
+                        'sets' => [
+                            'main' => [
+                                'sets' => [
+                                    'zebra' => ['fields' => []],
+                                    'apple' => ['fields' => []],
+                                    'mango' => ['fields' => []],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])->save();
+
+        $this->artisan('statamic:eloquent:import-blueprints', ['--force' => true])
+            ->assertExitCode(0);
+
+        $model = FieldsetModel::where('handle', 'test')->first();
+        $sets = $model->data['fields'][0]['field']['sets']['main']['sets'];
+
+        $this->assertSame(0, $sets['zebra']['__count']);
+        $this->assertSame(1, $sets['apple']['__count']);
+        $this->assertSame(2, $sets['mango']['__count']);
+    }
+
+    #[Test]
     public function it_imports_blueprints_with_console_question()
     {
         BlueprintFacade::make('user')->setContents([

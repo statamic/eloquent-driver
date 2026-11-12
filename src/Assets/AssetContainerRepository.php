@@ -46,6 +46,7 @@ class AssetContainerRepository extends StacheRepository
         $container->save();
 
         Blink::forget("eloquent-assetcontainer-{$container->handle()}");
+        Blink::forget('eloquent-assetcontainers');
     }
 
     public function delete($container)

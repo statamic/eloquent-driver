@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Entries;
 
+use App\Models\User;
 use Illuminate\Support\Arr;
 use Statamic\Eloquent\Database\BaseModel;
 
@@ -22,7 +23,7 @@ class EntryModel extends BaseModel
 
     public function author()
     {
-        return $this->belongsTo(\App\Models\User::class, 'data->author');
+        return $this->belongsTo(User::class, 'data->author');
     }
 
     public function origin()

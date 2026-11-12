@@ -1,5 +1,28 @@
 <?php
 
+use Statamic\Eloquent\AddonSettings\AddonSettingsModel;
+use Statamic\Eloquent\Assets\Asset;
+use Statamic\Eloquent\Assets\AssetContainerModel;
+use Statamic\Eloquent\Assets\AssetModel;
+use Statamic\Eloquent\Collections\CollectionModel;
+use Statamic\Eloquent\Entries\Entry;
+use Statamic\Eloquent\Entries\EntryModel;
+use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Eloquent\Fields\FieldsetModel;
+use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\SubmissionModel;
+use Statamic\Eloquent\Globals\GlobalSetModel;
+use Statamic\Eloquent\Globals\VariablesModel;
+use Statamic\Eloquent\Revisions\RevisionModel;
+use Statamic\Eloquent\Sites\SiteModel;
+use Statamic\Eloquent\Structures\CollectionTree;
+use Statamic\Eloquent\Structures\NavModel;
+use Statamic\Eloquent\Structures\NavTree;
+use Statamic\Eloquent\Structures\TreeModel;
+use Statamic\Eloquent\Taxonomies\TaxonomyModel;
+use Statamic\Eloquent\Taxonomies\TermModel;
+use Statamic\Eloquent\Tokens\TokenModel;
+
 return [
 
     'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
@@ -7,104 +30,104 @@ return [
 
     'addon_settings' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\AddonSettings\AddonSettingsModel::class,
+        'model' => AddonSettingsModel::class,
     ],
 
     'asset_containers' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Assets\AssetContainerModel::class,
+        'model' => AssetContainerModel::class,
     ],
 
     'assets' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Assets\AssetModel::class,
-        'asset' => \Statamic\Eloquent\Assets\Asset::class,
+        'model' => AssetModel::class,
+        'asset' => Asset::class,
     ],
 
     'blueprints' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Fields\BlueprintModel::class,
+        'model' => BlueprintModel::class,
         'namespaces' => 'all',
     ],
 
     'collections' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Collections\CollectionModel::class,
+        'model' => CollectionModel::class,
         'update_entry_order_queue' => 'default',
         'update_entry_order_connection' => 'default',
     ],
 
     'collection_trees' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Structures\TreeModel::class,
-        'tree' => \Statamic\Eloquent\Structures\CollectionTree::class,
+        'model' => TreeModel::class,
+        'tree' => CollectionTree::class,
     ],
 
     'entries' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Entries\EntryModel::class,
-        'entry' => \Statamic\Eloquent\Entries\Entry::class,
+        'model' => EntryModel::class,
+        'entry' => Entry::class,
         'map_data_to_columns' => false,
     ],
 
     'fieldsets' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Fields\FieldsetModel::class,
+        'model' => FieldsetModel::class,
     ],
 
     'forms' => [
         'driver' => 'file',
-        'model'  => \Statamic\Eloquent\Forms\FormModel::class,
+        'model'  => FormModel::class,
     ],
 
     'form_submissions' => [
         'driver' => 'file',
-        'model'  => \Statamic\Eloquent\Forms\SubmissionModel::class,
+        'model'  => SubmissionModel::class,
     ],
 
     'global_sets' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Globals\GlobalSetModel::class,
+        'model' => GlobalSetModel::class,
     ],
 
     'global_set_variables' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Globals\VariablesModel::class,
+        'model' => VariablesModel::class,
     ],
 
     'navigations' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Structures\NavModel::class,
+        'model' => NavModel::class,
     ],
 
     'navigation_trees' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Structures\TreeModel::class,
-        'tree' => \Statamic\Eloquent\Structures\NavTree::class,
+        'model' => TreeModel::class,
+        'tree' => NavTree::class,
     ],
 
     'revisions' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Revisions\RevisionModel::class,
+        'model' => RevisionModel::class,
     ],
 
     'taxonomies' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Taxonomies\TaxonomyModel::class,
+        'model' => TaxonomyModel::class,
     ],
 
     'terms' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Taxonomies\TermModel::class,
+        'model' => TermModel::class,
     ],
 
     'tokens' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Tokens\TokenModel::class,
+        'model' => TokenModel::class,
     ],
 
     'sites' => [
         'driver' => 'file',
-        'model' => \Statamic\Eloquent\Sites\SiteModel::class,
+        'model' => SiteModel::class,
     ],
 ];

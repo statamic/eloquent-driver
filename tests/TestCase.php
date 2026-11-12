@@ -3,9 +3,11 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Statamic\Eloquent\ServiceProvider;
 use Statamic\Facades\Site;
+use Statamic\Stache\Stores\UsersStore;
 use Statamic\Testing\AddonTestCase;
 
 abstract class TestCase extends AddonTestCase
@@ -40,7 +42,7 @@ abstract class TestCase extends AddonTestCase
         $app['config']->set('auth.providers.users.driver', 'statamic');
         $app['config']->set('statamic.stache.watcher', false);
         $app['config']->set('statamic.stache.stores.users', [
-            'class' => \Statamic\Stache\Stores\UsersStore::class,
+            'class' => UsersStore::class,
             'directory' => __DIR__.'/__fixtures__/users',
         ]);
 
@@ -52,9 +54,18 @@ abstract class TestCase extends AddonTestCase
         ]);
     }
 
+    protected function normalizeYaml(string $yaml): string
+    {
+        // Normalize formatting changes introduced in symfony/yaml 8.1
+        $yaml = str_replace('{  }', '{}', $yaml);
+        $yaml = preg_replace('/^( *)-\n\1  (\S)/m', '$1- $2', $yaml);
+
+        return $yaml;
+    }
+
     protected function assertEveryItem($items, $callback)
     {
-        if ($items instanceof \Illuminate\Support\Collection) {
+        if ($items instanceof Collection) {
             $items = $items->all();
         }
 
@@ -71,7 +82,7 @@ abstract class TestCase extends AddonTestCase
 
     protected function assertEveryItemIsInstanceOf($class, $items)
     {
-        if ($items instanceof \Illuminate\Support\Collection) {
+        if ($items instanceof Collection) {
             $items = $items->all();
         }
 

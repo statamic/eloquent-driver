@@ -92,6 +92,7 @@ class TaxonomyRepository extends StacheRepository
         $entry->model($fresh);
 
         Blink::put("eloquent-taxonomies-{$fresh->handle}", $fresh);
+        Blink::forget('eloquent-taxonomies');
     }
 
     public function delete($entry)

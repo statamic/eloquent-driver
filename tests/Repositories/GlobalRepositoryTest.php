@@ -97,4 +97,17 @@ class GlobalRepositoryTest extends TestCase
 
         $this->assertNotNull($item = $this->repo->find('new'));
     }
+
+    #[Test]
+    public function saving_a_global_invalidates_the_cached_all_list()
+    {
+        // Warm the Blink cache by reading all() before the new global exists.
+        $this->assertCount(2, $this->repo->all());
+
+        $this->repo->save(GlobalSetAPI::make('new')->title('New')->sites(['en']));
+
+        $handles = $this->repo->all()->map->handle()->all();
+        $this->assertCount(3, $handles);
+        $this->assertContains('new', $handles);
+    }
 }

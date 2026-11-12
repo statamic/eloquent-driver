@@ -4,12 +4,19 @@ namespace Statamic\Eloquent;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Statamic\Fields\Field;
 
 trait QueriesJsonColumns
 {
     public function orderBy($column, $direction = 'asc')
     {
+        $direction = strtolower($direction);
+
+        if (! in_array($direction, ['asc', 'desc'], true)) {
+            throw new InvalidArgumentException('Order direction must be "asc" or "desc".');
+        }
+
         $actualColumn = $this->column($column);
 
         if (

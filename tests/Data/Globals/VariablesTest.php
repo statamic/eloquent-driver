@@ -9,11 +9,11 @@ use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Globals\Variables;
-use Statamic\Facades;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\GlobalSet;
 use Statamic\Fields\Fieldtype;
 use Statamic\Fields\Value;
+use Statamic\Query\Builder;
 use Statamic\Support\Arr;
 use Tests\TestCase;
 
@@ -85,7 +85,7 @@ array:
 string: 'The string'
 
 EOT;
-        $this->assertEquals($expected, $a->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($a->fileContents()));
 
         $expected = <<<'EOT'
 array:
@@ -93,10 +93,10 @@ array:
   - 'second one'
 string: 'The string'
 'null': null
-empty: {  }
+empty: {}
 
 EOT;
-        $this->assertEquals($expected, $b->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($b->fileContents()));
 
         $expected = <<<'EOT'
 array:
@@ -105,7 +105,7 @@ array:
 string: 'The string'
 
 EOT;
-        $this->assertEquals($expected, $c->fileContents());
+        $this->assertEquals($expected, $this->normalizeYaml($c->fileContents()));
     }
 
     #[Test]
@@ -236,7 +236,7 @@ EOT;
             }
         })::register();
 
-        $blueprint = Facades\Blueprint::makeFromFields(['charlie' => ['type' => 'test']]);
+        $blueprint = Blueprint::makeFromFields(['charlie' => ['type' => 'test']]);
         BlueprintRepository::shouldReceive('find')->with('globals.settings')->andReturn($blueprint);
         $global = GlobalSet::make('settings');
         $variables = $global->makeLocalization('en');
@@ -266,7 +266,7 @@ EOT;
             }
         })::register();
 
-        $blueprint = Facades\Blueprint::makeFromFields(['foo' => ['type' => 'test']]);
+        $blueprint = Blueprint::makeFromFields(['foo' => ['type' => 'test']]);
         BlueprintRepository::shouldReceive('find')->with('globals.settings')->andReturn($blueprint);
         $global = GlobalSet::make('settings');
         $variables = $global->makeLocalization('en');
@@ -280,7 +280,7 @@ EOT;
     public static function queryBuilderProvider()
     {
         return [
-            'statamic' => [Mockery::mock(\Statamic\Query\Builder::class)],
+            'statamic' => [Mockery::mock(Builder::class)],
             'database' => [Mockery::mock(\Illuminate\Database\Query\Builder::class)],
             'eloquent' => [Mockery::mock(\Illuminate\Database\Eloquent\Builder::class)],
         ];

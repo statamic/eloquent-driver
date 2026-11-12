@@ -207,7 +207,7 @@ class AssetTest extends TestCase
     public function uploads_a_file()
     {
         Event::fake();
-        $asset = (new \Statamic\Eloquent\Assets\Asset)->container($this->container)->path('path/to/asset.jpg')->syncOriginal();
+        $asset = (new Asset)->container($this->container)->path('path/to/asset.jpg')->syncOriginal();
 
         Facades\AssetContainer::shouldReceive('findByHandle')->with('test_container')->andReturn($this->container);
         Storage::disk('test')->assertMissing('path/to/asset.jpg');
@@ -255,5 +255,55 @@ class AssetTest extends TestCase
         Event::assertDispatched(AssetSaved::class, fn ($event) => $event->asset === $asset);
 
         $this->assertCount(6, AssetModel::all());
+    }
+
+    #[Test]
+    public function uploading_to_the_path_of_an_existing_asset_creates_a_new_model()
+    {
+        $this->assertCount(6, AssetModel::all());
+
+        $asset = $this->container->makeAsset('a.jpg');
+        $model = $asset->model();
+
+        $asset->upload(UploadedFile::fake()->image('a.jpg', 13, 15));
+
+        $this->assertNotSame('a.jpg', $asset->path());
+        $this->assertNotSame($model->getKey(), $asset->model()->getKey());
+        $this->assertSame('a.jpg', $model->fresh()->path);
+        $this->assertCount(7, AssetModel::all());
+    }
+
+    #[Test]
+    public function uploading_to_the_path_of_an_existing_hydrated_asset_creates_a_new_model()
+    {
+        $this->assertCount(6, AssetModel::all());
+
+        $asset = $this->container->asset('a.jpg');
+        $model = $asset->model();
+
+        $asset->upload(UploadedFile::fake()->image('a.jpg', 13, 15));
+
+        $this->assertNotSame('a.jpg', $asset->path());
+        $this->assertNotSame($model->getKey(), $asset->model()->getKey());
+        $this->assertSame('a.jpg', $model->fresh()->path);
+        $this->assertCount(7, AssetModel::all());
+    }
+
+    #[Test]
+    public function uploading_to_the_path_of_an_existing_asset_creates_a_new_model_when_a_creating_listener_reads_the_asset()
+    {
+        Event::listen(AssetCreating::class, fn ($event) => $event->asset->exists());
+
+        $this->assertCount(6, AssetModel::all());
+
+        $asset = $this->container->makeAsset('a.jpg');
+        $model = $asset->model();
+
+        $asset->upload(UploadedFile::fake()->image('a.jpg', 13, 15));
+
+        $this->assertNotSame('a.jpg', $asset->path());
+        $this->assertNotSame($model->getKey(), $asset->model()->getKey());
+        $this->assertSame('a.jpg', $model->fresh()->path);
+        $this->assertCount(7, AssetModel::all());
     }
 }

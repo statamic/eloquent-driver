@@ -52,7 +52,8 @@ class AssetContainerContents extends CoreAssetContainerContents
                         )
                             ->map(fn ($folder) => ['path' => $folder, 'type' => 'dir'])
                     )
-                    ->unique();
+                    ->unique()
+                    ->values();
         });
 
         return $this->folders;
@@ -131,13 +132,19 @@ class AssetContainerContents extends CoreAssetContainerContents
     {
         $this->directories();
 
-        $this->folders = $this->folders->reject(fn ($dir) => $dir['path'] == $path);
+        $this->folders = $this->folders->reject(fn ($dir) => $dir['path'] == $path)->values();
 
         return $this;
     }
 
     public function add($path)
     {
+        $path = (string) $path;
+
+        if ($path === '' || $path === '/') {
+            return $this;
+        }
+
         $this->directories();
 
         // Add parent directories
@@ -145,7 +152,9 @@ class AssetContainerContents extends CoreAssetContainerContents
             $this->add($dir);
         }
 
-        $this->folders->push(['path' => $path, 'type' => 'dir']);
+        if (! $this->folders->contains(fn ($folder) => $folder['path'] === $path)) {
+            $this->folders = $this->folders->push(['path' => $path, 'type' => 'dir'])->values();
+        }
 
         return $this;
     }

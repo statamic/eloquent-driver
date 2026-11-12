@@ -81,9 +81,11 @@ class SyncAssets extends Command
         });
 
         // delete any assets we have a db entry for that no longer exist
+        $folderForQuery = $folder === '/' ? '/' : Str::chopStart($folder, '/');
+
         AssetModel::query()
             ->where('container', $container->handle())
-            ->where('folder', $folder)
+            ->where('folder', $folderForQuery)
             ->chunk(100, function ($assets) use ($files) {
                 $assets->each(function ($asset) use ($files) {
                     if (! $files->contains($asset->path)) {
@@ -115,7 +117,10 @@ class SyncAssets extends Command
             ->pluck('folder')
             ->unique()
             ->each(function ($folder) use ($filesystemFolders, $container) {
-                if ($filesystemFolders->contains(fn ($fsFolder) => Str::startsWith($folder, $fsFolder.'/'))) {
+                if (
+                    $filesystemFolders->contains($folder) ||
+                    $filesystemFolders->contains(fn ($fsFolder) => Str::startsWith($folder, $fsFolder.'/'))
+                ) {
                     return;
                 }
 

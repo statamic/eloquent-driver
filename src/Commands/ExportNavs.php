@@ -17,7 +17,7 @@ use Statamic\Stache\Repositories\NavigationRepository;
 use Statamic\Stache\Repositories\NavTreeRepository;
 use Statamic\Statamic;
 use Statamic\Structures\Nav;
-use Statamic\Structures\Tree;
+use Statamic\Structures\NavTree;
 
 class ExportNavs extends Command
 {
@@ -57,8 +57,6 @@ class ExportNavs extends Command
     {
         $originalNavRepo = get_class(app()->make(NavigationRepositoryContract::class));
         $originalNavTreeRepo = get_class(app()->make(NavTreeRepositoryContract::class));
-        $originalNav = get_class(app()->make(NavContract::class));
-        $originalTree = get_class(app()->make(TreeContract::class));
 
         Facade::clearResolvedInstance(NavigationRepositoryContract::class);
         Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
@@ -67,14 +65,12 @@ class ExportNavs extends Command
         Statamic::repository(NavTreeRepositoryContract::class, NavTreeRepository::class);
 
         app()->bind(NavContract::class, Nav::class);
-        app()->bind(TreeContract::class, Tree::class);
+        app()->bind(TreeContract::class, NavTree::class);
 
         $callback();
 
         Statamic::repository(NavigationRepositoryContract::class, $originalNavRepo);
         Statamic::repository(NavTreeRepositoryContract::class, $originalNavTreeRepo);
-        app()->bind(NavContract::class, $originalNav);
-        app()->bind(TreeContract::class, $originalTree);
 
         Facade::clearResolvedInstance(NavigationRepositoryContract::class);
         Facade::clearResolvedInstance(NavTreeRepositoryContract::class);

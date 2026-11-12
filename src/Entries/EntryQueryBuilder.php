@@ -146,7 +146,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             : $this->whereIn('collection', app('statamic.eloquent.entries.model')::query()->whereIn('id', $ids)->distinct('collection')->pluck('collection')->values());
     }
 
-    private function getCollectionsForStatusQuery(): \Illuminate\Support\Collection
+    private function getCollectionsForStatusQuery(): IlluminateCollection
     {
         // Since we have to add nested queries for each collection, we only want to add clauses for the
         // applicable collections. By this point, there should be where clauses on the collection column.

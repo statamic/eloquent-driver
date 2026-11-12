@@ -52,6 +52,66 @@ class AssetContainerContentsTest extends TestCase
     }
 
     #[Test]
+    public function it_updates_the_folder_listing_when_uploading_into_a_new_folder()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+
+        // Prime the folder cache, as a previous request would have done.
+        $this->assertCount(0, $container->contents()->directories());
+
+        $container->makeAsset('subfolder/file.txt')->upload(UploadedFile::fake()->create('file.txt'));
+
+        $this->assertSame([
+            [
+                'path' => 'subfolder',
+                'type' => 'dir',
+            ],
+        ], $container->contents()->directories()->all());
+    }
+
+    #[Test]
+    public function it_does_not_duplicate_a_folder_when_uploading_multiple_files_into_it()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+
+        // Prime the folder cache, as a previous request would have done.
+        $this->assertCount(0, $container->contents()->directories());
+
+        $container->makeAsset('subfolder/one.txt')->upload(UploadedFile::fake()->create('one.txt'));
+        $container->makeAsset('subfolder/two.txt')->upload(UploadedFile::fake()->create('two.txt'));
+
+        $this->assertSame([
+            [
+                'path' => 'subfolder',
+                'type' => 'dir',
+            ],
+        ], $container->contents()->directories()->all());
+    }
+
+    #[Test]
+    public function it_updates_the_folder_listing_when_uploading_a_nested_folder()
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('existing/file.txt')->upload(UploadedFile::fake()->create('file.txt'));
+
+        // Prime the folder cache with the existing folder only.
+        $this->assertCount(1, $container->contents()->directories());
+
+        $container->makeAsset('existing/new/file.txt')->upload(UploadedFile::fake()->create('file.txt'));
+
+        $this->assertSame([
+            [
+                'path' => 'existing',
+                'type' => 'dir',
+            ],
+            [
+                'path' => 'existing/new',
+                'type' => 'dir',
+            ],
+        ], $container->contents()->directories()->all());
+    }
+
+    #[Test]
     public function it_adds_to_a_folder_listing()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();

@@ -5,7 +5,11 @@ namespace Tests\Data\Fields;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Eloquent\Fields\FieldsetModel;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
+use Statamic\Fields\BlueprintRepository;
+use Statamic\Support\Arr;
 use Tests\TestCase;
 
 class BlueprintTest extends TestCase
@@ -16,7 +20,7 @@ class BlueprintTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
+        $this->app->singleton(BlueprintRepository::class, function () {
             return (new \Statamic\Eloquent\Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
         });
@@ -27,11 +31,11 @@ class BlueprintTest extends TestCase
         );
 
         $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
-            return \Statamic\Eloquent\Fields\BlueprintModel::class;
+            return BlueprintModel::class;
         });
 
         $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
-            return \Statamic\Eloquent\Fields\FieldsetModel::class;
+            return FieldsetModel::class;
         });
     }
 
@@ -74,6 +78,59 @@ class BlueprintTest extends TestCase
     }
 
     #[Test]
+    public function it_preserves_the_order_of_sets()
+    {
+        $blueprint = Blueprint::make()
+            ->setNamespace('collections.pages')
+            ->setHandle('test')
+            ->setContents([
+                'tabs' => [
+                    'main' => [
+                        'sections' => [
+                            [
+                                'fields' => [
+                                    [
+                                        'handle' => 'content',
+                                        'field' => [
+                                            'type' => 'bard',
+                                            'sets' => [
+                                                'main' => [
+                                                    'sets' => [
+                                                        'zebra' => ['fields' => []],
+                                                        'apple' => ['fields' => []],
+                                                        'mango' => ['fields' => []],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $blueprint->save();
+
+        // MySQL reorders the keys of a JSON object when it stores it, so we do the same here.
+        $path = 'tabs.main.sections.0.fields.0.field.sets.main.sets';
+        $model = Blueprint::getModel($blueprint);
+        $data = $model->data;
+        $sets = Arr::get($data, $path);
+        ksort($sets);
+        Arr::set($data, $path, $sets);
+        $model->update(['data' => $data]);
+
+        Blink::flush();
+
+        $sets = Arr::get(Blueprint::find('collections.pages.test')->contents(), $path);
+
+        $this->assertSame(['zebra', 'apple', 'mango'], array_keys($sets));
+        $this->assertArrayNotHasKey('__count', $sets['zebra']);
+    }
+
+    #[Test]
     public function it_uses_file_based_namespaces()
     {
         config()->set('statamic.eloquent-driver.blueprints.namespaces', ['collections']);
@@ -87,5 +144,30 @@ class BlueprintTest extends TestCase
             ->save();
 
         $this->assertCount(1, BlueprintModel::all()); // we check theres no new  database entries, ie its been handled by files
+    }
+
+    #[Test]
+    public function it_returns_fallback_for_default_blueprint_when_namespace_is_restricted()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        app(BlueprintRepository::class)->setFallback('default', function () {
+            return Blueprint::make()->setContents([
+                'tabs' => ['main' => ['sections' => [['fields' => [['handle' => 'content', 'field' => ['type' => 'markdown', 'localizable' => true]]]]]]],
+            ]);
+        });
+
+        $blueprint = Blueprint::find('default');
+
+        $this->assertNotNull($blueprint);
+        $this->assertInstanceOf(\Statamic\Fields\Blueprint::class, $blueprint);
+    }
+
+    #[Test]
+    public function it_returns_null_for_default_blueprint_when_namespace_is_restricted_and_no_fallback_is_set()
+    {
+        config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
+
+        $this->assertNull(Blueprint::find('default'));
     }
 }

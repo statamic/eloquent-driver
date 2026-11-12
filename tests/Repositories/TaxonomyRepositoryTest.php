@@ -102,4 +102,17 @@ class TaxonomyRepositoryTest extends TestCase
     //         $this->assertNotNull($item = $this->repo->findByHandle('new'));
     //         $this->assertEquals(['foo' => 'bar'], $item->cascade()->all());
     //     }
+
+    #[Test]
+    public function saving_a_taxonomy_invalidates_the_cached_all_list()
+    {
+        // Warm the Blink cache by reading all() before the new taxonomy exists.
+        $this->assertCount(2, $this->repo->all());
+
+        $this->repo->save(TaxonomyAPI::make('new')->title('New'));
+
+        $handles = $this->repo->all()->map->handle()->all();
+        $this->assertCount(3, $handles);
+        $this->assertContains('new', $handles);
+    }
 }

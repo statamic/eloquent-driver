@@ -12,6 +12,8 @@ use Statamic\Eloquent\Taxonomies\TaxonomyModel;
 use Statamic\Eloquent\Taxonomies\TermModel;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
+use Statamic\Stache\Repositories\TaxonomyRepository;
+use Statamic\Stache\Repositories\TermRepository;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -28,8 +30,8 @@ class ImportTaxonomiesTest extends TestCase
 
         app()->bind(TaxonomyContract::class, \Statamic\Taxonomies\Taxonomy::class);
         app()->bind(TermContract::class, \Statamic\Taxonomies\Term::class);
-        app()->bind(TaxonomyRepositoryContract::class, \Statamic\Stache\Repositories\TaxonomyRepository::class);
-        app()->bind(TermRepositoryContract::class, \Statamic\Stache\Repositories\TermRepository::class);
+        app()->bind(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+        app()->bind(TermRepositoryContract::class, TermRepository::class);
     }
 
     #[Test]

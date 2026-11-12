@@ -6,13 +6,19 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Assets\Asset;
+use Statamic\Assets\AssetContainerContents;
+use Statamic\Assets\AssetRepository;
+use Statamic\Assets\QueryBuilder;
 use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Contracts\Assets\AssetContainer as AssetContainerContract;
 use Statamic\Contracts\Assets\AssetContainerRepository as AssetContainerRepositoryContract;
 use Statamic\Contracts\Assets\AssetRepository as AssetRepositoryContract;
 use Statamic\Eloquent\Assets\AssetContainerModel;
 use Statamic\Eloquent\Assets\AssetModel;
+use Statamic\Eloquent\Assets\AssetQueryBuilder;
 use Statamic\Facades\AssetContainer;
+use Statamic\Stache\Repositories\AssetContainerRepository;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -33,11 +39,11 @@ class ImportAssetsTest extends TestCase
         Facade::clearResolvedInstance(AssetRepositoryContract::class);
 
         app()->bind(AssetContainerContract::class, \Statamic\Assets\AssetContainer::class);
-        app()->bind(AssetContract::class, \Statamic\Assets\Asset::class);
-        app()->bind(AssetContainerRepositoryContract::class, \Statamic\Stache\Repositories\AssetContainerRepository::class);
-        app()->bind(AssetRepositoryContract::class, \Statamic\Assets\AssetRepository::class);
-        app()->bind(\Statamic\Eloquent\Assets\AssetQueryBuilder::class, \Statamic\Assets\QueryBuilder::class);
-        app()->bind(\Statamic\Assets\AssetContainerContents::class, \Statamic\Assets\AssetContainerContents::class);
+        app()->bind(AssetContract::class, Asset::class);
+        app()->bind(AssetContainerRepositoryContract::class, AssetContainerRepository::class);
+        app()->bind(AssetRepositoryContract::class, AssetRepository::class);
+        app()->bind(AssetQueryBuilder::class, QueryBuilder::class);
+        app()->bind(AssetContainerContents::class, AssetContainerContents::class);
     }
 
     protected function tearDown(): void

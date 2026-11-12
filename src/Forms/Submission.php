@@ -67,7 +67,15 @@ class Submission extends FileEntry
             return $this;
         }
 
-        return $this->date ?? ($this->date = Carbon::now());
+        if ($this->date) {
+            return $this->date;
+        }
+
+        if (is_numeric($this->id)) {
+            return $this->date = Carbon::createFromTimestamp($this->id);
+        }
+
+        return $this->date = Carbon::now();
     }
 
     public function save()
