@@ -6,6 +6,7 @@ use Facades\Tests\Factories\EntryFactory;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -1007,7 +1008,7 @@ class EntryQueryBuilderTest extends TestCase
     #[DataProvider('filterByStatusProvider')]
     public function it_filters_by_status($status, $expected)
     {
-        \Statamic\Facades\Blink::flush();
+        Blink::flush();
 
         Collection::make('pages')->dated(false)->save();
         EntryFactory::collection('pages')->slug('page')->published(true)->create();
