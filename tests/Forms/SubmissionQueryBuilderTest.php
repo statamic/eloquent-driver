@@ -394,6 +394,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -417,6 +421,10 @@ class SubmissionQueryBuilderTest extends TestCase
     {
         if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
         }
 
         $form = tap(Form::make('test'))->save();
@@ -444,6 +452,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -464,6 +476,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -474,7 +490,7 @@ class SubmissionQueryBuilderTest extends TestCase
         $entries = FormSubmission::query()->whereJsonOverlaps('test_taxonomy', ['taxonomy-1'])->orWhereJsonDoesntOverlap('test_taxonomy', ['taxonomy-5'])->get();
 
         $this->assertCount(4, $entries);
-        $this->assertEquals(['1', '3', '2', '4'], $entries->map->get('id')->all());
+        $this->assertEquals(['1', '2', '3', '4'], $entries->map->get('id')->sort()->values()->all());
     }
 
     #[Test]
