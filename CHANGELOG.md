@@ -1,5 +1,16 @@
 # Release Notes
 
+## 5.12.6 (2026-11-12)
+
+### What's fixed
+- Export collection trees to files [#645](https://github.com/statamic/eloquent-driver/pull/645) by @damselem
+- Only select one row in submission query first() [#647](https://github.com/statamic/eloquent-driver/pull/647) by @ryanmitchell
+- Don't treat term slugs without a taxonomy prefix as taxonomies [#648](https://github.com/statamic/eloquent-driver/pull/648) by @ryanmitchell
+- Fix date-based queries on JSON fields with Postgres [#575](https://github.com/statamic/eloquent-driver/pull/575) by @duncanmcclean
+- Speed up Terms field augmentation with large taxonomies and collections [#649](https://github.com/statamic/eloquent-driver/pull/649) by @ryanmitchell
+
+
+
 ## 5.12.5 (2026-10-28)
 
 ### What's fixed
