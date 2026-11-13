@@ -182,7 +182,7 @@ Enable the `alphabetical_sorting` option to sort entries, terms, assets and form
 'alphabetical_sorting' => true,
 ```
 
-- **SQLite** uses the current site's locale, the same way Statamic sorts flat files. SQLite can't use the indexes on text columns (like asset `basename`, `filename` and `path`) for this sort. In asset containers with fewer than 10,000 assets this adds around 1–5 ms per page in the asset browser. For anything larger, run your own benchmarks.
+- **SQLite** uses the current site's locale, the same way Statamic sorts flat files. SQLite can't use the indexes on text columns (like asset `basename`, `filename` and `path`) for this sort, so every matching row is sorted on each query. The cost grows with the number of rows: in the asset browser it adds around 1–5 ms per page for up to 10,000 assets and around 15–20 ms at 50,000.
 - **MySQL and MariaDB** sort JSON values with the connection's `collation`, ignoring case and accents, without a performance cost. Numbers aren't sorted naturally.
 - **PostgreSQL** isn't changed. If your database uses the `C` locale or runs on Alpine Linux (musl), text is sorted byte by byte.
 
