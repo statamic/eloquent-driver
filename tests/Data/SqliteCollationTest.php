@@ -2,6 +2,7 @@
 
 namespace Tests\Data;
 
+use Closure;
 use Facades\Tests\Factories\EntryFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -195,6 +196,24 @@ class SqliteCollationTest extends TestCase
         $sorted = DB::table('collation_test')->orderByRaw('name collate '.SqliteCollation::NATURAL)->pluck('name')->all();
 
         $this->assertSame(['2', '10', 'a', 'b', 'C', 'Ä'], $sorted);
+    }
+
+    #[Test]
+    public function it_registers_the_collation_when_the_query_runs()
+    {
+        config(['database.connections.collation_test' => ['driver' => 'sqlite', 'database' => ':memory:']]);
+        $connection = DB::connection('collation_test');
+
+        $name = SqliteCollation::for($connection);
+        $this->assertInstanceOf(Closure::class, $connection->getRawPdo(), 'Building the query should not connect.');
+
+        $sorted = fn () => array_column($connection->select("select 'b' as v union all select 'C' union all select 'a' order by v collate {$name}"), 'v');
+
+        $this->assertSame(['a', 'b', 'C'], $sorted());
+
+        DB::reconnect('collation_test');
+
+        $this->assertSame(['a', 'b', 'C'], $sorted());
     }
 
     #[Test]

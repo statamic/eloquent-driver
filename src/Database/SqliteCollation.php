@@ -21,16 +21,31 @@ class SqliteCollation
 
     const NATURAL = 'STATAMIC_NATURAL';
 
+    /** @var WeakMap<Connection, array<string, ?string>>|null collation name => locale */
+    private static ?WeakMap $connections = null;
+
+    /** @var WeakMap<PDO, array<string, true>>|null */
     private static ?WeakMap $registered = null;
 
+    /**
+     * Collations are registered right before each query runs rather than here, so they
+     * survive reconnects between building and running a query, and toSql() doesn't connect.
+     */
     public static function for(Connection $connection): string
     {
         $locale = class_exists(Collator::class) ? (string) Site::current()->locale() : null;
+        $name = static::name($locale);
 
-        static::register($connection->getPdo(), $locale);
-        static::register($connection->getReadPdo(), $locale);
+        self::$connections ??= new WeakMap;
 
-        return static::name($locale);
+        if (! isset(self::$connections[$connection])) {
+            self::$connections[$connection] = [];
+            $connection->beforeExecuting(fn ($query, $bindings, $connection) => static::registerOn($connection));
+        }
+
+        self::$connections[$connection] = [...self::$connections[$connection], $name => $locale];
+
+        return $name;
     }
 
     public static function name(?string $locale): string
@@ -40,6 +55,16 @@ class SqliteCollation
         }
 
         return static::PREFIX.'_'.strtoupper(preg_replace('/[^A-Za-z0-9]+/', '_', $locale));
+    }
+
+    private static function registerOn(Connection $connection): void
+    {
+        $connection->reconnectIfMissingConnection();
+
+        foreach (self::$connections[$connection] as $locale) {
+            static::register($connection->getPdo(), $locale);
+            static::register($connection->getReadPdo(), $locale);
+        }
     }
 
     public static function register(PDO $pdo, ?string $locale): void
