@@ -52,6 +52,55 @@ class AssetContainerContentsTest extends TestCase
     }
 
     #[Test]
+    public function it_keeps_the_folder_listing_in_the_cache_when_the_watcher_is_off()
+    {
+        config(['statamic.stache.watcher' => false]);
+
+        $this->assertTrue($this->folderListingIsCachedAfterBeingRead());
+    }
+
+    #[Test]
+    public function it_keeps_the_folder_listing_in_the_cache_when_the_watcher_is_auto_and_the_app_isnt_local()
+    {
+        // The default. Outside of a local environment "auto" means the watcher is off.
+        config(['statamic.stache.watcher' => 'auto']);
+        $this->app['env'] = 'production';
+
+        $this->assertTrue($this->folderListingIsCachedAfterBeingRead());
+    }
+
+    #[Test]
+    public function it_doesnt_keep_the_folder_listing_in_the_cache_when_the_watcher_is_auto_and_the_app_is_local()
+    {
+        config(['statamic.stache.watcher' => 'auto']);
+        $this->app['env'] = 'local';
+
+        $this->assertFalse($this->folderListingIsCachedAfterBeingRead());
+    }
+
+    #[Test]
+    public function it_doesnt_keep_the_folder_listing_in_the_cache_when_the_watcher_is_on()
+    {
+        config(['statamic.stache.watcher' => true]);
+
+        $this->assertFalse($this->folderListingIsCachedAfterBeingRead());
+    }
+
+    private function folderListingIsCachedAfterBeingRead(): bool
+    {
+        $container = tap(AssetContainer::make('test')->disk('test'))->save();
+        $container->makeAsset('one/one.txt')->upload(UploadedFile::fake()->create('one.txt'));
+
+        $contents = $container->contents();
+        $contents->cacheStore()->forget('asset-folder-contents-test');
+
+        Blink::flush();
+        $container->contents()->directories();
+
+        return $contents->cacheStore()->has('asset-folder-contents-test');
+    }
+
+    #[Test]
     public function it_updates_the_folder_listing_when_uploading_into_a_new_folder()
     {
         $container = tap(AssetContainer::make('test')->disk('test'))->save();
