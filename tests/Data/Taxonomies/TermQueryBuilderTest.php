@@ -3,6 +3,7 @@
 namespace Tests\Data\Taxonomies;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
@@ -215,6 +216,211 @@ class TermQueryBuilderTest extends TestCase
 
         // revert config to original
         config()->set('statamic.eloquent-driver.entries.driver', 'eloquent');
+    }
+
+    #[Test]
+    public function it_gets_terms_by_slugs_without_a_taxonomy_prefix()
+    {
+        Taxonomy::make('tags')->save();
+        Taxonomy::make('cats')->save();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+        Term::make('c')->taxonomy('cats')->data([])->save();
+
+        $this->assertEquals(['cats::c', 'tags::a'], Term::query()->whereIn('slug', ['a', 'c'])->get()->map->id()->sort()->values()->all());
+        $this->assertEquals(['tags::a'], Term::query()->whereIn('id', ['tags::a', 'c'])->get()->map->id()->all());
+    }
+
+    #[Test]
+    public function it_supplies_collection_context_without_filtering_usage()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()
+            ->whereIn('id', ['tags::a', 'tags::b'])
+            ->withCollectionContext('blog')
+            ->get();
+
+        $this->assertEquals(['tags::a', 'tags::b'], $terms->map->id()->sort()->values()->all());
+        $this->assertEquals(['blog', 'blog'], $terms->map(fn ($term) => $term->collection()->handle())->all());
+
+        $this->assertEquals('blog', Term::query()
+            ->whereIn('id', ['tags::b'])
+            ->withCollectionContext('blog')
+            ->first()
+            ->collection()
+            ->handle());
+
+        $this->assertNoEntriesTableQueries();
+    }
+
+    #[Test]
+    public function it_doesnt_check_usage_in_collections_when_querying_an_empty_list_of_ids()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+
+        DB::enableQueryLog();
+
+        $this->assertCount(0, Term::query()->whereIn('id', [])->where('collection', 'blog')->get());
+
+        $this->assertNoEntriesTableQueries();
+    }
+
+    #[Test]
+    public function it_still_checks_usage_in_collections_when_an_empty_list_of_ids_is_combined_with_or_wheres()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        $terms = Term::query()
+            ->whereIn('id', [])
+            ->orWhereIn('id', ['tags::a', 'tags::b'])
+            ->where('collection', 'blog')
+            ->get();
+
+        $this->assertEquals(['tags::a'], $terms->map->id()->all());
+    }
+
+    #[Test]
+    public function it_returns_no_terms_when_none_are_used_in_the_collection()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['title' => 'No tags'])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+        Term::make('b')->taxonomy('tags')->data([])->save();
+
+        $this->assertCount(0, Term::query()->where('collection', 'blog')->get());
+        $this->assertCount(0, Term::query()->where('collection', 'blog')->where('taxonomy', 'tags')->get());
+    }
+
+    #[Test]
+    public function it_only_checks_usage_for_terms_matching_the_other_wheres()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a', 'c']])->create();
+
+        foreach (['a', 'b', 'c', 'd'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()
+            ->whereIn('id', ['tags::a', 'tags::b'])
+            ->where('collection', 'blog')
+            ->get();
+
+        $this->assertEquals(['tags::a'], $terms->map->id()->all());
+        $this->assertEquals('blog', $terms->first()->collection()->handle());
+
+        // A single query, with usage checked as part of it, rather than working out every used term first.
+        $termQueries = collect(DB::getQueryLog())->pluck('query')->filter(fn ($query) => str_contains($query, 'taxonomy_terms'));
+        $this->assertCount(1, $termQueries);
+        $this->assertStringContainsString('exists', strtolower($termQueries->first()));
+    }
+
+    #[Test]
+    public function it_gathers_used_terms_in_a_single_pass_when_not_querying_specific_terms()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+        Collection::make('news')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a', 'b']])->create();
+        EntryFactory::collection('blog')->data(['tags' => ['b']])->create();
+        EntryFactory::collection('news')->data(['tags' => ['c']])->create();
+
+        foreach (['a', 'b', 'c', 'd'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        DB::enableQueryLog();
+
+        $terms = Term::query()->where('taxonomy', 'tags')->where('collection', 'blog')->get();
+
+        $this->assertEquals(['tags::a', 'tags::b'], $terms->map->id()->sort()->values()->all());
+
+        $termQueries = collect(DB::getQueryLog())->pluck('query')->filter(fn ($query) => str_contains($query, 'taxonomy_terms'));
+        $this->assertCount(1, $termQueries);
+        $this->assertStringNotContainsString('exists', strtolower($termQueries->first()));
+    }
+
+    #[Test]
+    public function it_filters_usage_in_collections_with_single_values()
+    {
+        // e.g. a terms field with max_items: 1 stores a string rather than an array
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => 'a'])->create();
+        EntryFactory::collection('blog')->data(['tags' => ['b']])->create();
+
+        foreach (['a', 'b', 'c'] as $slug) {
+            Term::make($slug)->taxonomy('tags')->data([])->save();
+        }
+
+        $this->assertEquals(['tags::a', 'tags::b'],
+            Term::query()->where('taxonomy', 'tags')->where('collection', 'blog')->get()->map->id()->sort()->values()->all()
+        );
+
+        $this->assertEquals(['tags::a'],
+            Term::query()->whereIn('id', ['tags::a', 'tags::c'])->where('collection', 'blog')->get()->map->id()->all()
+        );
+    }
+
+    private function assertNoEntriesTableQueries()
+    {
+        $entriesTable = (new (app('statamic.eloquent.entries.model')))->getTable();
+
+        $queries = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn ($query) => str_contains($query, $entriesTable));
+
+        $this->assertCount(0, $queries, 'Unexpected queries against the entries table: '.$queries->implode(PHP_EOL));
+    }
+
+    #[Test]
+    public function it_supplies_the_queried_collection_to_paginated_terms()
+    {
+        Taxonomy::make('tags')->save();
+        Collection::make('blog')->taxonomies(['tags'])->save();
+
+        EntryFactory::collection('blog')->data(['tags' => ['a']])->create();
+
+        Term::make('a')->taxonomy('tags')->data([])->save();
+
+        $paginator = Term::query()->where('collection', 'blog')->paginate(10);
+
+        $this->assertCount(1, $paginator->items());
+        $this->assertEquals('blog', $paginator->items()[0]->collection()?->handle());
+
+        $paginator = Term::query()->whereIn('id', ['tags::a'])->withCollectionContext('blog')->paginate(10);
+
+        $this->assertEquals('blog', $paginator->items()[0]->collection()?->handle());
     }
 
     #[Test]
@@ -498,19 +704,19 @@ class TermQueryBuilderTest extends TestCase
         Taxonomy::make('tags')->save();
         Term::make('1')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         Term::make('2')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3']])->save();
-        Term::make('3')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->save();
+        Term::make('3')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-3']])->save();
         Term::make('4')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-3', 'taxonomy-4']])->save();
-        Term::make('5')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-5']])->save();
+        Term::make('5')->taxonomy('tags')->data(['test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-5']])->save();
 
-        $entries = Term::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-5'])->get();
+        $entries = Term::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-2'])->get();
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['1', '3', '5'], $entries->map->slug()->all());
 
         $entries = Term::query()->whereJsonContains('test_taxonomy', 'taxonomy-1')->get();
 
-        $this->assertCount(2, $entries);
-        $this->assertEquals(['1', '3'], $entries->map->slug()->all());
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['1', '3', '5'], $entries->map->slug()->all());
     }
 
     #[Test]
@@ -629,6 +835,10 @@ class TermQueryBuilderTest extends TestCase
     #[Test]
     public function terms_are_found_using_where_has_when_max_items_not_1()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s weak typing for JSON contains comparisons with mixed types.');
+        }
+
         $blueprint = Blueprint::makeFromFields(['terms_field' => ['type' => 'terms', 'taxonomies' => ['tags']]]);
         Blueprint::shouldReceive('in')->with('taxonomies/tags')->andReturn(collect(['tags' => $blueprint]));
 

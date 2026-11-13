@@ -52,6 +52,6 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
 
     public function first()
     {
-        return $this->get()->first();
+        return $this->limit(1)->get()->first();
     }
 }

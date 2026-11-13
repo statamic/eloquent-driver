@@ -12,7 +12,7 @@ on: # zizmor: ignore[concurrency-limits]
 permissions: {}
 
 jobs:
-  php-tests:
+  sqlite:
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,7 +21,7 @@ jobs:
         laravel: [12.*, 13.*]
         stability: [prefer-lowest, prefer-stable]
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    name: SQLite - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
@@ -48,32 +48,31 @@ jobs:
       - name: Execute tests
         run: vendor/bin/phpunit
 
-  mysql-tests:
+  mysql:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        include:
-          - db: mysql
-            image: mysql:8.4
-            health: mysqladmin ping
-          - db: mariadb
-            image: mariadb:11
-            health: healthcheck.sh --connect --innodb_initialized
-
-    name: ${{ matrix.db }} - P8.5 - L13.*
-
     services:
-      database:
-        image: ${{ matrix.image }}
+      mysql:
+        image: mysql:8@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # 8
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-          MYSQL_DATABASE: testing
-          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 'yes'
-          MARIADB_DATABASE: testing
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: laravel
         ports:
           - 3306:3306
-        options: --health-cmd="${{ matrix.health }}" --health-interval=10s --health-timeout=5s --health-retries=5
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.5]
+        laravel: [13.*]
+        stability: [prefer-stable]
+
+    name: MySQL - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
@@ -84,22 +83,80 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
-          php-version: 8.5
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, bcmath, intl, gd, exif, iconv
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, bcmath, soap, intl, gd, exif, iconv, imagick
           coverage: none
 
       - name: Install dependencies
-        run: |
-          composer require "illuminate/contracts:13.*" --no-interaction --no-update
-          composer update --prefer-stable --prefer-dist --no-interaction --no-suggest
-
-      # The rest of the suite assumes SQLite.
-      - name: Execute tests
-        run: vendor/bin/phpunit tests/Data/MysqlCollationTest.php
+        shell: bash
         env:
-          DB_CONNECTION: ${{ matrix.db }}
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
+          LARAVEL: ${{ matrix.laravel }}
+          STABILITY: ${{ matrix.stability }}
+        run: |
+          composer require "laravel/framework:$LARAVEL" --no-interaction --no-update
+          composer update --$STABILITY --prefer-dist --no-interaction --no-suggest
+
+      - name: Execute tests
+        run: vendor/bin/phpunit
+        env:
+          DB_CONNECTION: mysql
+          DB_DATABASE: laravel
           DB_USERNAME: root
-          DB_PASSWORD: ''
+          DB_PASSWORD: password
+
+  postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16@sha256:f9a7b9ebf6f56201f949db745e47bc423c0f0f8294bafe991cc10bf74b029657 # 16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: laravel
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd=pg_isready
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.5]
+        laravel: [13.*]
+        stability: [prefer-stable]
+
+    name: PostgreSQL - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
+
+      - name: Install dependencies
+        shell: bash
+        env:
+          LARAVEL: ${{ matrix.laravel }}
+          STABILITY: ${{ matrix.stability }}
+        run: |
+          composer require "laravel/framework:$LARAVEL" --no-interaction --no-update
+          composer update --$STABILITY --prefer-dist --no-interaction --no-suggest
+
+      - name: Execute tests
+        run: vendor/bin/phpunit
+        env:
+          DB_CONNECTION: pgsql
+          DB_DATABASE: laravel
+          DB_USERNAME: root
+          DB_PASSWORD: password

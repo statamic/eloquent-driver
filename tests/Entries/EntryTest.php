@@ -201,7 +201,6 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
             ->locale('en')
             ->collection($collection);
 
@@ -234,7 +233,6 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
             ->locale('en')
             ->collection($collection)
             ->blueprint('test')
@@ -320,7 +318,6 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id(1)
             ->locale('en')
             ->collection($collection)
             ->blueprint('test')
@@ -406,7 +403,6 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id('1.0')
             ->collection('blog')
             ->slug('the-slug')
             ->data(['foo' => 'bar']);
@@ -428,7 +424,7 @@ class EntryTest extends TestCase
         Collection::make('blog')->title('blog')->save();
 
         $entry = (new Entry)
-            ->id('1.0')
+            ->id(1)
             ->collection('blog')
             ->slug('the-slug')
             ->data(['order' => 4]);
@@ -454,7 +450,6 @@ class EntryTest extends TestCase
             ->save();
 
         $entry = (new Entry)
-            ->id('1.0')
             ->collection('blog')
             ->slug('the-slug')
             ->data(['foo' => 'bar', 'null_value' => null]);

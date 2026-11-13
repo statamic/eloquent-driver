@@ -57,9 +57,9 @@ class ImportFormsTest extends TestCase
         $this->assertCount(3, SubmissionModel::all());
 
         $this->assertDatabaseHas('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 
     #[Test]
@@ -81,9 +81,9 @@ class ImportFormsTest extends TestCase
         $this->assertCount(3, SubmissionModel::all());
 
         $this->assertDatabaseHas('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 
     #[Test]
@@ -105,9 +105,9 @@ class ImportFormsTest extends TestCase
         $this->assertCount(0, SubmissionModel::all());
 
         $this->assertDatabaseHas('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 
     #[Test]
@@ -131,9 +131,9 @@ class ImportFormsTest extends TestCase
         $this->assertCount(0, SubmissionModel::all());
 
         $this->assertDatabaseHas('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseMissing('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 
     #[Test]
@@ -155,9 +155,9 @@ class ImportFormsTest extends TestCase
         $this->assertCount(3, SubmissionModel::all());
 
         $this->assertDatabaseMissing('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 
     #[Test]
@@ -181,8 +181,8 @@ class ImportFormsTest extends TestCase
         $this->assertCount(3, SubmissionModel::all());
 
         $this->assertDatabaseMissing('forms', ['handle' => 'contact', 'title' => 'Contact']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jack"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jason"}']);
-        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => '{"name":"Jesse"}']);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
 }

@@ -72,7 +72,7 @@ class ImportRevisionsTest extends TestCase
             'key' => 'collections/pages/en/foo',
             'action' => 'revision',
             'message' => 'Initial revision',
-            'attributes' => '{"foo":"bar"}',
+            'attributes' => $this->castAsJson(['foo' => 'bar']),
         ]);
     }
 }
