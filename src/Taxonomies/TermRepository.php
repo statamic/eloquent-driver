@@ -127,6 +127,8 @@ class TermRepository extends StacheRepository
             ])->save();
         }
 
+        Blink::forget(Term::localeRowsBlinkKey($entry->taxonomyHandle(), $entry->getOriginal('slug', $entry->slug())));
+        Blink::forget(Term::localeRowsBlinkKey($entry->taxonomyHandle(), $entry->slug()));
         Blink::put("eloquent-term-{$entry->id()}", $entry);
         Blink::put("eloquent-term-{$entry->uri()}", $entry);
     }
@@ -139,6 +141,7 @@ class TermRepository extends StacheRepository
             ->where('taxonomy', $entry->taxonomyHandle())
             ->delete();
 
+        Blink::forget(Term::localeRowsBlinkKey($entry->taxonomyHandle(), $entry->slug()));
         Blink::forget("eloquent-term-{$entry->id()}");
         Blink::forget("eloquent-term-{$entry->uri()}");
     }

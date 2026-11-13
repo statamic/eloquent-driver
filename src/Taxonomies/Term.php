@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Statamic\Contracts\Taxonomies\Term as Contract;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Site;
 use Statamic\Taxonomies\Term as FileEntry;
 
 class Term extends FileEntry
@@ -19,10 +20,13 @@ class Term extends FileEntry
         // Locale rows preloaded by TermQueryBuilder::transform() are cached in
         // Blink to avoid N+1. Fall back to a direct DB query when not present
         // (e.g. when fromModel() is called outside of a query builder context).
-        $blinkKey = "eloquent-term-locale-rows-{$model->taxonomy}::{$model->slug}";
-        $allRows = Blink::has($blinkKey)
-            ? Blink::get($blinkKey)
-            : $modelClass::where('slug', $model->slug)->where('taxonomy', $model->taxonomy)->get();
+        // With a single site there are no locale rows to load.
+        $blinkKey = static::localeRowsBlinkKey($model->taxonomy, $model->slug);
+        $allRows = match (true) {
+            ! Site::hasMultiple() => collect([$model]),
+            Blink::has($blinkKey) => Blink::get($blinkKey),
+            default => $modelClass::where('slug', $model->slug)->where('taxonomy', $model->taxonomy)->get(),
+        };
 
         // Non-canonical rows (origin set) don't carry term-level attributes like
         // blueprint or collection, so we always read those from the canonical row.
@@ -60,6 +64,11 @@ class Term extends FileEntry
         }
 
         return $term->syncOriginal();
+    }
+
+    public static function localeRowsBlinkKey(string $taxonomy, string $slug): string
+    {
+        return "eloquent-term-locale-rows-{$taxonomy}::{$slug}";
     }
 
     public function toModel()

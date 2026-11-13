@@ -197,6 +197,27 @@ class TermQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_by_site_using_an_operator()
+    {
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en'],
+            'fr' => ['url' => 'http://localhost/fr/', 'locale' => 'fr'],
+        ]);
+
+        Taxonomy::make('tags')->sites(['en', 'fr'])->save();
+
+        Term::make('a')->taxonomy('tags')
+            ->dataForLocale('en', ['title' => 'Term A'])
+            ->dataForLocale('fr', ['title' => 'Terme A'])
+            ->save();
+
+        $terms = Term::query()->where('site', '=', 'fr')->get();
+
+        $this->assertEquals(['fr'], $terms->map->locale()->all());
+        $this->assertEquals('Terme A', $terms->first()->get('title'));
+    }
+
+    #[Test]
     public function it_filters_by_taxonomy()
     {
         Taxonomy::make('tags')->save();
