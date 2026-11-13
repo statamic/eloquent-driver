@@ -37,7 +37,7 @@ trait CollatesOrderBy
     {
         $actualColumn = $this->column($column);
 
-        if (! $this->shouldCollate($actualColumn) || ! $collation = SqliteCollation::for($this->builder->getConnection())) {
+        if (! $collation = $this->collationFor($actualColumn)) {
             $this->builder->orderBy($actualColumn, $direction);
 
             return;
@@ -48,12 +48,22 @@ trait CollatesOrderBy
         $this->builder->orderByRaw("{$wrapped} collate {$collation} {$direction}");
     }
 
-    protected function shouldCollate($column): bool
+    protected function collationFor($column): ?string
     {
-        if (! is_string($column)) {
-            return false;
+        if (! is_string($column) || ! config('statamic.eloquent-driver.sqlite_collation', false)) {
+            return null;
         }
 
+        $connection = $this->builder->getConnection();
+
+        return match ($connection->getDriverName()) {
+            'sqlite' => $this->shouldCollate($column) ? SqliteCollation::for($connection) : null,
+            default => null,
+        };
+    }
+
+    protected function shouldCollate(string $column): bool
+    {
         // Collating an indexed column stops SQLite from using the index to sort.
         return ! in_array(Str::afterLast($column, '.'), $this->uncollatedColumns(), true);
     }

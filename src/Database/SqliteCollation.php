@@ -23,12 +23,8 @@ class SqliteCollation
 
     private static ?WeakMap $registered = null;
 
-    public static function for(Connection $connection): ?string
+    public static function for(Connection $connection): string
     {
-        if (! config('statamic.eloquent-driver.sqlite_collation', false) || $connection->getDriverName() !== 'sqlite') {
-            return null;
-        }
-
         $locale = class_exists(Collator::class) ? (string) Site::current()->locale() : null;
 
         static::register($connection->getPdo(), $locale);
