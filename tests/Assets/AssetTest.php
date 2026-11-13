@@ -85,7 +85,7 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertSame(['data' => ['focus' => '50-50-1'], 'height' => 100, 'width' => 100], $asset->meta());
+        $this->assertEquals(['data' => ['focus' => '50-50-1'], 'height' => 100, 'width' => 100], $asset->meta());
     }
 
     #[Test]
@@ -310,5 +310,33 @@ class AssetTest extends TestCase
         $this->assertNotSame($model->getKey(), $asset->model()->getKey());
         $this->assertSame('a.jpg', $model->fresh()->path);
         $this->assertCount(7, AssetModel::all());
+    }
+
+    #[Test]
+    public function it_stores_meta_values_in_their_own_columns()
+    {
+        Storage::disk('test')->put('wide.jpg', UploadedFile::fake()->image('wide.jpg', 800, 600)->get());
+        Storage::disk('test')->put('tiny.jpg', UploadedFile::fake()->image('tiny.jpg', 10, 10)->get());
+
+        tap(Facades\Asset::make()->container('test')->path('wide.jpg'))->set('alt', 'Wide')->save();
+        Facades\Asset::make()->container('test')->path('tiny.jpg')->save();
+
+        $model = AssetModel::where('basename', 'wide.jpg')->first();
+        $this->assertSame(['alt' => 'Wide'], $model->meta);
+        $this->assertSame(800, $model->width);
+        $this->assertSame(600, $model->height);
+        $this->assertSame('image/jpeg', $model->mime_type);
+        $this->assertGreaterThan(0, $model->size);
+        $this->assertGreaterThan(0, $model->last_modified);
+
+        Facades\Blink::flush();
+        $asset = Facades\Asset::find('test::wide.jpg');
+        $this->assertSame(800, $asset->width());
+        $this->assertSame('Wide', $asset->get('alt'));
+
+        $query = fn () => Facades\Asset::query()->where('container', 'test')->whereIn('basename', ['wide.jpg', 'tiny.jpg']);
+        $this->assertSame(['tiny.jpg', 'wide.jpg'], $query()->orderBy('size')->get()->map->basename()->all());
+        $this->assertSame(['wide.jpg'], $query()->where('width', '>', 100)->get()->map->basename()->all());
+        $this->assertSame(['wide.jpg'], $query()->where('alt', 'Wide')->get()->map->basename()->all());
     }
 }

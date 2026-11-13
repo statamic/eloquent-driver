@@ -18,12 +18,12 @@ return new class extends Migration
             $table->string('path')->index();
             $table->jsonb('meta')->nullable();
 
-            $table->integer('duration')->nullable()->default(null);
-            $table->integer('height')->nullable()->default(null);
-            $table->integer('last_modified');
-            $table->string('mime_type');
-            $table->integer('size')->index();
-            $table->integer('width')->nullable()->default(null);
+            $table->float('duration')->nullable();
+            $table->unsignedInteger('height')->nullable();
+            $table->unsignedBigInteger('last_modified')->nullable();
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('size')->nullable()->index();
+            $table->unsignedInteger('width')->nullable();
 
             $table->timestamps();
 

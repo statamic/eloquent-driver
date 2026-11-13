@@ -2,68 +2,58 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Arr;
-use Statamic\Eloquent\Assets\AssetModel;
+use Statamic\Eloquent\Assets\Asset;
 use Statamic\Eloquent\Database\BaseMigration as Migration;
+use Statamic\Support\Arr;
 
 return new class extends Migration {
     public function up()
     {
-        if (Schema::hasColumn($this->prefix('assets_meta', 'size')) {
+        if (Schema::hasColumn($this->prefix('assets_meta'), 'size')) {
             return;
         }
 
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
-            $table->integer('duration')->nullable()->default(null);
-            $table->integer('height')->nullable()->default(null);
-            $table->integer('last_modified')->default(0);
-            $table->string('mime_type')->default('');
-            $table->integer('size')->default(0)->index();
-            $table->integer('width')->nullable()->default(null);
+            $table->float('duration')->nullable();
+            $table->unsignedInteger('height')->nullable();
+            $table->unsignedBigInteger('last_modified')->nullable();
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('size')->nullable()->index();
+            $table->unsignedInteger('width')->nullable();
         });
 
-        AssetModel::query()
-            ->lazy()
+        app('statamic.eloquent.assets.model')::query()
+            ->lazyById()
             ->each(function ($model) {
-                $meta = $model->meta;
+                $meta = $model->meta ?? [];
 
-                $model->duration = Arr::pull($meta, 'duration', null);
-                $model->height = Arr::pull($meta, 'height', null);
-                $model->last_modified = Arr::pull($meta, 'last_modified', time());
-                $model->mime_type = Arr::pull($meta, 'mime_type', '');
-                $model->size = Arr::pull($meta, 'size', 0);
-                $model->width = Arr::pull($meta, 'height', null);
+                foreach (Asset::META_COLUMNS as $column) {
+                    $model->{$column} = Arr::get($meta, $column);
+                }
 
-                $model->meta = $meta['data'];
+                $model->meta = $meta['data'] ?? [];
+
                 $model->saveQuietly();
             });
     }
 
     public function down()
     {
-        if (! Schema::hasColumn($this->prefix('assets_meta', 'size')) {
+        if (! Schema::hasColumn($this->prefix('assets_meta'), 'size')) {
             return;
         }
 
-        AssetModel::query()
-            ->lazy()
+        app('statamic.eloquent.assets.model')::query()
+            ->lazyById()
             ->each(function ($model) {
-                $meta = $model->meta;
-
-                $meta['duration'] = $model->duration;
-                $meta['height'] = $model->height;
-                $meta['last_modified'] = $model->last_modified;
-                $meta['mime_type'] = $model->mime_type;
-                $meta['size'] = $model->size;
-                $meta['width'] = $model->width;
-
-                $model->meta = $meta;
+                $model->meta = Asset::metaFromModel($model);
 
                 $model->saveQuietly();
             });
 
         Schema::table($this->prefix('assets_meta'), function (Blueprint $table) {
-            $table->dropColumn(['duration', 'height', 'last_modified', 'mime_type', 'size', 'width']);
+            $table->dropIndex(['size']);
+            $table->dropColumn(Asset::META_COLUMNS);
         });
     }
 };

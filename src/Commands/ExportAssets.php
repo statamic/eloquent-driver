@@ -103,7 +103,7 @@ class ExportAssets extends Command
             AssetFacade::make()
                 ->container($model->container)
                 ->path($model->path)
-                ->writeMeta($model->meta);
+                ->writeMeta(app('statamic.eloquent.assets.asset')::metaFromModel($model));
         });
 
         $this->newLine();

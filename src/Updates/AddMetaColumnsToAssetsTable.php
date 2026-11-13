@@ -9,7 +9,7 @@ class AddMetaColumnsToAssetsTable extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        $assetsTable = config('statamic.eloquent-driver.table_prefix', '').'assets';
+        $assetsTable = config('statamic.eloquent-driver.table_prefix', '').'assets_meta';
 
         return Schema::hasTable($assetsTable) && ! Schema::hasColumn($assetsTable, 'size');
     }
