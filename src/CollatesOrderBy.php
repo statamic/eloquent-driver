@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent;
 
+use Illuminate\Database\Connection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Statamic\Eloquent\Database\SqliteCollation;
@@ -58,6 +59,8 @@ trait CollatesOrderBy
 
         return match ($connection->getDriverName()) {
             'sqlite' => $this->shouldCollate($column) ? SqliteCollation::for($connection) : null,
+            // Columns already use the table collation, but JSON values are always utf8mb4_bin.
+            'mysql', 'mariadb' => Str::contains($column, '->') ? $this->mysqlCollation($connection) : null,
             default => null,
         };
     }
@@ -66,6 +69,13 @@ trait CollatesOrderBy
     {
         // Collating an indexed column stops SQLite from using the index to sort.
         return ! in_array(Str::afterLast($column, '.'), $this->uncollatedColumns(), true);
+    }
+
+    private function mysqlCollation(Connection $connection): string
+    {
+        $collation = (string) $connection->getConfig('collation');
+
+        return preg_match('/^utf8mb4_\w+$/', $collation) ? $collation : 'utf8mb4_unicode_ci';
     }
 
     protected function uncollatedColumns(): array
