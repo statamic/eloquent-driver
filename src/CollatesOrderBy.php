@@ -50,7 +50,7 @@ trait CollatesOrderBy
 
     protected function collationFor($column): ?string
     {
-        if (! is_string($column) || ! config('statamic.eloquent-driver.sqlite_collation', false)) {
+        if (! is_string($column) || ! config('statamic.eloquent-driver.alphabetical_sorting', false)) {
             return null;
         }
 

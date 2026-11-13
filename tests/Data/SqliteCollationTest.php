@@ -37,7 +37,7 @@ class SqliteCollationTest extends TestCase
             $this->markTestSkipped('Requires SQLite and the intl extension.');
         }
 
-        config(['statamic.eloquent-driver.sqlite_collation' => true]);
+        config(['statamic.eloquent-driver.alphabetical_sorting' => true]);
     }
 
     #[Test]
@@ -53,7 +53,7 @@ class SqliteCollationTest extends TestCase
     #[Test]
     public function it_keeps_binary_order_when_disabled()
     {
-        config(['statamic.eloquent-driver.sqlite_collation' => false]);
+        config(['statamic.eloquent-driver.alphabetical_sorting' => false]);
 
         $this->createAssets();
 

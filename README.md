@@ -170,12 +170,12 @@ The above example will set all forms and navigation blueprints to use eloquent, 
 
 SQLite compares text byte by byte, so sorting by a title puts `Zebra` before `apple` and `Äpfel` after `zoo`. Flat files sort the same content alphabetically, ignoring case, with numbers in natural order (`2` before `10`).
 
-To get the flat-file order on SQLite, enable the `sqlite_collation` option. The driver then sorts entries, terms, assets and form submissions by text fields using the current site's locale, the same way Statamic sorts flat files.
+To get the flat-file order on SQLite, enable the `alphabetical_sorting` option. The driver then sorts entries, terms, assets and form submissions by text fields using the current site's locale, the same way Statamic sorts flat files.
 
 ```php
 // config/statamic/eloquent-driver.php
 
-'sqlite_collation' => true,
+'alphabetical_sorting' => true,
 ```
 
 ## Upgrading

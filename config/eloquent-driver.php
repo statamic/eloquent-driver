@@ -27,7 +27,7 @@ return [
 
     'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
     'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
-    'sqlite_collation' => env('STATAMIC_ELOQUENT_SQLITE_COLLATION', false),
+    'alphabetical_sorting' => env('STATAMIC_ELOQUENT_ALPHABETICAL_SORTING', false),
 
     'addon_settings' => [
         'driver' => 'file',
