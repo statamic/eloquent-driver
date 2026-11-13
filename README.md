@@ -166,7 +166,7 @@ By default, setting the driver for blueprints to `eloquent` will apply to *all* 
 
 The above example will set all forms and navigation blueprints to use eloquent, while keeping the rest as files.
 
-### Sorting text alphabetically
+### Sorting text naturally
 
 Flat files sort text alphabetically, ignoring case, with numbers in natural order (`2` before `10`). Databases often compare text byte by byte instead, which puts `Zebra` before `apple` and `Äpfel` after `zoo`:
 
@@ -174,16 +174,16 @@ Flat files sort text alphabetically, ignoring case, with numbers in natural orde
 - **MySQL and MariaDB** sort columns by the table collation, but values stored in JSON (like entry and term titles, asset meta and form submission data) byte by byte.
 - **PostgreSQL** sorts by the database locale, which is usually alphabetical already.
 
-Enable the `alphabetical_sorting` option to sort entries, terms, assets and form submissions alphabetically:
+Set the `text_sorting` option to `natural` to sort entries, terms, assets and form submissions the same way:
 
 ```php
 // config/statamic/eloquent-driver.php
 
-'alphabetical_sorting' => true,
+'text_sorting' => 'natural', // or 'database' (default) to leave sorting to the database
 ```
 
 - **SQLite** uses the current site's locale, the same way Statamic sorts flat files. SQLite can't use the indexes on text columns (like asset `basename`, `filename` and `path`) for this sort, so every matching row is sorted on each query. The cost grows with the number of rows: in the asset browser it adds around 1–5 ms per page for up to 10,000 assets and around 15–20 ms at 50,000.
-- **MySQL and MariaDB** sort JSON values with the connection's `collation`, ignoring case and accents, without a performance cost. Numbers aren't sorted naturally.
+- **MySQL and MariaDB** sort JSON values with the connection's `collation`, ignoring case and accents, without a performance cost. Values that only differ by case or accents (like `apple` and `Apple`) are then sorted byte by byte, so the order is always the same. Numbers aren't sorted naturally.
 - **PostgreSQL** isn't changed. If your database uses the `C` locale or runs on Alpine Linux (musl), text is sorted byte by byte.
 
 ## Upgrading

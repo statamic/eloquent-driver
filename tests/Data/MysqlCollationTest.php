@@ -23,13 +23,13 @@ class MysqlCollationTest extends TestCase
             $this->markTestSkipped('Requires MySQL or MariaDB.');
         }
 
-        config(['statamic.eloquent-driver.alphabetical_sorting' => true]);
+        config(['statamic.eloquent-driver.text_sorting' => 'natural']);
     }
 
     #[Test]
     public function it_keeps_binary_order_when_disabled()
     {
-        config(['statamic.eloquent-driver.alphabetical_sorting' => false]);
+        config(['statamic.eloquent-driver.text_sorting' => 'database']);
 
         Collection::make('posts')->save();
 
@@ -41,11 +41,29 @@ class MysqlCollationTest extends TestCase
     }
 
     #[Test]
+    public function it_breaks_ties_by_bytes()
+    {
+        Collection::make('posts')->save();
+
+        foreach (['apple', 'Äpfel', 'Apple', 'apfel'] as $i => $name) {
+            EntryFactory::id((string) ($i + 1))->slug("post-{$i}")->collection('posts')->data(['title' => $name])->create();
+        }
+
+        $order = ['apfel', 'Äpfel', 'Apple', 'apple'];
+
+        $this->assertEquals($order, Entry::query()->orderBy('title')->get()->map->get('title')->all());
+        $this->assertEquals(array_reverse($order), Entry::query()->orderByDesc('title')->get()->map->get('title')->all());
+    }
+
+    #[Test]
     public function it_uses_the_connection_collation()
     {
         $this->useConnectionWithCollation('utf8mb4_bin');
 
-        $this->assertStringContainsString('collate utf8mb4_bin asc', Entry::query()->orderBy('title')->toSql());
+        $sql = Entry::query()->orderBy('title')->toSql();
+
+        $this->assertStringContainsString('collate utf8mb4_bin asc', $sql);
+        $this->assertSame(1, substr_count($sql, 'collate'));
     }
 
     #[Test]

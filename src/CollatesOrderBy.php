@@ -44,9 +44,16 @@ trait CollatesOrderBy
             return;
         }
 
-        $wrapped = $this->builder->getConnection()->getQueryGrammar()->wrap($actualColumn);
+        $connection = $this->builder->getConnection();
+        $wrapped = $connection->getQueryGrammar()->wrap($actualColumn);
 
         $this->builder->orderByRaw("{$wrapped} collate {$collation} {$direction}");
+
+        // Case and accent insensitive collations treat values like "apple" and "Apple" as equal,
+        // so break ties by bytes to keep the order (and pagination) stable.
+        if (in_array($connection->getDriverName(), ['mysql', 'mariadb'], true) && ! str_ends_with($collation, '_bin')) {
+            $this->builder->orderByRaw("{$wrapped} collate utf8mb4_bin {$direction}");
+        }
     }
 
     protected function collationFor($column): ?string
