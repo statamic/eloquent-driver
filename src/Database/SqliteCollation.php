@@ -100,7 +100,7 @@ class SqliteCollation
             $collator = new Collator($locale);
             $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
 
-            // Match how Comparator ignores case without the cost of running mb_strtolower()
+            // Ignores case like Comparator's mb_strtolower() but cheaper; also ignores other tertiary differences like width
             $collator->setStrength(Collator::SECONDARY);
 
             $strings = fn (string $a, string $b): int => (int) $collator->compare($a, $b);
