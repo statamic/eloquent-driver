@@ -3,6 +3,7 @@
 namespace Statamic\Eloquent\Assets;
 
 use Statamic\Assets\AssetContainerContents as CoreAssetContainerContents;
+use Statamic\Facades\Stache;
 use Statamic\Statamic;
 use Statamic\Support\Str;
 
@@ -166,6 +167,6 @@ class AssetContainerContents extends CoreAssetContainerContents
 
     private function ttl()
     {
-        return config('statamic.stache.watcher') ? 0 : null;
+        return Stache::isWatcherEnabled() ? 0 : null;
     }
 }
