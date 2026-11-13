@@ -51,7 +51,7 @@ trait CollatesOrderBy
 
     protected function collationFor($column): ?string
     {
-        if (! is_string($column) || ! config('statamic.eloquent-driver.alphabetical_sorting', false)) {
+        if (! is_string($column) || config('statamic.eloquent-driver.text_sorting', 'database') !== 'natural') {
             return null;
         }
 

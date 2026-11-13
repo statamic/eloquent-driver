@@ -15,11 +15,11 @@ use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
 use Tests\TestCase;
 
-class AlphabeticalSortingTest extends TestCase
+class NaturalSortingTest extends TestCase
 {
     const NAMES = ['b', 'Äpfel', 'zoo', 'apple', 'C', 'Zebra'];
 
-    const ALPHABETICAL_ORDER = ['Äpfel', 'apple', 'b', 'C', 'Zebra', 'zoo'];
+    const NATURAL_ORDER = ['Äpfel', 'apple', 'b', 'C', 'Zebra', 'zoo'];
 
     protected function setUp(): void
     {
@@ -29,11 +29,11 @@ class AlphabeticalSortingTest extends TestCase
             $this->markTestSkipped('Requires the intl extension on SQLite.');
         }
 
-        config(['statamic.eloquent-driver.alphabetical_sorting' => true]);
+        config(['statamic.eloquent-driver.text_sorting' => 'natural']);
     }
 
     #[Test]
-    public function it_sorts_entries_alphabetically()
+    public function it_sorts_entries_naturally()
     {
         Collection::make('posts')->save();
 
@@ -41,12 +41,12 @@ class AlphabeticalSortingTest extends TestCase
             EntryFactory::id((string) ($i + 1))->slug("post-{$i}")->collection('posts')->data(['title' => $name])->create();
         }
 
-        $this->assertEquals(self::ALPHABETICAL_ORDER, Entry::query()->orderBy('title')->get()->map->get('title')->all());
-        $this->assertEquals(array_reverse(self::ALPHABETICAL_ORDER), Entry::query()->orderByDesc('title')->get()->map->get('title')->all());
+        $this->assertEquals(self::NATURAL_ORDER, Entry::query()->orderBy('title')->get()->map->get('title')->all());
+        $this->assertEquals(array_reverse(self::NATURAL_ORDER), Entry::query()->orderByDesc('title')->get()->map->get('title')->all());
     }
 
     #[Test]
-    public function it_sorts_terms_alphabetically()
+    public function it_sorts_terms_naturally()
     {
         Taxonomy::make('tags')->save();
 
@@ -54,11 +54,11 @@ class AlphabeticalSortingTest extends TestCase
             Term::make("term-{$i}")->taxonomy('tags')->data(['title' => $name])->save();
         }
 
-        $this->assertEquals(self::ALPHABETICAL_ORDER, Term::query()->orderBy('title')->get()->map->get('title')->all());
+        $this->assertEquals(self::NATURAL_ORDER, Term::query()->orderBy('title')->get()->map->get('title')->all());
     }
 
     #[Test]
-    public function it_sorts_submissions_alphabetically()
+    public function it_sorts_submissions_naturally()
     {
         $form = tap(Form::make('test'))->save();
 
@@ -66,11 +66,11 @@ class AlphabeticalSortingTest extends TestCase
             FormSubmission::make()->form($form)->data(['name' => $name])->save();
         }
 
-        $this->assertEquals(self::ALPHABETICAL_ORDER, FormSubmission::query()->orderBy('name')->get()->map->get('name')->all());
+        $this->assertEquals(self::NATURAL_ORDER, FormSubmission::query()->orderBy('name')->get()->map->get('name')->all());
     }
 
     #[Test]
-    public function it_sorts_assets_alphabetically()
+    public function it_sorts_assets_naturally()
     {
         Storage::fake('test');
         AssetContainer::make('test')->disk('test')->save();
@@ -82,7 +82,7 @@ class AlphabeticalSortingTest extends TestCase
 
         $query = fn () => Asset::query()->where('container', 'test');
 
-        $this->assertEquals(self::ALPHABETICAL_ORDER, $query()->orderBy('basename')->get()->map->filename()->all());
-        $this->assertEquals(self::ALPHABETICAL_ORDER, $query()->orderBy('title')->get()->map->get('title')->all());
+        $this->assertEquals(self::NATURAL_ORDER, $query()->orderBy('basename')->get()->map->filename()->all());
+        $this->assertEquals(self::NATURAL_ORDER, $query()->orderBy('title')->get()->map->get('title')->all());
     }
 }

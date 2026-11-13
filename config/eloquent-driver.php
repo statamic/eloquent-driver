@@ -27,7 +27,7 @@ return [
 
     'connection' => env('STATAMIC_ELOQUENT_CONNECTION', ''),
     'table_prefix' => env('STATAMIC_ELOQUENT_PREFIX', ''),
-    'alphabetical_sorting' => env('STATAMIC_ELOQUENT_ALPHABETICAL_SORTING', false),
+    'text_sorting' => env('STATAMIC_ELOQUENT_TEXT_SORTING', 'database'), // database, natural
 
     'addon_settings' => [
         'driver' => 'file',
