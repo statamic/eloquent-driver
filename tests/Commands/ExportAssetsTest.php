@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Assets\AssetContainerModel;
 use Statamic\Eloquent\Assets\AssetModel;
 use Statamic\Facades\Stache;
+use Statamic\Facades\YAML;
 use Tests\TestCase;
 
 class ExportAssetsTest extends TestCase
@@ -83,13 +84,18 @@ class ExportAssetsTest extends TestCase
         Storage::disk('test')->put('one.txt', 'hello');
 
         AssetContainerModel::create(['handle' => 'test', 'title' => 'Test', 'disk' => 'test', 'settings' => []]);
-        AssetModel::create(['container' => 'test', 'path' => 'one.txt', 'folder' => '/', 'basename' => 'one.txt', 'filename' => 'one', 'extension' => 'txt', 'meta' => ['data' => ['alt' => 'One']]]);
+        AssetModel::create(['container' => 'test', 'path' => 'one.txt', 'folder' => '/', 'basename' => 'one.txt', 'filename' => 'one', 'extension' => 'txt', 'meta' => ['alt' => 'One'], 'size' => 5, 'mime_type' => 'text/plain', 'last_modified' => 1700000000]);
 
         $this->artisan('statamic:eloquent:export-assets', ['--force' => true])
             ->expectsOutputToContain('Assets exported')
             ->assertExitCode(0);
 
         $this->assertFileExists(__DIR__.'/tmp/.meta/one.txt.yaml');
+
+        $meta = YAML::parse(file_get_contents(__DIR__.'/tmp/.meta/one.txt.yaml'));
+        $this->assertEquals(['alt' => 'One'], $meta['data']);
+        $this->assertEquals(5, $meta['size']);
+        $this->assertEquals('text/plain', $meta['mime_type']);
     }
 
     #[Test]
@@ -102,7 +108,7 @@ class ExportAssetsTest extends TestCase
         file_put_contents($this->containersDir.'/test.yaml', "title: Test\ndisk: test\n");
 
         AssetContainerModel::create(['handle' => 'test', 'title' => 'Test', 'disk' => 'test', 'settings' => []]);
-        AssetModel::create(['container' => 'test', 'path' => 'one.txt', 'folder' => '/', 'basename' => 'one.txt', 'filename' => 'one', 'extension' => 'txt', 'meta' => ['data' => ['alt' => 'One']]]);
+        AssetModel::create(['container' => 'test', 'path' => 'one.txt', 'folder' => '/', 'basename' => 'one.txt', 'filename' => 'one', 'extension' => 'txt', 'meta' => ['alt' => 'One'], 'size' => 5, 'mime_type' => 'text/plain', 'last_modified' => 1700000000]);
 
         $this->artisan('statamic:eloquent:export-assets', ['--only-assets' => true])
             ->doesntExpectOutputToContain('Asset containers exported')
