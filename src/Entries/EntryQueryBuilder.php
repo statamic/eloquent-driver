@@ -70,8 +70,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
     }
 
     /**
-     * Mapped data columns that don't hold text (integers, dates, etc.) sort correctly
-     * without a collation, and collating them would stop SQLite using their indexes.
+     * Non-text mapped columns sort correctly as is, and collating them would skip their indexes.
      */
     private function nonTextMappedColumns(): array
     {
@@ -85,7 +84,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return collect($model->getConnection()->getSchemaBuilder()->getColumns($model->getTable()))
                 ->whereIn('name', $mappings)
                 // SQLite gives a column text affinity when its type contains CHAR, CLOB or TEXT
-                ->reject(fn ($column) => Str::contains(strtolower($column['type_name'] ?? $column['type'] ?? ''), ['char', 'clob', 'text']))
+                ->reject(fn ($column) => Str::contains(strtolower($column['type_name']), ['char', 'clob', 'text']))
                 ->pluck('name')
                 ->all();
         });

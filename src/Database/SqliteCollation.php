@@ -11,9 +11,8 @@ use Statamic\Facades\Site;
 use WeakMap;
 
 /**
- * SQLite only ships the BINARY, NOCASE and RTRIM collations, so this registers a collation
- * on the PDO handle to sort text like Statamic's Comparator does for flat files: per locale
- * when the intl extension is available, otherwise a locale-independent natural sort.
+ * SQLite only ships BINARY, NOCASE and RTRIM, so this registers a collation that sorts like
+ * Statamic's Comparator: per locale with intl, otherwise a case-insensitive natural sort.
  */
 class SqliteCollation
 {
@@ -28,8 +27,7 @@ class SqliteCollation
     private static ?WeakMap $registered = null;
 
     /**
-     * Collations are registered right before each query runs rather than here, so they
-     * survive reconnects between building and running a query, and toSql() doesn't connect.
+     * Registers the collation right before each query runs, so it survives reconnects and toSql() doesn't connect.
      */
     public static function for(Connection $connection): string
     {
@@ -89,8 +87,7 @@ class SqliteCollation
     }
 
     /**
-     * Build the comparison callback. A null locale gives the fallback Comparator
-     * uses when intl is missing: a case-insensitive natural sort.
+     * A null locale mirrors Comparator without intl.
      */
     public static function comparator(?string $locale): Closure
     {
@@ -100,7 +97,7 @@ class SqliteCollation
             $collator = new Collator($locale);
             $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
 
-            // Ignores case like Comparator's mb_strtolower() but cheaper; also ignores other tertiary differences like width
+            // Ignores case (and width) without Comparator's mb_strtolower() cost
             $collator->setStrength(Collator::SECONDARY);
 
             $strings = fn (string $a, string $b): int => (int) $collator->compare($a, $b);

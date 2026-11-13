@@ -178,7 +178,6 @@ class SqliteCollationTest extends TestCase
         $names = self::NAMES;
         usort($names, SqliteCollation::comparator(null));
 
-        // Matches Comparator::strings() without intl: strnatcmp() on lowercased values
         $this->assertSame(['2', '10', 'a', 'b', 'C', 'Ä'], $names);
     }
 
