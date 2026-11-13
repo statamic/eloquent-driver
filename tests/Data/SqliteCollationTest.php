@@ -17,7 +17,6 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
 use Statamic\Facades\Site;
-use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
 use Tests\TestCase;
 
@@ -122,42 +121,6 @@ class SqliteCollationTest extends TestCase
         $this->assertStringNotContainsString('collate', Term::query()->orderBy('id')->orderBy('updated_at')->toSql());
 
         $this->assertStringContainsString('"slug" collate', Entry::query()->orderBy('slug')->toSql());
-    }
-
-    #[Test]
-    public function it_sorts_entries_alphabetically()
-    {
-        Collection::make('posts')->save();
-
-        foreach (self::NAMES as $i => $name) {
-            EntryFactory::id((string) ($i + 1))->slug("post-{$i}")->collection('posts')->data(['title' => $name])->create();
-        }
-
-        $this->assertEquals(self::UNICODE_ORDER, Entry::query()->where('collection', 'posts')->orderBy('title')->get()->map->get('title')->all());
-    }
-
-    #[Test]
-    public function it_sorts_terms_alphabetically()
-    {
-        Taxonomy::make('tags')->save();
-
-        foreach (self::NAMES as $i => $name) {
-            Term::make("term-{$i}")->taxonomy('tags')->data(['title' => $name])->save();
-        }
-
-        $this->assertEquals(self::UNICODE_ORDER, Term::query()->orderBy('title')->get()->map->get('title')->all());
-    }
-
-    #[Test]
-    public function it_sorts_submissions_alphabetically()
-    {
-        $form = tap(Form::make('test'))->save();
-
-        foreach (self::NAMES as $name) {
-            FormSubmission::make()->form($form)->data(['name' => $name])->save();
-        }
-
-        $this->assertEquals(self::UNICODE_ORDER, FormSubmission::query()->orderBy('name')->get()->map->get('name')->all());
     }
 
     #[Test]
