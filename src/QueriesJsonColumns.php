@@ -6,23 +6,21 @@ use DateTimeInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use InvalidArgumentException;
 use Statamic\Fields\Field;
 
 trait QueriesJsonColumns
 {
-    public function orderBy($column, $direction = 'asc')
+    use CollatesOrderBy {
+        orderByColumn as orderByCollatedColumn;
+    }
+
+    protected function orderByColumn($column, string $direction): void
     {
-        $direction = strtolower($direction);
-
-        if (! in_array($direction, ['asc', 'desc'], true)) {
-            throw new InvalidArgumentException('Order direction must be "asc" or "desc".');
-        }
-
         $actualColumn = $this->column($column);
 
         if (
-            Str::contains($actualColumn, ['data->', 'meta->'])
+            is_string($actualColumn)
+            && Str::contains($actualColumn, ['data->', 'meta->'])
             && $jsonCast = $this->getJsonCasts()->get($column)
         ) {
             $grammar = $this->builder->getConnection()->getQueryGrammar();
@@ -44,7 +42,7 @@ trait QueriesJsonColumns
                         ->orderByRaw("cast({$wrappedEndDateColumn} as {$jsonCast}) {$direction}");
                 }
 
-                return $this;
+                return;
             }
 
             // SQLite casts dates to year, which is pretty unhelpful.
@@ -54,17 +52,15 @@ trait QueriesJsonColumns
             ) {
                 $this->builder->orderByRaw("datetime({$wrappedColumn}) {$direction}");
 
-                return $this;
+                return;
             }
 
             $this->builder->orderByRaw("cast({$wrappedColumn} as {$jsonCast}) {$direction}");
 
-            return $this;
+            return;
         }
 
-        parent::orderBy($column, $direction);
-
-        return $this;
+        $this->orderByCollatedColumn($column, $direction);
     }
 
     public function whereDate($column, $operator, $value = null, $boolean = 'and')

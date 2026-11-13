@@ -104,6 +104,62 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: password
 
+  mariadb:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:11@sha256:d36f18d65a0459510b8b0f643b226a6d299e3206486e2b64ff20754a6d291707 # 11
+        env:
+          MARIADB_ROOT_PASSWORD: password
+          MARIADB_DATABASE: laravel
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.5]
+        laravel: [13.*]
+        stability: [prefer-stable]
+
+    name: MariaDB - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_mysql, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
+
+      - name: Install dependencies
+        shell: bash
+        env:
+          LARAVEL: ${{ matrix.laravel }}
+          STABILITY: ${{ matrix.stability }}
+        run: |
+          composer require "laravel/framework:$LARAVEL" --no-interaction --no-update
+          composer update --$STABILITY --prefer-dist --no-interaction --no-suggest
+
+      - name: Execute tests
+        run: vendor/bin/phpunit
+        env:
+          DB_CONNECTION: mariadb
+          DB_DATABASE: laravel
+          DB_USERNAME: root
+          DB_PASSWORD: password
+
   postgres:
     runs-on: ubuntu-latest
 
