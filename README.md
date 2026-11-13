@@ -166,17 +166,25 @@ By default, setting the driver for blueprints to `eloquent` will apply to *all* 
 
 The above example will set all forms and navigation blueprints to use eloquent, while keeping the rest as files.
 
-### Sorting text on SQLite
+### Sorting text alphabetically
 
-SQLite compares text byte by byte, so sorting by a title puts `Zebra` before `apple` and `Äpfel` after `zoo`. Flat files sort the same content alphabetically, ignoring case, with numbers in natural order (`2` before `10`).
+Flat files sort text alphabetically, ignoring case, with numbers in natural order (`2` before `10`). Databases often compare text byte by byte instead, which puts `Zebra` before `apple` and `Äpfel` after `zoo`:
 
-To get the flat-file order on SQLite, enable the `alphabetical_sorting` option. The driver then sorts entries, terms, assets and form submissions by text fields using the current site's locale, the same way Statamic sorts flat files.
+- **SQLite** sorts all text byte by byte.
+- **MySQL and MariaDB** sort columns by the table collation, but values stored in JSON (like entry and term titles, asset meta and form submission data) byte by byte.
+- **PostgreSQL** sorts by the database locale, which is usually alphabetical already.
+
+Enable the `alphabetical_sorting` option to sort entries, terms, assets and form submissions alphabetically:
 
 ```php
 // config/statamic/eloquent-driver.php
 
 'alphabetical_sorting' => true,
 ```
+
+- **SQLite** uses the current site's locale, the same way Statamic sorts flat files. SQLite can't use the indexes on text columns (like asset `basename`, `filename` and `path`) for this sort. In asset containers with fewer than 10,000 assets this adds around 1–5 ms per page in the asset browser. For anything larger, run your own benchmarks.
+- **MySQL and MariaDB** sort JSON values with the connection's `collation`, ignoring case and accents, without a performance cost. Numbers aren't sorted naturally.
+- **PostgreSQL** isn't changed. If your database uses the `C` locale or runs on Alpine Linux (musl), text is sorted byte by byte.
 
 ## Upgrading
 
