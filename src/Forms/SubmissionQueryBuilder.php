@@ -64,6 +64,10 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
             return $this->whereSites($values, $boolean);
         }
 
+        if ($column === 'id') {
+            $values = collect($values)->filter(fn ($id) => is_numeric($id))->values()->all();
+        }
+
         return parent::whereIn($column, $values, $boolean);
     }
 

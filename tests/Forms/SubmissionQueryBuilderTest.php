@@ -5,12 +5,14 @@ namespace Forms;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
 use Statamic\Facades\Site;
+use Statamic\Http\Middleware\DeleteTemporaryFileUploads;
 use Statamic\Jobs\DeletePartialFormSubmissions;
 use Statamic\Jobs\DeleteSpamFormSubmissions;
 use Tests\TestCase;
@@ -621,6 +623,41 @@ class SubmissionQueryBuilderTest extends TestCase
         $this->assertEquals(['fr', 'fr-spam', 'legacy'], $ids(FormSubmission::query()->whereIn('site', ['fr', 'en'])->where('data->id', '!=', 'en')));
         $this->assertEquals(['fr', 'fr-spam'], $ids(FormSubmission::query()->whereIn('site', ['fr'])));
         $this->assertSame(2, $form->querySubmissions()->where('site', Site::get('en'))->whereStatus('finalized')->count());
+    }
+
+    #[Test]
+    public function non_numeric_ids_are_ignored_when_filtering_by_ids()
+    {
+        $form = tap(Form::make('test'))->save();
+        $submission = tap(FormSubmission::make()->form($form)->data(['id' => 'a']))->save();
+
+        DB::enableQueryLog();
+
+        $this->assertEquals(['a'], FormSubmission::query()->whereIn('id', [$submission->id(), 'orphan'])->get()->map->get('id')->all());
+        $this->assertCount(0, FormSubmission::query()->whereIn('id', ['orphan'])->get());
+
+        $this->assertNotContains('orphan', collect(DB::getQueryLog())->flatMap->bindings->all());
+    }
+
+    #[Test]
+    public function the_upload_sweep_ignores_non_numeric_upload_folders()
+    {
+        $disk = Storage::fake('local');
+
+        $form = tap(Form::make('test'))->save();
+        $spam = tap(FormSubmission::make()->form($form)->markAsSpam())->save();
+
+        $paths = collect([$spam->id(), 'orphan'])->map(fn ($id) => "statamic/form-uploads/{$id}/document/file.txt");
+
+        $paths->each(function ($path) use ($disk) {
+            $disk->put($path, 'content');
+            touch($disk->path($path), now()->subWeeks(2)->timestamp);
+        });
+
+        (new \ReflectionMethod(DeleteTemporaryFileUploads::class, 'deleteFormUploadsOverAWeekOld'))->invoke(new DeleteTemporaryFileUploads);
+
+        $disk->assertExists($paths[0]);
+        $disk->assertMissing($paths[1]);
     }
 
     #[Test]
