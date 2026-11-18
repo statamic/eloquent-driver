@@ -173,6 +173,44 @@ class FormSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function lifecycle_keys_are_stored_when_data_only_returns_field_values()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = new class extends Submission
+        {
+            public function data($data = null)
+            {
+                if (func_num_args() === 0) {
+                    return parent::data()->reject(fn ($value, $key) => str_starts_with($key, '_'));
+                }
+
+                return parent::data($data);
+            }
+
+            public function fileData()
+            {
+                return parent::data()->all();
+            }
+        };
+
+        $submission->form($form)->data(['name' => 'John Doe'])->site('fr')->asPartial()->save();
+        $submission->markAsSpam()->save();
+
+        $data = SubmissionModel::find($submission->id())->data;
+
+        $this->assertSame('John Doe', $data['name']);
+        $this->assertSame('fr', $data['_site']);
+        $this->assertTrue($data['_partial']);
+        $this->assertIsInt($data['_marked_spam_at']);
+    }
+
+    #[Test]
     public function unsaved_submissions_have_a_stable_id()
     {
         $form = tap(Facades\Form::make('test')->title('Test'))->save();

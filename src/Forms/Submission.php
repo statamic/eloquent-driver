@@ -51,12 +51,13 @@ class Submission extends FileEntry
         $timestamp = (new $class)->fromDateTime($this->date());
 
         $model = $class::findOrNew($this->id());
+        $data = collect($this->fileData());
 
         return (! empty($model->id)) ? $model->fill([
-            'data' => $this->data->filter(fn ($v) => $v !== null),
+            'data' => $data->filter(fn ($v) => $v !== null),
         ]) : $model->fill([
             'id' => $this->id(),
-            'data' => $this->data,
+            'data' => $data,
             'form' => $this->form->handle(),
             'created_at' => $timestamp,
         ]);

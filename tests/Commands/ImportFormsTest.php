@@ -225,4 +225,25 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
     }
+
+    #[Test]
+    public function it_imports_submission_lifecycle_keys()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Form::make('contact'))->save();
+        $form->makeSubmission()->id('1635238840.6895')->data(['name' => 'Jack'])->site('fr')->asPartial()->markAsSpam()->save();
+
+        $this->artisan('statamic:eloquent:import-forms', ['--force' => true])->assertExitCode(0);
+
+        $data = SubmissionModel::first()->data;
+
+        $this->assertSame('Jack', $data['name']);
+        $this->assertSame('fr', $data['_site']);
+        $this->assertTrue($data['_partial']);
+        $this->assertIsInt($data['_marked_spam_at']);
+    }
 }
