@@ -154,6 +154,32 @@ class FormSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function unsaved_submissions_have_a_stable_id()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = $form->makeSubmission();
+        $id = $submission->id();
+
+        Carbon::setTestNow(now()->addSecond());
+
+        $this->assertSame($id, $submission->id());
+    }
+
+    #[Test]
+    public function saving_a_new_submission_twice_updates_the_same_row()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = $form->makeSubmission()->data(['name' => 'John Doe'])->asPartial();
+        $submission->save();
+        $submission->data(['name' => 'Jane Doe'])->save();
+
+        $this->assertSame(1, SubmissionModel::count());
+        $this->assertSame('Jane Doe', SubmissionModel::first()->data['name']);
+    }
+
+    #[Test]
     public function it_should_save_quietly()
     {
         $form = tap(Facades\Form::make('test')->title('Test'))

@@ -23,6 +23,15 @@ class Submission extends FileEntry
             ->model($model);
     }
 
+    public function id($id = null)
+    {
+        if (func_num_args() === 0 && is_null($this->id)) {
+            $this->id = parent::id();
+        }
+
+        return parent::id(...func_get_args());
+    }
+
     public function toModel()
     {
         $class = app('statamic.eloquent.form_submissions.model');
