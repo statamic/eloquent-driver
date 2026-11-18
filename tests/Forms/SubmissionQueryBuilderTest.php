@@ -2,6 +2,7 @@
 
 namespace Forms;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -9,6 +10,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
+use Statamic\Jobs\DeletePartialFormSubmissions;
+use Statamic\Jobs\DeleteSpamFormSubmissions;
 use Tests\TestCase;
 
 class SubmissionQueryBuilderTest extends TestCase
@@ -551,6 +554,46 @@ class SubmissionQueryBuilderTest extends TestCase
             'partial' => ['partial', ['partial']],
             'spam' => ['spam', ['spam', 'spam-partial']],
         ];
+    }
+
+    #[Test]
+    public function the_delete_spam_submissions_job_only_deletes_old_spam()
+    {
+        config(['statamic.forms.delete_spam_submissions_after' => 30]);
+
+        $form = tap(Form::make('test'))->save();
+
+        Carbon::setTestNow(now()->subDays(31));
+        FormSubmission::make()->form($form)->data(['id' => 'old-spam'])->markAsSpam()->save();
+        Carbon::setTestNow(now()->addSecond());
+        FormSubmission::make()->form($form)->data(['id' => 'old-finalized'])->save();
+        Carbon::setTestNow(now()->addDays(30));
+        FormSubmission::make()->form($form)->data(['id' => 'new-spam'])->markAsSpam()->save();
+        Carbon::setTestNow(now()->addDay());
+
+        (new DeleteSpamFormSubmissions)->handle();
+
+        $this->assertEquals(['new-spam', 'old-finalized'], FormSubmission::query()->get()->map->get('id')->sort()->values()->all());
+    }
+
+    #[Test]
+    public function the_delete_partial_submissions_job_only_deletes_old_partials()
+    {
+        config(['statamic.forms.delete_partial_submissions_after' => 7]);
+
+        $form = tap(Form::make('test'))->save();
+
+        Carbon::setTestNow(now()->subDays(8));
+        FormSubmission::make()->form($form)->data(['id' => 'old-partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addSecond());
+        FormSubmission::make()->form($form)->data(['id' => 'old-finalized'])->save();
+        Carbon::setTestNow(now()->addDays(7));
+        FormSubmission::make()->form($form)->data(['id' => 'new-partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addDay());
+
+        (new DeletePartialFormSubmissions)->handle();
+
+        $this->assertEquals(['new-partial', 'old-finalized'], FormSubmission::query()->get()->map->get('id')->sort()->values()->all());
     }
 
     #[Test]

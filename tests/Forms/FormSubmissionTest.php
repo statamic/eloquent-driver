@@ -154,6 +154,25 @@ class FormSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function lifecycle_keys_are_stored_in_the_data_column()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = tap($form->makeSubmission()->data(['name' => 'John Doe'])->site('fr')->asPartial()->markAsSpam())->save();
+
+        $data = SubmissionModel::find($submission->id())->data;
+
+        $this->assertSame('fr', $data['_site']);
+        $this->assertTrue($data['_partial']);
+        $this->assertIsInt($data['_marked_spam_at']);
+    }
+
+    #[Test]
     public function unsaved_submissions_have_a_stable_id()
     {
         $form = tap(Facades\Form::make('test')->title('Test'))->save();

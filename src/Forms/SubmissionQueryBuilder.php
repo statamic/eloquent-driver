@@ -41,9 +41,9 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
     {
         return match ($status) {
             'any' => $this,
-            'finalized' => $this->whereNotTrue('partial')->whereNotTrue('spam'),
-            'partial' => $this->where('partial', true)->whereNotTrue('spam'),
-            'spam' => $this->where('spam', true),
+            'finalized' => $this->whereNotTrue('_partial')->whereNull('_marked_spam_at'),
+            'partial' => $this->where('_partial', true)->whereNull('_marked_spam_at'),
+            'spam' => $this->whereNotNull('_marked_spam_at'),
             default => throw new \Exception("Invalid status [$status]"),
         };
     }
