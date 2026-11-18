@@ -11,7 +11,9 @@ use Statamic\Eloquent\Fields\Concerns\PreservesSetOrder;
 use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Blueprint as BlueprintFacade;
 use Statamic\Fields\Blueprint as StacheBlueprint;
+use Statamic\Fields\BlueprintRepository;
 use Statamic\Fields\Fieldset as StacheFieldset;
+use Statamic\Fields\FieldsetRepository;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
@@ -53,16 +55,16 @@ class ExportBlueprints extends Command
 
     private function usingDefaultRepositories(Closure $callback)
     {
-        Facade::clearResolvedInstance(\Statamic\Fields\BlueprintRepository::class);
-        Facade::clearResolvedInstance(\Statamic\Fields\FieldsetRepository::class);
+        Facade::clearResolvedInstance(BlueprintRepository::class);
+        Facade::clearResolvedInstance(FieldsetRepository::class);
 
-        app()->bind(\Statamic\Fields\BlueprintRepository::class, function () {
-            return (new \Statamic\Fields\BlueprintRepository)
+        app()->bind(BlueprintRepository::class, function () {
+            return (new BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
         });
 
-        app()->singleton(\Statamic\Fields\FieldsetRepository::class, function () {
-            return (new \Statamic\Fields\FieldsetRepository)
+        app()->singleton(FieldsetRepository::class, function () {
+            return (new FieldsetRepository)
                 ->setDirectory(resource_path('fieldsets'));
         });
 

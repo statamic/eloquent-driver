@@ -24,7 +24,7 @@ class FieldsetTest extends TestCase
         );
 
         $this->app->bind('statamic.eloquent.fieldsets.model', function () {
-            return \Statamic\Eloquent\Fields\FieldsetModel::class;
+            return FieldsetModel::class;
         });
     }
 

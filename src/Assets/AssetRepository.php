@@ -53,7 +53,7 @@ class AssetRepository extends BaseRepository
             $url = $siteUrl.$url;
         }
 
-        $path = Str::after($url, $containerUrl);
+        $path = rawurldecode(Str::after($url, $containerUrl));
 
         if (Str::startsWith($path, '/')) {
             $path = substr($path, 1);
@@ -83,6 +83,10 @@ class AssetRepository extends BaseRepository
 
         $id = $asset->id();
         Blink::put("eloquent-asset-{$id}", $asset);
+
+        if ($asset->folder() !== '/') {
+            $asset->container()->contents()->add($asset->folder())->save();
+        }
     }
 
     public static function bindings(): array

@@ -2,18 +2,25 @@
 
 namespace Statamic\Eloquent;
 
+use DateTimeInterface;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Statamic\Fields\Field;
 
 trait QueriesJsonColumns
 {
-    public function orderBy($column, $direction = 'asc')
+    use CollatesOrderBy {
+        orderByColumn as orderByCollatedColumn;
+    }
+
+    protected function orderByColumn($column, string $direction): void
     {
         $actualColumn = $this->column($column);
 
         if (
-            Str::contains($actualColumn, ['data->', 'meta->'])
+            is_string($actualColumn)
+            && Str::contains($actualColumn, ['data->', 'meta->'])
             && $jsonCast = $this->getJsonCasts()->get($column)
         ) {
             $grammar = $this->builder->getConnection()->getQueryGrammar();
@@ -35,7 +42,7 @@ trait QueriesJsonColumns
                         ->orderByRaw("cast({$wrappedEndDateColumn} as {$jsonCast}) {$direction}");
                 }
 
-                return $this;
+                return;
             }
 
             // SQLite casts dates to year, which is pretty unhelpful.
@@ -45,15 +52,106 @@ trait QueriesJsonColumns
             ) {
                 $this->builder->orderByRaw("datetime({$wrappedColumn}) {$direction}");
 
-                return $this;
+                return;
             }
 
             $this->builder->orderByRaw("cast({$wrappedColumn} as {$jsonCast}) {$direction}");
 
+            return;
+        }
+
+        $this->orderByCollatedColumn($column, $direction);
+    }
+
+    public function whereDate($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            $grammar = $this->builder->getConnection()->getQueryGrammar();
+            $wrappedColumn = $grammar->wrap($actualColumn);
+
+            if (! ($value instanceof DateTimeInterface)) {
+                $value = Carbon::parse($value);
+            }
+
+            $this->builder->whereRaw(
+                "({$wrappedColumn})::timestamp::date {$operator} ?",
+                [$value->format('Y-m-d')],
+                $boolean
+            );
+
             return $this;
         }
 
-        parent::orderBy($column, $direction);
+        return parent::whereDate($column, $operator, $value, $boolean);
+    }
+
+    public function whereMonth($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('month', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereMonth($column, $operator, $value, $boolean);
+    }
+
+    public function whereDay($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('day', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereDay($column, $operator, $value, $boolean);
+    }
+
+    public function whereYear($column, $operator, $value = null, $boolean = 'and')
+    {
+        if (func_num_args() === 2) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        $actualColumn = $this->column($column);
+
+        if ($this->isJsonColumnOnPostgres($actualColumn)) {
+            return $this->dateBasedWhereJsonPostgres('year', $actualColumn, $operator, $value, $boolean);
+        }
+
+        return parent::whereYear($column, $operator, $value, $boolean);
+    }
+
+    private function isJsonColumnOnPostgres(string $column): bool
+    {
+        return Str::contains($column, ['data->', 'meta->'])
+            && str_contains(get_class($this->builder->getConnection()->getQueryGrammar()), 'PostgresGrammar');
+    }
+
+    private function dateBasedWhereJsonPostgres(string $type, string $column, string $operator, $value, string $boolean): static
+    {
+        $grammar = $this->builder->getConnection()->getQueryGrammar();
+        $wrappedColumn = $grammar->wrap($column);
+
+        $this->builder->whereRaw(
+            "extract({$type} from ({$wrappedColumn})::timestamp) {$operator} ?",
+            [$value],
+            $boolean
+        );
 
         return $this;
     }

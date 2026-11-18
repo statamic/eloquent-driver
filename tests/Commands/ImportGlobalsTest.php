@@ -11,6 +11,9 @@ use Statamic\Contracts\Globals\Variables as VariablesContract;
 use Statamic\Eloquent\Globals\GlobalSetModel;
 use Statamic\Eloquent\Globals\VariablesModel;
 use Statamic\Facades\GlobalSet;
+use Statamic\Globals\Variables;
+use Statamic\Stache\Repositories\GlobalRepository;
+use Statamic\Stache\Repositories\GlobalVariablesRepository;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -26,9 +29,9 @@ class ImportGlobalsTest extends TestCase
         Facade::clearResolvedInstance(GlobalVariablesRepositoryContract::class);
 
         app()->bind(GlobalSetContract::class, \Statamic\Globals\GlobalSet::class);
-        app()->bind(VariablesContract::class, \Statamic\Globals\Variables::class);
-        app()->bind(GlobalRepositoryContract::class, \Statamic\Stache\Repositories\GlobalRepository::class);
-        app()->bind(GlobalVariablesRepositoryContract::class, \Statamic\Stache\Repositories\GlobalVariablesRepository::class);
+        app()->bind(VariablesContract::class, Variables::class);
+        app()->bind(GlobalRepositoryContract::class, GlobalRepository::class);
+        app()->bind(GlobalVariablesRepositoryContract::class, GlobalVariablesRepository::class);
     }
 
     #[Test]
@@ -50,7 +53,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(1, VariablesModel::all());
 
         $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -70,7 +73,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(1, VariablesModel::all());
 
         $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -92,7 +95,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(0, VariablesModel::all());
 
         $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -112,7 +115,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(0, VariablesModel::all());
 
         $this->assertDatabaseHas('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseMissing('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -134,7 +137,7 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(1, VariablesModel::all());
 
         $this->assertDatabaseMissing('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -154,6 +157,6 @@ class ImportGlobalsTest extends TestCase
         $this->assertCount(1, VariablesModel::all());
 
         $this->assertDatabaseMissing('global_sets', ['handle' => 'footer', 'title' => 'Footer']);
-        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('global_set_variables', ['handle' => 'footer', 'locale' => 'en', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 }

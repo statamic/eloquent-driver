@@ -53,10 +53,7 @@ class AddonSettingsRepositoryTest extends TestCase
 
         $settings->save();
 
-        $this->assertDatabaseHas('addon_settings', [
-            'addon' => 'vendor/test-addon',
-            'settings' => json_encode(['foo' => 'bar', 'baz' => 'qux']),
-        ]);
+        $this->assertEquals(['foo' => 'bar', 'baz' => 'qux'], AddonSettingsModel::where('addon', 'vendor/test-addon')->first()?->settings);
     }
 
     #[Test]

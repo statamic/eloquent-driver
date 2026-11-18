@@ -14,6 +14,10 @@ use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
+use Statamic\Stache\Repositories\CollectionRepository;
+use Statamic\Stache\Repositories\CollectionTreeRepository;
+use Statamic\Stache\Repositories\EntryRepository;
+use Statamic\Structures\CollectionTree;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -31,11 +35,11 @@ class ImportEntriesTest extends TestCase
         Facade::clearResolvedInstance(CollectionTreeRepositoryContract::class);
 
         app()->bind(CollectionContract::class, \Statamic\Entries\Collection::class);
-        app()->bind(CollectionTreeContract::class, \Statamic\Structures\CollectionTree::class);
-        app()->bind(CollectionRepositoryContract::class, \Statamic\Stache\Repositories\CollectionRepository::class);
-        app()->bind(CollectionTreeRepositoryContract::class, \Statamic\Stache\Repositories\CollectionTreeRepository::class);
+        app()->bind(CollectionTreeContract::class, CollectionTree::class);
+        app()->bind(CollectionRepositoryContract::class, CollectionRepository::class);
+        app()->bind(CollectionTreeRepositoryContract::class, CollectionTreeRepository::class);
 
-        app()->bind(EntryRepositoryContract::class, \Statamic\Stache\Repositories\EntryRepository::class);
+        app()->bind(EntryRepositoryContract::class, EntryRepository::class);
         app()->bind(EntryContract::class, \Statamic\Entries\Entry::class);
     }
 
@@ -53,7 +57,7 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(1, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => '{"foo":"bar"}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar'])]);
     }
 
     #[Test]
@@ -79,8 +83,8 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(2, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => '{"foo":"bar"}']);
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => '{"foo":"bar","baz":"qux","__localized_fields":[]}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'en',  'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar'])]);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'site' => 'fr', 'slug' => 'foo', 'data' => $this->castAsJson(['foo' => 'bar', 'baz' => 'qux', '__localized_fields' => []])]);
     }
 
     #[Test]
@@ -97,6 +101,6 @@ class ImportEntriesTest extends TestCase
 
         $this->assertCount(1, EntryModel::all());
 
-        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'template-test', 'data' => '{"foo":"bar","template":"some.template"}']);
+        $this->assertDatabaseHas('entries', ['collection' => 'pages', 'slug' => 'template-test', 'data' => $this->castAsJson(['foo' => 'bar', 'template' => 'some.template'])]);
     }
 }

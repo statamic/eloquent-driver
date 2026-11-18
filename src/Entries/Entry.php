@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Entries\Entry as FileEntry;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Collection as CollectionFacade;
 use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Support\Arr;
 
@@ -16,15 +17,17 @@ class Entry extends FileEntry
 
     public static function fromModel(Model $model)
     {
-        $data = isset($model->data['__localized_fields'])
-            ? collect($model->data['__localized_fields'])->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
+        $localizedFields = $model->data['__localized_fields'] ?? null;
+
+        $data = $localizedFields !== null
+            ? collect($localizedFields)->reject(fn ($field) => $field === 'date')->mapWithKeys(fn ($field) => [$field => $model->data[$field] ?? null])
             : $model->data;
 
         foreach ((new self)->getDataColumnMappings($model) as $key) {
             $data[$key] = $model->$key;
         }
 
-        $entry = (new static)
+        $entry = static::newInstanceForCollection($model->collection)
             ->origin($model->origin_id)
             ->locale($model->site)
             ->slug($model->slug)
@@ -35,8 +38,18 @@ class Entry extends FileEntry
             ->published($model->published)
             ->model($model);
 
-        if ($model->date && $entry->collection()->dated()) {
+        // a localization owns its date only when its marker lists it; roots and rows without a marker keep the column date
+        $ownsDate = ! $model->origin_id || $localizedFields === null || in_array('date', $localizedFields, true);
+
+        if ($model->date && $ownsDate && $entry->collection()->dated()) {
             $entry->date($model->date);
+        }
+
+        // a localization owns its order only when its marker lists it; otherwise it inherits the origin's order
+        $ownsOrder = ! $model->origin_id || in_array('order', $localizedFields ?? [], true);
+
+        if ($model->order !== null && $ownsOrder && ! $entry->hasStructure()) {
+            $entry->set('order', $model->order);
         }
 
         if (config('statamic.system.track_last_update')) {
@@ -46,6 +59,16 @@ class Entry extends FileEntry
         }
 
         return $entry->syncOriginal();
+    }
+
+    /**
+     * Performance optimization: start with the collection's entry class if it extends the Eloquent entry
+     */
+    protected static function newInstanceForCollection($handle)
+    {
+        $class = Blink::once("collection-{$handle}", fn () => CollectionFacade::findByHandle($handle))?->entryClass();
+
+        return $class && is_subclass_of($class, self::class) ? app($class) : new static;
     }
 
     public function toModel()
@@ -60,7 +83,7 @@ class Entry extends FileEntry
         $data = $source->data()
             ->merge(method_exists($source, 'computedData') ? $source->computedData() : []);
 
-        $date = $source->hasDate() ? $source->date() : null;
+        $date = $source->hasDate() ? $source->date()->copy()->setTimezone(config('app.timezone')) : null;
 
         $directOrigin = $source->origin();
 
@@ -84,16 +107,14 @@ class Entry extends FileEntry
 
                 $directOriginData = $directOrigin->data();
 
-                // remove any fields in entry data that are marked as localized but value is present, and matches origin value
+                // remove any fields in entry data that are marked as localized but value is present, and matches the
+                // value inherited from the closest origin that carries the field (a localized null included)
                 $localizedFields = [];
                 foreach ($localizedBlueprintFields as $blueprintField) {
                     if ($data->has($blueprintField)) {
                         $fieldOrigin = $directOrigin;
                         $fieldOriginData = $directOriginData;
-                        while (
-                            $fieldOrigin->hasOrigin()
-                            && ! in_array($blueprintField, $fieldOriginData->get('__localized_fields') ?? [])
-                        ) {
+                        while ($fieldOrigin->hasOrigin() && ! $fieldOriginData->has($blueprintField)) {
                             $fieldOrigin = $fieldOrigin->origin();
                             $fieldOriginData = $fieldOrigin->data();
                         }
@@ -108,11 +129,16 @@ class Entry extends FileEntry
 
                 $data = $directOrigin->data()->merge($data);
 
-                $data->put('__localized_fields', $localizedFields);
+                $originDate = $directOrigin->hasDate() ? $directOrigin->date()?->copy()->setTimezone(config('app.timezone')) : null;
 
-                if (! in_array('date', $localizedFields)) {
-                    $date = $directOrigin->hasDate() ? $directOrigin->date() : null;
+                // the date is localized like any other field: when the blueprint allows it and the own date differs from the origin's
+                if (in_array('date', $localizedBlueprintFields, true) && $source->hasExplicitDate() && ! $date->equalTo($originDate)) {
+                    $localizedFields[] = 'date';
+                } else {
+                    $date = $originDate;
                 }
+
+                $data->put('__localized_fields', $localizedFields);
             }
         }
 
@@ -171,6 +197,21 @@ class Entry extends FileEntry
         }
 
         return $this;
+    }
+
+    /**
+     * Same dirty state attributes as Statamic itself, minus `path` which eloquent entries don't have.
+     */
+    public function getCurrentDirtyStateAttributes(): array
+    {
+        return array_merge([
+            'collection' => $this->collectionHandle(),
+            'locale' => $this->locale(),
+            'origin' => $this->hasOrigin() ? $this->origin()->id() : null,
+            'slug' => $this->slug(),
+            'date' => optional($this->date())->format('Y-m-d-Hi'),
+            'published' => $this->published(),
+        ], $this->data()->except(['updated_at'])->toArray());
     }
 
     public function fileLastModified()

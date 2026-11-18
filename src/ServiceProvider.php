@@ -20,30 +20,59 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Tokens\TokenRepository as TokenRepositoryContract;
+use Statamic\Eloquent\AddonSettings\AddonSettings;
 use Statamic\Eloquent\AddonSettings\AddonSettingsRepository;
+use Statamic\Eloquent\Assets\Asset;
+use Statamic\Eloquent\Assets\AssetContainer;
 use Statamic\Eloquent\Assets\AssetContainerContents as EloquentAssetContainerContents;
 use Statamic\Eloquent\Assets\AssetContainerRepository;
 use Statamic\Eloquent\Assets\AssetQueryBuilder;
 use Statamic\Eloquent\Assets\AssetRepository;
+use Statamic\Eloquent\Collections\Collection;
 use Statamic\Eloquent\Collections\CollectionRepository;
 use Statamic\Eloquent\Entries\EntryQueryBuilder;
 use Statamic\Eloquent\Entries\EntryRepository;
+use Statamic\Eloquent\Forms\Form;
 use Statamic\Eloquent\Forms\FormRepository;
+use Statamic\Eloquent\Forms\Submission;
 use Statamic\Eloquent\Forms\SubmissionQueryBuilder;
 use Statamic\Eloquent\Forms\SubmissionRepository;
 use Statamic\Eloquent\Globals\GlobalRepository;
+use Statamic\Eloquent\Globals\GlobalSet;
 use Statamic\Eloquent\Globals\GlobalVariablesRepository;
+use Statamic\Eloquent\Globals\Variables;
+use Statamic\Eloquent\Revisions\Revision;
 use Statamic\Eloquent\Revisions\RevisionQueryBuilder;
 use Statamic\Eloquent\Revisions\RevisionRepository;
 use Statamic\Eloquent\Structures\CollectionTreeRepository;
+use Statamic\Eloquent\Structures\Nav;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
+use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
+use Statamic\Eloquent\Taxonomies\Term;
 use Statamic\Eloquent\Taxonomies\TermQueryBuilder;
 use Statamic\Eloquent\Taxonomies\TermRepository;
+use Statamic\Eloquent\Tokens\Token;
 use Statamic\Eloquent\Tokens\TokenRepository;
+use Statamic\Eloquent\Updates\AddBlueprintToEntriesTable;
+use Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable;
+use Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable;
+use Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable;
+use Statamic\Eloquent\Updates\AddOrderToEntriesTable;
+use Statamic\Eloquent\Updates\AddOrderToSitesTable;
+use Statamic\Eloquent\Updates\ChangeDefaultBlueprint;
+use Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType;
+use Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms;
+use Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables;
+use Statamic\Eloquent\Updates\DropStatusOnEntries;
+use Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle;
+use Statamic\Eloquent\Updates\SplitGlobalsFromVariables;
+use Statamic\Eloquent\Updates\UpdateGlobalVariables;
 use Statamic\Facades\Stache;
+use Statamic\Fields\BlueprintRepository;
 use Statamic\Providers\AddonServiceProvider;
+use Statamic\Sites\Sites;
 use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
@@ -51,20 +80,20 @@ class ServiceProvider extends AddonServiceProvider
     protected $config = false;
 
     protected $updateScripts = [
-        \Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable::class,
-        \Statamic\Eloquent\Updates\AddOrderToEntriesTable::class,
-        \Statamic\Eloquent\Updates\AddBlueprintToEntriesTable::class,
-        \Statamic\Eloquent\Updates\ChangeDefaultBlueprint::class,
-        \Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms::class,
-        \Statamic\Eloquent\Updates\SplitGlobalsFromVariables::class,
-        \Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable::class,
-        \Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle::class,
-        \Statamic\Eloquent\Updates\DropStatusOnEntries::class,
-        \Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType::class,
-        \Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable::class,
-        \Statamic\Eloquent\Updates\AddOrderToSitesTable::class,
-        \Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables::class,
-        \Statamic\Eloquent\Updates\UpdateGlobalVariables::class,
+        AddMetaAndIndexesToAssetsTable::class,
+        AddOrderToEntriesTable::class,
+        AddBlueprintToEntriesTable::class,
+        ChangeDefaultBlueprint::class,
+        DropForeignKeysOnEntriesAndForms::class,
+        SplitGlobalsFromVariables::class,
+        AddIdToAttributesInRevisionsTable::class,
+        RelateFormSubmissionsByHandle::class,
+        DropStatusOnEntries::class,
+        ChangeFormSubmissionsIdType::class,
+        AddIndexToDateOnEntriesTable::class,
+        AddOrderToSitesTable::class,
+        DropOriginOnGlobalSetVariables::class,
+        UpdateGlobalVariables::class,
     ];
 
     public function boot()
@@ -234,37 +263,37 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerSites();
 
         $this->registerSerializableClasses(array_filter([
-            \Statamic\Eloquent\AddonSettings\AddonSettings::class,
+            AddonSettings::class,
             config('statamic.eloquent-driver.addon_settings.model'),
-            \Statamic\Eloquent\Assets\AssetContainer::class,
+            AssetContainer::class,
             config('statamic.eloquent-driver.asset_containers.model'),
             config('statamic.eloquent-driver.assets.asset'),
             config('statamic.eloquent-driver.assets.model'),
-            \Statamic\Eloquent\Collections\Collection::class,
+            Collection::class,
             config('statamic.eloquent-driver.collections.model'),
             config('statamic.eloquent-driver.collection_trees.tree'),
             config('statamic.eloquent-driver.collection_trees.model'),
             config('statamic.eloquent-driver.entries.entry'),
             config('statamic.eloquent-driver.entries.model'),
-            \Statamic\Eloquent\Forms\Form::class,
+            Form::class,
             config('statamic.eloquent-driver.forms.model'),
-            \Statamic\Eloquent\Forms\Submission::class,
+            Submission::class,
             config('statamic.eloquent-driver.form_submissions.model'),
-            \Statamic\Eloquent\Globals\GlobalSet::class,
+            GlobalSet::class,
             config('statamic.eloquent-driver.global_sets.model'),
-            \Statamic\Eloquent\Globals\Variables::class,
+            Variables::class,
             config('statamic.eloquent-driver.global_set_variables.model'),
-            \Statamic\Eloquent\Structures\Nav::class,
+            Nav::class,
             config('statamic.eloquent-driver.navigations.model'),
             config('statamic.eloquent-driver.navigation_trees.tree'),
             config('statamic.eloquent-driver.navigation_trees.model'),
-            \Statamic\Eloquent\Revisions\Revision::class,
+            Revision::class,
             config('statamic.eloquent-driver.revisions.model'),
-            \Statamic\Eloquent\Taxonomies\Taxonomy::class,
+            Taxonomy::class,
             config('statamic.eloquent-driver.taxonomies.model'),
-            \Statamic\Eloquent\Taxonomies\Term::class,
+            Term::class,
             config('statamic.eloquent-driver.terms.model'),
-            \Statamic\Eloquent\Tokens\Token::class,
+            Token::class,
             config('statamic.eloquent-driver.tokens.model'),
         ]));
     }
@@ -310,7 +339,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind('statamic.eloquent.assets.asset', function () {
-            return config('statamic.eloquent-driver.assets.asset', \Statamic\Eloquent\Assets\Asset::class);
+            return config('statamic.eloquent-driver.assets.asset', Asset::class);
         });
 
         if (config('statamic.eloquent-driver.assets.driver', 'file') != 'eloquent') {
@@ -350,13 +379,13 @@ class ServiceProvider extends AddonServiceProvider
         // Capture fallbacks (e.g. Statamic core's 'default' fallback) before replacing the singleton
         // so non-eloquent-driven namespace lookups continue to work the same as the file driver.
         $fallbacks = [];
-        if ($this->app->bound(\Statamic\Fields\BlueprintRepository::class)) {
-            $previous = $this->app->make(\Statamic\Fields\BlueprintRepository::class);
+        if ($this->app->bound(BlueprintRepository::class)) {
+            $previous = $this->app->make(BlueprintRepository::class);
             $fallbacks = (new \ReflectionProperty($previous, 'fallbacks'))->getValue($previous);
         }
 
-        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () use ($fallbacks) {
-            $repo = (new \Statamic\Eloquent\Fields\BlueprintRepository)
+        $this->app->singleton(BlueprintRepository::class, function () use ($fallbacks) {
+            $repo = (new Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
 
             foreach ($fallbacks as $handle => $fallback) {
@@ -643,7 +672,7 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        $this->app->singleton(\Statamic\Sites\Sites::class, \Statamic\Eloquent\Sites\Sites::class);
+        $this->app->singleton(Sites::class, \Statamic\Eloquent\Sites\Sites::class);
     }
 
     protected function addAboutCommandInfo()

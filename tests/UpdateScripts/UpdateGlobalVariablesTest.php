@@ -50,7 +50,7 @@ class UpdateGlobalVariablesTest extends TestCase
 
         $this->assertDatabaseHas(GlobalSetModel::class, [
             'handle' => 'test',
-            'settings' => json_encode([
+            'settings' => $this->castAsJson([
                 'sites' => [
                     'en' => null,
                     'fr' => 'en',

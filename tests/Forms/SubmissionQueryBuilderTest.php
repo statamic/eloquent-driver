@@ -3,6 +3,7 @@
 namespace Forms;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
@@ -23,6 +24,22 @@ class SubmissionQueryBuilderTest extends TestCase
         $submissions = FormSubmission::whereForm('test');
         $this->assertInstanceOf(Collection::class, $submissions);
         $this->assertEveryItemIsInstanceOf(Submission::class, $submissions);
+    }
+
+    #[Test]
+    public function it_only_selects_one_row_when_getting_the_first_submission()
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'a', 'test' => 'foo'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'b', 'test' => 'foo'])->save();
+
+        DB::enableQueryLog();
+
+        $submission = FormSubmission::query()->where('test', 'foo')->orderBy('id', 'desc')->first();
+
+        $this->assertInstanceOf(Submission::class, $submission);
+        $query = collect(DB::getQueryLog())->pluck('query')->first(fn ($query) => str_contains($query, 'form_submissions'));
+        $this->assertStringContainsString('limit 1', $query);
     }
 
     #[Test]
@@ -378,6 +395,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -401,6 +422,10 @@ class SubmissionQueryBuilderTest extends TestCase
     {
         if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
         }
 
         $form = tap(Form::make('test'))->save();
@@ -428,6 +453,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -448,6 +477,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -458,7 +491,7 @@ class SubmissionQueryBuilderTest extends TestCase
         $entries = FormSubmission::query()->whereJsonOverlaps('test_taxonomy', ['taxonomy-1'])->orWhereJsonDoesntOverlap('test_taxonomy', ['taxonomy-5'])->get();
 
         $this->assertCount(4, $entries);
-        $this->assertEquals(['1', '3', '2', '4'], $entries->map->get('id')->all());
+        $this->assertEquals(['1', '2', '3', '4'], $entries->map->get('id')->sort()->values()->all());
     }
 
     #[Test]

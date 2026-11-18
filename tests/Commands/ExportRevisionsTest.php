@@ -10,6 +10,8 @@ use Statamic\Contracts\Revisions\Revision as RevisionContract;
 use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContract;
 use Statamic\Eloquent\Revisions\RevisionModel;
 use Statamic\Facades\Stache;
+use Statamic\Revisions\Revision;
+use Statamic\Revisions\RevisionRepository;
 use Tests\TestCase;
 
 class ExportRevisionsTest extends TestCase
@@ -28,8 +30,8 @@ class ExportRevisionsTest extends TestCase
         Stache::store('revisions')->directory($this->revisionsDir);
 
         Facade::clearResolvedInstance(RevisionRepositoryContract::class);
-        app()->bind(RevisionRepositoryContract::class, \Statamic\Revisions\RevisionRepository::class);
-        app()->bind(RevisionContract::class, \Statamic\Revisions\Revision::class);
+        app()->bind(RevisionRepositoryContract::class, RevisionRepository::class);
+        app()->bind(RevisionContract::class, Revision::class);
     }
 
     protected function tearDown(): void

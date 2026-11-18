@@ -5,8 +5,10 @@ namespace Tests\Data\Fields;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Eloquent\Fields\BlueprintModel;
+use Statamic\Eloquent\Fields\FieldsetModel;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
+use Statamic\Fields\BlueprintRepository;
 use Statamic\Support\Arr;
 use Tests\TestCase;
 
@@ -18,7 +20,7 @@ class BlueprintTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->singleton(\Statamic\Fields\BlueprintRepository::class, function () {
+        $this->app->singleton(BlueprintRepository::class, function () {
             return (new \Statamic\Eloquent\Fields\BlueprintRepository)
                 ->setDirectory(resource_path('blueprints'));
         });
@@ -29,11 +31,11 @@ class BlueprintTest extends TestCase
         );
 
         $this->app->bind('statamic.eloquent.blueprints.blueprint_model', function () {
-            return \Statamic\Eloquent\Fields\BlueprintModel::class;
+            return BlueprintModel::class;
         });
 
         $this->app->bind('statamic.eloquent.blueprints.fieldset_model', function () {
-            return \Statamic\Eloquent\Fields\FieldsetModel::class;
+            return FieldsetModel::class;
         });
     }
 
@@ -149,8 +151,8 @@ class BlueprintTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.blueprints.namespaces', ['forms']);
 
-        app(\Statamic\Fields\BlueprintRepository::class)->setFallback('default', function () {
-            return \Statamic\Facades\Blueprint::make()->setContents([
+        app(BlueprintRepository::class)->setFallback('default', function () {
+            return Blueprint::make()->setContents([
                 'tabs' => ['main' => ['sections' => [['fields' => [['handle' => 'content', 'field' => ['type' => 'markdown', 'localizable' => true]]]]]]],
             ]);
         });
