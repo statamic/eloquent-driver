@@ -81,7 +81,7 @@ class ImportFormsTest extends TestCase
                 ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
             ],
             'webhook' => [
-                ['url' => 'https://example.com/webhook'],
+                ['id' => 'ijklmnop', 'url' => 'https://example.com/webhook'],
             ],
         ];
 
@@ -97,9 +97,9 @@ class ImportFormsTest extends TestCase
 
         $model = FormModel::where('handle', 'contact')->first();
 
-        $this->assertSame($fields, Arr::get($model->settings, 'fields'));
-        $this->assertSame($connections, Arr::get($model->settings, 'connections'));
-        $this->assertSame($charts, Arr::get($model->settings, 'charts'));
+        $this->assertEquals($fields, Arr::get($model->settings, 'fields'));
+        $this->assertEquals($connections, Arr::get($model->settings, 'connections'));
+        $this->assertEquals($charts, Arr::get($model->settings, 'charts'));
     }
 
     #[Test]

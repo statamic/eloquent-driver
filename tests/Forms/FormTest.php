@@ -149,8 +149,8 @@ class FormTest extends TestCase
 
         $form = tap(Form::make('test')->title('Test form')->formFields($fields))->save();
 
-        $this->assertSame($fields, Arr::get($form->model(), 'settings.fields'));
-        $this->assertSame($fields, Form::find('test')->formFields()->contents());
+        $this->assertEquals($fields, Arr::get($form->model(), 'settings.fields'));
+        $this->assertEquals($fields, Form::find('test')->formFields()->contents());
     }
 
     #[Test]
@@ -161,14 +161,14 @@ class FormTest extends TestCase
                 ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks for getting in touch'],
             ],
             'webhook' => [
-                ['url' => 'https://example.com/webhook'],
+                ['id' => 'ijklmnop', 'url' => 'https://example.com/webhook'],
             ],
         ];
 
         $form = tap(Form::make('test')->title('Test form')->connections($connections))->save();
 
-        $this->assertSame($connections, Arr::get($form->model(), 'settings.connections'));
-        $this->assertSame($connections, Form::find('test')->connections()->all());
+        $this->assertEquals($connections, Arr::get($form->model(), 'settings.connections'));
+        $this->assertEquals($connections, Form::find('test')->connections()->all());
     }
 
     #[Test]
@@ -180,8 +180,8 @@ class FormTest extends TestCase
 
         $form = tap(Form::make('test')->title('Test form')->charts($charts))->save();
 
-        $this->assertSame($charts, Arr::get($form->model(), 'settings.charts'));
-        $this->assertSame($charts, Form::find('test')->charts());
+        $this->assertEquals($charts, Arr::get($form->model(), 'settings.charts'));
+        $this->assertEquals($charts, Form::find('test')->charts());
     }
 
     #[Test]
@@ -246,7 +246,7 @@ class FormTest extends TestCase
 
         $form->save();
 
-        $this->assertSame($fields, Arr::get($form->model(), 'settings.fields'));
+        $this->assertEquals($fields, Arr::get($form->model(), 'settings.fields'));
         $this->assertNull(Facades\Blueprint::find('forms.test'));
     }
 

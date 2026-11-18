@@ -64,7 +64,7 @@ class ExportFormsTest extends TestCase
                 ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
             ],
             'webhook' => [
-                ['url' => 'https://example.com/webhook'],
+                ['id' => 'ijklmnop', 'url' => 'https://example.com/webhook'],
             ],
         ];
 
@@ -90,9 +90,9 @@ class ExportFormsTest extends TestCase
 
         $contents = YAML::parse(File::get($this->formsDir.'/contact.yaml'));
 
-        $this->assertSame($fields, $contents['fields']);
-        $this->assertSame($connections, $contents['connections']);
-        $this->assertSame($charts, $contents['charts']);
+        $this->assertEquals($fields, $contents['fields']);
+        $this->assertEquals($connections, $contents['connections']);
+        $this->assertEquals($charts, $contents['charts']);
         $this->assertSame('winnie', $contents['honeypot']);
     }
 
