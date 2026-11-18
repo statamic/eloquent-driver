@@ -132,7 +132,7 @@ class Form extends FileEntry
             return false;
         }
 
-        $this->submissions()->each->delete();
+        $this->querySubmissions()->get()->each->delete();
         $this->model()->delete();
 
         Blink::forget("eloquent-forms-{$this->handle()}");

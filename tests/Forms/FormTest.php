@@ -2,10 +2,13 @@
 
 namespace Tests\Forms;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Forms\Form as EloquentForm;
 use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Events\FormCreated;
 use Statamic\Events\FormCreating;
 use Statamic\Events\FormDeleted;
@@ -275,7 +278,7 @@ class FormTest extends TestCase
             return false;
         });
 
-        $form = new \Statamic\Eloquent\Forms\Form('test');
+        $form = new EloquentForm('test');
         $form->handle('test');
         $form->save();
 
@@ -300,5 +303,32 @@ class FormTest extends TestCase
         Event::assertNotDispatched(FormDeleted::class);
 
         $this->assertTrue($return);
+    }
+
+    #[Test]
+    public function deleting_a_form_deletes_submissions_of_every_status()
+    {
+        $form = new class extends EloquentForm
+        {
+            public function submissions()
+            {
+                return $this->querySubmissions()->whereStatus('finalized')->get();
+            }
+        };
+
+        $form->handle('contact_us')->save();
+
+        Carbon::setTestNow(now()->subMinutes(3));
+        $form->makeSubmission()->data(['name' => 'Finalized'])->save();
+        Carbon::setTestNow(now()->addMinute());
+        $form->makeSubmission()->data(['name' => 'Partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addMinute());
+        $form->makeSubmission()->data(['name' => 'Spam'])->markAsSpam()->save();
+
+        $this->assertSame(3, SubmissionModel::count());
+
+        $form->delete();
+
+        $this->assertSame(0, SubmissionModel::count());
     }
 }
