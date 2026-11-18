@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
+use Statamic\Facades\Site;
 use Statamic\Jobs\DeletePartialFormSubmissions;
 use Statamic\Jobs\DeleteSpamFormSubmissions;
 use Tests\TestCase;
@@ -594,6 +595,32 @@ class SubmissionQueryBuilderTest extends TestCase
         (new DeletePartialFormSubmissions)->handle();
 
         $this->assertEquals(['new-partial', 'old-finalized'], FormSubmission::query()->get()->map->get('id')->sort()->values()->all());
+    }
+
+    #[Test]
+    public function it_filters_by_site()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'legacy'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'en'])->site('en')->save();
+        FormSubmission::make()->form($form)->data(['id' => 'fr'])->site('fr')->save();
+        FormSubmission::make()->form($form)->data(['id' => 'fr-spam'])->site('fr')->markAsSpam()->save();
+
+        $ids = fn ($query) => $query->get()->map->get('id')->sort()->values()->all();
+
+        $this->assertEquals(['en', 'legacy'], $ids(FormSubmission::query()->where('site', 'en')));
+        $this->assertEquals(['en', 'legacy'], $ids(FormSubmission::query()->where('site', Site::get('en'))));
+        $this->assertEquals(['fr', 'fr-spam'], $ids(FormSubmission::query()->where('site', '=', 'fr')));
+        $this->assertEquals(['fr'], $ids(FormSubmission::query()->where('site', Site::get('fr'))->whereStatus('finalized')));
+        $this->assertEquals(['en', 'fr', 'fr-spam', 'legacy'], $ids(FormSubmission::query()->where('site', 'fr')->orWhere('site', 'en')));
+        $this->assertEquals(['fr', 'fr-spam', 'legacy'], $ids(FormSubmission::query()->whereIn('site', ['fr', 'en'])->where('data->id', '!=', 'en')));
+        $this->assertEquals(['fr', 'fr-spam'], $ids(FormSubmission::query()->whereIn('site', ['fr'])));
+        $this->assertSame(2, $form->querySubmissions()->where('site', Site::get('en'))->whereStatus('finalized')->count());
     }
 
     #[Test]
