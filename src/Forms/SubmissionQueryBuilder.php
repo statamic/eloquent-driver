@@ -2,6 +2,7 @@
 
 namespace Statamic\Eloquent\Forms;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Statamic\Contracts\Forms\SubmissionQueryBuilder as BuilderContract;
 use Statamic\Data\DataCollection;
 use Statamic\Eloquent\CollatesOrderBy;
@@ -64,7 +65,7 @@ class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderCont
             return $this->whereSites($values, $boolean);
         }
 
-        if ($column === 'id') {
+        if ($column === 'id' && (is_array($values) || $values instanceof Arrayable)) {
             $values = collect($values)->filter(fn ($id) => is_numeric($id))->values()->all();
         }
 

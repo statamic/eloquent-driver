@@ -640,6 +640,17 @@ class SubmissionQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    public function ids_can_be_filtered_by_a_subquery()
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'a'])->save();
+
+        $submissions = FormSubmission::query()->whereIn('id', fn ($query) => $query->select('id')->from('form_submissions'))->get();
+
+        $this->assertEquals(['a'], $submissions->map->get('id')->all());
+    }
+
+    #[Test]
     public function the_upload_sweep_ignores_non_numeric_upload_folders()
     {
         $disk = Storage::fake('local');
