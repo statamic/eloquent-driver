@@ -17,19 +17,32 @@ class Submission extends FileEntry
     public static function fromModel(Model $model)
     {
         return (new static)
-            ->id($model->id)
+            ->id(static::normalizeId($model->id))
             ->date($model->created_at ?? Carbon::now())
             ->data(Arr::except($model->data, 'date'))
             ->model($model);
     }
 
-    public function id($id = null)
+    private static function normalizeId($id)
     {
-        if (func_num_args() === 0 && is_null($this->id)) {
-            $this->id = parent::id();
+        if (! is_numeric($id)) {
+            return $id;
         }
 
-        return parent::id(...func_get_args());
+        $id = (string) $id;
+
+        return str_contains($id, '.') ? rtrim(rtrim($id, '0'), '.') : $id;
+    }
+
+    public function id($id = null)
+    {
+        if (func_num_args() > 0) {
+            $this->id = $id;
+
+            return $this;
+        }
+
+        return $this->id ??= parent::id();
     }
 
     public function toModel()

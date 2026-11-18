@@ -186,6 +186,20 @@ class FormSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function ids_with_trailing_zeros_survive_a_round_trip()
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-18 12:00:00')->setMicro(120000));
+
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = tap($form->makeSubmission()->data(['name' => 'John Doe']))->save();
+
+        $this->assertSame('1795003200.12', $submission->id());
+        $this->assertSame('1795003200.12', $form->submission('1795003200.12')->id());
+        $this->assertSame('1795003200.12', Facades\FormSubmission::query()->first()->id());
+    }
+
+    #[Test]
     public function saving_a_new_submission_twice_updates_the_same_row()
     {
         $form = tap(Facades\Form::make('test')->title('Test'))->save();
