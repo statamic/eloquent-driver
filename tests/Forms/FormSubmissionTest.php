@@ -10,6 +10,7 @@ use Statamic\Eloquent\Forms\FormModel;
 use Statamic\Eloquent\Forms\Submission;
 use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Events\SubmissionCreated;
+use Statamic\Events\SubmissionCreating;
 use Statamic\Events\SubmissionDeleted;
 use Statamic\Events\SubmissionSaved;
 use Statamic\Facades;
@@ -119,6 +120,96 @@ class FormSubmissionTest extends TestCase
         ]))->save();
 
         $this->assertArrayNotHasKey('null_value', $submission->model()->data);
+    }
+
+    #[Test]
+    public function it_dispatches_submission_creating_on_first_save()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        Event::fake();
+
+        tap($form->makeSubmission()->data([
+            'name' => 'John Doe',
+        ]))->save();
+
+        Event::assertDispatched(SubmissionCreating::class);
+    }
+
+    #[Test]
+    public function partial_submissions_keep_their_lifecycle_keys()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))
+            ->save();
+
+        $submission = tap($form->makeSubmission()->data([
+            'name' => 'John Doe',
+        ])->asPartial())->save();
+
+        $fresh = Submission::fromModel($submission->model()->fresh());
+
+        $this->assertTrue($fresh->isPartial());
+        $this->assertSame('partial', $fresh->status());
+    }
+
+    #[Test]
+    public function lifecycle_keys_are_stored_in_the_data_column()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = tap($form->makeSubmission()->data(['name' => 'John Doe'])->site('fr')->asPartial()->markAsSpam())->save();
+
+        $data = SubmissionModel::find($submission->id())->data;
+
+        $this->assertSame('fr', $data['_site']);
+        $this->assertTrue($data['_partial']);
+        $this->assertIsInt($data['_marked_spam_at']);
+    }
+
+    #[Test]
+    public function unsaved_submissions_have_a_stable_id()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = $form->makeSubmission();
+        $id = $submission->id();
+
+        Carbon::setTestNow(now()->addSecond());
+
+        $this->assertSame($id, $submission->id());
+    }
+
+    #[Test]
+    public function ids_with_trailing_zeros_survive_a_round_trip()
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-18 12:00:00')->setMicro(120000));
+
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = tap($form->makeSubmission()->data(['name' => 'John Doe']))->save();
+
+        $this->assertSame('1795003200.12', $submission->id());
+        $this->assertSame('1795003200.12', $form->submission('1795003200.12')->id());
+        $this->assertSame('1795003200.12', Facades\FormSubmission::query()->first()->id());
+    }
+
+    #[Test]
+    public function saving_a_new_submission_twice_updates_the_same_row()
+    {
+        $form = tap(Facades\Form::make('test')->title('Test'))->save();
+
+        $submission = $form->makeSubmission()->data(['name' => 'John Doe'])->asPartial();
+        $submission->save();
+        $submission->data(['name' => 'Jane Doe'])->save();
+
+        $this->assertSame(1, SubmissionModel::count());
+        $this->assertSame('Jane Doe', SubmissionModel::first()->data['name']);
     }
 
     #[Test]

@@ -2,6 +2,7 @@
 
 namespace Tests\Commands;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Form as FormContract;
@@ -60,6 +61,45 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
+    }
+
+    #[Test]
+    public function it_imports_form_fields_connections_and_charts()
+    {
+        $fields = [
+            'sections' => [
+                [
+                    'fields' => [
+                        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+                    ],
+                ],
+            ],
+        ];
+
+        $connections = [
+            'email' => [
+                ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks'],
+            ],
+            'webhook' => [
+                ['id' => 'ijklmnop', 'url' => 'https://example.com/webhook'],
+            ],
+        ];
+
+        $charts = [
+            ['field' => 'name', 'chart' => 'popular_answers'],
+        ];
+
+        tap(Form::make('contact')->title('Contact')->formFields($fields)->connections($connections)->charts($charts))->save();
+
+        $this->artisan('statamic:eloquent:import-forms', ['--force' => true])
+            ->expectsOutputToContain('Forms imported successfully.')
+            ->assertExitCode(0);
+
+        $model = FormModel::where('handle', 'contact')->first();
+
+        $this->assertEquals($fields, Arr::get($model->settings, 'fields'));
+        $this->assertEquals($connections, Arr::get($model->settings, 'connections'));
+        $this->assertEquals($charts, Arr::get($model->settings, 'charts'));
     }
 
     #[Test]
@@ -184,5 +224,26 @@ class ImportFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jack'])]);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jason'])]);
         $this->assertDatabaseHas('form_submissions', ['form' => 'contact', 'data' => $this->castAsJson(['name' => 'Jesse'])]);
+    }
+
+    #[Test]
+    public function it_imports_submission_lifecycle_keys()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Form::make('contact'))->save();
+        $form->makeSubmission()->id('1635238840.6895')->data(['name' => 'Jack'])->site('fr')->asPartial()->markAsSpam()->save();
+
+        $this->artisan('statamic:eloquent:import-forms', ['--force' => true])->assertExitCode(0);
+
+        $data = SubmissionModel::first()->data;
+
+        $this->assertSame('Jack', $data['name']);
+        $this->assertSame('fr', $data['_site']);
+        $this->assertTrue($data['_partial']);
+        $this->assertIsInt($data['_marked_spam_at']);
     }
 }
