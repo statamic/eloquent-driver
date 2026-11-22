@@ -42,7 +42,7 @@ class EntryRepository extends StacheRepository
 
     public function findByUri(string $uri, ?string $site = null): ?EntryContract
     {
-        $blinkKey = 'eloquent-entry-'.md5(urlencode($uri)).($site ? '-'.$site : '');
+        $blinkKey = $this->uriBlinkKey($uri, $site);
         $item = Blink::once($blinkKey, function () use ($uri, $site) {
             return parent::findByUri($uri, $site);
         });
@@ -88,13 +88,13 @@ class EntryRepository extends StacheRepository
         $entry->model($model->fresh());
 
         Blink::put("eloquent-entry-{$entry->id()}", $entry);
-        Blink::put("eloquent-entry-{$entry->uri()}", $entry);
+        $this->forgetUriBlinkKeys($model);
     }
 
     public function delete($entry)
     {
         Blink::forget("eloquent-entry-{$entry->id()}");
-        Blink::forget("eloquent-entry-{$entry->uri()}");
+        $this->forgetUriBlinkKeys($entry->model());
 
         $entry->model()->delete();
     }
@@ -106,7 +106,10 @@ class EntryRepository extends StacheRepository
         $collection->queryEntries()
             ->when($ids->isNotEmpty(), fn ($query) => $query->whereIn('id', $ids))
             ->get()
-            ->each(fn ($entry) => $entry->model()->update(['uri' => $entry->uri()]));
+            ->each(function ($entry) {
+                $entry->model()->update(['uri' => $entry->uri()]);
+                $this->forgetUriBlinkKeys($entry->model());
+            });
     }
 
     public function updateOrders($collection, $ids = null)
@@ -152,5 +155,20 @@ class EntryRepository extends StacheRepository
         }
 
         parent::taxonomize($entry);
+    }
+
+    protected function uriBlinkKey(string $uri, ?string $site = null): string
+    {
+        return 'eloquent-entry-'.md5(urlencode($uri)).($site ? '-'.$site : '');
+    }
+
+    protected function forgetUriBlinkKeys($model): void
+    {
+        collect([$model->uri, $model->getPrevious()['uri'] ?? null])
+            ->filter()
+            ->each(function ($uri) use ($model) {
+                Blink::forget($this->uriBlinkKey($uri));
+                Blink::forget($this->uriBlinkKey($uri, $model->site));
+            });
     }
 }
