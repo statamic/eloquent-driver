@@ -13,6 +13,7 @@ use Statamic\Entries\EntryCollection;
 use Statamic\Events\CollectionTreeSaved;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
+use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
 
@@ -346,5 +347,20 @@ class EntryRepositoryTest extends TestCase
         $entry->delete();
 
         $this->assertNull(EntryFacade::findByUri('/blog/foo'));
+    }
+
+    #[Test]
+    public function it_does_not_find_an_entry_by_its_old_uri_after_updating_uris()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        (new Entry)->id(1)->collection($collection)->slug('alfa')->save();
+
+        EntryFacade::findByUri('/blog/alfa');
+        $collection->routes('posts/{slug}')->save();
+        Blink::store('entry-uris')->flush();
+        (new EntryRepository(new Stache))->updateUris($collection);
+
+        $this->assertNull(EntryFacade::findByUri('/blog/alfa'));
+        $this->assertEquals(1, EntryFacade::findByUri('/posts/alfa')?->id());
     }
 }
