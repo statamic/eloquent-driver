@@ -22,6 +22,10 @@ class EntryRepository extends StacheRepository
 
     public function find($id): ?EntryContract
     {
+        if (blank($id)) {
+            return null;
+        }
+
         $blinkKey = "eloquent-entry-{$id}";
         $item = Blink::once($blinkKey, function () use ($id) {
             return $this->query()->where('id', $id)->first();
