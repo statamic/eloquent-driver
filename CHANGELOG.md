@@ -1,5 +1,15 @@
 # Release Notes
 
+## 5.13.0 (2026-11-13)
+
+### What's new
+- Match Stache sort order [#646](https://github.com/statamic/eloquent-driver/pull/646) by @daun
+
+### What's fixed
+- Keep the asset folder listing cached when the Stache watcher is on auto [#651](https://github.com/statamic/eloquent-driver/pull/651) by @DanielDarrenJones
+
+
+
 ## 5.12.6 (2026-11-12)
 
 ### What's fixed

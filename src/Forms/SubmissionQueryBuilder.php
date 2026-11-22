@@ -4,6 +4,7 @@ namespace Statamic\Eloquent\Forms;
 
 use Statamic\Contracts\Forms\SubmissionQueryBuilder as BuilderContract;
 use Statamic\Data\DataCollection;
+use Statamic\Eloquent\CollatesOrderBy;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Form;
 use Statamic\Query\EloquentQueryBuilder;
@@ -11,6 +12,8 @@ use Statamic\Support\Str;
 
 class SubmissionQueryBuilder extends EloquentQueryBuilder implements BuilderContract
 {
+    use CollatesOrderBy;
+
     const COLUMNS = [
         'id', 'form', 'created_at', 'updated_at',
     ];
