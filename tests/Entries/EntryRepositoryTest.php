@@ -308,4 +308,31 @@ class EntryRepositoryTest extends TestCase
 
         $this->assertEquals([$expected->id()], $actual->map->id()->all());
     }
+
+    #[Test]
+    public function it_does_not_find_a_stale_entry_by_uri_after_saving()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('foo')->data(['title' => 'A']))->save();
+
+        EntryFacade::findByUri('/blog/foo');
+        EntryFacade::findByUri('/blog/foo', 'en');
+        EntryFacade::query()->where('id', $entry->id())->first()->set('title', 'B')->save();
+
+        $this->assertEquals('B', EntryFacade::findByUri('/blog/foo')->get('title'));
+        $this->assertEquals('B', EntryFacade::findByUri('/blog/foo', 'en')->get('title'));
+    }
+
+    #[Test]
+    public function it_does_not_find_an_entry_by_its_old_uri_after_changing_the_slug()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('old'))->save();
+
+        EntryFacade::findByUri('/blog/old');
+        EntryFacade::query()->where('id', $entry->id())->first()->slug('new')->save();
+
+        $this->assertNull(EntryFacade::findByUri('/blog/old'));
+        $this->assertEquals($entry->id(), EntryFacade::findByUri('/blog/new')?->id());
+    }
 }
