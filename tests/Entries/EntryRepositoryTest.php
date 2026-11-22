@@ -335,4 +335,16 @@ class EntryRepositoryTest extends TestCase
         $this->assertNull(EntryFacade::findByUri('/blog/old'));
         $this->assertEquals($entry->id(), EntryFacade::findByUri('/blog/new')?->id());
     }
+
+    #[Test]
+    public function it_does_not_find_a_deleted_entry_by_uri()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('foo'))->save();
+
+        EntryFacade::findByUri('/blog/foo');
+        $entry->delete();
+
+        $this->assertNull(EntryFacade::findByUri('/blog/foo'));
+    }
 }
