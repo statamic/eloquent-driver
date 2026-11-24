@@ -11,8 +11,10 @@ use Statamic\Eloquent\Entries\EntryModel;
 use Statamic\Eloquent\Entries\EntryRepository;
 use Statamic\Entries\EntryCollection;
 use Statamic\Events\CollectionTreeSaved;
+use Statamic\Events\EntryCreated;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
+use Statamic\Facades\Entry as EntryFacade;
 use Statamic\Stache\Stache;
 use Tests\TestCase;
 
@@ -295,6 +297,47 @@ class EntryRepositoryTest extends TestCase
         $this->assertEquals($expected, $actual->map->id()->all());
     }
 
+    #[Test]
+    public function it_does_not_find_an_entry_by_an_empty_id_after_saving_an_entry_without_uri()
+    {
+        $collection = Collection::make('pages')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('foo'))->save();
+
+        $this->assertNull($entry->uri());
+        $this->assertNull(EntryFacade::find(null));
+        $this->assertNull(EntryFacade::find(''));
+    }
+
+    #[Test]
+    public function it_creates_propagated_localizations_as_new_entries()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://test.com/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://test.com/fr/'],
+        ]);
+
+        $collection = Collection::make('team')
+            ->sites(['en', 'fr'])
+            ->structureContents(['max_depth' => 1])
+            ->propagate(true)
+            ->save();
+
+        Event::fake([EntryCreated::class]);
+
+        $alfa = tap((new Entry)->collection($collection)->locale('en')->slug('alfa'))->save();
+        $bravo = tap((new Entry)->collection($collection)->locale('en')->slug('bravo'))->save();
+
+        Event::assertDispatchedTimes(EntryCreated::class, 4);
+
+        $orders = fn ($entry) => [
+            $entry->model()->fresh()->order,
+            $entry->descendants()->get('fr')->model()->fresh()->order,
+        ];
+
+        $this->assertEquals([1, 1], $orders($alfa));
+        $this->assertEquals([2, 2], $orders($bravo));
+    }
+
     #[Test, Group('EntryRepository#whereInId')]
     public function it_skips_missing_entires_when_finding_by_ids()
     {
@@ -307,5 +350,59 @@ class EntryRepositoryTest extends TestCase
         ]);
 
         $this->assertEquals([$expected->id()], $actual->map->id()->all());
+    }
+
+    #[Test]
+    public function it_does_not_find_a_stale_entry_by_uri_after_saving()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('foo')->data(['title' => 'A']))->save();
+
+        EntryFacade::findByUri('/blog/foo');
+        EntryFacade::findByUri('/blog/foo', 'en');
+        EntryFacade::query()->where('id', $entry->id())->first()->set('title', 'B')->save();
+
+        $this->assertEquals('B', EntryFacade::findByUri('/blog/foo')->get('title'));
+        $this->assertEquals('B', EntryFacade::findByUri('/blog/foo', 'en')->get('title'));
+    }
+
+    #[Test]
+    public function it_does_not_find_an_entry_by_its_old_uri_after_changing_the_slug()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('old'))->save();
+
+        EntryFacade::findByUri('/blog/old');
+        EntryFacade::query()->where('id', $entry->id())->first()->slug('new')->save();
+
+        $this->assertNull(EntryFacade::findByUri('/blog/old'));
+        $this->assertEquals($entry->id(), EntryFacade::findByUri('/blog/new')?->id());
+    }
+
+    #[Test]
+    public function it_does_not_find_a_deleted_entry_by_uri()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        $entry = tap((new Entry)->collection($collection)->slug('foo'))->save();
+
+        EntryFacade::findByUri('/blog/foo');
+        $entry->delete();
+
+        $this->assertNull(EntryFacade::findByUri('/blog/foo'));
+    }
+
+    #[Test]
+    public function it_does_not_find_an_entry_by_its_old_uri_after_updating_uris()
+    {
+        $collection = Collection::make('blog')->routes('blog/{slug}')->save();
+        (new Entry)->id(1)->collection($collection)->slug('alfa')->save();
+
+        EntryFacade::findByUri('/blog/alfa');
+        $collection->routes('posts/{slug}')->save();
+        Blink::store('entry-uris')->flush();
+        (new EntryRepository(new Stache))->updateUris($collection);
+
+        $this->assertNull(EntryFacade::findByUri('/blog/alfa'));
+        $this->assertEquals(1, EntryFacade::findByUri('/posts/alfa')?->id());
     }
 }
