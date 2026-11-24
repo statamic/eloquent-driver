@@ -1,5 +1,17 @@
 # Release Notes
 
+## 5.14.0 (2026-11-24)
+
+### What's new
+- Forms 2 compatibility [#612](https://github.com/statamic/eloquent-driver/pull/612) by @duncanmcclean
+
+### What's fixed
+- Clear `findByUri()` cache when entries are saved or deleted [#655](https://github.com/statamic/eloquent-driver/pull/655) by @daun
+- Return `null` from `Entry::find()` for empty ids [#654](https://github.com/statamic/eloquent-driver/pull/654) by @daun
+- Fix Pint lint workflow on PHP 8.6 images [#653](https://github.com/statamic/eloquent-driver/pull/653) by @duncanmcclean
+
+
+
 ## 5.13.0 (2026-11-13)
 
 ### What's new
