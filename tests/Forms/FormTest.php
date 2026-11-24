@@ -2,8 +2,13 @@
 
 namespace Tests\Forms;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Eloquent\Forms\Form as EloquentForm;
+use Statamic\Eloquent\Forms\FormModel;
+use Statamic\Eloquent\Forms\SubmissionModel;
 use Statamic\Events\FormCreated;
 use Statamic\Events\FormCreating;
 use Statamic\Events\FormDeleted;
@@ -132,6 +137,123 @@ class FormTest extends TestCase
     }
 
     #[Test]
+    public function it_stores_form_fields()
+    {
+        $fields = [
+            'sections' => [
+                [
+                    'fields' => [
+                        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+                        ['handle' => 'email', 'field' => ['type' => 'email', 'display' => 'Email', 'validate' => ['required']]],
+                    ],
+                ],
+            ],
+        ];
+
+        $form = tap(Form::make('test')->title('Test form')->formFields($fields))->save();
+
+        $this->assertEquals($fields, Arr::get($form->model(), 'settings.fields'));
+        $this->assertEquals($fields, Form::find('test')->formFields()->contents());
+    }
+
+    #[Test]
+    public function it_stores_connections()
+    {
+        $connections = [
+            'email' => [
+                ['id' => 'abcdefgh', 'to' => '{{ email }}', 'subject' => 'Thanks for getting in touch'],
+            ],
+            'webhook' => [
+                ['id' => 'ijklmnop', 'url' => 'https://example.com/webhook'],
+            ],
+        ];
+
+        $form = tap(Form::make('test')->title('Test form')->connections($connections))->save();
+
+        $this->assertEquals($connections, Arr::get($form->model(), 'settings.connections'));
+        $this->assertEquals($connections, Form::find('test')->connections()->all());
+    }
+
+    #[Test]
+    public function it_stores_charts()
+    {
+        $charts = [
+            ['field' => 'name', 'chart' => 'popular_answers'],
+        ];
+
+        $form = tap(Form::make('test')->title('Test form')->charts($charts))->save();
+
+        $this->assertEquals($charts, Arr::get($form->model(), 'settings.charts'));
+        $this->assertEquals($charts, Form::find('test')->charts());
+    }
+
+    #[Test]
+    #[DataProvider('legacyEmailProvider')]
+    public function legacy_email_settings_are_converted_to_an_email_connection($email)
+    {
+        FormModel::create([
+            'handle' => 'test',
+            'title' => 'Test form',
+            'settings' => [
+                'store' => true,
+                'honeypot' => 'winnie',
+                'email' => $email,
+            ],
+        ]);
+
+        $form = Form::find('test');
+
+        $emailConnection = $form->connections()->get('email');
+
+        $this->assertCount(1, $emailConnection);
+        $this->assertSame('foo@bar.com', $emailConnection[0]['to']);
+        $this->assertSame('Feedback', $emailConnection[0]['subject']);
+        $this->assertNotNull($emailConnection[0]['id']);
+        $this->assertSame('winnie', $form->honeypot());
+    }
+
+    public static function legacyEmailProvider(): array
+    {
+        return [
+            'single email config' => [['to' => 'foo@bar.com', 'subject' => 'Feedback']],
+            'multiple email configs' => [[['to' => 'foo@bar.com', 'subject' => 'Feedback']]],
+        ];
+    }
+
+    #[Test]
+    public function fields_fall_back_to_a_legacy_blueprint_file()
+    {
+        Facades\Blueprint::make('test')
+            ->setNamespace('forms')
+            ->setContents([
+                'tabs' => [
+                    'main' => [
+                        'sections' => [
+                            [
+                                'fields' => [
+                                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->save();
+
+        FormModel::create(['handle' => 'test', 'title' => 'Test form']);
+
+        $form = Form::find('test');
+        $fields = $form->formFields()->contents();
+
+        $this->assertSame('short_answer', Arr::get($fields, 'sections.0.fields.0.field.type'));
+
+        $form->save();
+
+        $this->assertEquals($fields, Arr::get($form->model(), 'settings.fields'));
+        $this->assertNull(Facades\Blueprint::find('forms.test'));
+    }
+
+    #[Test]
     public function it_fires_a_deleting_event()
     {
         Event::fake();
@@ -156,7 +278,7 @@ class FormTest extends TestCase
             return false;
         });
 
-        $form = new \Statamic\Eloquent\Forms\Form('test');
+        $form = new EloquentForm('test');
         $form->handle('test');
         $form->save();
 
@@ -181,5 +303,32 @@ class FormTest extends TestCase
         Event::assertNotDispatched(FormDeleted::class);
 
         $this->assertTrue($return);
+    }
+
+    #[Test]
+    public function deleting_a_form_deletes_submissions_of_every_status()
+    {
+        $form = new class extends EloquentForm
+        {
+            public function submissions()
+            {
+                return $this->querySubmissions()->whereStatus('finalized')->get();
+            }
+        };
+
+        $form->handle('contact_us')->save();
+
+        Carbon::setTestNow(now()->subMinutes(3));
+        $form->makeSubmission()->data(['name' => 'Finalized'])->save();
+        Carbon::setTestNow(now()->addMinute());
+        $form->makeSubmission()->data(['name' => 'Partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addMinute());
+        $form->makeSubmission()->data(['name' => 'Spam'])->markAsSpam()->save();
+
+        $this->assertSame(3, SubmissionModel::count());
+
+        $form->delete();
+
+        $this->assertSame(0, SubmissionModel::count());
     }
 }

@@ -87,7 +87,7 @@ class ImportForms extends Command
                         ->fill([
                             'id' => $submission->id(),
                             'form' => $form->handle(),
-                            'data' => $submission->data(),
+                            'data' => $submission->fileData(),
                             'updated_at' => $timestamp,
                         ])
                         ->save();
