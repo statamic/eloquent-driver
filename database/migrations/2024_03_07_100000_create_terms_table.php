@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create($this->prefix('taxonomy_terms'), function (Blueprint $table) {
             $table->id();
             $table->string('site')->index();
+            $table->unsignedBigInteger('origin')->nullable()->index();
             $table->string('slug');
             $table->string('uri')->nullable()->index();
             $table->string('taxonomy')->index();

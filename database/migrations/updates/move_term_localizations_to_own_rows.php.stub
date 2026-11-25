@@ -1,0 +1,89 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Statamic\Eloquent\Database\BaseMigration as Migration;
+
+return new class extends Migration {
+    public function up()
+    {
+        $table = $this->prefix('taxonomy_terms');
+
+        if (Schema::hasColumn($table, 'origin')) {
+            return;
+        }
+
+        Schema::table($table, function (Blueprint $table) {
+            $table->unsignedBigInteger('origin')->nullable()->after('site')->index();
+        });
+
+        DB::table($table)
+            ->whereNull('origin')
+            ->chunkById(500, function ($terms) use ($table) {
+                foreach ($terms as $term) {
+                    $data = json_decode($term->data, true) ?? [];
+
+                    if (! array_key_exists('localizations', $data)) {
+                        continue;
+                    }
+
+                    $localizations = $data['localizations'] ?? [];
+                    unset($data['localizations']);
+
+                    DB::table($table)->where('id', $term->id)->update(['data' => json_encode($data)]);
+
+                    foreach ($localizations as $locale => $localeData) {
+                        if ($locale === $term->site) {
+                            continue;
+                        }
+
+                        DB::table($table)->insertOrIgnore([
+                            'site' => $locale,
+                            'origin' => $term->id,
+                            'slug' => $term->slug,
+                            'uri' => $term->uri,
+                            'taxonomy' => $term->taxonomy,
+                            'data' => json_encode($localeData ?? []),
+                            'created_at' => $term->created_at,
+                            'updated_at' => $term->updated_at,
+                        ]);
+                    }
+                }
+            });
+    }
+
+    public function down()
+    {
+        $table = $this->prefix('taxonomy_terms');
+
+        if (! Schema::hasColumn($table, 'origin')) {
+            return;
+        }
+
+        DB::table($table)
+            ->whereNull('origin')
+            ->chunkById(500, function ($terms) use ($table) {
+                foreach ($terms as $term) {
+                    $data = json_decode($term->data, true) ?? [];
+
+                    $localizations = DB::table($table)
+                        ->where('origin', $term->id)
+                        ->get()
+                        ->mapWithKeys(fn ($row) => [$row->site => json_decode($row->data, true) ?? []])
+                        ->all();
+
+                    $data['localizations'] = [$term->site => collect($data)->except(['blueprint', 'collection'])->all()] + $localizations;
+
+                    DB::table($table)->where('id', $term->id)->update(['data' => json_encode($data)]);
+                }
+            });
+
+        DB::table($table)->whereNotNull('origin')->delete();
+
+        Schema::table($table, function (Blueprint $table) {
+            $table->dropIndex(['origin']);
+            $table->dropColumn('origin');
+        });
+    }
+};

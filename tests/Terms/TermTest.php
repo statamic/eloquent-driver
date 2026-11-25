@@ -216,7 +216,45 @@ class TermTest extends TestCase
     }
 
     #[Test]
-    public function it_stores_localizations_in_the_model_when_saving()
+    public function renaming_a_localized_term_moves_its_locale_rows()
+    {
+        $this->setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Taxonomy::make('tags')->title('Tags')->sites(['en', 'fr'])->save();
+
+        TermFacade::make('old')->taxonomy('tags')->data(['title' => 'Old'])->dataForLocale('fr', ['title' => 'Vieux'])->save();
+
+        TermFacade::find('tags::old')->term()->slug('new')->save();
+
+        $this->assertEquals(['new', 'new'], TermModel::pluck('slug')->all());
+
+        Blink::flush();
+        $this->assertEquals('Vieux', TermFacade::find('tags::new')->in('fr')->get('title'));
+    }
+
+    #[Test]
+    public function deleting_a_localized_term_deletes_its_locale_rows()
+    {
+        $this->setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Taxonomy::make('tags')->title('Tags')->sites(['en', 'fr'])->save();
+
+        TermFacade::make('a')->taxonomy('tags')->data(['title' => 'A'])->dataForLocale('fr', ['title' => 'A fr'])->save();
+        $this->assertEquals(2, TermModel::count());
+
+        TermFacade::find('tags::a')->delete();
+
+        $this->assertEquals(0, TermModel::count());
+    }
+
+    #[Test]
+    public function it_stores_localizations_as_separate_rows_when_saving()
     {
         $this->setSites([
             'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
@@ -229,11 +267,16 @@ class TermTest extends TestCase
         $term->dataForLocale('fr', ['title' => 'Tag de test']);
         $term->save();
 
-        $model = TermModel::first();
+        $this->assertEquals(2, TermModel::count());
 
-        $this->assertArrayHasKey('localizations', $model->data);
-        $this->assertArrayHasKey('fr', $model->data['localizations']);
-        $this->assertEquals('Tag de test', $model->data['localizations']['fr']['title']);
+        $canonical = TermModel::whereNull('origin')->first();
+        $this->assertArrayNotHasKey('localizations', $canonical->data);
+        $this->assertEquals('Test Tag', $canonical->data['title']);
+
+        $frRow = TermModel::whereNotNull('origin')->first();
+        $this->assertEquals($canonical->id, $frRow->origin);
+        $this->assertEquals('fr', $frRow->site);
+        $this->assertEquals('Tag de test', $frRow->data['title']);
     }
 
     #[Test]

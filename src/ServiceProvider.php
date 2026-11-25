@@ -66,6 +66,7 @@ use Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType;
 use Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms;
 use Statamic\Eloquent\Updates\DropOriginOnGlobalSetVariables;
 use Statamic\Eloquent\Updates\DropStatusOnEntries;
+use Statamic\Eloquent\Updates\MoveTermLocalizationsToOwnRows;
 use Statamic\Eloquent\Updates\RelateFormSubmissionsByHandle;
 use Statamic\Eloquent\Updates\SplitGlobalsFromVariables;
 use Statamic\Eloquent\Updates\UpdateGlobalVariables;
@@ -94,6 +95,7 @@ class ServiceProvider extends AddonServiceProvider
         AddOrderToSitesTable::class,
         DropOriginOnGlobalSetVariables::class,
         UpdateGlobalVariables::class,
+        MoveTermLocalizationsToOwnRows::class,
     ];
 
     public function boot()

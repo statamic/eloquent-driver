@@ -97,21 +97,26 @@ class ExportTaxonomies extends Command
             return;
         }
 
-        $terms = EloquentTerm::all();
+        $terms = EloquentTerm::whereNull('origin')->get();
 
-        $this->withProgressBar($terms, function ($model) {
-            $data = $model->data;
+        $this->withProgressBar($terms, function ($canonicalModel) {
+            $data = $canonicalModel->data;
 
             $term = TermFacade::make()
-                ->slug($model->slug)
-                ->taxonomy($model->taxonomy)
-                ->blueprint($model->data['blueprint'] ?? null);
+                ->slug($canonicalModel->slug)
+                ->taxonomy($canonicalModel->taxonomy)
+                ->blueprint($data['blueprint'] ?? null);
+
+            // Load locale rows (per-row storage) and fall back to embedded JSON
+            // localizations for terms that pre-date the migration.
+            EloquentTerm::where('slug', $canonicalModel->slug)
+                ->where('taxonomy', $canonicalModel->taxonomy)
+                ->where('origin', $canonicalModel->id)
+                ->get()
+                ->each(fn ($localeModel) => $term->dataForLocale($localeModel->site, $localeModel->data ?? []));
 
             collect($data['localizations'] ?? [])
-                ->except($term->defaultLocale())
-                ->each(function ($localeData, $locale) use ($term) {
-                    $term->dataForLocale($locale, $localeData);
-                });
+                ->each(fn ($localeData, $locale) => $term->dataForLocale($locale, $localeData));
 
             unset($data['localizations']);
 
@@ -124,7 +129,7 @@ class ExportTaxonomies extends Command
             $term->data($data);
 
             if (config('statamic.system.track_last_update')) {
-                $term->set('updated_at', $model->updated_at ?? $model->created_at);
+                $term->set('updated_at', $canonicalModel->updated_at ?? $canonicalModel->created_at);
             }
 
             $term->save();
