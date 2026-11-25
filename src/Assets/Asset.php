@@ -30,16 +30,37 @@ class Asset extends FileAsset
     protected $existsOnDisk = false;
     protected $removedData = [];
 
+    /**
+     * Meta values stored in their own columns rather than the meta JSON column.
+     */
+    public const META_COLUMNS = ['duration', 'height', 'last_modified', 'mime_type', 'size', 'width'];
+
     public static function fromModel(Model $model)
     {
         $asset = (new static)
             ->container($model->container)
             ->path(Str::replace('//', '/', $model->folder.'/'.$model->basename))
-            ->hydrateMeta($model->meta)
+            ->hydrateMeta(static::metaFromModel($model))
             ->syncOriginal()
             ->model($model);
 
         return $asset;
+    }
+
+    /**
+     * Build the meta array Statamic expects from the model's columns.
+     */
+    public static function metaFromModel(Model $model): array
+    {
+        $meta = ['data' => $model->meta ?? []];
+
+        foreach (self::META_COLUMNS as $column) {
+            if (! is_null($model->{$column})) {
+                $meta[$column] = $model->{$column};
+            }
+        }
+
+        return $meta;
     }
 
     public function meta($key = null)
@@ -63,8 +84,8 @@ class Asset extends FileAsset
             return $meta;
         }
 
-        if ($meta = $this->model()?->meta) {
-            return $meta;
+        if ($model = $this->model()) {
+            return static::metaFromModel($model);
         }
 
         $meta = $this->generateMeta();
@@ -164,12 +185,13 @@ class Asset extends FileAsset
         }
 
         $model->fill([
-            'meta' => $meta,
+            'meta' => $meta['data'] ?? [],
             'filename' => $source->filename(),
             'extension' => $extension,
             'path' => $source->path(),
             'folder' => $source->folder(),
             'basename' => $source->basename(),
+            ...collect(self::META_COLUMNS)->mapWithKeys(fn ($column) => [$column => $meta[$column] ?? null])->all(),
         ]);
 
         // Set initial timestamps.

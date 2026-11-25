@@ -59,6 +59,7 @@ use Statamic\Eloquent\Updates\AddBlueprintToEntriesTable;
 use Statamic\Eloquent\Updates\AddIdToAttributesInRevisionsTable;
 use Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable;
 use Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable;
+use Statamic\Eloquent\Updates\AddMetaColumnsToAssetsTable;
 use Statamic\Eloquent\Updates\AddOrderToEntriesTable;
 use Statamic\Eloquent\Updates\AddOrderToSitesTable;
 use Statamic\Eloquent\Updates\ChangeDefaultBlueprint;
@@ -94,6 +95,7 @@ class ServiceProvider extends AddonServiceProvider
         AddOrderToSitesTable::class,
         DropOriginOnGlobalSetVariables::class,
         UpdateGlobalVariables::class,
+        AddMetaColumnsToAssetsTable::class,
     ];
 
     public function boot()

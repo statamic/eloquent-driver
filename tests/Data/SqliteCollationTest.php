@@ -77,7 +77,7 @@ class SqliteCollationTest extends TestCase
 
         $query = Asset::query()->where('container', 'test')->orderBy('number')->orderBy('basename');
 
-        $this->assertStringContainsString('cast(json_extract("meta", \'$."data"."number"\') as float) asc', $query->toSql());
+        $this->assertStringContainsString('cast(json_extract("meta", \'$."number"\') as float) asc', $query->toSql());
         $this->assertEquals(['2', '10', 'a', 'Ä', 'b', 'C'], $query->get()->map->filename()->all());
     }
 

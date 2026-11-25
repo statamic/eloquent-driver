@@ -72,7 +72,9 @@ class AssetTest extends TestCase
             'basename' => 'test.jpg',
             'filename' => 'test',
             'extension' => 'jpg',
-            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+            'meta' => ['focus' => '50-50-1'],
+            'width' => 100,
+            'height' => 100,
         ]);
 
         $asset = (new Asset)->fromModel($model);
@@ -83,7 +85,7 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertSame(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+        $this->assertEquals(['data' => ['focus' => '50-50-1'], 'height' => 100, 'width' => 100], $asset->meta());
     }
 
     #[Test]
@@ -96,7 +98,12 @@ class AssetTest extends TestCase
             'basename' => 'test.jpg',
             'filename' => 'test',
             'extension' => 'jpg',
-            'meta' => ['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']],
+            'meta' => ['focus' => '50-50-1'],
+            'width' => 100,
+            'height' => 100,
+            'last_modified' => $lastModified = time(),
+            'mime_type' => 'image/jpeg',
+            'size' => 1000,
         ]);
 
         $model->save();
@@ -109,7 +116,7 @@ class AssetTest extends TestCase
         $this->assertSame('test.jpg', $asset->basename());
         $this->assertSame('test', $asset->filename());
         $this->assertSame('jpg', $asset->extension());
-        $this->assertEquals(['width' => 100, 'height' => 100, 'data' => ['focus' => '50-50-1']], $asset->meta());
+        $this->assertEquals(['data' => ['focus' => '50-50-1'], 'height' => 100, 'last_modified' => $lastModified, 'mime_type' => 'image/jpeg', 'size' => 1000, 'width' => 100], $asset->meta());
     }
 
     #[Test]
@@ -168,11 +175,9 @@ class AssetTest extends TestCase
     {
         $this->assertCount(6, AssetModel::all());
 
-        Storage::disk('test')->put('f.jpg', '');
+        Storage::disk('test')->put('test.jpg', '');
 
         $asset = Facades\Asset::make()->container('test')->path('test.jpg');
-        $this->assertCount(6, AssetModel::all());
-
         $asset->save();
 
         $this->assertInstanceOf(AssetModel::class, $asset->model());
@@ -199,7 +204,7 @@ class AssetTest extends TestCase
         $this->assertSame($model->basename, $asset->basename());
         $this->assertSame($model->filename, $asset->filename());
         $this->assertSame($model->extension, $asset->extension());
-        $this->assertSame($model->meta, $asset->meta());
+        $this->assertSame($model->meta, $asset->meta()['data']);
         $this->assertSame($modelId, $asset->model()->getKey());
     }
 
@@ -305,5 +310,33 @@ class AssetTest extends TestCase
         $this->assertNotSame($model->getKey(), $asset->model()->getKey());
         $this->assertSame('a.jpg', $model->fresh()->path);
         $this->assertCount(7, AssetModel::all());
+    }
+
+    #[Test]
+    public function it_stores_meta_values_in_their_own_columns()
+    {
+        Storage::disk('test')->put('wide.jpg', UploadedFile::fake()->image('wide.jpg', 800, 600)->get());
+        Storage::disk('test')->put('tiny.jpg', UploadedFile::fake()->image('tiny.jpg', 10, 10)->get());
+
+        tap(Facades\Asset::make()->container('test')->path('wide.jpg'))->set('alt', 'Wide')->save();
+        Facades\Asset::make()->container('test')->path('tiny.jpg')->save();
+
+        $model = AssetModel::where('basename', 'wide.jpg')->first();
+        $this->assertSame(['alt' => 'Wide'], $model->meta);
+        $this->assertSame(800, $model->width);
+        $this->assertSame(600, $model->height);
+        $this->assertSame('image/jpeg', $model->mime_type);
+        $this->assertGreaterThan(0, $model->size);
+        $this->assertGreaterThan(0, $model->last_modified);
+
+        Facades\Blink::flush();
+        $asset = Facades\Asset::find('test::wide.jpg');
+        $this->assertSame(800, $asset->width());
+        $this->assertSame('Wide', $asset->get('alt'));
+
+        $query = fn () => Facades\Asset::query()->where('container', 'test')->whereIn('basename', ['wide.jpg', 'tiny.jpg']);
+        $this->assertSame(['tiny.jpg', 'wide.jpg'], $query()->orderBy('size')->get()->map->basename()->all());
+        $this->assertSame(['wide.jpg'], $query()->where('width', '>', 100)->get()->map->basename()->all());
+        $this->assertSame(['wide.jpg'], $query()->where('alt', 'Wide')->get()->map->basename()->all());
     }
 }

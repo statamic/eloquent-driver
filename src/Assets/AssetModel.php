@@ -15,6 +15,11 @@ class AssetModel extends BaseModel
         return [
             'data' => 'json',
             'meta' => 'json',
+            'duration' => 'float',
+            'height' => 'integer',
+            'last_modified' => 'integer',
+            'size' => 'integer',
+            'width' => 'integer',
         ];
     }
 }
