@@ -9,7 +9,7 @@ class AddOrderToTermsTable extends UpdateScript
 {
     public function shouldUpdate($newVersion, $oldVersion)
     {
-        return $this->isUpdatingTo('5.12.0')
+        return $this->isUpdatingTo('5.14.0')
             && Schema::hasTable(config('statamic.eloquent-driver.table_prefix', '').'taxonomy_terms')
             && ! Schema::hasColumn(config('statamic.eloquent-driver.table_prefix', '').'taxonomy_terms', 'order');
     }

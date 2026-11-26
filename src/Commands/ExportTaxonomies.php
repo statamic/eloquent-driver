@@ -6,17 +6,22 @@ use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Facade;
 use Statamic\Console\RunsInPlease;
+use Statamic\Contracts\Structures\TaxonomyTree as TaxonomyTreeContract;
+use Statamic\Contracts\Structures\TaxonomyTreeRepository as TaxonomyTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Eloquent\Taxonomies\TaxonomyModel as EloquentTaxonomy;
 use Statamic\Eloquent\Taxonomies\TermModel as EloquentTerm;
 use Statamic\Facades\Taxonomy as TaxonomyFacade;
 use Statamic\Facades\Term as TermFacade;
 use Statamic\Stache\Repositories\TaxonomyRepository;
+use Statamic\Stache\Repositories\TaxonomyTreeRepository;
 use Statamic\Stache\Repositories\TermRepository;
 use Statamic\Statamic;
+use Statamic\Structures\TaxonomyTree as StacheTaxonomyTree;
 use Statamic\Taxonomies\Taxonomy as StacheTaxonomy;
 use Statamic\Taxonomies\Term as StacheTerm;
 
@@ -32,14 +37,15 @@ class ExportTaxonomies extends Command
     protected $signature = 'statamic:eloquent:export-taxonomies
         {--force : Force the export to run, with all prompts answered "yes"}
         {--only-taxonomies : Only export taxonomies}
-        {--only-terms : Only export terms}';
+        {--only-terms : Only export terms}
+        {--only-taxonomy-trees : Only export taxonomy trees}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Exports eloquent taxonomies and terms to flat files.';
+    protected $description = 'Exports eloquent taxonomies, taxonomy trees and terms to flat files.';
 
     /**
      * Execute the console command.
@@ -50,6 +56,7 @@ class ExportTaxonomies extends Command
     {
         $this->usingDefaultRepositories(function () {
             $this->exportTaxonomies();
+            $this->exportTaxonomyTrees();
             $this->exportTerms();
         });
 
@@ -59,12 +66,15 @@ class ExportTaxonomies extends Command
     private function usingDefaultRepositories(Closure $callback)
     {
         Facade::clearResolvedInstance(TaxonomyRepositoryContract::class);
+        Facade::clearResolvedInstance(TaxonomyTreeRepositoryContract::class);
         Facade::clearResolvedInstance(TermRepositoryContract::class);
 
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
+        Statamic::repository(TaxonomyTreeRepositoryContract::class, TaxonomyTreeRepository::class);
         Statamic::repository(TermRepositoryContract::class, TermRepository::class);
 
         app()->bind(TaxonomyContract::class, StacheTaxonomy::class);
+        app()->bind(TaxonomyTreeContract::class, StacheTaxonomyTree::class);
         app()->bind(TermContract::class, StacheTerm::class);
 
         $callback();
@@ -84,11 +94,38 @@ class ExportTaxonomies extends Command
                 ->title($model->title)
                 ->sites($model->sites)
                 ->revisionsEnabled($model->settings['revisions'] ?? false)
+                ->routes($model->settings['routes'] ?? null)
+                ->structureContents($model->settings['structure'] ?? null)
                 ->save();
         });
 
         $this->newLine();
         $this->info('Taxonomies exported');
+    }
+
+    private function exportTaxonomyTrees()
+    {
+        $trees = TreeModel::where('type', 'taxonomy')->get();
+
+        if ($trees->isEmpty() || ! $this->shouldExportTaxonomyTrees()) {
+            return;
+        }
+
+        $this->withProgressBar($trees, function ($model) {
+            if (! $structure = TaxonomyFacade::findByHandle($model->handle)?->structure()) {
+                return;
+            }
+
+            $structure->newTreeInstance()
+                ->tree($model->tree)
+                ->handle($model->handle)
+                ->locale($model->locale)
+                ->syncOriginal()
+                ->save();
+        });
+
+        $this->newLine();
+        $this->info('Taxonomy trees exported');
     }
 
     private function exportTerms()
@@ -138,13 +175,23 @@ class ExportTaxonomies extends Command
     {
         return $this->option('only-taxonomies')
             || ! $this->option('only-terms')
+            && ! $this->option('only-taxonomy-trees')
             && ($this->option('force') || $this->confirm('Do you want to export taxonomies?'));
+    }
+
+    private function shouldExportTaxonomyTrees(): bool
+    {
+        return $this->option('only-taxonomy-trees')
+            || ! $this->option('only-taxonomies')
+            && ! $this->option('only-terms')
+            && ($this->option('force') || $this->confirm('Do you want to export taxonomy trees?'));
     }
 
     private function shouldExportTerms(): bool
     {
         return $this->option('only-terms')
             || ! $this->option('only-taxonomies')
+            && ! $this->option('only-taxonomy-trees')
             && ($this->option('force') || $this->confirm('Do you want to export terms?'));
     }
 }

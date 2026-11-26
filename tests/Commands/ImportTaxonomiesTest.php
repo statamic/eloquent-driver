@@ -8,6 +8,7 @@ use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
+use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Eloquent\Taxonomies\TaxonomyModel;
 use Statamic\Eloquent\Taxonomies\TermModel;
 use Statamic\Facades\Taxonomy;
@@ -188,5 +189,60 @@ class ImportTaxonomiesTest extends TestCase
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'alfa']);
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'bravo']);
         $this->assertDatabaseHas('taxonomy_terms', ['slug' => 'charlie']);
+    }
+
+    #[Test]
+    public function it_imports_taxonomy_trees_and_term_order()
+    {
+        $taxonomy = tap(Taxonomy::make('categories')->structureContents(['max_depth' => 3]))->save();
+        Term::make()->taxonomy('categories')->inDefaultLocale()->slug('furniture')->data(['title' => 'Furniture'])->save();
+        Term::make()->taxonomy('categories')->inDefaultLocale()->slug('cat')->data(['title' => 'Cat'])->save();
+        Term::make()->taxonomy('categories')->inDefaultLocale()->slug('animals')->data(['title' => 'Animals'])->save();
+
+        $taxonomy->structure()->tree()->tree([
+            ['term' => 'animals', 'children' => [['term' => 'cat']]],
+            ['term' => 'furniture'],
+        ])->save();
+
+        $this->artisan('statamic:eloquent:import-taxonomies')
+            ->expectsQuestion('Do you want to import taxonomies?', true)
+            ->expectsOutputToContain('Taxonomies imported successfully.')
+            ->expectsQuestion('Do you want to import taxonomy trees?', true)
+            ->expectsOutputToContain('Taxonomy trees imported successfully.')
+            ->expectsQuestion('Do you want to import terms?', true)
+            ->expectsOutputToContain('Terms imported successfully.')
+            ->assertExitCode(0);
+
+        $tree = TreeModel::where('type', 'taxonomy')->where('handle', 'categories')->first();
+        $this->assertEquals([
+            ['term' => 'animals', 'children' => [['term' => 'cat']]],
+            ['term' => 'furniture'],
+        ], $tree->tree);
+
+        $this->assertEquals(['max_depth' => 3], TaxonomyModel::where('handle', 'categories')->first()->settings['structure']);
+
+        $this->assertEquals(
+            ['animals' => 1, 'cat' => 2, 'furniture' => 3],
+            TermModel::orderBy('order')->pluck('order', 'slug')->all()
+        );
+        $this->assertEquals('/categories/animals/cat', TermModel::where('slug', 'cat')->first()->uri);
+    }
+
+    #[Test]
+    public function it_imports_only_taxonomy_trees_with_only_taxonomy_trees_argument()
+    {
+        $taxonomy = tap(Taxonomy::make('categories')->structureContents(['max_depth' => 3]))->save();
+        Term::make()->taxonomy('categories')->inDefaultLocale()->slug('animals')->data(['title' => 'Animals'])->save();
+        $taxonomy->structure()->tree()->tree([['term' => 'animals']])->save();
+
+        $this->artisan('statamic:eloquent:import-taxonomies', ['--only-taxonomy-trees' => true])
+            ->doesntExpectOutputToContain('Taxonomies imported successfully.')
+            ->expectsOutputToContain('Taxonomy trees imported successfully.')
+            ->doesntExpectOutputToContain('Terms imported successfully.')
+            ->assertExitCode(0);
+
+        $this->assertCount(0, TaxonomyModel::all());
+        $this->assertCount(0, TermModel::all());
+        $this->assertCount(1, TreeModel::where('type', 'taxonomy')->get());
     }
 }

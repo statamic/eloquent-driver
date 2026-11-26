@@ -44,12 +44,6 @@ class TaxonomyTreeRepository extends StacheRepository
 
         Blink::forget("eloquent-taxonomy-tree-{$tree->handle()}-{$tree->locale()}");
 
-        // TaxonomyStructure::in() caches the tree object under this key. Without
-        // forgetting it, code still holding the structure (e.g. Taxonomy::delete()
-        // deleting the tree's terms afterwards) would keep using the deleted,
-        // in-memory tree instance and re-insert it on save.
-        Blink::forget("taxonomy-structure-tree-{$tree->handle()}");
-
         $tree->model()?->delete();
 
         return true;

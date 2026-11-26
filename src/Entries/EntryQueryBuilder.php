@@ -299,7 +299,13 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
             return;
         }
 
-        collect($this->taxonomyWheres)
+        // On nestable taxonomies, a term also matches entries tagged with any of its
+        // descendants. The trait expands each where into an In/NotIn of every slug.
+        $wheres = $this->expandTaxonomyDescendants
+            ? $this->expandTaxonomyWheres($this->taxonomyWheres)
+            : $this->taxonomyWheres;
+
+        collect($wheres)
             ->each(function ($where) {
                 if ($where['type'] === 'Basic') {
                     [$taxonomy, $term] = explode('::', $where['value']);
@@ -325,7 +331,7 @@ class EntryQueryBuilder extends EloquentQueryBuilder implements QueryBuilder
                     foreach ($where['values'] as $value) {
                         [$taxonomy, $term] = explode('::', $value);
 
-                        $query->orWhereJsonDoesntContain($this->column($taxonomy), $term);
+                        $query->whereJsonDoesntContain($this->column($taxonomy), $term);
                     }
                 });
 
