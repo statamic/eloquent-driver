@@ -17,9 +17,12 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.3, 8.4, 8.5]
+        php: [8.3, 8.4, 8.5, 8.6]
         laravel: [12.*, 13.*]
         stability: [prefer-lowest, prefer-stable]
+        exclude:
+          - php: 8.6
+            laravel: 12.*
 
     name: SQLite - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
