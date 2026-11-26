@@ -4,11 +4,8 @@ namespace Statamic\Eloquent\Taxonomies;
 
 use Statamic\Contracts\Taxonomies\Term as TermContract;
 use Statamic\Facades\Blink;
-use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Taxonomy;
 use Statamic\Stache\Repositories\TermRepository as StacheRepository;
-use Statamic\Support\Str;
 use Statamic\Taxonomies\LocalizedTerm;
 
 class TermRepository extends StacheRepository
@@ -39,64 +36,10 @@ class TermRepository extends StacheRepository
             return null;
         }
 
-        return $term;
-    }
-
-    public function findByUri(string $uri, ?string $site = null): ?TermContract
-    {
-        $site = $site ?? $this->stache->sites()->first();
-
-        if ($substitute = $this->substitutionsByUri[$site.'@'.$uri] ?? null) {
-            return $substitute;
-        }
-
-        $collection = Collection::all()
-            ->first(function ($collection) use ($uri, $site) {
-                if (Str::startsWith($uri, $collection->uri($site))) {
-                    return true;
-                }
-
-                return Str::startsWith($uri, '/'.$collection->handle());
-            });
-
-        if ($collection) {
-            $uri = Str::after($uri, $collection->uri($site) ?? $collection->handle());
-        }
-
-        $uri = Str::removeLeft($uri, '/');
-
-        [$taxonomy, $slug] = array_pad(explode('/', $uri), 2, null);
-
-        if (! $slug) {
-            return null;
-        }
-
-        if (! $taxonomy = $this->findTaxonomyHandleByUri(Str::ensureLeft($taxonomy, '/'))) {
-            return null;
-        }
-
-        $blinkKey = 'eloquent-term-'.md5(urlencode($uri)).($site ? '-'.$site : '');
-        $term = Blink::once($blinkKey, function () use ($slug, $taxonomy) {
-            return $this->query()
-                ->where('slug', $slug)
-                ->where('taxonomy', $taxonomy)
-                ->first();
-        });
-
-        if (! $term) {
-            Blink::forget($blinkKey);
-
-            return null;
-        }
-
-        return $term->in($site)?->collection($collection);
-    }
-
-    private function findTaxonomyHandleByUri($uri)
-    {
-        return Taxonomy::all()->first(function ($taxonomy) use ($uri) {
-            return $taxonomy->uri() == $uri;
-        })?->handle();
+        // A term saved earlier in the request is cached here in its raw, locale-less
+        // form (see save()). Resolve it the same way the freshly-queried path does,
+        // since some Term methods only behave correctly on a LocalizedTerm.
+        return $term instanceof LocalizedTerm ? $term : $term->inDefaultLocale();
     }
 
     public function save($entry)
@@ -105,6 +48,13 @@ class TermRepository extends StacheRepository
         $model->save();
 
         $entry->model($model->fresh());
+
+        // Building the model (e.g. resolving a hierarchical term's URI) may have
+        // queried and cached the taxonomy's existing term slugs before this term
+        // was persisted. Forget it so the next read reflects the saved term.
+        if (($taxonomy = $entry->taxonomy()) && $taxonomy->hasStructure()) {
+            Blink::forget('taxonomy-structure-term-slugs-'.$taxonomy->handle());
+        }
 
         Blink::put("eloquent-term-{$entry->id()}", $entry);
         Blink::put("eloquent-term-{$entry->uri()}", $entry);
@@ -156,5 +106,53 @@ class TermRepository extends StacheRepository
         }
 
         return $query->count();
+    }
+
+    public function updateOrders($taxonomy, $ids = null)
+    {
+        // The order (and, on nestable taxonomies, the URI) of a term is derived
+        // from the tree. We only persist copies of them so the database can sort
+        // and look terms up by them, so write just those columns without a full
+        // save, which would fire events and touch every localization.
+        $this->termsToUpdate($taxonomy, $ids)->each(function ($term) {
+            $term = $term->term();
+
+            if (! $model = $term->model()) {
+                return;
+            }
+
+            $model->forceFill([
+                'order' => $term->inDefaultLocale()->order(),
+                'uri' => $term->uri(),
+            ]);
+
+            if (! $model->isDirty()) {
+                return;
+            }
+
+            $model::withoutTimestamps(fn () => $model->saveQuietly());
+
+            Blink::forget("eloquent-term-{$term->id()}");
+        });
+    }
+
+    public function updateParents($taxonomy, $ids = null)
+    {
+        // A term's parent is resolved from the taxonomy tree, so there's nothing
+        // to store. A move also changes the URIs of the moved term and its
+        // descendants, but those are handled by updateOrders(), which is called
+        // with them.
+    }
+
+    private function termsToUpdate($taxonomy, $ids)
+    {
+        if (collect($ids)->isEmpty()) {
+            return $taxonomy->queryTerms()->get();
+        }
+
+        return collect($ids)
+            ->map(fn ($id) => $this->find($id))
+            ->filter()
+            ->values();
     }
 }

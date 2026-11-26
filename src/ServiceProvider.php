@@ -17,6 +17,7 @@ use Statamic\Contracts\Revisions\RevisionRepository as RevisionRepositoryContrac
 use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepositoryContract;
 use Statamic\Contracts\Structures\NavigationRepository as NavigationRepositoryContract;
 use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract;
+use Statamic\Contracts\Structures\TaxonomyTreeRepository as TaxonomyTreeRepositoryContract;
 use Statamic\Contracts\Taxonomies\TaxonomyRepository as TaxonomyRepositoryContract;
 use Statamic\Contracts\Taxonomies\TermRepository as TermRepositoryContract;
 use Statamic\Contracts\Tokens\TokenRepository as TokenRepositoryContract;
@@ -48,6 +49,7 @@ use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\Nav;
 use Statamic\Eloquent\Structures\NavigationRepository;
 use Statamic\Eloquent\Structures\NavTreeRepository;
+use Statamic\Eloquent\Structures\TaxonomyTreeRepository;
 use Statamic\Eloquent\Taxonomies\Taxonomy;
 use Statamic\Eloquent\Taxonomies\TaxonomyRepository;
 use Statamic\Eloquent\Taxonomies\Term;
@@ -61,6 +63,7 @@ use Statamic\Eloquent\Updates\AddIndexToDateOnEntriesTable;
 use Statamic\Eloquent\Updates\AddMetaAndIndexesToAssetsTable;
 use Statamic\Eloquent\Updates\AddOrderToEntriesTable;
 use Statamic\Eloquent\Updates\AddOrderToSitesTable;
+use Statamic\Eloquent\Updates\AddOrderToTermsTable;
 use Statamic\Eloquent\Updates\ChangeDefaultBlueprint;
 use Statamic\Eloquent\Updates\ChangeFormSubmissionsIdType;
 use Statamic\Eloquent\Updates\DropForeignKeysOnEntriesAndForms;
@@ -94,6 +97,7 @@ class ServiceProvider extends AddonServiceProvider
         AddOrderToSitesTable::class,
         DropOriginOnGlobalSetVariables::class,
         UpdateGlobalVariables::class,
+        AddOrderToTermsTable::class,
     ];
 
     public function boot()
@@ -258,6 +262,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->registerStructures();
         $this->registerStructureTrees();
         $this->registerTaxonomies();
+        $this->registerTaxonomyTrees();
         $this->registerTerms();
         $this->registerTokens();
         $this->registerSites();
@@ -626,6 +631,25 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::repository(TaxonomyRepositoryContract::class, TaxonomyRepository::class);
 
         Stache::exclude('taxonomies');
+    }
+
+    private function registerTaxonomyTrees()
+    {
+        $this->app->bind('statamic.eloquent.taxonomies.tree', function () {
+            return config('statamic.eloquent-driver.taxonomy_trees.tree');
+        });
+
+        $this->app->bind('statamic.eloquent.taxonomies.tree_model', function () {
+            return config('statamic.eloquent-driver.taxonomy_trees.model');
+        });
+
+        if (config('statamic.eloquent-driver.taxonomy_trees.driver', 'file') != 'eloquent') {
+            return;
+        }
+
+        Statamic::repository(TaxonomyTreeRepositoryContract::class, TaxonomyTreeRepository::class);
+
+        Stache::exclude('taxonomy-trees');
     }
 
     public function registerTerms()

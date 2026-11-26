@@ -18,6 +18,7 @@ use Statamic\Eloquent\Sites\SiteModel;
 use Statamic\Eloquent\Structures\CollectionTree;
 use Statamic\Eloquent\Structures\NavModel;
 use Statamic\Eloquent\Structures\NavTree;
+use Statamic\Eloquent\Structures\TaxonomyTree;
 use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Eloquent\Taxonomies\TaxonomyModel;
 use Statamic\Eloquent\Taxonomies\TermModel;
@@ -115,6 +116,12 @@ return [
     'taxonomies' => [
         'driver' => 'file',
         'model' => TaxonomyModel::class,
+    ],
+
+    'taxonomy_trees' => [
+        'driver' => 'file',
+        'model' => TreeModel::class,
+        'tree' => TaxonomyTree::class,
     ],
 
     'terms' => [

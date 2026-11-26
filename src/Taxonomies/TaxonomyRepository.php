@@ -5,10 +5,8 @@ namespace Statamic\Eloquent\Taxonomies;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Statamic\Contracts\Taxonomies\Taxonomy as TaxonomyContract;
-use Statamic\Facades;
 use Statamic\Facades\Blink;
 use Statamic\Stache\Repositories\TaxonomyRepository as StacheRepository;
-use Statamic\Support\Str;
 
 class TaxonomyRepository extends StacheRepository
 {
@@ -52,29 +50,6 @@ class TaxonomyRepository extends StacheRepository
         }
 
         return app(TaxonomyContract::class)->fromModel($taxonomyModel);
-    }
-
-    public function findByUri(string $uri, ?string $site = null): ?Taxonomy
-    {
-        $collection = Facades\Collection::all()
-            ->first(function ($collection) use ($uri, $site) {
-                if (Str::startsWith($uri, $collection->uri($site))) {
-                    return true;
-                }
-
-                return Str::startsWith($uri, '/'.$collection->handle());
-            });
-
-        if ($collection) {
-            $uri = Str::after($uri, $collection->uri($site) ?? $collection->handle());
-        }
-
-        // If the collection is mounted to the home page, the uri would have
-        // the slash trimmed off at this point. We'll make sure it's there,
-        // then look for whats after it to get our handle.
-        $uri = Str::after(Str::ensureLeft($uri, '/'), '/');
-
-        return ($taxonomy = $this->findByHandle($uri)) ? $taxonomy->collection($collection) : null;
     }
 
     public function handles(): Collection
