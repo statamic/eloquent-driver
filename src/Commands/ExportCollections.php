@@ -12,12 +12,12 @@ use Statamic\Contracts\Structures\CollectionTreeRepository as CollectionTreeRepo
 use Statamic\Eloquent\Collections\Collection as EloquentCollection;
 use Statamic\Eloquent\Collections\CollectionModel;
 use Statamic\Eloquent\Collections\CollectionRepository;
-use Statamic\Eloquent\Structures\CollectionTreeRepository;
 use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Entries\Collection as StacheCollection;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Stache;
+use Statamic\Stache\Repositories\CollectionTreeRepository;
 use Statamic\Statamic;
 
 class ExportCollections extends Command

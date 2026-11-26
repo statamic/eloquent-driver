@@ -11,6 +11,9 @@ use Statamic\Contracts\Structures\NavTreeRepository as NavTreeRepositoryContract
 use Statamic\Eloquent\Structures\NavModel;
 use Statamic\Eloquent\Structures\TreeModel;
 use Statamic\Facades\Nav;
+use Statamic\Stache\Repositories\NavigationRepository;
+use Statamic\Stache\Repositories\NavTreeRepository;
+use Statamic\Structures\NavTree;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 use Tests\TestCase;
 
@@ -26,9 +29,9 @@ class ImportNavsTest extends TestCase
         Facade::clearResolvedInstance(NavTreeRepositoryContract::class);
 
         app()->bind(NavContract::class, \Statamic\Structures\Nav::class);
-        app()->bind(NavTreeContract::class, \Statamic\Structures\NavTree::class);
-        app()->bind(NavigationRepositoryContract::class, \Statamic\Stache\Repositories\NavigationRepository::class);
-        app()->bind(NavTreeRepositoryContract::class, \Statamic\Stache\Repositories\NavTreeRepository::class);
+        app()->bind(NavTreeContract::class, NavTree::class);
+        app()->bind(NavigationRepositoryContract::class, NavigationRepository::class);
+        app()->bind(NavTreeRepositoryContract::class, NavTreeRepository::class);
     }
 
     #[Test]

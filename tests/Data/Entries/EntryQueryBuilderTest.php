@@ -3,8 +3,10 @@
 namespace Tests\Data\Entries;
 
 use Facades\Tests\Factories\EntryFactory;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
@@ -42,6 +44,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entry_is_found_within_all_created_entries_and_select_query_columns_are_set_using_entry_facade_with_find_method_with_columns_param()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s loose column handling for JSON data fields.');
+        }
+
         $searchedEntry = $this->createDummyCollectionAndEntries();
         $columns = ['foo', 'collection'];
         $retrievedEntry = Entry::query()->find($searchedEntry->id(), $columns);
@@ -325,6 +331,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_where_between()
     {
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Postgres cannot compare JSON-extracted text values with numeric BETWEEN.');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'number_field' => 9])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'number_field' => 10])->create();
@@ -340,6 +350,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_where_not_between()
     {
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Postgres cannot compare JSON-extracted text values with numeric BETWEEN.');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'number_field' => 9])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'number_field' => 10])->create();
@@ -355,6 +369,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_or_where_between()
     {
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Postgres cannot compare JSON-extracted text values with numeric BETWEEN.');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'number_field' => 9])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'number_field' => 10])->create();
@@ -370,6 +388,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_or_where_not_between()
     {
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Postgres cannot compare JSON-extracted text values with numeric BETWEEN.');
+        }
+
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'number_field' => 8])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'number_field' => 9])->create();
         EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'number_field' => 10])->create();
@@ -391,19 +413,19 @@ class EntryQueryBuilderTest extends TestCase
 
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'test_taxonomy' => ['taxonomy-3']])->create();
-        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-3']])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-3']])->create();
         EntryFactory::id('4')->slug('post-4')->collection('posts')->data(['title' => 'Post 4', 'test_taxonomy' => ['taxonomy-3', 'taxonomy-4']])->create();
-        EntryFactory::id('5')->slug('post-5')->collection('posts')->data(['title' => 'Post 5', 'test_taxonomy' => ['taxonomy-5']])->create();
+        EntryFactory::id('5')->slug('post-5')->collection('posts')->data(['title' => 'Post 5', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2', 'taxonomy-5']])->create();
 
-        $entries = Entry::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-5'])->get();
+        $entries = Entry::query()->whereJsonContains('test_taxonomy', ['taxonomy-1', 'taxonomy-2'])->get();
 
         $this->assertCount(3, $entries);
         $this->assertEquals(['Post 1', 'Post 3', 'Post 5'], $entries->map->title->all());
 
         $entries = Entry::query()->whereJsonContains('test_taxonomy', 'taxonomy-1')->get();
 
-        $this->assertCount(2, $entries);
-        $this->assertEquals(['Post 1', 'Post 3'], $entries->map->title->all());
+        $this->assertCount(3, $entries);
+        $this->assertEquals(['Post 1', 'Post 3', 'Post 5'], $entries->map->title->all());
     }
 
     #[Test]
@@ -465,7 +487,7 @@ class EntryQueryBuilderTest extends TestCase
         $entries = Entry::query()->whereJsonContains('test_taxonomy', ['taxonomy-1'])->orWhereJsonDoesntContain('test_taxonomy', ['taxonomy-5'])->get();
 
         $this->assertCount(4, $entries);
-        $this->assertEquals(['Post 1', 'Post 3', 'Post 2', 'Post 4'], $entries->map->title->all());
+        $this->assertEquals(['Post 1', 'Post 2', 'Post 3', 'Post 4'], $entries->map->title->sort()->values()->all());
     }
 
     #[Test]
@@ -712,6 +734,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_can_be_retrieved_on_join_table_conditions()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s weak typing for joining bigint with JSON-extracted text.');
+        }
+
         Collection::make('posts')->save();
         EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'author' => 'John Doe', 'location' => 4])->create();
         EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'author' => 'John Doe'])->create();
@@ -839,11 +865,79 @@ class EntryQueryBuilderTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('jsonCastFieldProvider')]
+    public function entries_json_field_order_by_throws_exception_for_invalid_direction($field)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Order direction must be "asc" or "desc".');
+
+        Entry::query()->where('collection', 'posts')->orderBy('field', 'asc, (select 1)')->get();
+    }
+
+    public static function jsonCastFieldProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer']],
+            'float' => [['type' => 'float']],
+            'date' => [['type' => 'date']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true]],
+            'date range' => [['type' => 'date', 'mode' => 'range']],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range']],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('uppercaseDirectionProvider')]
+    public function entries_can_be_ordered_by_a_json_field_with_uppercase_direction($field, $values)
+    {
+        $blueprint = Blueprint::makeFromFields(['field' => $field]);
+        Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
+
+        Collection::make('posts')->save();
+        EntryFactory::id('1')->slug('post-1')->collection('posts')->data(['title' => 'Post 1', 'field' => $values[0]])->create();
+        EntryFactory::id('2')->slug('post-2')->collection('posts')->data(['title' => 'Post 2', 'field' => $values[1]])->create();
+        EntryFactory::id('3')->slug('post-3')->collection('posts')->data(['title' => 'Post 3', 'field' => $values[2]])->create();
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('field', 'ASC')->get();
+
+        $this->assertEquals(['Post 2', 'Post 1', 'Post 3'], $entries->map->title->all());
+
+        $entries = Entry::query()->where('collection', 'posts')->orderBy('field', 'DESC')->get();
+
+        $this->assertEquals(['Post 3', 'Post 1', 'Post 2'], $entries->map->title->all());
+    }
+
+    public static function uppercaseDirectionProvider()
+    {
+        return [
+            'integer' => [['type' => 'integer'], [5, 3, 20]],
+            'float' => [['type' => 'float'], [5.5, 3.3, 20.2]],
+            'date' => [['type' => 'date'], ['2021-06-15', '2021-01-13', '2021-11-17']],
+            'datetime' => [['type' => 'date', 'time_enabled' => true], ['2021-06-15 20:31:04', '2021-01-13 20:31:04', '2021-11-17 20:31:04']],
+            'date range' => [['type' => 'date', 'mode' => 'range'], [
+                ['start' => '2021-06-15', 'end' => '2021-06-16'],
+                ['start' => '2021-01-13', 'end' => '2021-06-16'],
+                ['start' => '2021-11-17', 'end' => '2021-11-18'],
+            ]],
+            'datetime range' => [['type' => 'date', 'time_enabled' => true, 'mode' => 'range'], [
+                ['start' => '2021-06-15 20:31:04', 'end' => '2021-06-15 21:00:00'],
+                ['start' => '2021-01-13 20:31:04', 'end' => '2021-06-16 20:31:04'],
+                ['start' => '2021-11-17 20:31:04', 'end' => '2021-11-17 21:00:00'],
+            ]],
+        ];
+    }
+
+    #[Test]
     public function entries_can_be_ordered_by_a_mapped_data_column()
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
 
@@ -863,7 +957,7 @@ class EntryQueryBuilderTest extends TestCase
     {
         config()->set('statamic.eloquent-driver.entries.map_data_to_columns', true);
 
-        \Illuminate\Support\Facades\Schema::table('entries', function ($table) {
+        Schema::table('entries', function ($table) {
             $table->string('foo', 30);
         });
 
@@ -914,6 +1008,8 @@ class EntryQueryBuilderTest extends TestCase
     #[DataProvider('filterByStatusProvider')]
     public function it_filters_by_status($status, $expected)
     {
+        Blink::flush();
+
         Collection::make('pages')->dated(false)->save();
         EntryFactory::collection('pages')->slug('page')->published(true)->create();
         EntryFactory::collection('pages')->slug('page-draft')->published(false)->create();
@@ -936,7 +1032,7 @@ class EntryQueryBuilderTest extends TestCase
         EntryFactory::collection('calendar')->slug('calendar-past')->published(true)->date(now()->subDay())->create();
         EntryFactory::collection('calendar')->slug('calendar-past-draft')->published(false)->date(now()->subDay())->create();
 
-        $this->assertEquals($expected, Entry::query()->whereStatus($status)->get()->map->slug()->sort()->all());
+        $this->assertEquals($expected, Entry::query()->whereStatus($status)->get()->map->slug()->sort()->values()->all());
     }
 
     public static function filterByStatusProvider()
@@ -1023,6 +1119,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_where_has_when_max_items_not_1()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s weak typing for JSON contains comparisons with mixed types.');
+        }
+
         $blueprint = Blueprint::makeFromFields(['entries_field' => ['type' => 'entries']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 
@@ -1065,6 +1165,10 @@ class EntryQueryBuilderTest extends TestCase
     #[Test]
     public function entries_are_found_using_where_relation()
     {
+        if (! $this->isUsingSqlite()) {
+            $this->markTestSkipped('This test relies on SQLite\'s weak typing for JSON contains comparisons with mixed types.');
+        }
+
         $blueprint = Blueprint::makeFromFields(['entries_field' => ['type' => 'entries']]);
         Blueprint::shouldReceive('in')->with('collections/posts')->andReturn(collect(['posts' => $blueprint]));
 

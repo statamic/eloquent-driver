@@ -2,11 +2,19 @@
 
 namespace Forms;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormSubmission;
+use Statamic\Facades\Site;
+use Statamic\Http\Middleware\DeleteTemporaryFileUploads;
+use Statamic\Jobs\DeletePartialFormSubmissions;
+use Statamic\Jobs\DeleteSpamFormSubmissions;
 use Tests\TestCase;
 
 class SubmissionQueryBuilderTest extends TestCase
@@ -22,6 +30,22 @@ class SubmissionQueryBuilderTest extends TestCase
         $submissions = FormSubmission::whereForm('test');
         $this->assertInstanceOf(Collection::class, $submissions);
         $this->assertEveryItemIsInstanceOf(Submission::class, $submissions);
+    }
+
+    #[Test]
+    public function it_only_selects_one_row_when_getting_the_first_submission()
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'a', 'test' => 'foo'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'b', 'test' => 'foo'])->save();
+
+        DB::enableQueryLog();
+
+        $submission = FormSubmission::query()->where('test', 'foo')->orderBy('id', 'desc')->first();
+
+        $this->assertInstanceOf(Submission::class, $submission);
+        $query = collect(DB::getQueryLog())->pluck('query')->first(fn ($query) => str_contains($query, 'form_submissions'));
+        $this->assertStringContainsString('limit 1', $query);
     }
 
     #[Test]
@@ -377,6 +401,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -400,6 +428,10 @@ class SubmissionQueryBuilderTest extends TestCase
     {
         if ($this->isUsingSqlite()) {
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
+        }
+
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
         }
 
         $form = tap(Form::make('test'))->save();
@@ -427,6 +459,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -447,6 +483,10 @@ class SubmissionQueryBuilderTest extends TestCase
             $this->markTestSkipped('SQLite doesn\'t support JSON contains queries');
         }
 
+        if ($this->isUsingPostgres()) {
+            $this->markTestSkipped('Laravel doesn\'t support JSON overlaps queries on Postgres');
+        }
+
         $form = tap(Form::make('test'))->save();
         FormSubmission::make()->form($form)->data(['id' => '1', 'test_taxonomy' => ['taxonomy-1', 'taxonomy-2']])->save();
         FormSubmission::make()->form($form)->data(['id' => '2', 'test_taxonomy' => ['taxonomy-3']])->save();
@@ -457,7 +497,7 @@ class SubmissionQueryBuilderTest extends TestCase
         $entries = FormSubmission::query()->whereJsonOverlaps('test_taxonomy', ['taxonomy-1'])->orWhereJsonDoesntOverlap('test_taxonomy', ['taxonomy-5'])->get();
 
         $this->assertCount(4, $entries);
-        $this->assertEquals(['1', '3', '2', '4'], $entries->map->get('id')->all());
+        $this->assertEquals(['1', '2', '3', '4'], $entries->map->get('id')->sort()->values()->all());
     }
 
     #[Test]
@@ -492,5 +532,150 @@ class SubmissionQueryBuilderTest extends TestCase
 
         $submissions = FormSubmission::query()->limit(10)->offset(1)->get();
         $this->assertEquals(['b', 'c'], $submissions->map->get('id')->all());
+    }
+
+    #[Test]
+    #[DataProvider('filterByStatusProvider')]
+    public function it_filters_by_status(string $status, array $expected)
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'finalized'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'partial'])->asPartial()->save();
+        FormSubmission::make()->form($form)->data(['id' => 'spam'])->markAsSpam()->save();
+        FormSubmission::make()->form($form)->data(['id' => 'spam-partial'])->asPartial()->markAsSpam()->save();
+
+        $submissions = FormSubmission::query()->whereStatus($status)->get();
+
+        $this->assertEquals($expected, $submissions->map->get('id')->sort()->values()->all());
+    }
+
+    public static function filterByStatusProvider(): array
+    {
+        return [
+            'any' => ['any', ['finalized', 'partial', 'spam', 'spam-partial']],
+            'finalized' => ['finalized', ['finalized']],
+            'partial' => ['partial', ['partial']],
+            'spam' => ['spam', ['spam', 'spam-partial']],
+        ];
+    }
+
+    #[Test]
+    public function the_delete_spam_submissions_job_only_deletes_old_spam()
+    {
+        config(['statamic.forms.delete_spam_submissions_after' => 30]);
+
+        $form = tap(Form::make('test'))->save();
+
+        Carbon::setTestNow(now()->subDays(31));
+        FormSubmission::make()->form($form)->data(['id' => 'old-spam'])->markAsSpam()->save();
+        Carbon::setTestNow(now()->addSecond());
+        FormSubmission::make()->form($form)->data(['id' => 'old-finalized'])->save();
+        Carbon::setTestNow(now()->addDays(30));
+        FormSubmission::make()->form($form)->data(['id' => 'new-spam'])->markAsSpam()->save();
+        Carbon::setTestNow(now()->addDay());
+
+        (new DeleteSpamFormSubmissions)->handle();
+
+        $this->assertEquals(['new-spam', 'old-finalized'], FormSubmission::query()->get()->map->get('id')->sort()->values()->all());
+    }
+
+    #[Test]
+    public function the_delete_partial_submissions_job_only_deletes_old_partials()
+    {
+        config(['statamic.forms.delete_partial_submissions_after' => 7]);
+
+        $form = tap(Form::make('test'))->save();
+
+        Carbon::setTestNow(now()->subDays(8));
+        FormSubmission::make()->form($form)->data(['id' => 'old-partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addSecond());
+        FormSubmission::make()->form($form)->data(['id' => 'old-finalized'])->save();
+        Carbon::setTestNow(now()->addDays(7));
+        FormSubmission::make()->form($form)->data(['id' => 'new-partial'])->asPartial()->save();
+        Carbon::setTestNow(now()->addDay());
+
+        (new DeletePartialFormSubmissions)->handle();
+
+        $this->assertEquals(['new-partial', 'old-finalized'], FormSubmission::query()->get()->map->get('id')->sort()->values()->all());
+    }
+
+    #[Test]
+    public function it_filters_by_site()
+    {
+        $this->setSites([
+            'en' => ['name' => 'English', 'locale' => 'en_US', 'url' => 'http://localhost/'],
+            'fr' => ['name' => 'French', 'locale' => 'fr_FR', 'url' => 'http://localhost/fr/'],
+        ]);
+
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'legacy'])->save();
+        FormSubmission::make()->form($form)->data(['id' => 'en'])->site('en')->save();
+        FormSubmission::make()->form($form)->data(['id' => 'fr'])->site('fr')->save();
+        FormSubmission::make()->form($form)->data(['id' => 'fr-spam'])->site('fr')->markAsSpam()->save();
+
+        $ids = fn ($query) => $query->get()->map->get('id')->sort()->values()->all();
+
+        $this->assertEquals(['en', 'legacy'], $ids(FormSubmission::query()->where('site', 'en')));
+        $this->assertEquals(['en', 'legacy'], $ids(FormSubmission::query()->where('site', Site::get('en'))));
+        $this->assertEquals(['fr', 'fr-spam'], $ids(FormSubmission::query()->where('site', '=', 'fr')));
+        $this->assertEquals(['fr'], $ids(FormSubmission::query()->where('site', Site::get('fr'))->whereStatus('finalized')));
+        $this->assertEquals(['en', 'fr', 'fr-spam', 'legacy'], $ids(FormSubmission::query()->where('site', 'fr')->orWhere('site', 'en')));
+        $this->assertEquals(['fr', 'fr-spam', 'legacy'], $ids(FormSubmission::query()->whereIn('site', ['fr', 'en'])->where('data->id', '!=', 'en')));
+        $this->assertEquals(['fr', 'fr-spam'], $ids(FormSubmission::query()->whereIn('site', ['fr'])));
+        $this->assertSame(2, $form->querySubmissions()->where('site', Site::get('en'))->whereStatus('finalized')->count());
+    }
+
+    #[Test]
+    public function non_numeric_ids_are_ignored_when_filtering_by_ids()
+    {
+        $form = tap(Form::make('test'))->save();
+        $submission = tap(FormSubmission::make()->form($form)->data(['id' => 'a']))->save();
+
+        DB::enableQueryLog();
+
+        $this->assertEquals(['a'], FormSubmission::query()->whereIn('id', [$submission->id(), 'orphan'])->get()->map->get('id')->all());
+        $this->assertCount(0, FormSubmission::query()->whereIn('id', ['orphan'])->get());
+
+        $this->assertNotContains('orphan', collect(DB::getQueryLog())->flatMap->bindings->all());
+    }
+
+    #[Test]
+    public function ids_can_be_filtered_by_a_subquery()
+    {
+        $form = tap(Form::make('test'))->save();
+        FormSubmission::make()->form($form)->data(['id' => 'a'])->save();
+
+        $submissions = FormSubmission::query()->whereIn('id', fn ($query) => $query->select('id')->from('form_submissions'))->get();
+
+        $this->assertEquals(['a'], $submissions->map->get('id')->all());
+    }
+
+    #[Test]
+    public function the_upload_sweep_ignores_non_numeric_upload_folders()
+    {
+        $disk = Storage::fake('local');
+
+        $form = tap(Form::make('test'))->save();
+        $spam = tap(FormSubmission::make()->form($form)->markAsSpam())->save();
+
+        $paths = collect([$spam->id(), 'orphan'])->map(fn ($id) => "statamic/form-uploads/{$id}/document/file.txt");
+
+        $paths->each(function ($path) use ($disk) {
+            $disk->put($path, 'content');
+            touch($disk->path($path), now()->subWeeks(2)->timestamp);
+        });
+
+        (new \ReflectionMethod(DeleteTemporaryFileUploads::class, 'deleteFormUploadsOverAWeekOld'))->invoke(new DeleteTemporaryFileUploads);
+
+        $disk->assertExists($paths[0]);
+        $disk->assertMissing($paths[1]);
+    }
+
+    #[Test]
+    public function filtering_by_unexpected_status_throws_exception()
+    {
+        $this->expectExceptionMessage('Invalid status [foo]');
+
+        FormSubmission::query()->whereStatus('foo')->get();
     }
 }
